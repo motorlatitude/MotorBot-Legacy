@@ -5,7 +5,7 @@ var app = apiai("ea1bdb33a83f48c795a585e44a4cdb4b");
 var DiscordClient = require('./discordClient.js');
 var youtubeStream = require('youtube-audio-stream')
 
-var dc = new DiscordClient({token: "MTY5NTU0ODgyNjc0NTU2OTMw.CfAmNQ.WebsSsEexNlFWaNc2u54EP-hIX0", debug: true, autorun: true});
+var dc = new DiscordClient({token: "{API TOKEN}}", debug: true, autorun: true});
 
 dc.on("ready", function(msg){
   var d = new Date();
