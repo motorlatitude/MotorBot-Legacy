@@ -1,0 +1,21 @@
+{
+  "name": "motorbot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "demo.js",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies":{
+    "request": "*",
+    "ws": "*",
+    "tweetnacl": "*",
+    "node-opus": "*",
+    "zlib": "*",
+    "apiai": "*",
+    "youtube-audio-stream": "*"
+  },
+  "author": "Lennart Hase",
+  "license": "ISC"
+}
