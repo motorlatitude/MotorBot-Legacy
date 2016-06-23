@@ -6,7 +6,7 @@ var DiscordClient = require('./discordClient.js');
 var youtubeStream = require('youtube-audio-stream')
 
 var dc = new DiscordClient({token: "MTY5NTU0ODgyNjc0NTU2OTMw.CfAmNQ.WebsSsEexNlFWaNc2u54EP-hIX0", debug: true, autorun: true});
-
+var stream;
 dc.on("ready", function(msg){
   var d = new Date();
   var time = "["+d.getDate()+"/"+(parseInt(d.getMonth())+1)+"/"+d.getFullYear()+" "+d.toLocaleTimeString()+"] ";
@@ -47,7 +47,20 @@ dc.on("message", function(msg,channel_id,user_id,raw_data){
   }
   else if(msg == "!api internals"){
     console.log(time+"API Command");
-    var msg = "DiscordClient Class has the current set of internals:\n```JSON\n"+JSON.stringify(dc.internals, null, '\t')+"\n```";
+    var cache = [];
+    var DCInternals = JSON.stringify(dc.internals, function(key, value) {
+        if (typeof value === 'object' && value !== null) {
+            if (cache.indexOf(value) !== -1) {
+                // Circular reference found, discard key
+                return;
+            }
+            // Store value in our collection
+            cache.push(value);
+        }
+        return value;
+    }, '\t');
+    cache = null;
+    var msg = ":wrench: DiscordClient Class has the current set of internals:\n\n```JSON\n"+DCInternals+"\n```";
     dc.sendMessage(channel_id,msg);
   }
   else if(msg == "!api sid"){
@@ -110,50 +123,58 @@ dc.on("message", function(msg,channel_id,user_id,raw_data){
       dc.leaveVoice(guild_id);
     }
   }
+  else if(msg.match(/^!stop speaking/)){
+    dc.stopSpeaking();
+  }
   else if(msg.match(/^!music\s/)){
     var videoId = msg.split(" ")[1];
-    var requestUrl = 'http://youtube.com/watch?v=' + videoId;
-    var res = youtubeStream(requestUrl);
-    dc.playStream(res);
+    if(videoId == "stop"){
+      dc.stopStream();
+    }
+    else{
+      var requestUrl = 'http://youtube.com/watch?v=' + videoId;
+      var res = youtubeStream(requestUrl);
+      dc.playStream(res);
 
-    req.get({
-      url: "https://www.googleapis.com/youtube/v3/videos?id="+videoId+"&key=AIzaSyAyoWcB_yzEqESeJm-W_eC5QDcOu5R1M90&part=snippet",
-      headers: {
-        "Content-Type": "application/json"
-      }
-    }, function optionalCallback(err, httpResponse, body) {
-        if (err) {
-          return console.error('Error Occured Fetching Youtube Metadata');
+      req.get({
+        url: "https://www.googleapis.com/youtube/v3/videos?id="+videoId+"&key=AIzaSyAyoWcB_yzEqESeJm-W_eC5QDcOu5R1M90&part=snippet",
+        headers: {
+          "Content-Type": "application/json"
         }
-        var data = JSON.parse(body);
-        var title = data.items[0].snippet.title;
-        //dc.sendMessage(channel_id,"Now Playing: "+title);
-        console.log("Now Playing: "+title);
-        req2 = https.request({
-          host: "discordapp.com",
-          path: "/api/channels/"+channel_id+"/messages/195276726475948032",
-          method: "PATCH",
-          headers: {
-            "Authorization": "MTY5NTU0ODgyNjc0NTU2OTMw.CfAmNQ.WebsSsEexNlFWaNc2u54EP-hIX0",
-            "Content-Type": "application/json"
+      }, function optionalCallback(err, httpResponse, body) {
+          if (err) {
+            return console.error('Error Occured Fetching Youtube Metadata');
           }
-        }, function(res) {
-            var data = "";
-            res.setEncoding('utf8')
-            res.on('data', function(chunk){
-              data += chunk
-            });
-            res.on('end', function(){
-              console.log("Music Pin Updated");
-              console.log(data);
-            });
-        });
-        req2.write(JSON.stringify({content: 'Now Playing: '+title}))
-        req2.on('error', function(error){
-          console.log("Error Occured Grabbing The Data");
-        })
-        req2.end();
-    });
+          var data = JSON.parse(body);
+          var title = data.items[0].snippet.title;
+          //dc.sendMessage(channel_id,"Now Playing: "+title);
+          console.log("Now Playing: "+title);
+          req2 = https.request({
+            host: "discordapp.com",
+            path: "/api/channels/"+channel_id+"/messages/195276726475948032",
+            method: "PATCH",
+            headers: {
+              "Authorization": "MTY5NTU0ODgyNjc0NTU2OTMw.CfAmNQ.WebsSsEexNlFWaNc2u54EP-hIX0",
+              "Content-Type": "application/json"
+            }
+          }, function(res) {
+              var data = "";
+              res.setEncoding('utf8')
+              res.on('data', function(chunk){
+                data += chunk
+              });
+              res.on('end', function(){
+                console.log("Music Pin Updated");
+                console.log(data);
+              });
+          });
+          req2.write(JSON.stringify({content: 'Now Playing: '+title}))
+          req2.on('error', function(error){
+            console.log("Error Occured Grabbing The Data");
+          })
+          req2.end();
+      });
+    }
     /*req = https.request({
       host: "discordapp.com",
       path: "/api/channels/"+channel_id+"/pins/195271369116614656",

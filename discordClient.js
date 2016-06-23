@@ -299,7 +299,7 @@ var DiscordClient = function (options){
   }
 
   function handleVoiceWSMessage(data, flags){
-    debug("Voice Gateway Server Sent Frame");
+    //debug("Voice Gateway Server Sent Frame");
     var msg = flags.binary ? JSON.parse(zlib.inflateSync(data).toString()) : JSON.parse(data);
     switch(msg.op){
       case 2:
@@ -360,6 +360,7 @@ var DiscordClient = function (options){
         self.internals.voice.ready = true;
         self.internals.voice.sequence = 0;
         self.internals.voice.timestamp = 0;
+        self.internals.voice.allowPlay = true;
         break;
       case 5: //user speaking - irrelevant atm
 
@@ -371,6 +372,8 @@ var DiscordClient = function (options){
 
   //Public Methods
   self.playStream = function(stream){
+    self.stopStream();
+    self.internals.voice.allowPlay = true;
     if(self.internals.voice.ready){
       self.internals.voice.sequence = 0;
       self.internals.voice.timestamp = 0;
@@ -407,7 +410,7 @@ var DiscordClient = function (options){
       }
 
       sendAudio = function(opusEncoder, streamOutput, cnt){
-        if(self.internals.voice.ready){
+        if(self.internals.voice.ready && self.internals.voice.allowPlay){
           var buff, encoded, audioPacket, nextTime, channels = 2;
           //console.log(streamOutput.read(1920*2));
           buff = streamOutput.read(1920*channels);
@@ -444,11 +447,11 @@ var DiscordClient = function (options){
 				'-ac', 2,
 				'pipe:1'
 			]);
-      stream.pipe(enc.stdin)
+      self.internals.voice.enc = enc;
+      self.internals.voice.stream = stream;
+      self.internals.voice.stream.pipe(self.internals.voice.enc.stdin)
 			enc.stdout.once('end', function() {
-        console.log("[!] Song ended");
-        var wsSpeakingStart = { "op":5, "d":{ "speaking": false, "delay": 0 } };
-        vws.send(JSON.stringify(wsSpeakingStart));
+        console.log("[!] Stdout Ended");
 				enc.kill();
 			});
 			enc.stdout.once('error', function(e) {
@@ -460,6 +463,15 @@ var DiscordClient = function (options){
         startTime = new Date().getTime();
         sendAudio(opusEncoder,enc.stdout,1);
 			});
+    }
+  }
+
+  self.stopStream = function(){
+    if(self.internals.voice.stream && self.internals.voice.enc){
+      self.internals.voice.stream.unpipe(self.internals.voice.enc.stdin)
+      self.internals.voice.allowPlay = false;
+      var wsSpeakingEnd = { "op":5, "d":{ "speaking": false, "delay": 0 } };
+      vws.send(JSON.stringify(wsSpeakingEnd));
     }
   }
 
