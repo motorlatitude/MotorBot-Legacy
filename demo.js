@@ -3,10 +3,57 @@ var apiai = require('apiai');
 var https = require('https');
 var app = apiai("ea1bdb33a83f48c795a585e44a4cdb4b");
 var DiscordClient = require('./discordClient.js');
-var youtubeStream = require('youtube-audio-stream')
+var youtubeStream = require('ytdl-core');
+
+//Create Server
+var express = require("express");
+var MongoClient = require('mongodb').MongoClient
+
+var app = express();
+app.use(express.static(__dirname + "/static"));
+
+app.get("/", function(req, res){
+  res.end(JSON.stringify({Motorbot: true}));
+});
+
+app.get("/api/playlist/:videoId", function(request,res){
+  console.log("Added Item to Playlist");
+  var videoId = request.params.videoId || "";
+  var channel_id = "169555395860234240" // api_channel otherwise we have to get the user to oAuth, bit of a pain so don't bother
+  req.get({
+    url: "https://www.googleapis.com/youtube/v3/videos?id="+videoId+"&key=AIzaSyAyoWcB_yzEqESeJm-W_eC5QDcOu5R1M90&part=snippet",
+    headers: {
+      "Content-Type": "application/json"
+    }
+  }, function optionalCallback(err, httpResponse, body) {
+      if (err) {
+        return console.error('Error Occured Fetching Youtube Metadata');
+      }
+      var data = JSON.parse(body);
+      if(data.items[0]){
+        console.log(videoId);
+        videoList.push(videoId);
+        videoNameList.push(data.items[0].snippet.title);
+        songChannelId.push(channel_id);
+        goThroughVideoList(channel_id);
+        dc.sendMessage(channel_id,":notes: Added "+data.items[0].snippet.title+", you're number "+(videoList.length)+" in the queue");
+        res.end(JSON.stringify({added: true, queue: videoList.length}));
+      }
+      else{
+        dc.sendMessage(channel_id,":warning: Youtube Error: Googleapis returned video not found for videoId ("+videoId+")");
+        res.end(JSON.stringify({added: false, error: "Youtube Error"}));
+      }
+  });
+});
+
+var server = app.listen(3210);
 
 var dc = new DiscordClient({token: "MTY5NTU0ODgyNjc0NTU2OTMw.CfAmNQ.WebsSsEexNlFWaNc2u54EP-hIX0", debug: true, autorun: true});
 var stream;
+var videoList = [];
+var videoNameList = [];
+var videoCount = 0;
+var songChannelId = [];
 dc.on("ready", function(msg){
   var d = new Date();
   var time = "["+d.getDate()+"/"+(parseInt(d.getMonth())+1)+"/"+d.getFullYear()+" "+d.toLocaleTimeString()+"] ";
@@ -63,6 +110,24 @@ dc.on("message", function(msg,channel_id,user_id,raw_data){
     var msg = ":wrench: DiscordClient Class has the current set of internals:\n\n```JSON\n"+DCInternals+"\n```";
     dc.sendMessage(channel_id,msg);
   }
+  else if(msg == "!api internals voice"){
+    console.log(time+"API Voice Command");
+    var cache = [];
+    var DCInternals = JSON.stringify(dc.internals.voice, function(key, value) {
+        if (typeof value === 'object' && value !== null) {
+            if (cache.indexOf(value) !== -1) {
+                // Circular reference found, discard key
+                return;
+            }
+            // Store value in our collection
+            cache.push(value);
+        }
+        return value;
+    }, '\t');
+    cache = null;
+    var msg = ":wrench: DiscordClient Class has the current set of internals for Voice:\n\n```JSON\n"+DCInternals+"\n```";
+    dc.sendMessage(channel_id,msg);
+  }
   else if(msg == "!api sid"){
     console.log(time+"API Command");
     var msg = "```Javascript\nDiscordClient.prototype.internals.sequence = "+dc.internals.sequence+"\n```";
@@ -70,7 +135,11 @@ dc.on("message", function(msg,channel_id,user_id,raw_data){
   }
   else if(msg == "!api status"){
     console.log(time+"API Command");
-    var msg = "All is clear, I'm current connected to Discord Server and everything seems fine :D\n\n```Javascript\nConnected to Server: \""+dc.internals.gateway+"\"\nMy ID is: "+dc.internals.user_id+"\n```";
+    var voice = "Not Connected";
+    if(dc.internals.voice.endpoint){
+      voice = dc.internals.voice.endpoint;
+    }
+    var msg = "All is clear, I'm current connected to Discord Server and everything seems fine :smile:\n\n```Javascript\nConnected to Server: \""+dc.internals.gateway+"\"\nMy ID is: "+dc.internals.user_id+"\nConnected to Voice Server: "+voice+"\n```";
     dc.sendMessage(channel_id,msg);
   }
   else if(msg == "!os"){
@@ -84,8 +153,8 @@ dc.on("message", function(msg,channel_id,user_id,raw_data){
   else if(msg.match(/cum\son\sme/)){
     dc.sendMessage(channel_id,"8====D- -- - (O)");
   }
-  else if(msg.match(/\!status\s/)){
-    var stt = msg.replace(/\.status\s/,"");
+  else if(msg.match(/^!status\s/)){
+    var stt = msg.replace(/!status\s/,"");
     dc.setStatus(stt);
   }
   else if(msg.match(/\!random/)){
@@ -123,80 +192,55 @@ dc.on("message", function(msg,channel_id,user_id,raw_data){
       dc.leaveVoice(guild_id);
     }
   }
-  else if(msg.match(/^!stop speaking/)){
-    dc.stopSpeaking();
-  }
   else if(msg.match(/^!music\s/)){
-    var videoId = msg.split(" ")[1];
-    if(videoId == "stop"){
-      dc.stopStream();
+    if(dc.internals.voice.ready){
+      var videoId = msg.split(" ")[1];
+      if(videoId == "stop"){
+        dc.stopStream();
+      }
+      else if(videoId == "add"){
+        videoId = msg.split(" ")[2];
+        req.get({
+          url: "https://www.googleapis.com/youtube/v3/videos?id="+videoId+"&key=AIzaSyAyoWcB_yzEqESeJm-W_eC5QDcOu5R1M90&part=snippet",
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }, function optionalCallback(err, httpResponse, body) {
+            if (err) {
+              return console.error('Error Occured Fetching Youtube Metadata');
+            }
+            var data = JSON.parse(body);
+            if(data.items[0]){
+              console.log(videoId);
+              videoList.push(videoId);
+              videoNameList.push(data.items[0].snippet.title);
+              songChannelId.push(channel_id);
+              goThroughVideoList(channel_id);
+              dc.sendMessage(channel_id,":notes: Added "+data.items[0].snippet.title+", you're number "+(videoList.length)+" in the queue");
+            }
+            else{
+              dc.sendMessage(channel_id,":warning: Youtube Error: Googleapis returned video not found for videoId ("+videoId+")");
+            }
+        });
+      }
+      else if(videoId == "skip"){
+        dc.stopStream();
+        videoCount = videoCount + 1;
+        goThroughVideoList();
+      }
+      else if(videoId == "resume"){
+        goThroughVideoList();
+      }
+      else if(videoId == "list"){
+        dc.sendMessage(channel_id,"```\n"+videoNameList.join("\n")+"\n```");
+      }
+      else{
+        dc.sendMessage(channel_id,"You need help mate :rolling_eyes:!");
+      }
     }
     else{
-      var requestUrl = 'http://youtube.com/watch?v=' + videoId;
-      var res = youtubeStream(requestUrl);
-      dc.playStream(res);
-
-      req.get({
-        url: "https://www.googleapis.com/youtube/v3/videos?id="+videoId+"&key=AIzaSyAyoWcB_yzEqESeJm-W_eC5QDcOu5R1M90&part=snippet",
-        headers: {
-          "Content-Type": "application/json"
-        }
-      }, function optionalCallback(err, httpResponse, body) {
-          if (err) {
-            return console.error('Error Occured Fetching Youtube Metadata');
-          }
-          var data = JSON.parse(body);
-          var title = data.items[0].snippet.title;
-          //dc.sendMessage(channel_id,"Now Playing: "+title);
-          console.log("Now Playing: "+title);
-          req2 = https.request({
-            host: "discordapp.com",
-            path: "/api/channels/"+channel_id+"/messages/195276726475948032",
-            method: "PATCH",
-            headers: {
-              "Authorization": "MTY5NTU0ODgyNjc0NTU2OTMw.CfAmNQ.WebsSsEexNlFWaNc2u54EP-hIX0",
-              "Content-Type": "application/json"
-            }
-          }, function(res) {
-              var data = "";
-              res.setEncoding('utf8')
-              res.on('data', function(chunk){
-                data += chunk
-              });
-              res.on('end', function(){
-                console.log("Music Pin Updated");
-                console.log(data);
-              });
-          });
-          req2.write(JSON.stringify({content: 'Now Playing: '+title}))
-          req2.on('error', function(error){
-            console.log("Error Occured Grabbing The Data");
-          })
-          req2.end();
-      });
+      dc.sendMessage(channel_id,"Hmmmmm, I think you might want to join a Voice Channel first :wink:");
     }
-    /*req = https.request({
-      host: "discordapp.com",
-      path: "/api/channels/"+channel_id+"/pins/195271369116614656",
-      method: "DELETE",
-      headers: {
-        "Authorization": "MTY5NTU0ODgyNjc0NTU2OTMw.CfAmNQ.WebsSsEexNlFWaNc2u54EP-hIX0"
-      }
-    }, function(res) {
-        var data = "";
-        res.setEncoding('utf8')
-        res.on('data', function(chunk){
-          data += chunk
-        });
-        res.on('end', function(){
-          console.log("Music Pinned");
-          console.log(data);
-        });
-    });
-    req.on('error', function(error){
-      console.log("Error Occured Grabbing The Data");
-    })
-    req.end()*/
   }
   else if(msg.match(/^!talk\s/)){
     console.log("Talk Command Issued")
@@ -210,6 +254,55 @@ dc.on("message", function(msg,channel_id,user_id,raw_data){
     });
     request.end();
   }
+});
+
+function goThroughVideoList(){
+  if(dc.internals.voice.ready){
+    console.log("Playing Video: "+videoCount);
+    var videoId = videoList[0];
+    var channel_id = songChannelId[0];
+    var title = videoNameList[0]
+    if(videoId && !dc.internals.voice.allowPlay){
+      videoList.splice(0,1);
+      songChannelId.splice(0,1);
+      videoNameList.splice(0,1);
+      req.get({
+        url: "https://www.googleapis.com/youtube/v3/videos?id="+videoId+"&key=AIzaSyAyoWcB_yzEqESeJm-W_eC5QDcOu5R1M90&part=snippet",
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }, function optionalCallback(err, httpResponse, body) {
+          if (err) {
+            return console.error('Error Occured Fetching Youtube Metadata');
+          }
+          var data = JSON.parse(body);
+          if(data.items[0]){
+            var requestUrl = 'http://youtube.com/watch?v=' + videoId;
+            var yStream = youtubeStream(requestUrl,{quality: 'lowest'});
+            yStream.on("error", function(e){
+              console.log("Error Occured Loading Youtube Video");
+            });
+            dc.playStream(yStream);
+            dc.sendMessage(channel_id,":play_pause: Now Playing: "+title);
+            console.log("Now Playing: "+title);
+          }
+          else{
+            dc.sendMessage(channel_id,":warning: Youtube Error: Googleapis returned video not found for videoId ("+videoId+")");
+            videoCount = videoCount + 1;
+            goThroughVideoList();
+          }
+      });
+    }
+  }
+  else{
+    dc.sendMessage(channel_id,"Hmmmmm, I think you might want to join a Voice Channel first :wink:");
+  }
+}
+
+dc.on("songDone", function(){
+  console.log("Song Done");
+  videoCount = videoCount + 1;
+  goThroughVideoList();
 });
 
 dc.on("status", function(user_id,status,game,raw_data){

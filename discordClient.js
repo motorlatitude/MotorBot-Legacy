@@ -7,7 +7,8 @@ var req = require('request'),                         //used to send http reques
     os = require('os'),                               //system information
     nacl = require('tweetnacl'),
     Opus = require('node-opus'),
-    zlib = require('zlib');                           //compression
+    zlib = require('zlib'),                           //compression
+    childProc = require('child_process');
 
 /* Discord Client Class
  * Options (Array Object)
@@ -360,7 +361,7 @@ var DiscordClient = function (options){
         self.internals.voice.ready = true;
         self.internals.voice.sequence = 0;
         self.internals.voice.timestamp = 0;
-        self.internals.voice.allowPlay = true;
+        self.internals.voice.allowPlay = false;
         break;
       case 5: //user speaking - irrelevant atm
 
@@ -373,106 +374,142 @@ var DiscordClient = function (options){
   //Public Methods
   self.playStream = function(stream){
     self.stopStream();
-    self.internals.voice.allowPlay = true;
-    if(self.internals.voice.ready){
-      self.internals.voice.sequence = 0;
-      self.internals.voice.timestamp = 0;
-      var encoded, startTime;
-      opusEncoder = new Opus.OpusEncoder(48000, 2);
-      var nonce = new Buffer(24);
-      nonce.fill(0);
-      VoicePacket = function(data){
-        var mac = self.internals.voice.secretKey ? 16 : 0;
-    		var packetLength = data.length + 12 + mac;
+    setTimeout(function(){
+      self.internals.voice.allowPlay = true;
+      if(self.internals.voice.ready){
+        self.internals.voice.sequence = 0;
+        self.internals.voice.timestamp = 0;
+        var encoded, startTime;
+        opusEncoder = new Opus.OpusEncoder(48000, 2);
+        var nonce = new Buffer(24);
+        nonce.fill(0);
+        VoicePacket = function(data){
+          var mac = self.internals.voice.secretKey ? 16 : 0;
+      		var packetLength = data.length + 12 + mac;
 
-    		var audioBuffer = data;
-    		var returnBuffer = new Buffer(packetLength);
+      		var audioBuffer = data;
+      		var returnBuffer = new Buffer(packetLength);
 
-    		returnBuffer.fill(0);
-    		returnBuffer[0] = 0x80;
-    		returnBuffer[1] = 0x78;
+      		returnBuffer.fill(0);
+      		returnBuffer[0] = 0x80;
+      		returnBuffer[1] = 0x78;
 
-    		returnBuffer.writeUIntBE(self.internals.voice.sequence, 2, 2);
-    		returnBuffer.writeUIntBE(self.internals.voice.timestamp, 4, 4);
-    		returnBuffer.writeUIntBE(self.internals.voice.ssrc, 8, 4);
+      		returnBuffer.writeUIntBE(self.internals.voice.sequence, 2, 2);
+      		returnBuffer.writeUIntBE(self.internals.voice.timestamp, 4, 4);
+      		returnBuffer.writeUIntBE(self.internals.voice.ssrc, 8, 4);
 
-    		if (self.internals.voice.secretKey) {
-    			// copy first 12 bytes
-    			returnBuffer.copy(nonce, 0, 0, 12);
-    			audioBuffer = nacl.secretbox(new Uint8Array(data), new Uint8Array(nonce), new Uint8Array(self.internals.voice.secretKey));
-    		}
+      		if (self.internals.voice.secretKey) {
+      			// copy first 12 bytes
+      			returnBuffer.copy(nonce, 0, 0, 12);
+      			audioBuffer = nacl.secretbox(new Uint8Array(data), new Uint8Array(nonce), new Uint8Array(self.internals.voice.secretKey));
+      		}
 
-    		for (var i = 0; i < audioBuffer.length; i++) {
-    			returnBuffer[i + 12] = audioBuffer[i];
-    		}
+      		for (var i = 0; i < audioBuffer.length; i++) {
+      			returnBuffer[i + 12] = audioBuffer[i];
+      		}
 
-    		return returnBuffer;
-      }
-
-      sendAudio = function(opusEncoder, streamOutput, cnt){
-        if(self.internals.voice.ready && self.internals.voice.allowPlay){
-          var buff, encoded, audioPacket, nextTime, channels = 2;
-          //console.log(streamOutput.read(1920*2));
-          buff = streamOutput.read(1920*channels);
-          if(streamOutput.destroyed) return;
-          self.internals.voice.sequence + 1 < 65535 ? self.internals.voice.sequence += 1 : self.internals.voice.sequence = 0;
-          self.internals.voice.timestamp + 960 < 4294967295 ? self.internals.voice.timestamp += 960 : self.internals.voice.timestamp = 0;
-          if (buff && buff.length !== 1920 * channels) {
-  					var newBuffer = new Buffer(1920 * channels).fill(0);
-  					buff.copy(newBuffer);
-  					buff = newBuffer;
-  				 }
-          encoded = [0xF8, 0xFF, 0xFE];
-          if(buff && buff.length === 1920*channels) encoded = opusEncoder.encode(buff);
-          audioPacket = VoicePacket(encoded)
-          nextTime = startTime + cnt * 20;
-          self.internals.voice.udpClient.send(audioPacket, 0, audioPacket.length, self.internals.voice.port, self.internals.voice.endpoint.split(":")[0], function(err, bytes) {
-              if (err) throw err;
-              //debug('UDP message sent to ' + self.internals.voice.endpoint.split(":")[0] +':'+ self.internals.voice.port);
-          });
-          return setTimeout(function() {
-    				return sendAudio(opusEncoder, streamOutput, cnt + 1);
-    			}, 20 + (nextTime - new Date().getTime()));
+      		return returnBuffer;
         }
+
+        sendAudio = function(opusEncoder, streamOutput, cnt){
+          if(self.internals.voice.ready && self.internals.voice.allowPlay){
+            var buff, encoded, audioPacket, nextTime, channels = 2;
+            //console.log(streamOutput.read(1920*2));
+            buff = streamOutput.read(1920*channels);
+            if(streamOutput.destroyed) return;
+            self.internals.voice.sequence + 1 < 65535 ? self.internals.voice.sequence += 1 : self.internals.voice.sequence = 0;
+            self.internals.voice.timestamp + 960 < 4294967295 ? self.internals.voice.timestamp += 960 : self.internals.voice.timestamp = 0;
+            if (buff && buff.length !== 1920 * channels) {
+    					var newBuffer = new Buffer(1920 * channels).fill(0);
+    					buff.copy(newBuffer);
+    					buff = newBuffer;
+    				}
+            encoded = [0xF8, 0xFF, 0xFE];
+            if(buff && buff.length === 1920*channels) encoded = opusEncoder.encode(buff);
+            audioPacket = VoicePacket(encoded)
+            nextTime = startTime + cnt * 20;
+            self.internals.voice.udpClient.send(audioPacket, 0, audioPacket.length, self.internals.voice.port, self.internals.voice.endpoint.split(":")[0], function(err, bytes) {
+                if (err) throw err;
+                //debug('UDP message sent to ' + self.internals.voice.endpoint.split(":")[0] +':'+ self.internals.voice.port);
+            });
+            return setTimeout(function() {
+      				return sendAudio(opusEncoder, streamOutput, cnt + 1);
+      			}, 20 + (nextTime - new Date().getTime()));
+          }
+        }
+
+  			var spawn = childProc.spawn;
+
+        self.internals.voice.enc = spawn('ffmpeg' , [
+  				'-i', '-',
+  				'-f', 's16le',
+  				'-ar', '48000',
+          '-ss', 0,
+  				'-ac', 2,
+  				'pipe:1'
+  			]).on("error",function(e){
+          console.log("ERROR");
+        });
+        self.internals.voice.stream = stream;
+        self.internals.voice.stream.pipe(self.internals.voice.enc.stdin)
+  			self.internals.voice.enc.stdout.once('end', function() {
+          console.log("[!] Stdout Ended");
+          if(self.internals.voice.enc){
+    				self.internals.voice.enc.kill();
+            self.internals.voice.stream = null;
+            self.internals.voice.enc = null;
+            self.internals.voice.allowPlay = false;
+          }
+  			});
+        self.internals.voice.stream.on("error", function(e){
+          console.log("STREAM ERROR: "+e);
+        });
+        process.stdout.on('error', function( err ) {
+          console.log("STDOUT ERROR: "+e);
+        });
+        self.internals.voice.enc.once('exit', function(code, signal) {
+          console.log("[!] Enc Exited");
+  			});
+        self.internals.voice.enc.once('close', function(code, signal) {
+          console.log("[!] Stdout Closed");
+          self.emit("songDone");
+  			});
+        self.internals.voice.enc.on('error', function(error) {
+          console.log("[!] ENC ERROR: "+error);
+  			});
+        self.internals.voice.enc.once('disconnect', function() {
+          console.log("[!] Stdout Disconnected");
+  			});
+  			self.internals.voice.enc.stdout.once('error', function(e) {
+          console.log("[!] Stdout Disconnected");
+  			  self.internals.voice.enc.stdout.emit('end');
+  			});
+        self.internals.voice.enc.stderr.on('data', function(data){
+          //console.log('data: '+data);
+        });
+  			self.internals.voice.enc.stdout.once('readable', function() {
+          var wsSpeakingStart = { "op":5, "d":{ "speaking": true, "delay": 0 } };
+          vws.send(JSON.stringify(wsSpeakingStart));
+          startTime = new Date().getTime();
+          if(self.internals.voice.enc){
+            sendAudio(opusEncoder,self.internals.voice.enc.stdout,1);
+          }
+  			});
       }
-
-      childProc = require('child_process');
-					spawn = childProc.spawn;
-					spawnSync = childProc.spawnSync;
-
-      enc = spawn('ffmpeg' , [
-				'-i', '-',
-				'-f', 's16le',
-				'-ar', '48000',
-				'-ac', 2,
-				'pipe:1'
-			]);
-      self.internals.voice.enc = enc;
-      self.internals.voice.stream = stream;
-      self.internals.voice.stream.pipe(self.internals.voice.enc.stdin)
-			enc.stdout.once('end', function() {
-        console.log("[!] Stdout Ended");
-				enc.kill();
-			});
-			enc.stdout.once('error', function(e) {
-				enc.stdout.emit('end');
-			});
-			enc.stdout.once('readable', function() {
-        var wsSpeakingStart = { "op":5, "d":{ "speaking": true, "delay": 0 } };
-        vws.send(JSON.stringify(wsSpeakingStart));
-        startTime = new Date().getTime();
-        sendAudio(opusEncoder,enc.stdout,1);
-			});
-    }
+    },2000);
   }
 
   self.stopStream = function(){
-    if(self.internals.voice.stream && self.internals.voice.enc){
-      self.internals.voice.stream.unpipe(self.internals.voice.enc.stdin)
+      if(self.internals.voice.enc){
+        self.internals.voice.enc.stdin.setEncoding('utf8');
+        self.internals.voice.enc.stdin.write('q');
+      }
+      self.internals.voice.stream = null;
+      self.internals.voice.enc = null;
       self.internals.voice.allowPlay = false;
+      self.internals.voice.pauseTime = 0;
       var wsSpeakingEnd = { "op":5, "d":{ "speaking": false, "delay": 0 } };
       vws.send(JSON.stringify(wsSpeakingEnd));
-    }
   }
 
   self.setStatus = function(name){
@@ -564,6 +601,24 @@ var DiscordClient = function (options){
     self.connect();
   }
 
+  process.on('uncaughtException', function (err) {
+      // Handle ECONNRESETs caused by `next` or `destroy`
+      if (err.code == 'ECONNRESET') {
+        self.sendMessage("169555395860234240", ":name_badge: **FATAL ERROR**\n        **Error**: A fatal error occured with code `ECONNRESET`.\n        **Message**: This video appears to be in the incorrect format, please use a more up to date version.");
+        console.log('Got an ECONNRESET! This is *probably* not an error. Stacktrace:');
+        console.log(err.stack);
+      }
+      else if (err.code == 'EPIPE') {
+        self.sendMessage("169555395860234240", ":name_badge: **FATAL ERROR**\n        **Error**: A fatal error occured with code `EPIPE`.\n        **Message**: This video appears to be in the incorrect format, please use a more up to date version.");
+        console.log('Got an EPIPE! This is *probably* not an error. Stacktrace:');
+        console.log(err.stack);
+      }else {
+          // Normal error handling
+          console.error(err);
+          process.exit(1);
+      }
+  });
 }
+
 util.inherits(DiscordClient,EE); //get DiscordClient class to inherit event emitter class and act as an event emitter
 module.exports = DiscordClient;
