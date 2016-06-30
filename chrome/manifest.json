@@ -2,30 +2,26 @@
   "manifest_version": 2,
   "name": "MotorBot",
   "description": "This extension will let you add youtube videos to MotorBot",
-  "version": "1.0.6",
-  "browser_action": {
-   "default_icon": "icon.png",
-   "default_popup": "popup.html"
-  },
+  "version": "1.0.9",
   "content_scripts": [
     {
       "matches": ["https://www.youtube.com/*", "https://youtube.com/*"],
-      "js": ["popup.js"],
+      "js": ["jquery.min.js","ytb.js"],
       "run_at": "document_end"
     }
   ],
  "web_accessible_resources": [
-     "icon.png"
+     "icon_20x20.png"
    ],
   "permissions": [
    "activeTab",
    "contextMenus",
    "tabs",
    "https://www.youtube.com/*",
-   "https://youtube.com/*",
-   "http://46.101.80.208:3210/*"
+   "https://youtube.com/*"
    ],
    "icons":{
-      "512":"icon.png"
+      "512":"icon.png",
+      "20": "icon_20x20.png"
     }
 }

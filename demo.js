@@ -1,7 +1,7 @@
 req = require('request');
 var apiai = require('apiai');
 var https = require('https');
-var app = apiai("ea1bdb33a83f48c795a585e44a4cdb4b");
+var apiai = apiai("ea1bdb33a83f48c795a585e44a4cdb4b");
 var DiscordClient = require('./discordClient.js');
 var youtubeStream = require('ytdl-core');
 
@@ -66,69 +66,7 @@ dc.on("message", function(msg,channel_id,user_id,raw_data){
   var d = new Date();
   var time = "["+d.getDate()+"/"+(parseInt(d.getMonth())+1)+"/"+d.getFullYear()+" "+d.toLocaleTimeString()+"] "
   console.log(time+"\""+msg+"\" sent by user <@"+user_id+"> in <#"+channel_id+">");
-  if(msg == ".log dump"){
-    console.log(time+"Grabbing relevant file");
-    var url = "https://discordapp.com/api/channels/"+channel_id+"/messages"
-    req.post({
-      url: url,
-      headers: {
-        "Authorization": "MTY5NTU0ODgyNjc0NTU2OTMw.CfAmNQ.WebsSsEexNlFWaNc2u54EP-hIX0",
-        "Content-Type": "multipart/form-data"
-      },
-      formData: {
-        content: ":wrench: Developer Debug Log, shows full log of actions carried out on the server.",
-        file: {
-          value: fs.readFileSync(__dirname + '/debug.log', 'utf8'),
-          options: {
-            contentType: "application/octet-stream",
-            filename: "debug.log"
-          }
-        }
-      }
-    }, function optionalCallback(err, httpResponse, body) {
-        if (err) {
-          return console.error(time+'Upload failed:', err);
-        }
-        console.log(time+'Upload successful!');
-      });
-  }
-  else if(msg == "!api internals"){
-    console.log(time+"API Command");
-    var cache = [];
-    var DCInternals = JSON.stringify(dc.internals, function(key, value) {
-        if (typeof value === 'object' && value !== null) {
-            if (cache.indexOf(value) !== -1) {
-                // Circular reference found, discard key
-                return;
-            }
-            // Store value in our collection
-            cache.push(value);
-        }
-        return value;
-    }, '\t');
-    cache = null;
-    var msg = ":wrench: DiscordClient Class has the current set of internals:\n\n```JSON\n"+DCInternals+"\n```";
-    dc.sendMessage(channel_id,msg);
-  }
-  else if(msg == "!api internals voice"){
-    console.log(time+"API Voice Command");
-    var cache = [];
-    var DCInternals = JSON.stringify(dc.internals.voice, function(key, value) {
-        if (typeof value === 'object' && value !== null) {
-            if (cache.indexOf(value) !== -1) {
-                // Circular reference found, discard key
-                return;
-            }
-            // Store value in our collection
-            cache.push(value);
-        }
-        return value;
-    }, '\t');
-    cache = null;
-    var msg = ":wrench: DiscordClient Class has the current set of internals for Voice:\n\n```JSON\n"+DCInternals+"\n```";
-    dc.sendMessage(channel_id,msg);
-  }
-  else if(msg == "!api sid"){
+  if(msg == "!api sid"){
     console.log(time+"API Command");
     var msg = "```Javascript\nDiscordClient.prototype.internals.sequence = "+dc.internals.sequence+"\n```";
     dc.sendMessage(channel_id,msg);
@@ -147,7 +85,7 @@ dc.on("message", function(msg,channel_id,user_id,raw_data){
     dc.sendMessage(channel_id,msg);
   }
   else if(msg == "!os uptime"){
-    var msg = "I've been online for: "+millisecondsToStr(parseFloat(dc.internals.os.uptime())*1000);
+    var msg = "Server Uptime: "+millisecondsToStr(parseFloat(dc.internals.os.uptime())*1000);
     dc.sendMessage(channel_id,msg);
   }
   else if(msg.match(/cum\son\sme/)){
@@ -244,7 +182,7 @@ dc.on("message", function(msg,channel_id,user_id,raw_data){
   }
   else if(msg.match(/^!talk\s/)){
     console.log("Talk Command Issued")
-    var request = app.textRequest(msg.replace(/^!talk\s/,""));
+    var request = apiai.textRequest(msg.replace(/^!talk\s/,""));
     request.on('response', function(response) {
         console.log(response);
         dc.sendMessage(channel_id,response.result.fulfillment.speech);
@@ -359,13 +297,3 @@ function millisecondsToStr (milliseconds) {
     }
     return 'less than a second'; //'just now' //or other string you like;
 }
-
-var fs = require('fs');
-var util = require('util');
-var log_file = fs.createWriteStream(__dirname + '/debug.log', {flags : 'a'});
-var log_stdout = process.stdout;
-
-console.log = function(d) { //
-  log_file.write(util.format(d) + '\n');
-  log_stdout.write(util.format(d) + '\n');
-};

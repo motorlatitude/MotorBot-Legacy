@@ -88,7 +88,7 @@ var DiscordClient = function (options){
 
   function handleWSConnection(){
     debug("Connected to Gateway Server");
-    if(self.reconnect && self.internals.session_id != null){
+    /*if(self.reconnect && self.internals.session_id != null){
       //client resume - send op 6 package (should return all missed events, if op 9 returned reconnect using op 2)
       var resumePackage = {
         "op": 6,
@@ -101,26 +101,26 @@ var DiscordClient = function (options){
       debug("Sending OP 6 package to attempt reconnect");
       ws.send(JSON.stringify(resumePackage));
     }
-    else{
+    else{*/
       //send identity package
-      debug("Using Compression: "+!!zlib.inflateSync);
-      var identityPackage = {
-        "op": 2,
-        "d": {
-          "token": self.internals.token,
-          "properties": {
-              "$os": os.platform(),
-              "$browser": "discordClient",
-              "$device": "discordClient",
-              "$referrer": "",
-              "$referring_domain": ""
-          },
-          "compress": !!zlib.inflateSync,
-          "large_threshold": 250
-        }
+    debug("Using Compression: "+!!zlib.inflateSync);
+    var identityPackage = {
+      "op": 2,
+      "d": {
+        "token": self.internals.token,
+        "properties": {
+            "$os": os.platform(),
+            "$browser": "discordClient",
+            "$device": "discordClient",
+            "$referrer": "",
+            "$referring_domain": ""
+        },
+        "compress": !!zlib.inflateSync,
+        "large_threshold": 250
       }
-      ws.send(JSON.stringify(identityPackage));
     }
+    ws.send(JSON.stringify(identityPackage));
+    //}
   }
 
   function handleWSMessage(data, flags){
@@ -138,7 +138,7 @@ var DiscordClient = function (options){
             "d": self.internals.sequence
           }
           if(ws.readyState === ws.OPEN){
-            debug("Sending Heartbeat with Sequence Identifier: "+self.internals.sequence);
+            //debug("Sending Heartbeat with Sequence Identifier: "+self.internals.sequence);
             ws.send(JSON.stringify(hbPackage));
           }
         },msg.d.heartbeat_interval);
@@ -254,14 +254,11 @@ var DiscordClient = function (options){
         }
         //console.log(util.inspect(msg, false, null));
         debug("Generating New Websocket Connection to Voice Gateway");
-
         vws = new websocket("wss://"+msg.d.endpoint.split(":")[0]);
-
         vws.once('open', handleVoiceWSConnection);
     		vws.once('close', handleVoiceWSClose);
     		vws.once('error', handleVoiceWSFailure);
     		vws.on('message', handleVoiceWSMessage);
-
         break;
       case "INVALID_SESSION":
         debug("An op 9 package was recieved from the gateway server (Invalid Session Id)");
@@ -310,7 +307,7 @@ var DiscordClient = function (options){
             "d": null
           }
           if(vws.readyState === vws.OPEN){
-            debug("Sending Voice Heartbeat with Sequence Identifier: null");
+            //debug("Sending Voice Heartbeat with Sequence Identifier: null");
             vws.send(JSON.stringify(vhbPackage));
           }
         },msg.d.heartbeat_interval);
@@ -353,6 +350,9 @@ var DiscordClient = function (options){
             console.log(util.inspect(wsDiscPayload, false, null));
       			vws.send(JSON.stringify(wsDiscPayload));
         });
+        break;
+      case 3: //return HB
+
         break;
       case 4: //session description
         console.log(util.inspect(msg, false, null));
