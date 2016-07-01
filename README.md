@@ -4,7 +4,7 @@ MotorBot is bot built from nodeJS, using discords public API (https://discordapp
 (WIP)
 
 # Commands
-All commands should be preceded with a `!` followed by the name of the command, which should be further followed by a method of the given command.
+All commands should be preceded with a `!` followed by the name of the command, which should be further followed by a method or a parameter of the given command.
 ## List of Commands
 
 ### API
@@ -14,7 +14,7 @@ All commands should be preceded with a `!` followed by the name of the command, 
 ###### SID
   The sid method allows you to determine the last sequence identifier sent to the discord gateway server.
 ###### STATUS
-  The status method returns the status of the current bot-server connection.
+  The status method returns the status of the current bot-to-server connection.
 
 ### OS
   Command: `!os`<br>
