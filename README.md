@@ -1,4 +1,4 @@
-# MotorBot - v0.2b
+# MotorBot
 [![PyPI](https://img.shields.io/pypi/status/Django.svg?style=flat)]()
 
 [![GitHub release](https://img.shields.io/badge/version-0.2b-brightgreen.svg)]()
