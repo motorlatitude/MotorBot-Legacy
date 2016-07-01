@@ -50,7 +50,7 @@ All commands should be preceded with a `!` followed by the name of the command, 
 ### STATUS
   Command: `!status`<br>
   Has Methods: `null`<br>
-  Has Parameters: `Status Message`
+  Has Parameters: `Status Message`<br>
   Allows the user to set the status of the bot e.g. `!status with code` will mean the status of the bot will be `Playing with code`.
 
 ### RANDOM
@@ -67,7 +67,7 @@ All commands should be preceded with a `!` followed by the name of the command, 
 ###### LEAVE
   Kicks the bot out of the current voice channel.
 
-###### MUSIC
+### MUSIC
   Command: `!music`<br>
   Has Methods: `list, add <youtube_id>, skip, resume, stop`<br>
   The music method allows the user to play music in a voice channel. The music must be in the form of a youtube video and should be added using either the chrome extension or via the youtube video ID which can be found in the URL e.g. https://www.youtube.com/watch?v=*CictPbTWkBU*
@@ -85,7 +85,7 @@ All commands should be preceded with a `!` followed by the name of the command, 
   Stops the current song and the bot will not continue to play any more songs until the `resume` method is used.
 
 ### TALK
-*  Command: `!talk`<br>
+  Command: `!talk`<br>
   Has Methods: `null`<br>
   Has Parameters: `<message>`<br>
   This is an **experimental** feature that uses the APIAI library to allow the bot to talk to user.
