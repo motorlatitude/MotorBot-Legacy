@@ -23,30 +23,30 @@ All commands should be preceded with a `!` followed by the name of the command, 
   Command: `!os`<br>
   Has Methods: `[uptime]`<br>
   This command lets you determine the OS on which the bot is currently running, it provides some general information. Sample Output:
-  ```Javascript
+```Javascript
+{
+  platform: "linux",
+  release: "4.4.0-28-generic",
+  type: "Linux",
+  loadAvg: 0.03271484375,0.0283203125,0.0048828125,
+  hostname: "lolstat.net",
+  memory: "269MB / 1041MB",
+  arch: x64,
+  cpus: [
   {
-    platform: "linux",
-    release: "4.4.0-28-generic",
-    type: "Linux",
-    loadAvg: 0.03271484375,0.0283203125,0.0048828125,
-    hostname: "lolstat.net",
-    memory: "269MB / 1041MB",
-    arch: x64,
-    cpus: [
-    {
-      "model": "Intel(R) Xeon(R) CPU E5-2650L v3 @ 1.80GHz",
-      "speed": 1799,
-      "times": {
-          "user": 5652800,
-          "nice": 0,
-          "sys": 3032000,
-          "idle": 898510200,
-          "irq": 0
-      }
+    "model": "Intel(R) Xeon(R) CPU E5-2650L v3 @ 1.80GHz",
+    "speed": 1799,
+    "times": {
+        "user": 5652800,
+        "nice": 0,
+        "sys": 3032000,
+        "idle": 898510200,
+        "irq": 0
     }
-  ]
   }
-  ```
+]
+}
+```
 ###### UPTIME
   The Uptime method returns the time since last boot of the server on which the bot is running.
 
