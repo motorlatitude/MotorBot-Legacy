@@ -6,8 +6,6 @@
 
 MotorBot is bot built from nodeJS, using discords public API (https://discordapp.com/developers/docs/)
 
-(WIP)
-
 # Commands
 All commands should be preceded with a `!` followed by the name of the command, which should be further followed by a method or a parameter of the given command.
 ## List of Commands
