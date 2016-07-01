@@ -8,7 +8,7 @@ All commands should be preceded with a `!` followed by the name of the command, 
 ## List of Commands
 
 ### API
-*  Command: `!api`<br>
+  Command: `!api`<br>
   Has Methods: `sid, status`<br>
   The API methods are for the developer to analyse the current status of the API Connection that the bot has established.
 ###### SID
@@ -17,7 +17,7 @@ All commands should be preceded with a `!` followed by the name of the command, 
   The status method returns the status of the current bot-server connection.
 
 ### OS
-*  Command: `!os`<br>
+  Command: `!os`<br>
   Has Methods: `[uptime]`<br>
   This command lets you determine the OS on which the bot is currently running, it provides some general information. Sample Output:
   ```Javascript
@@ -48,18 +48,18 @@ All commands should be preceded with a `!` followed by the name of the command, 
   The Uptime method returns the time of how long the system running the bot has been on (i.e. time since last boot)
 
 ### STATUS
-*  Command: `!status`<br>
+  Command: `!status`<br>
   Has Methods: `null`<br>
   Has Parameters: `Status Message`
   Allows the user to set the status of the bot e.g. `!status with code` will mean the status of the bot will be `Playing with code`.
 
 ### RANDOM
-*  Command: `!random`<br>
+  Command: `!random`<br>
   Has Methods: `null`<br>
   Generates a random integer between 0 and 100.
 
 ### VOICE
-*  Command: `!voice`<br>
+  Command: `!voice`<br>
   Has Methods: `join <channel_name>, leave`<br>
   The voice command can be used to establish a voice connection to discord.
 ###### JOIN
