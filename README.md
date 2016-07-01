@@ -8,84 +8,84 @@ All commands should be preceded with a `!` followed by the name of the command, 
 ## List of Commands
 
 ### API
-  Command: `!api`
-  Has Methods: `sid, status`
+*  Command: `!api`<br>
+  Has Methods: `sid, status`<br>
   The API methods are for the developer to analyse the current status of the API Connection that the bot has established.
-#### SID
+###### SID
   The sid method allows you to determine the last sequence identifier sent to the discord gateway server.
-#### STATUS
+###### STATUS
   The status method returns the status of the current bot-server connection.
 
 ### OS
-  Command: `!os`
-  Has Methods: `[uptime]`
+*  Command: `!os`<br>
+  Has Methods: `[uptime]`<br>
   This command lets you determine the OS on which the bot is currently running, it provides some general information. Sample Output:
   ```Javascript
+  {
+    platform: "linux",
+    release: "4.4.0-28-generic",
+    type: "Linux",
+    loadAvg: 0.03271484375,0.0283203125,0.0048828125,
+    hostname: "lolstat.net",
+    memory: "269MB / 1041MB",
+    arch: x64,
+    cpus: [
     {
-      platform: "linux",
-      release: "4.4.0-28-generic",
-      type: "Linux",
-      loadAvg: 0.03271484375,0.0283203125,0.0048828125,
-      hostname: "lolstat.net",
-      memory: "269MB / 1041MB",
-      arch: x64,
-      cpus: [
-      {
-          "model": "Intel(R) Xeon(R) CPU E5-2650L v3 @ 1.80GHz",
-          "speed": 1799,
-          "times": {
-              "user": 5652800,
-              "nice": 0,
-              "sys": 3032000,
-              "idle": 898510200,
-              "irq": 0
-          }
+      "model": "Intel(R) Xeon(R) CPU E5-2650L v3 @ 1.80GHz",
+      "speed": 1799,
+      "times": {
+          "user": 5652800,
+          "nice": 0,
+          "sys": 3032000,
+          "idle": 898510200,
+          "irq": 0
       }
+    }
   ]
   }
   ```
-#### UPTIME
+###### UPTIME
   The Uptime method returns the time of how long the system running the bot has been on (i.e. time since last boot)
 
 ### STATUS
-  Command: `!status`
-  Has Methods: `null`
+*  Command: `!status`<br>
+  Has Methods: `null`<br>
   Has Parameters: `Status Message`
   Allows the user to set the status of the bot e.g. `!status with code` will mean the status of the bot will be `Playing with code`.
 
 ### RANDOM
-  Command: `!random`
-  Has Methods: `null`
+*  Command: `!random`<br>
+  Has Methods: `null`<br>
   Generates a random integer between 0 and 100.
 
 ### VOICE
-  Command: `!voice`
-  Has Methods: `join <channel_name>, leave`
+*  Command: `!voice`<br>
+  Has Methods: `join <channel_name>, leave`<br>
   The voice command can be used to establish a voice connection to discord.
-#### JOIN
+###### JOIN
   The join method lets the user join a voice channel, if no channel is specified the bot will default to the General Channel
-#### LEAVE
+###### LEAVE
   Kicks the bot out of the current voice channel.
 
-### MUSIC
-  Command: `!music`
-  Has Methods: `list, add <youtube_id>, skip, resume, stop`
+###### MUSIC
+  Command: `!music`<br>
+  Has Methods: `list, add <youtube_id>, skip, resume, stop`<br>
   The music method allows the user to play music in a voice channel. The music must be in the form of a youtube video and should be added using either the chrome extension or via the youtube video ID which can be found in the URL e.g. https://www.youtube.com/watch?v=*CictPbTWkBU*
   **NOTE** The bot must be in a channel for the user to use these commands.
-#### LIST
+###### LIST
   Lists the current songs in the playlist. The songs are ordered from up next at the top to the last song to be played at the bottom.
-#### ADD
+###### ADD
   Allows the user to add a song to the playlist, this command requires a `youtube_video_id` parameter to be provided on the call of the method. The song will be added to the playlist, if no song is present it will immediately play the song.
   **Extra Note:** The google chrome extension will allow you to add a song even if the bot is not in a voice channel, to play the added song once the bot does join a voice channel, use the `resume` method.
-#### SKIP
+###### SKIP
   Allows you to skip the current song and move to the next song in the playlist. If no song is present the music will terminate.
-#### RESUME
+###### RESUME
   Allows the user to resume a stopped playlist or start playing the songs present in the playlist.
-#### STOP
+###### STOP
   Stops the current song and the bot will not continue to play any more songs until the `resume` method is used.
 
 ### TALK
-  Command: `!talk`
-  Has Methods: `null`
-  Has Parameters: `<message>`
+*  Command: `!talk`<br>
+  Has Methods: `null`<br>
+  Has Parameters: `<message>`<br>
   This is an **experimental** feature that uses the APIAI library to allow the bot to talk to user.
