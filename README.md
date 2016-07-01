@@ -1,4 +1,11 @@
 # MotorBot - v0.2b
+[![PyPI](https://img.shields.io/pypi/status/Django.svg?style=flat)]()
+
+[![GitHub release](https://img.shields.io/badge/version-0.2b-brightgreen.svg)]()
+
+[![Chrome Web Store](https://img.shields.io/chrome-web-store/v/pgkdpldhnmmhpdfmmkgpnpofaaagomab.svg)]()
+
+
 MotorBot is bot built from nodeJS, using discords public API (https://discordapp.com/developers/docs/)
 
 (WIP)
@@ -45,7 +52,7 @@ All commands should be preceded with a `!` followed by the name of the command, 
   }
   ```
 ###### UPTIME
-  The Uptime method returns the time of how long the system running the bot has been on (i.e. time since last boot)
+  The Uptime method returns the time since last boot of the server on which the bot is running.
 
 ### STATUS
   Command: `!status`<br>
@@ -76,6 +83,8 @@ All commands should be preceded with a `!` followed by the name of the command, 
   Lists the current songs in the playlist. The songs are ordered from up next at the top to the last song to be played at the bottom.
 ###### ADD
   Allows the user to add a song to the playlist, this command **requires** a youtube video id parameter to be provided on the call of the method. The song will be added to the playlist, if no song is present it will immediately play the song.
+
+
   **Extra Note:** The google chrome extension will allow you to add a song even if the bot is not in a voice channel, to play the added song once the bot does join a voice channel, use the `resume` method.
 ###### SKIP
   Allows you to skip the current song and move to the next song in the playlist. If no song is present the music will terminate.
