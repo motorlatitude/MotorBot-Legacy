@@ -1,5 +1,5 @@
 # MotorBot
-[![PyPI](https://img.shields.io/pypi/status/Django.svg?style=flat)]() &nbsp; &nbsp;
+[![PyPI](https://img.shields.io/pypi/status/MotorBot.svg?style=flat)]() &nbsp; &nbsp;
 [![GitHub release](https://img.shields.io/github/release/motorlatitude/motorbot.svg)]() &nbsp; &nbsp;
 [![Chrome Web Store](https://img.shields.io/chrome-web-store/v/pgkdpldhnmmhpdfmmkgpnpofaaagomab.svg)]()
 
