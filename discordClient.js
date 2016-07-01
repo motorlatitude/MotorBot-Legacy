@@ -347,7 +347,7 @@ var DiscordClient = function (options){
     						}
     					}
       			};
-            console.log(util.inspect(wsDiscPayload, false, null));
+            //console.log(util.inspect(wsDiscPayload, false, null));
       			vws.send(JSON.stringify(wsDiscPayload));
         });
         break;
@@ -355,7 +355,7 @@ var DiscordClient = function (options){
 
         break;
       case 4: //session description
-        console.log(util.inspect(msg, false, null));
+        //console.log(util.inspect(msg, false, null));
         self.internals.voice.secretKey = msg.d.secret_key;
         self.internals.voice.mode = msg.d.mode;
         self.internals.voice.ready = true;
@@ -502,7 +502,12 @@ var DiscordClient = function (options){
   self.stopStream = function(){
       if(self.internals.voice.enc){
         self.internals.voice.enc.stdin.setEncoding('utf8');
-        self.internals.voice.enc.stdin.write('q');
+        try{
+          self.internals.voice.enc.stdin.write('q');
+        }
+        catch(err){
+          debug("Error: Write After End Occured\n"+err);
+        }
       }
       self.internals.voice.stream = null;
       self.internals.voice.enc = null;

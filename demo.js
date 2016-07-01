@@ -5,15 +5,29 @@ var apiai = apiai("ea1bdb33a83f48c795a585e44a4cdb4b");
 var DiscordClient = require('./discordClient.js');
 var youtubeStream = require('ytdl-core');
 
+var dc = new DiscordClient({token: "MTY5NTU0ODgyNjc0NTU2OTMw.CfAmNQ.WebsSsEexNlFWaNc2u54EP-hIX0", debug: true, autorun: true});
+var stream;
+var videoList = [];
+var videoNameList = [];
+var videoCount = 0;
+var songChannelId = [];
+
 //Create Server
 var express = require("express");
 var MongoClient = require('mongodb').MongoClient
 
 var app = express();
 app.use(express.static(__dirname + "/static"));
+app.use(function (req, res, next) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET');
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    next();
+});
 
 app.get("/", function(req, res){
-  res.end(JSON.stringify({Motorbot: true}));
+  res.end(JSON.stringify({videoNameList: videoNameList}));
 });
 
 app.get("/api/playlist/:videoId", function(request,res){
@@ -48,17 +62,11 @@ app.get("/api/playlist/:videoId", function(request,res){
 
 var server = app.listen(3210);
 
-var dc = new DiscordClient({token: "MTY5NTU0ODgyNjc0NTU2OTMw.CfAmNQ.WebsSsEexNlFWaNc2u54EP-hIX0", debug: true, autorun: true});
-var stream;
-var videoList = [];
-var videoNameList = [];
-var videoCount = 0;
-var songChannelId = [];
 dc.on("ready", function(msg){
   var d = new Date();
   var time = "["+d.getDate()+"/"+(parseInt(d.getMonth())+1)+"/"+d.getFullYear()+" "+d.toLocaleTimeString()+"] ";
   console.log(time+msg.user.username+"#"+msg.user.discriminator+" has connected to the gateway server and is at your command");
-
+  dc.sendMessage("169555395860234240","Hi, I'm now online :smiley:");
   dc.setStatus("with Discord API");
 });
 
@@ -204,32 +212,14 @@ function goThroughVideoList(){
       videoList.splice(0,1);
       songChannelId.splice(0,1);
       videoNameList.splice(0,1);
-      req.get({
-        url: "https://www.googleapis.com/youtube/v3/videos?id="+videoId+"&key=AIzaSyAyoWcB_yzEqESeJm-W_eC5QDcOu5R1M90&part=snippet",
-        headers: {
-          "Content-Type": "application/json"
-        }
-      }, function optionalCallback(err, httpResponse, body) {
-          if (err) {
-            return console.error('Error Occured Fetching Youtube Metadata');
-          }
-          var data = JSON.parse(body);
-          if(data.items[0]){
-            var requestUrl = 'http://youtube.com/watch?v=' + videoId;
-            var yStream = youtubeStream(requestUrl,{quality: 'lowest'});
-            yStream.on("error", function(e){
-              console.log("Error Occured Loading Youtube Video");
-            });
-            dc.playStream(yStream);
-            dc.sendMessage(channel_id,":play_pause: Now Playing: "+title);
-            console.log("Now Playing: "+title);
-          }
-          else{
-            dc.sendMessage(channel_id,":warning: Youtube Error: Googleapis returned video not found for videoId ("+videoId+")");
-            videoCount = videoCount + 1;
-            goThroughVideoList();
-          }
+      var requestUrl = 'http://youtube.com/watch?v=' + videoId;
+      var yStream = youtubeStream(requestUrl,{quality: 'lowest', filter: 'audioonly'});
+      yStream.on("error", function(e){
+        console.log("Error Occured Loading Youtube Video");
       });
+      dc.playStream(yStream);
+      dc.sendMessage(channel_id,":play_pause: Now Playing: "+title);
+      console.log("Now Playing: "+title);
     }
   }
   else{

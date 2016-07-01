@@ -1,7 +1,7 @@
 <?php
   //var_dump($_GET);
-  //permissions = 66321471 allows us access to all (convert hexadecimal value to binary then to decimal then add)
-  //bot adding link https://discordapp.com/oauth2/authorize?&client_id=169554794376200192&scope=bot+identify+email&permissions=66321471&response_type=code
+  //permissions = 536083519 allows us access to all (convert hexadecimal value to binary then to decimal then add)
+  //bot adding link https://discordapp.com/oauth2/authorize?&client_id=169554794376200192&scope=bot+identify+email&permissions=536083519&response_type=code
   header('Content-Type: application/json');
   $totalOutput = array();
   // create curl resource
@@ -115,7 +115,7 @@
   curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PATCH');
   $data = json_encode(array(
     "name" => "admin",
-    "color" => 238581, //convert hex with http://www.binaryhexconverter.com/hex-to-decimal-converter
+    "color" => 4057476, //convert hex with http://www.binaryhexconverter.com/hex-to-decimal-converter
     "permissions" => 66313279,
     "position" => 1,
     "hoist" => false
