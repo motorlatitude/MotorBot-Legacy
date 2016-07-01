@@ -1,8 +1,8 @@
 {
   "name": "motorbot",
   "version": "1.0.0",
-  "description": "",
-  "main": "demo.js",
+  "description": "Discord Bot",
+  "main": "index.js",
   "private": true,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -14,7 +14,7 @@
     "node-opus": "*",
     "zlib": "*",
     "apiai": "*",
-    "youtube-audio-stream": "*"
+    "node-ytdl-core": "*"
   },
   "author": "Lennart Hase",
   "license": "ISC"
