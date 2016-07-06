@@ -424,6 +424,22 @@ var DiscordClient = function (options){
     					buff.copy(newBuffer);
     					buff = newBuffer;
     				}
+            if(buff){
+              let out = new Buffer(buff.length);
+              let multiplier =  Math.pow(1, 1.660964);
+          		for (let i = 0; i < buff.length; i += 2) {
+          			if (i >= buff.length - 1) {
+          				break;
+          			}
+          			let uint = Math.floor(multiplier * buff.readInt16LE(i));
+          			// Ensure value stays within 16bit
+          			uint = Math.min(32767, uint);
+          			uint = Math.max(-32767, uint);
+          			// Write 2 new bytes into other buffer;
+          			out.writeInt16LE(uint, i);
+          		}
+              buff = out;
+            }
             encoded = [0xF8, 0xFF, 0xFE];
             if(buff && buff.length === 1920*channels) encoded = opusEncoder.encode(buff);
             audioPacket = VoicePacket(encoded)

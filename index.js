@@ -146,6 +146,9 @@ dc.on("message", function(msg,channel_id,user_id,raw_data){
       }
       else if(videoId == "add"){
         videoId = msg.split(" ")[2];
+        if(videoId.indexOf('https://') > -1){
+          videoId = getParameterByName("v",videoId);
+        }
         req.get({
           url: "https://www.googleapis.com/youtube/v3/videos?id="+videoId+"&key=AIzaSyAyoWcB_yzEqESeJm-W_eC5QDcOu5R1M90&part=snippet",
           headers: {
@@ -156,13 +159,18 @@ dc.on("message", function(msg,channel_id,user_id,raw_data){
               return console.error('Error Occured Fetching Youtube Metadata');
             }
             var data = JSON.parse(body);
-            if(data.items[0]){
-              console.log(videoId);
-              videoList.push(videoId);
-              videoNameList.push(data.items[0].snippet.title);
-              songChannelId.push(channel_id);
-              goThroughVideoList(channel_id);
-              dc.sendMessage(channel_id,":notes: Added "+data.items[0].snippet.title+", you're number "+(videoList.length)+" in the queue");
+            if(data.items){
+              if(data.items[0]){
+                console.log(videoId);
+                videoList.push(videoId);
+                videoNameList.push(data.items[0].snippet.title);
+                songChannelId.push(channel_id);
+                goThroughVideoList(channel_id);
+                dc.sendMessage(channel_id,":notes: Added "+data.items[0].snippet.title+", you're number "+(videoList.length)+" in the queue");
+              }
+              else{
+                dc.sendMessage(channel_id,":warning: Youtube Error: Googleapis returned video not found for videoId ("+videoId+")");
+              }
             }
             else{
               dc.sendMessage(channel_id,":warning: Youtube Error: Googleapis returned video not found for videoId ("+videoId+")");
@@ -178,7 +186,12 @@ dc.on("message", function(msg,channel_id,user_id,raw_data){
         goThroughVideoList();
       }
       else if(videoId == "list"){
-        dc.sendMessage(channel_id,"```\n"+videoNameList.join("\n")+"\n```");
+        if(videoNameList.length > 0){
+          dc.sendMessage(channel_id,"```\n"+videoNameList.join("\n")+"\n```");
+        }
+        else{
+          dc.sendMessage(channel_id,"No songs are currently in the playlist :grinning:");
+        }
       }
       else{
         dc.sendMessage(channel_id,"You need help mate :rolling_eyes:!");
@@ -286,4 +299,14 @@ function millisecondsToStr (milliseconds) {
         return seconds + ' second' + numberEnding(seconds);
     }
     return 'less than a second'; //'just now' //or other string you like;
+}
+
+function getParameterByName(name, url) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
 }

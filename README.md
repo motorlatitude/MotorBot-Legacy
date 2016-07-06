@@ -72,13 +72,14 @@ All commands should be preceded with a `!` followed by the name of the command, 
 
 ### MUSIC
   Command: `!music`<br>
-  Has Methods: `list, add <youtube_id>, skip, resume, stop`<br>
+  Has Methods: `list, add <youtube_id or link>, skip, resume, stop`<br>
   The music method allows the user to play music in a voice channel. The music must be in the form of a youtube video and should be added using either the chrome extension or via the youtube video ID which can be found in the URL e.g. for https://www.youtube.com/watch?v=CictPbTWkBU the youtube video id is `CictPbTWkBU`<br>
+  The full URL can be used as well
   **NOTE** The bot must be in a channel for the user to use these commands.
 ###### LIST
   Lists the current songs in the playlist. The songs are ordered from up next at the top to the last song to be played at the bottom.
 ###### ADD
-  Allows the user to add a song to the playlist, this command **requires** a youtube video id parameter to be provided on the call of the method. The song will be added to the playlist, if no song is present it will immediately play the song.
+  Allows the user to add a song to the playlist, this command **requires** a youtube video id parameter or youtube video URL to be provided on the call of the method. The song will be added to the playlist, if no song is present in the playlist it will immediately play the newly added song.
 
 
   **Extra Note:** The google chrome extension will allow you to add a song even if the bot is not in a voice channel, to play the added song once the bot does join a voice channel, use the `resume` method.
