@@ -1,6 +1,7 @@
 req = require('request');
 var apiai = require('apiai');
 var https = require('https');
+var raven = require('raven');
 var apiai = apiai("ea1bdb33a83f48c795a585e44a4cdb4b");
 var DiscordClient = require('./discordClient.js');
 var youtubeStream = require('ytdl-core');
@@ -26,8 +27,34 @@ app.use(function (req, res, next) {
     next();
 });
 
+function onError(err, req, res, next) {
+    res.statusCode = 500;
+    res.end(res.sentry+'\n');
+}
+
+// The request handler must be the first item
+app.use(raven.middleware.express.requestHandler('https://4ef8d9b35c3541688d5efcbb237a9e7b:b2773c83068047cfabc5e5a252e68505@app.getsentry.com/85790'));
+
+var ravenClient = new raven.Client('https://4ef8d9b35c3541688d5efcbb237a9e7b:b2773c83068047cfabc5e5a252e68505@app.getsentry.com/85790')
+
+app.get('/errorTest', function(req, res) {
+    ravenClient.captureException("Some long error message stuff https://4ef8d9b35c3541688d5efcbb237a9e7b:b2773c83068047cfabc5e5a252e68505@app.getsentry.com/85790 things and cookies and shit",{extra: {"key": {"child-key": "child_value"},"thing":"thingValue"},level: 'info'});
+    res.end("cake");
+});
+
 app.get("/", function(req, res){
   res.end(JSON.stringify({videoNameList: videoNameList}));
+});
+
+
+
+// The error handler must be before any other error middleware
+app.use(raven.middleware.express.errorHandler('https://4ef8d9b35c3541688d5efcbb237a9e7b:b2773c83068047cfabc5e5a252e68505@app.getsentry.com/85790'));
+
+app.get("/redirect", function(req, res){
+  var code = req.query.code;
+  var guildId = req.query.guild_id;
+  res.end(JSON.stringify({guildId: guildId, connected: true}));
 });
 
 app.get("/api/playlist/:videoId", function(request,res){
