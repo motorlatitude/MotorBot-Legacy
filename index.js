@@ -8,10 +8,6 @@ var youtubeStream = require('ytdl-core');
 
 var dc = new DiscordClient({token: "MTY5NTU0ODgyNjc0NTU2OTMw.CfAmNQ.WebsSsEexNlFWaNc2u54EP-hIX0", debug: true, autorun: true});
 var stream;
-var videoList = [];
-var videoNameList = [];
-var videoCount = 0;
-var songChannelId = [];
 
 //Create Server
 var express = require("express");
@@ -35,7 +31,7 @@ function onError(err, req, res, next) {
 // The request handler must be the first item
 app.use(raven.middleware.express.requestHandler('https://4ef8d9b35c3541688d5efcbb237a9e7b:b2773c83068047cfabc5e5a252e68505@app.getsentry.com/85790'));
 
-var ravenClient = new raven.Client('https://4ef8d9b35c3541688d5efcbb237a9e7b:b2773c83068047cfabc5e5a252e68505@app.getsentry.com/85790')
+var ravenClient = new raven.Client('https://4ef8d9b35c3541688d5efcbb237a9e7b:b2773c83068047cfabc5e5a252e68505@app.getsentry.com/85790',{release: '0e4fdef81448dcfa0e16ecc4433ff3997aa53572'});
 
 app.get('/errorTest', function(req, res) {
     ravenClient.captureException("Some long error message stuff https://4ef8d9b35c3541688d5efcbb237a9e7b:b2773c83068047cfabc5e5a252e68505@app.getsentry.com/85790 things and cookies and shit",{extra: {"key": {"child-key": "child_value"},"thing":"thingValue"},level: 'info'});
@@ -43,7 +39,7 @@ app.get('/errorTest', function(req, res) {
 });
 
 app.get("/", function(req, res){
-  res.end(JSON.stringify({videoNameList: videoNameList}));
+  res.end();
 });
 
 
@@ -62,7 +58,7 @@ app.get("/api/playlist/:videoId", function(request,res){
   var videoId = request.params.videoId || "";
   var channel_id = "169555395860234240" // api_channel otherwise we have to get the user to oAuth, bit of a pain so don't bother
   req.get({
-    url: "https://www.googleapis.com/youtube/v3/videos?id="+videoId+"&key=AIzaSyAyoWcB_yzEqESeJm-W_eC5QDcOu5R1M90&part=snippet",
+    url: "https://www.googleapis.com/youtube/v3/videos?id="+videoId+"&key=AIzaSyAyoWcB_yzEqESeJm-W_eC5QDcOu5R1M90&part=snippet,contentDetails",
     headers: {
       "Content-Type": "application/json"
     }
@@ -73,12 +69,17 @@ app.get("/api/playlist/:videoId", function(request,res){
       var data = JSON.parse(body);
       if(data.items[0]){
         console.log(videoId);
-        videoList.push(videoId);
-        videoNameList.push(data.items[0].snippet.title);
-        songChannelId.push(channel_id);
-        goThroughVideoList(channel_id);
-        dc.sendMessage(channel_id,":notes: Added "+data.items[0].snippet.title+", you're number "+(videoList.length)+" in the queue");
-        res.end(JSON.stringify({added: true, queue: videoList.length}));
+        var playlistCollection = app.locals.db.collection("playlist")
+        playlistCollection.insertOne({videoId: videoId, title: data.items[0].snippet.title, duration: data.items[0].contentDetails.duration, channel_id: channel_id, timestamp: new Date().getTime(), status: 'added'}, function(err, result){
+          if(err){
+            dc.sendMessage(channel_id,":warning: A database error occurred adding this track...\nReport sent to sentry, please notify admin of the following error: `Databse insertion error at line 75`");
+          }
+          else{
+            dc.sendMessage(channel_id,":notes: Added "+data.items[0].snippet.title);
+            goThroughVideoList(channel_id);
+          }
+          res.end(JSON.stringify({added: true}));
+        });
       }
       else{
         dc.sendMessage(channel_id,":warning: Youtube Error: Googleapis returned video not found for videoId ("+videoId+")");
@@ -89,11 +90,23 @@ app.get("/api/playlist/:videoId", function(request,res){
 
 var server = app.listen(3210);
 
+createDBConnection = function(){
+  MongoClient.connect('mongodb://localhost:27017/motorbot', function(err, db){
+    if(err){
+      dc.sendMessage("169555395860234240",":name_badge: Fatal Error: I couldn't connect to the motorbot database :cry:");
+      throw new Error("Failed to connect to database, exiting");
+    }
+    dc.sendMessage("169555395860234240",":white_check_mark: Connected to Motorbot Database Succesfully");
+    app.locals.db = db;
+  });
+}
+
 dc.on("ready", function(msg){
   var d = new Date();
   var time = "["+d.getDate()+"/"+(parseInt(d.getMonth())+1)+"/"+d.getFullYear()+" "+d.toLocaleTimeString()+"] ";
   console.log(time+msg.user.username+"#"+msg.user.discriminator+" has connected to the gateway server and is at your command");
-  dc.sendMessage("169555395860234240","Hi, I'm now online :smiley:");
+  dc.sendMessage("169555395860234240",":white_check_mark: Hi, I'm now online :smiley:");
+  createDBConnection()
   dc.setStatus("with Discord API");
 });
 
@@ -136,6 +149,9 @@ dc.on("message", function(msg,channel_id,user_id,raw_data){
   else if(msg.match(/goodnight/gmi)){
     dc.sendMessage(channel_id,":sparkles: Good Night <@"+user_id+">");
   }
+  else if(msg.match(/^!ban doug/gmi)){
+    dc.sendMessage(channel_id,"If only I could :rolling_eyes: <@"+user_id+">");
+  }
   else if(msg.match(/fight\sme(\sbro|)/gmi) || msg.match(/come\sat\sme(\sbro|)/gmi)){
     dc.sendMessage(channel_id,"(ง’̀-‘́)ง");
   }
@@ -177,7 +193,7 @@ dc.on("message", function(msg,channel_id,user_id,raw_data){
           videoId = getParameterByName("v",videoId);
         }
         req.get({
-          url: "https://www.googleapis.com/youtube/v3/videos?id="+videoId+"&key=AIzaSyAyoWcB_yzEqESeJm-W_eC5QDcOu5R1M90&part=snippet",
+          url: "https://www.googleapis.com/youtube/v3/videos?id="+videoId+"&key=AIzaSyAyoWcB_yzEqESeJm-W_eC5QDcOu5R1M90&part=snippet,contentDetails",
           headers: {
             "Content-Type": "application/json"
           }
@@ -189,11 +205,16 @@ dc.on("message", function(msg,channel_id,user_id,raw_data){
             if(data.items){
               if(data.items[0]){
                 console.log(videoId);
-                videoList.push(videoId);
-                videoNameList.push(data.items[0].snippet.title);
-                songChannelId.push(channel_id);
-                goThroughVideoList(channel_id);
-                dc.sendMessage(channel_id,":notes: Added "+data.items[0].snippet.title+", you're number "+(videoList.length)+" in the queue");
+                var playlistCollection = app.locals.db.collection("playlist")
+                playlistCollection.insertOne({videoId: videoId, title: data.items[0].snippet.title, duration: data.items[0].contentDetails.duration, channel_id: channel_id, timestamp: new Date().getTime(), status: 'added'}, function(err, result){
+                  if(err){
+                    dc.sendMessage(channel_id,":warning: A database error occurred adding this track...\nReport sent to sentry, please notify admin of the following error: `Databse insertion error at line 211`");
+                  }
+                  else{
+                    dc.sendMessage(channel_id,":notes: Added "+data.items[0].snippet.title);
+                    goThroughVideoList(channel_id);
+                  }
+                });
               }
               else{
                 dc.sendMessage(channel_id,":warning: Youtube Error: Googleapis returned video not found for videoId ("+videoId+")");
@@ -206,19 +227,31 @@ dc.on("message", function(msg,channel_id,user_id,raw_data){
       }
       else if(videoId == "skip"){
         dc.stopStream();
-        videoCount = videoCount + 1;
         goThroughVideoList();
       }
       else if(videoId == "resume"){
         goThroughVideoList();
       }
       else if(videoId == "list"){
-        if(videoNameList.length > 0){
-          dc.sendMessage(channel_id,"```\n"+videoNameList.join("\n")+"\n```");
-        }
-        else{
-          dc.sendMessage(channel_id,"No songs are currently in the playlist :grinning:");
-        }
+        var playlistCollection = app.locals.db.collection("playlist")
+        playlistCollection.find({status: "added"}).sort({timestamp: -1}).toArray(function(err, results){
+          if(err){
+            dc.sendMessage(channel_id,":warning: A database error occurred whilst listing all tracks...\nReport sent to sentry, please notify admin of the following error: `playlistCollection Error at line 239`");
+          }
+          else{
+            if(results.length > 0){
+              var songNames = [];
+              for(var i=0;i<results.length;i++){
+                var songTitle = results[i].title
+                songNames.push(songTitle)
+              }
+              dc.sendMessage(channel_id,"```\n"+songNames.join("\n")+"\n```");
+            }
+            else{
+              dc.sendMessage(channel_id,"No songs are currently in the playlist :grinning:");
+            }
+          }
+        });
       }
       else{
         dc.sendMessage(channel_id,"You need help mate :rolling_eyes:!");
@@ -240,27 +273,36 @@ dc.on("message", function(msg,channel_id,user_id,raw_data){
     });
     request.end();
   }
+  else if(msg.match(/^!/)){
+    dc.sendMessage(channel_id,"I don't know what you want :confused:\nPlease consult the documenation at https://github.com/motorlatitude/MotorBot");
+  }
 });
 
 function goThroughVideoList(){
   if(dc.internals.voice.ready){
-    console.log("Playing Video: "+videoCount);
-    var videoId = videoList[0];
-    var channel_id = songChannelId[0];
-    var title = videoNameList[0]
-    if(videoId && !dc.internals.voice.allowPlay){
-      videoList.splice(0,1);
-      songChannelId.splice(0,1);
-      videoNameList.splice(0,1);
-      var requestUrl = 'http://youtube.com/watch?v=' + videoId;
-      var yStream = youtubeStream(requestUrl,{quality: 'lowest', filter: 'audioonly'});
-      yStream.on("error", function(e){
-        console.log("Error Occured Loading Youtube Video");
-      });
-      dc.playStream(yStream);
-      dc.sendMessage(channel_id,":play_pause: Now Playing: "+title);
-      console.log("Now Playing: "+title);
-    }
+    var playlistCollection = app.locals.db.collection("playlist")
+    playlistCollection.find({status: "added"}).sort({timestamp: -1}).toArray(function(err, results){
+      if(results[0]){
+        var videoId = results[0].videoId;
+        var channel_id = results[0].channel_id;
+        var title = results[0].title;
+        var trackId = results[0]._id;
+        if(videoId && !dc.internals.voice.allowPlay){
+          playlistCollection.updateOne({'_id': trackId},{'$set':{'status':'played'}},function(){
+            console.log("Track Status Changed");
+          });
+          var requestUrl = 'http://youtube.com/watch?v=' + videoId;
+          var yStream = youtubeStream(requestUrl,{quality: 'lowest', filter: 'audioonly'});
+          yStream.on("error", function(e){
+            console.log("Error Occured Loading Youtube Video");
+          });
+          dc.playStream(yStream);
+          var dur = results[0].duration.replace("PT","").split("M")[0]+":"+results[0].duration.replace("PT","").split("M")[1].replace("S","");
+          dc.sendMessage(channel_id,":play_pause: Now Playing: "+title+" ("+dur+")");
+          console.log("Now Playing: "+title);
+        }
+      }
+    });
   }
   else{
     dc.sendMessage(channel_id,"Hmmmmm, I think you might want to join a Voice Channel first :wink:");
@@ -269,7 +311,6 @@ function goThroughVideoList(){
 
 dc.on("songDone", function(){
   console.log("Song Done");
-  videoCount = videoCount + 1;
   goThroughVideoList();
 });
 

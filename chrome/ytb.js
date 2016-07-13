@@ -1,5 +1,6 @@
 function addExtraButton(){
   var element =  document.getElementById('watch8-secondary-actions');
+  var searchElement = document.getElementById('results');
   if (typeof(element) != 'undefined' && element != null){
     var newMenuItem = document.createElement('div');
     newMenuItem.className = "yt-uix-menu";
