@@ -512,7 +512,7 @@ var DiscordClient = function (options){
           }
   			});
       }
-    },2000);
+    },3000);
   }
 
   self.stopStream = function(){

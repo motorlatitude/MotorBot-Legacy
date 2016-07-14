@@ -305,7 +305,7 @@ function goThroughVideoList(){
     });
   }
   else{
-    dc.sendMessage(channel_id,"Hmmmmm, I think you might want to join a Voice Channel first :wink:");
+    dc.sendMessage("169555395860234240","Hmmmmm, I think you might want to join a Voice Channel first :wink:");
   }
 }
 
