@@ -119,6 +119,11 @@ dc.on("message", function(msg,channel_id,user_id,raw_data){
     var msg = "```Javascript\nDiscordClient.prototype.internals.sequence = "+dc.internals.sequence+"\n```";
     dc.sendMessage(channel_id,msg);
   }
+  else if(msg == "!api ssrc"){
+    console.log(time+"API Command");
+    var msg = "```Javascript\nDiscordClient.prototype.internals.voice.ssrc = "+dc.internals.voice.ssrc+"\n```";
+    dc.sendMessage(channel_id,msg);
+  }
   else if(msg == "!api status"){
     console.log(time+"API Command");
     var voice = "Not Connected";
@@ -229,7 +234,7 @@ dc.on("message", function(msg,channel_id,user_id,raw_data){
         dc.stopStream();
         goThroughVideoList();
       }
-      else if(videoId == "resume"){
+      else if(videoId == "play"){
         goThroughVideoList();
       }
       else if(videoId == "list"){

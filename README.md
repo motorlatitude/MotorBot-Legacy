@@ -85,7 +85,7 @@ All commands should be preceded with a `!` followed by the name of the command, 
   **Extra Note:** The google chrome extension will allow you to add a song even if the bot is not in a voice channel, to play the added song once the bot does join a voice channel, use the `resume` method.
 ###### SKIP
   Allows you to skip the current song and move to the next song in the playlist. If no song is present the music will terminate.
-###### RESUME
+###### PLAY
   Allows the user to resume a stopped playlist or start playing the songs present in the playlist.
 ###### STOP
   Stops the current song and the bot will not continue to play any more songs until the `resume` method is used.
