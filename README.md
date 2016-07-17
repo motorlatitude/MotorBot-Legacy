@@ -72,7 +72,7 @@ All commands should be preceded with a `!` followed by the name of the command, 
 
 ### MUSIC
   Command: `!music`<br>
-  Has Methods: `list, add <youtube_id or link>, skip, resume, stop`<br>
+  Has Methods: `list, add <youtube_id or link>, skip, play, stop`<br>
   The music method allows the user to play music in a voice channel. The music must be in the form of a youtube video and should be added using either the chrome extension or via the youtube video ID which can be found in the URL e.g. for https://www.youtube.com/watch?v=CictPbTWkBU the youtube video id is `CictPbTWkBU`<br>
   The full URL can be used as well
   **NOTE** The bot must be in a channel for the user to use these commands.
@@ -82,13 +82,13 @@ All commands should be preceded with a `!` followed by the name of the command, 
   Allows the user to add a song to the playlist, this command **requires** a youtube video id parameter or youtube video URL to be provided on the call of the method. The song will be added to the playlist, if no song is present in the playlist it will immediately play the newly added song.
 
 
-  **Extra Note:** The google chrome extension will allow you to add a song even if the bot is not in a voice channel, to play the added song once the bot does join a voice channel, use the `resume` method.
+  **Extra Note:** The google chrome extension will allow you to add a song even if the bot is not in a voice channel, to play the added song once the bot does join a voice channel, use the `play` method.
 ###### SKIP
   Allows you to skip the current song and move to the next song in the playlist. If no song is present the music will terminate.
 ###### PLAY
   Allows the user to resume a stopped playlist or start playing the songs present in the playlist.
 ###### STOP
-  Stops the current song and the bot will not continue to play any more songs until the `resume` method is used.
+  Stops the current song and the bot will not continue to play any more songs until the `play` method is used.
 
 ### TALK
   Command: `!talk`<br>
