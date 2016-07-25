@@ -177,10 +177,17 @@ dc.on("message", (msg,channel_id,user_id,raw_data) ->
     dc.sendMessage(channel_id,"Random Number: "+(Math.round((Math.random()*100))))
   else if msg.match(/goodnight/gmi)
     dc.sendMessage(channel_id,":sparkles: Good Night <@"+user_id+">")
+  else if msg.match(/heads\sor\stails(\?|)/gmi)
+    if Math.random() >= 0.5
+      dc.sendMessage(channel_id,":one: Heads <@"+user_id+">")
+    else
+      dc.sendMessage(channel_id,":zero: Tails <@"+user_id+">")
   else if msg.match(/^!ban doug/gmi)
     dc.sendMessage(channel_id,"If only I could :rolling_eyes: <@"+user_id+">")
   else if msg.match(/fight\sme(\sbro|)/gmi) || msg.match(/come\sat\sme(\sbro|)/gmi)
     dc.sendMessage(channel_id,"(ง’̀-‘́)ง")
+  else if msg.match(/^!help/gmi)
+    dc.sendMessage(channel_id,"<@"+user_id+"> Check this out: https://github.com/motorlatitude/MotorBot/blob/master/README.md")
   else if msg.match(/^!lolstat(\s|\.euw|\.na|\.br|\.eune|\.kr|\.lan|\.las|\.oce|\.ru|\.tr|\.jp)/gmi)
     region = "euw"
     if msg.replace(/^!lolstat/gmi,"").indexOf(".") > -1
