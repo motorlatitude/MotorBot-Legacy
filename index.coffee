@@ -1,6 +1,9 @@
 
 {Raven} = require(__dirname+'/raven.coffee')
 req = require('request')
+stylus = require('stylus')
+nib = require 'nib'
+serveStatic = require 'serve-static'
 apiai = require('apiai')
 https = require('https')
 apiai = apiai("ea1bdb33a83f48c795a585e44a4cdb4b")
@@ -27,7 +30,17 @@ express = require "express"
 MongoClient = require('mongodb').MongoClient
 
 app = express()
-app.use(express.static(__dirname + "/static"))
+compile = (str, path) ->
+  stylus(str).set('filename',path).use(nib())
+app.set('views', __dirname+'/views')
+app.set('view engine', 'pug')
+app.use(stylus.middleware(
+  {src: __dirname + '/static',
+  compile: compile
+  }
+))
+app.use(serveStatic(__dirname + '/static'))
+app.use(serveStatic(__dirname + '/static/img', { maxAge: 86400000 }))
 app.use((req, res, next) ->
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'GET')
@@ -40,8 +53,34 @@ onError = (err, req, res, next) ->
   res.statusCode = 500
   res.end(res.sentry+'\n')
 
+convertTimestamp = (input) ->
+  reptms = /^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/
+  hours = 0
+  minutes = 0
+  seconds = 0
+
+  if reptms.test(input)
+    matches = reptms.exec(input)
+    if (matches[1]) then hours = Number(matches[1])
+    if (matches[2]) then minutes = Number(matches[2])
+    if (matches[3]) then seconds = Number(matches[3])
+    if (minutes < 10) then minutes = "0"+minutes
+    if (seconds < 10) then seconds = "0"+seconds
+  if hours == 0
+    return minutes+":"+seconds
+  else
+    return hours+":"+minutes+":"+seconds
+
 app.get("/", (req, res) ->
-  res.end()
+  playlistCollection = app.locals.db.collection("playlist")
+  playlistCollection.find({status: "added"}).sort({timestamp: 1}).toArray((err, results) ->
+    if results[0]
+      for r in results
+        r.formattedTimestamp = convertTimestamp(r.duration)
+      res.render('playlist',{playlist:results})
+    else
+      res.render('playlist',{playlist:{}})
+  )
 )
 
 app.get("/redirect", (req, res) ->
@@ -142,6 +181,12 @@ dc.on("message", (msg,channel_id,user_id,raw_data) ->
     dc.sendMessage(channel_id,"If only I could :rolling_eyes: <@"+user_id+">")
   else if msg.match(/fight\sme(\sbro|)/gmi) || msg.match(/come\sat\sme(\sbro|)/gmi)
     dc.sendMessage(channel_id,"(ง’̀-‘́)ง")
+  else if msg.match(/^!lolstat(\s|\.euw|\.na|\.br|\.eune|\.kr|\.lan|\.las|\.oce|\.ru|\.tr|\.jp)/gmi)
+    region = "euw"
+    if msg.replace(/^!lolstat/gmi,"").indexOf(".") > -1
+      region = msg.replace(/^!lolstat/gmi,"").split(".")[1].split(/\s/gmi)[0]
+    summoner = encodeURI(msg.replace(/^!lolstat(\s|\.euw|\.na|\.br|\.eune|\.kr|\.lan|\.las|\.oce|\.ru|\.tr|\.jp)/gmi,"").replace(/\s/gmi,"").toLowerCase())
+    dc.sendFile(channel_id,req('https://api.lolstat.net/discord/profile/'+summoner+'/'+region),"",false)
   else if msg.match(/\!voice\s/)
     command = msg.replace(/\!voice\s/,"")
     guild_id = "130734377066954752"
@@ -215,12 +260,12 @@ dc.on("message", (msg,channel_id,user_id,raw_data) ->
               for r in results
                 songTitle = r.title
                 songNames.push(songTitle)
-              dc.sendMessage(channel_id,"\`\`\`\n"+songNames.join("\n")+"\n\`\`\`")
+              dc.sendMessage(channel_id,":headphones: Playlist can be viewed here: https://mb.lolstat.net/")
             else
               dc.sendMessage(channel_id,"No songs are currently in the playlist :grinning:")
         )
       else
-        dc.sendMessage(channel_id,"You need help mate :rolling_eyes:!")
+        dc.sendMessage(channel_id,"Unknown Voice Command :cry:")
     else
       dc.sendMessage(channel_id,"Hmmmmm, I think you might want to join a Voice Channel first :wink:")
   else if msg.match(/^!talk\s/)
@@ -236,7 +281,7 @@ dc.on("message", (msg,channel_id,user_id,raw_data) ->
     )
     request.end()
   else if msg.match(/^!/)
-    dc.sendMessage(channel_id,"I don't know what you want :confused:\nPlease consult the documenation at https://github.com/motorlatitude/MotorBot")
+    dc.sendMessage(channel_id,"I don't know what you want :cry:")
 )
 
 goThroughVideoList = () ->
@@ -259,7 +304,7 @@ goThroughVideoList = () ->
             console.log("Error Occured Loading Youtube Video")
           )
           dc.playStream(yStream)
-          dur = results[0].duration.replace("PT","").split("M")[0]+":"+results[0].duration.replace("PT","").split("M")[1].replace("S","")
+          dur = convertTimestamp(results[0].duration)
           dc.sendMessage(channel_id,":play_pause: Now Playing: "+title+" ("+dur+")")
           console.log("Now Playing: "+title)
     )

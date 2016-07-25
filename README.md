@@ -61,6 +61,12 @@ All commands should be preceded with a `!` followed by the name of the command, 
   Has Methods: `null`<br>
   Generates a random integer between 0 and 100.
 
+### LOLSTAT
+  Command: `!lolstat`<br>
+  Has Methods: `null`<br>
+  Has Parameters: `[.region] Summoner Name`<br>
+  Allows you to view a profile card for a summoner. This command should be used as follows: `!lolstat squírrel` will return the profile card for the summoner `squírrel` in the **EUW** region, in order to view for a different region a region parameter must be defined as follows: `!lolstat.na squírrel`. This will now return the profile card for `squírrel` in the **NA** region.
+
 ### VOICE
   Command: `!voice`<br>
   Has Methods: `join <channel_name>, leave`<br>
@@ -77,7 +83,7 @@ All commands should be preceded with a `!` followed by the name of the command, 
   The full URL can be used as well
   **NOTE** The bot must be in a channel for the user to use these commands.
 ###### LIST
-  Lists the current songs in the playlist. The songs are ordered from up next at the top to the last song to be played at the bottom.
+  Provides a link to let you see the current playlist (https://mb.lolstat.net/)
 ###### ADD
   Allows the user to add a song to the playlist, this command **requires** a youtube video id parameter or youtube video URL to be provided on the call of the method. The song will be added to the playlist, if no song is present in the playlist it will immediately play the newly added song.
 

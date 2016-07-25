@@ -355,7 +355,7 @@ var DiscordClient = function (options){
 
         break;
       case 4: //session description
-        //console.log(util.inspect(msg, false, null));
+        console.log(util.inspect(msg, false, null));
         self.internals.voice.secretKey = msg.d.secret_key;
         self.internals.voice.mode = msg.d.mode;
         self.internals.voice.ready = true;
@@ -426,7 +426,7 @@ var DiscordClient = function (options){
     				}
             if(buff){
               let out = new Buffer(buff.length);
-              let multiplier =  Math.pow(1, 1.660964);
+              let multiplier =  Math.pow(0.5, 1.660964);
           		for (let i = 0; i < buff.length; i += 2) {
           			if (i >= buff.length - 1) {
           				break;
@@ -570,6 +570,24 @@ var DiscordClient = function (options){
         }
         debug("Message Create Sent to gateway");
       });
+  }
+
+  self.sendFile = function(channel_id, file, msg, tts){
+    tts = tts || "false";
+    r = req.post({
+      url: "https://discordapp.com/api/channels/"+channel_id+"/messages",
+      headers: {
+        "Authorization": "MTY5NTU0ODgyNjc0NTU2OTMw.CfAmNQ.WebsSsEexNlFWaNc2u54EP-hIX0",
+        "Content-Type": "multipart/form-data"
+      }
+    }, function optionalCallback(err, httpResponse, body) {
+        if (err) {
+          return debug("Error Sending Message "+err);
+        }
+        debug("Message Create Sent to gateway");
+      });
+    form = r.form()
+    form.append('file', file, {filename: 'profile.png'})
   }
 
   self.joinVoice = function(channel_id, guild_id){

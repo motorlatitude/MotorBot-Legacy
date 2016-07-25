@@ -1,0 +1,22 @@
+doctype html
+html(lang="en")
+  head
+    title Motorbot Playlist
+    link(href='/css/playlist.css',rel='stylesheet')
+  body
+    ul
+      li.titleRow
+        .item
+        .title Titel
+        .videoId Video ID
+        .time Time
+        .status Status
+      -var i = 1
+      for song in playlist
+        li
+          .item=i
+          .title=song.title
+          .videoId=song.videoId
+          .time=song.formattedTimestamp
+          .status=song.status
+        -i++
