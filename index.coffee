@@ -1,5 +1,6 @@
 {Raven} = require(__dirname+'/raven.coffee')
 req = require('request')
+fs = require('fs')
 stylus = require('stylus')
 nib = require 'nib'
 serveStatic = require 'serve-static'
@@ -190,7 +191,7 @@ app.get("/api/playlist/:videoId", (request,res) ->
       playlistCollection.insertOne({videoId: videoId, title: data.items[0].snippet.title, duration: data.items[0].contentDetails.duration, channel_id: channel_id, timestamp: new Date().getTime(), status: 'added', userId: userId}, (err, result) ->
         if(err)
           raven.captureException(err,{level:'error'})
-          dc.sendMessage(channel_id,":warning: A database error occurred adding this track...\nReport sent to sentry, please notify admin of the following error: \`Databse insertion error at line 75\`")
+          dc.sendMessage(channel_id,":warning: A database error occurred adding this track... <@"+userId+">\nReport sent to sentry, please notify admin of the following error: \`Database insertion error at line 194: "+err.toString()+"\`")
         else
           dc.sendMessage(channel_id,":notes: Added "+data.items[0].snippet.title+" <@"+userId+">")
           goThroughVideoList(channel_id)
@@ -319,7 +320,7 @@ dc.on("message", (msg,channel_id,user_id,raw_data) ->
               playlistCollection.insertOne({videoId: videoId, title: data.items[0].snippet.title, duration: data.items[0].contentDetails.duration, channel_id: channel_id, timestamp: new Date().getTime(), status: 'added'}, (err, result) ->
                 if err
                   raven.captureException(err,{level:'error'})
-                  dc.sendMessage(channel_id,":warning: A database error occurred adding this track...\nReport sent to sentry, please notify admin of the following error: \`Databse insertion error at line 211\`")
+                  dc.sendMessage(channel_id,":warning: A database error occurred adding this track...\nReport sent to sentry, please notify admin of the following error: \`Database insertion error at line 323: "+err.toString()+"\`")
                 else
                   dc.sendMessage(channel_id,":notes: Added "+data.items[0].snippet.title)
                   goThroughVideoList(channel_id)
@@ -356,6 +357,34 @@ dc.on("message", (msg,channel_id,user_id,raw_data) ->
         dc.sendMessage(channel_id,"Unknown Voice Command :cry:")
     else
       dc.sendMessage(channel_id,"Hmmmmm, I think you might want to join a Voice Channel first :wink:")
+  else if msg.match(/^!sb\spog/)
+    if dc.internals.voice.ready
+      pogStream = fs.createReadStream(__dirname+'/soundboard/play of the game.mp3')
+      dc.playStream(pogStream,{volume: 2.0})
+      pogStream.on('end', () ->
+        pogStream.close()
+        pogStream = null
+      )
+    else
+      dc.sendMessage("169555395860234240","Hmmmmm, I think you might want to join a Voice Channel first :wink:")
+  else if msg.match(/^!sb\sgp/)
+    if dc.internals.voice.ready
+      pogStream = fs.createReadStream(__dirname+'/soundboard/gp.mp3')
+      dc.playStream(pogStream,{volume: 2.0})
+    else
+      dc.sendMessage("169555395860234240","Hmmmmm, I think you might want to join a Voice Channel first :wink:")
+  else if msg.match(/^!sb\sj3/)
+    if dc.internals.voice.ready
+      pogStream = fs.createReadStream(__dirname+'/soundboard/justice 3.mp3')
+      dc.playStream(pogStream,{volume: 2.0})
+    else
+      dc.sendMessage("169555395860234240","Hmmmmm, I think you might want to join a Voice Channel first :wink:")
+  else if msg.match(/^!sb\ssb/)
+    if dc.internals.voice.ready
+      pogStream = fs.createReadStream(__dirname+'/soundboard/speed boost.mp3')
+      dc.playStream(pogStream,{volume: 2.0})
+    else
+      dc.sendMessage("169555395860234240","Hmmmmm, I think you might want to join a Voice Channel first :wink:")
   else if msg.match(/^!talk\s/)
     console.log("Talk Command Issued")
     request = apiai.textRequest(msg.replace(/^!talk\s/,""))
@@ -391,7 +420,7 @@ goThroughVideoList = () ->
             raven.captureException(e,{level:'error',tags:{system: 'youtube-stream'}})
             console.log("Error Occured Loading Youtube Video")
           )
-          dc.playStream(yStream)
+          dc.playStream(yStream,{volume: 0.5})
           dur = convertTimestamp(results[0].duration)
           dc.sendMessage(channel_id,":play_pause: Now Playing: "+title+" ("+dur+")")
           console.log("Now Playing: "+title)

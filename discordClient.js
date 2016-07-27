@@ -372,7 +372,18 @@ var DiscordClient = function (options){
   }
 
   //Public Methods
-  self.playStream = function(stream){
+  self.playStream = function(stream, options){
+    var volume = 0.5;
+    if(options){
+      if(options.volume){
+        if(options.volume > 3){
+          volume = 3;
+        }
+        else{
+          volume = options.volume;
+        }
+      }
+    }
     self.stopStream();
     setTimeout(function(){
       self.internals.voice.allowPlay = true;
@@ -426,7 +437,7 @@ var DiscordClient = function (options){
     				}
             if(buff){
               let out = new Buffer(buff.length);
-              let multiplier =  Math.pow(0.5, 1.660964);
+              let multiplier =  Math.pow(volume, 1.660964);
           		for (let i = 0; i < buff.length; i += 2) {
           			if (i >= buff.length - 1) {
           				break;
@@ -512,7 +523,7 @@ var DiscordClient = function (options){
           }
   			});
       }
-    },3000);
+    },0);
   }
 
   self.stopStream = function(){
