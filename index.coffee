@@ -1,10 +1,10 @@
-
 {Raven} = require(__dirname+'/raven.coffee')
 req = require('request')
 stylus = require('stylus')
 nib = require 'nib'
 serveStatic = require 'serve-static'
 apiai = require('apiai')
+url_module = require('url')
 https = require('https')
 apiai = apiai("ea1bdb33a83f48c795a585e44a4cdb4b")
 DiscordClient = require('./discordClient.js')
@@ -86,12 +86,93 @@ app.get("/", (req, res) ->
 app.get("/redirect", (req, res) ->
   code = req.query.code
   guildId = req.query.guild_id
+  console.log req
   res.end(JSON.stringify({guildId: guildId, connected: true}))
+)
+
+oauth2 = require('simple-oauth2')({
+  clientID: "169554794376200192",
+  clientSecret: "5XyBGU-YtwVTMOQHKpbxUvmnYF4tx-At",
+  site: 'https://discordapp.com/api',
+  tokenPath: '/oauth2/token',
+  authorizationPath: '/oauth2/authorize'
+})
+
+authorization_uri = oauth2.authCode.authorizeURL({
+  redirect_uri: 'https://mb.lolstat.net/callback',
+  scope: 'identify email guilds'
+})
+
+app.get('/userAuth', (req, res) ->
+  res.render('userAuth',{})
+)
+
+app.get('/auth', (req, res) ->
+  res.redirect(authorization_uri)
+)
+
+app.get('/callback', (request, res) ->
+  console.log "Callback called"
+  code = request.query.code
+  console.log code
+  oauth2.authCode.getToken({
+    code: code,
+    redirect_uri: 'https://mb.lolstat.net/callback'
+  }, (error, result) ->
+    console.log "Save Token"
+    if (error)
+      console.log('Access Token Error', error.message)
+    token = oauth2.accessToken.create(result)
+    console.log token.token
+    console.log "Access Token -> "+token.token.access_token
+    req.get({
+      url: "https://discordapp.com/api/users/@me/guilds",
+      headers: {
+        "Authorization": "Bearer "+token.token.access_token
+        "Content-Type": "application/json"
+      }
+    }, (err, httpResponse, body) ->
+      foundGuild = false
+      for guild in JSON.parse(body)
+        console.log guild.id
+        if guild.id == "130734377066954752"
+          foundGuild = true
+          break
+      if foundGuild
+        req.get({
+          url: "https://discordapp.com/api/users/@me",
+          headers: {
+            "Authorization": "Bearer "+token.token.access_token
+            "Content-Type": "application/json"
+          }
+        }, (err, httpResponse, body) ->
+          if err
+            res.end("Sorry, Unknown Error Occured")
+          body = JSON.parse(body)
+          console.log body
+          res.redirect('/authSuccess?user='+body.id+'&name='+body.username)
+          res.end("Success, you're in KTJ and allowed to add songs")
+        )
+      else
+        res.end("Sorry, you're not a member of KTJ :(")
+    )
+  )
+)
+
+app.get('/authSuccess', (req, res) ->
+  userId = req.query.user
+  userName = req.query.name
+  res.render('authSuccess',{userId:userId,userName:userName})
+)
+
+app.get('/token', (req, res) ->
+  res.end("Token")
 )
 
 app.get("/api/playlist/:videoId", (request,res) ->
   console.log("Added Item to Playlist")
   videoId = request.params.videoId || ""
+  userId = request.query.userId || ""
   channel_id = "169555395860234240" # api_channel otherwise we have to get the user to oAuth, bit of a pain so don't bother
   req.get({
     url: "https://www.googleapis.com/youtube/v3/videos?id="+videoId+"&key=AIzaSyAyoWcB_yzEqESeJm-W_eC5QDcOu5R1M90&part=snippet,contentDetails",
@@ -106,12 +187,12 @@ app.get("/api/playlist/:videoId", (request,res) ->
     if data.items[0]
       console.log(videoId)
       playlistCollection = app.locals.db.collection("playlist")
-      playlistCollection.insertOne({videoId: videoId, title: data.items[0].snippet.title, duration: data.items[0].contentDetails.duration, channel_id: channel_id, timestamp: new Date().getTime(), status: 'added'}, (err, result) ->
+      playlistCollection.insertOne({videoId: videoId, title: data.items[0].snippet.title, duration: data.items[0].contentDetails.duration, channel_id: channel_id, timestamp: new Date().getTime(), status: 'added', userId: userId}, (err, result) ->
         if(err)
           raven.captureException(err,{level:'error'})
           dc.sendMessage(channel_id,":warning: A database error occurred adding this track...\nReport sent to sentry, please notify admin of the following error: \`Databse insertion error at line 75\`")
         else
-          dc.sendMessage(channel_id,":notes: Added "+data.items[0].snippet.title)
+          dc.sendMessage(channel_id,":notes: Added "+data.items[0].snippet.title+" <@"+userId+">")
           goThroughVideoList(channel_id)
           res.end(JSON.stringify({added: true}))
       )

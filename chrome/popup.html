@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Motorbot</title>
+  <script src="jquery.min.js"></script>
+  <script src="popup.js"></script>
+  <link rel="stylesheet" href="font-awesome-4.6.3/css/font-awesome.min.css">
+  <style type="text/css">
+    html,
+    body{
+      margin: 0;
+      padding: 0;
+    }
+
+    .frame{
+      width: 365px;
+      height: 250px;
+      text-align: center;
+      background: #2f3236;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .frame .title{
+      width: 100%;
+      height: 74px;
+      background: rgba(103, 126, 213, 1.00);
+      color: #fff;
+      font-family: Whitney, "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+      font-size: 26px;
+      font-weight: bold;
+      border-top-left-radius: 3px;
+      border-top-right-radius: 3px;
+    }
+
+    .frame .title .icon{
+      float: left;
+      height: 54px;
+      width: 54px;
+      overflow: hidden;
+      margin: 5px;
+      border-radius: 50%;
+      border: 4px solid rgba(255,255,255,0.2);
+    }
+
+    .frame .title .icon .iconImg{
+      background: url("motorbotIcon.png") no-repeat center;
+      background-size: 120%;
+      width: 54px;
+      height: 54px;
+    }
+
+    .frame .title .titleText{
+      float: left;
+      margin-left: 10px;
+      margin-top: 8px;
+      text-align: left;
+      width: auto;
+      line-height: 20px;
+    }
+
+    .frame .title .titleText span{
+      color: rgba(255,255,255,0.4);
+      font-size: 12px;
+      font-weight: 400;
+      text-align: left;
+    }
+
+    .frame .signInButton{
+      display: inline-block;
+      width: 160px;
+      margin-top: 50px;
+      height: auto;
+      line-height: 34px;
+      text-align: center;
+      color: #fff;
+      font-family: Whitney, "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+      font-size: 14px;
+      font-weight: 400;
+      background: #677ed5;
+      border-radius: 2px;
+      cursor: pointer;
+    }
+
+    .frame .signInButton:hover{
+      opacity: 0.8;
+    }
+
+    .frame .signInButton a{
+      text-decoration: none;
+      outline: none;
+      color: #fff;
+    }
+
+    .successFrame{
+      display: none;
+    }
+
+    .successFrame .title .titleText{
+      margin-top: 16px;
+    }
+
+    .successFrame .content{
+      margin-top: 30px;
+      margin-left: 0;
+      padding-left: 10px;
+      width: 100%;
+      float: left;
+      text-align: left;
+      padding-bottom: 26px;
+    }
+
+    .successFrame .content .check{
+      margin-left: 10px;
+      float: left;
+      position: relative;
+      top: 0;
+      line-height: 30px;
+      width: 30px;
+      height: 30px;
+      background: rgba(59, 172, 118, 1.00);
+      border-radius: 50%;
+      color: #fff;
+      text-align: center;
+      font-size: 15px;
+    }
+
+    .successFrame .content .check:before{
+      content: '';
+      position: absolute;
+      top: -4px;
+      left: -4px;
+      width: 34px;
+      height: 34px;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 50%;
+    }
+
+    .successFrame .content .contentText{
+      float: left;
+      margin-left: 15px;
+      width: 300px;
+      height: 30px;
+      color: #fff;
+      text-align: left;
+      font-family: Whitney, "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+      font-size: 14px;
+    }
+
+    .successFrame .content .contentText span{
+      color: rgba(80, 82, 85, 1.00);
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="title">
+      <div class="icon">
+        <div class="iconImg"></div>
+      </div>
+      <div class="titleText"><span>CONNECT TO DISCORD</span><br>Motorbot</div>
+    </div>
+    <div class="signInButton" id="signInButton">Login With Discord</div>
+  </div>
+  <div class="frame successFrame">
+    <div class="title">
+      <div class="icon">
+        <div class="iconImg"></div>
+      </div>
+      <div class="titleText">UserName<br><span>#discriminator</span></div>
+    </div>
+    <div class="content" style="border-bottom: 1px solid rgba(80, 82, 85, 0.5);">
+      <div class="check">
+        <i class="fa fa-check" aria-hidden="true"></i>
+      </div>
+      <div class="contentText">
+        Succesfully authenticated with discord<br>
+        <span>Gratz, you've been accepted</span>
+      </div>
+    </div>
+    <div class="content">
+      <div class="check">
+        <i class="fa fa-check" aria-hidden="true"></i>
+      </div>
+      <div class="contentText">
+        You're are allowed to add songs<br>
+        <span>All set, add songs at will!</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

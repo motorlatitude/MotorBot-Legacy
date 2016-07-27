@@ -7,10 +7,11 @@ html(lang="en")
     ul
       li.titleRow
         .item
-        .title Titel
+        .title Title
         .videoId Video ID
         .time Time
         .status Status
+        .user UserId
       -var i = 1
       for song in playlist
         li
@@ -19,4 +20,5 @@ html(lang="en")
           .videoId=song.videoId
           .time=song.formattedTimestamp
           .status=song.status
+          .user=song.userId
         -i++
