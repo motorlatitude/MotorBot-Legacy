@@ -233,6 +233,10 @@ dc.on("message", (msg,channel_id,user_id,raw_data) ->
     console.log(time+"API Command")
     msg = "\`\`\`Javascript\nDiscordClient.prototype.internals.sequence = "+dc.internals.sequence+"\n\`\`\`"
     dc.sendMessage(channel_id,msg)
+  else if msg == "!api vsid"
+    console.log(time+"API Command")
+    msg = "\`\`\`Javascript\nDiscordClient.prototype.internals.voice.sequence = "+dc.internals.voice.sequence+"\n\`\`\`"
+    dc.sendMessage(channel_id,msg)
   else if msg == "!api ssrc"
     console.log(time+"API Command")
     msg = "\`\`\`Javascript\nDiscordClient.prototype.internals.voice.ssrc = "+dc.internals.voice.ssrc+"\n\`\`\`"
@@ -359,24 +363,32 @@ dc.on("message", (msg,channel_id,user_id,raw_data) ->
       dc.sendMessage(channel_id,"Hmmmmm, I think you might want to join a Voice Channel first :wink:")
   else if msg.match(/^!sb\spog/)
     if dc.internals.voice.ready
-      pogStream = fs.createReadStream(__dirname+'/soundboard/play of the game.mp3')
-      dc.playStream(pogStream,{volume: 2.0})
-      pogStream.on('end', () ->
-        pogStream.close()
-        pogStream = null
-      )
+      #pogStream = fs.createReadStream(__dirname+'/soundboard/play of the game.mp3',{autoClose: true})
+      dc.playStream(__dirname+'/soundboard/play of the game.mp3',{volume: 3.0})
+    else
+      dc.sendMessage("169555395860234240","Hmmmmm, I think you might want to join a Voice Channel first :wink:")
+  else if msg.match(/^!sb\swonder/)
+    if dc.internals.voice.ready
+      pogStream = fs.createReadStream(__dirname+'/soundboard/wonder.mp3',{autoClose: true})
+      dc.playStream(pogStream,{volume: 3.0})
+    else
+      dc.sendMessage("169555395860234240","Hmmmmm, I think you might want to join a Voice Channel first :wink:")
+  else if msg.match(/^!sb\s1/)
+    if dc.internals.voice.ready
+      pogStream = fs.createReadStream(__dirname+'/soundboard/1.mp3',{autoClose: true})
+      dc.playStream(pogStream,{volume: 3.0})
     else
       dc.sendMessage("169555395860234240","Hmmmmm, I think you might want to join a Voice Channel first :wink:")
   else if msg.match(/^!sb\sgp/)
     if dc.internals.voice.ready
-      pogStream = fs.createReadStream(__dirname+'/soundboard/gp.mp3')
-      dc.playStream(pogStream,{volume: 2.0})
+      gpStream = fs.createReadStream(__dirname+'/soundboard/gp.mp3')
+      dc.playStream(gpStream,{volume: 2.0})
     else
       dc.sendMessage("169555395860234240","Hmmmmm, I think you might want to join a Voice Channel first :wink:")
   else if msg.match(/^!sb\sj3/)
     if dc.internals.voice.ready
-      pogStream = fs.createReadStream(__dirname+'/soundboard/justice 3.mp3')
-      dc.playStream(pogStream,{volume: 2.0})
+      jStream = fs.createReadStream(__dirname+'/soundboard/justice 3.mp3')
+      dc.playStream(jStream,{volume: 2.0})
     else
       dc.sendMessage("169555395860234240","Hmmmmm, I think you might want to join a Voice Channel first :wink:")
   else if msg.match(/^!sb\ssb/)
