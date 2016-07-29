@@ -88,7 +88,7 @@ All commands should be preceded with a `!` followed by the name of the command, 
   Allows the user to add a song to the playlist, this command **requires** a youtube video id parameter or youtube video URL to be provided on the call of the method. The song will be added to the playlist, if no song is present in the playlist it will immediately play the newly added song.
 
 
-  **Extra Note:** The google chrome extension will allow you to add a song even if the bot is not in a voice channel, to play the added song once the bot does join a voice channel, use the `play` method.
+  **Extra Note:** The google chrome extension will allow you to add a song even if the bot is not in a voice channel, to play the added song once the bot does join a voice channel, use the `play` method of the music command.
 ###### PREV
   Allows you to go back a song in the playlist, if a song is currently playing the method has to be called twice in quick succession . If no song is present the music will terminate.
 ###### SKIP
@@ -99,7 +99,7 @@ All commands should be preceded with a `!` followed by the name of the command, 
   Stops the current song and the bot will not continue to play any more songs until the `play` method is used.
 
 ### SB (Soundboard)
-  Command: `!sbc`<br>
+  Command: `!sb`<br>
   Has Methods: `null`<br>
   Has Parameters: `pog, j3, gp, sb`<br>
   Experimental soundboard command, the parameters define which effect to play.
