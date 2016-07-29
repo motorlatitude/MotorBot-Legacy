@@ -173,35 +173,39 @@ app.get('/token', (req, res) ->
 app.get("/api/playlist/:videoId", (request,res) ->
   console.log("Added Item to Playlist")
   videoId = request.params.videoId || ""
-  userId = request.query.userId || ""
-  channel_id = "169555395860234240" # api_channel otherwise we have to get the user to oAuth, bit of a pain so don't bother
-  req.get({
-    url: "https://www.googleapis.com/youtube/v3/videos?id="+videoId+"&key=AIzaSyAyoWcB_yzEqESeJm-W_eC5QDcOu5R1M90&part=snippet,contentDetails",
-    headers: {
-      "Content-Type": "application/json"
-    }
-  }, (err, httpResponse, body) ->
-    if err
-      raven.captureException(err,{level:'error',request: httpResponse})
-      return console.error('Error Occured Fetching Youtube Metadata')
-    data = JSON.parse(body)
-    if data.items[0]
-      console.log(videoId)
-      playlistCollection = app.locals.db.collection("playlist")
-      playlistCollection.insertOne({videoId: videoId, title: data.items[0].snippet.title, duration: data.items[0].contentDetails.duration, channel_id: channel_id, timestamp: new Date().getTime(), status: 'added', userId: userId}, (err, result) ->
-        if(err)
-          raven.captureException(err,{level:'error'})
-          dc.sendMessage(channel_id,":warning: A database error occurred adding this track... <@"+userId+">\nReport sent to sentry, please notify admin of the following error: \`Database insertion error at line 194: "+err.toString()+"\`")
-        else
-          dc.sendMessage(channel_id,":notes: Added "+data.items[0].snippet.title+" <@"+userId+">")
-          goThroughVideoList(channel_id)
-          res.end(JSON.stringify({added: true}))
-      )
-    else
-      raven.captureException(new Error("Youtube Error: Googleapis returned video not found for videoId"),{level:'error',extra:{videoId: videoId},request: httpResponse})
-      dc.sendMessage(channel_id,":warning: Youtube Error: Googleapis returned video not found for videoId ("+videoId+")")
-      res.end(JSON.stringify({added: false, error: "Youtube Error"}))
-  )
+  if request.query.userId
+    userId = request.query.userId
+    channel_id = "169555395860234240" # api_channel otherwise we have to get the user to oAuth, bit of a pain so don't bother
+    req.get({
+      url: "https://www.googleapis.com/youtube/v3/videos?id="+videoId+"&key=AIzaSyAyoWcB_yzEqESeJm-W_eC5QDcOu5R1M90&part=snippet,contentDetails",
+      headers: {
+        "Content-Type": "application/json"
+      }
+    }, (err, httpResponse, body) ->
+      if err
+        raven.captureException(err,{level:'error',request: httpResponse})
+        return console.error('Error Occured Fetching Youtube Metadata')
+      data = JSON.parse(body)
+      if data.items[0]
+        console.log(videoId)
+        playlistCollection = app.locals.db.collection("playlist")
+        playlistCollection.insertOne({videoId: videoId, title: data.items[0].snippet.title, duration: data.items[0].contentDetails.duration, channel_id: channel_id, timestamp: new Date().getTime(), status: 'added', userId: userId}, (err, result) ->
+          if(err)
+            raven.captureException(err,{level:'error'})
+            dc.sendMessage(channel_id,":warning: A database error occurred adding this track... <@"+userId+">\nReport sent to sentry, please notify admin of the following error: \`Database insertion error at line 194: "+err.toString()+"\`")
+          else
+            dc.sendMessage(channel_id,":notes: Added "+data.items[0].snippet.title+" <@"+userId+">")
+            goThroughVideoList(channel_id)
+            res.end(JSON.stringify({added: true}))
+        )
+      else
+        raven.captureException(new Error("Youtube Error: Googleapis returned video not found for videoId"),{level:'error',extra:{videoId: videoId},request: httpResponse})
+        dc.sendMessage(channel_id,":warning: Youtube Error: Googleapis returned video not found for videoId ("+videoId+")")
+        res.end(JSON.stringify({added: false, error: "Youtube Error"}))
+    )
+  else
+    raven.captureException(new Error("Chrome Extension: No UserId Provided"),{level:'warn',extra:{videoId: videoId}})
+    res.end(JSON.stringify({added: false, error: "Authentication Error"}))
 )
 
 server = app.listen(3210)
@@ -336,9 +340,21 @@ dc.on("message", (msg,channel_id,user_id,raw_data) ->
             raven.captureException(new Error("Youtube Error: Googleapis returned video not found for videoId"),{level:'error',extra:{videoId: videoId},request: httpResponse})
             dc.sendMessage(channel_id,":warning: Youtube Error: Googleapis returned video not found for videoId ("+videoId+")")
         )
+      else if videoId == "prev"
+        playlistCollection = app.locals.db.collection("playlist")
+        playlistCollection.find({status: "played"}).sort({timestamp: 1}).toArray((err, results) ->
+          lastResult = results[results.length-1]
+          playlistCollection.updateOne({_id: lastResult._id},{$set: {status: 'added'}},(err, result) ->
+            if err
+              console.log("Databse Updated Error Occured")
+            else
+              dc.stopStream()
+              setTimeout(goThroughVideoList,1000)
+          )
+        )
       else if videoId == "skip"
         dc.stopStream()
-        goThroughVideoList()
+        setTimeout(goThroughVideoList,1000)
       else if videoId == "play"
         goThroughVideoList()
       else if videoId == "list"
@@ -363,38 +379,50 @@ dc.on("message", (msg,channel_id,user_id,raw_data) ->
       dc.sendMessage(channel_id,"Hmmmmm, I think you might want to join a Voice Channel first :wink:")
   else if msg.match(/^!sb\spog/)
     if dc.internals.voice.ready
-      #pogStream = fs.createReadStream(__dirname+'/soundboard/play of the game.mp3',{autoClose: true})
-      dc.playStream(__dirname+'/soundboard/play of the game.mp3',{volume: 3.0})
+      dc.stopStream()
+      setTimeout(() ->
+        dc.playStream(__dirname+'/soundboard/play of the game.mp3',{volume: 3.0})
+      ,1000)
     else
       dc.sendMessage("169555395860234240","Hmmmmm, I think you might want to join a Voice Channel first :wink:")
   else if msg.match(/^!sb\swonder/)
     if dc.internals.voice.ready
-      pogStream = fs.createReadStream(__dirname+'/soundboard/wonder.mp3',{autoClose: true})
-      dc.playStream(pogStream,{volume: 3.0})
+      dc.stopStream()
+      setTimeout(() ->
+        dc.playStream(__dirname+'/soundboard/wonder.mp3',{volume: 3.0})
+      ,1000)
     else
       dc.sendMessage("169555395860234240","Hmmmmm, I think you might want to join a Voice Channel first :wink:")
   else if msg.match(/^!sb\s1/)
     if dc.internals.voice.ready
-      pogStream = fs.createReadStream(__dirname+'/soundboard/1.mp3',{autoClose: true})
-      dc.playStream(pogStream,{volume: 3.0})
+      dc.stopStream()
+      setTimeout(() ->
+        dc.playStream(__dirname+'/soundboard/1.mp3',{volume: 3.0})
+      ,1000)
     else
       dc.sendMessage("169555395860234240","Hmmmmm, I think you might want to join a Voice Channel first :wink:")
   else if msg.match(/^!sb\sgp/)
     if dc.internals.voice.ready
-      gpStream = fs.createReadStream(__dirname+'/soundboard/gp.mp3')
-      dc.playStream(gpStream,{volume: 2.0})
+      dc.stopStream()
+      setTimeout(() ->
+        dc.playStream(__dirname+'/soundboard/gp.mp3',{volume: 3.0})
+      ,1000)
     else
       dc.sendMessage("169555395860234240","Hmmmmm, I think you might want to join a Voice Channel first :wink:")
   else if msg.match(/^!sb\sj3/)
     if dc.internals.voice.ready
-      jStream = fs.createReadStream(__dirname+'/soundboard/justice 3.mp3')
-      dc.playStream(jStream,{volume: 2.0})
+      dc.stopStream()
+      setTimeout(() ->
+        dc.playStream(__dirname+'/soundboard/justice 3.mp3',{volume: 3.0})
+      ,1000)
     else
       dc.sendMessage("169555395860234240","Hmmmmm, I think you might want to join a Voice Channel first :wink:")
   else if msg.match(/^!sb\ssb/)
     if dc.internals.voice.ready
-      pogStream = fs.createReadStream(__dirname+'/soundboard/speed boost.mp3')
-      dc.playStream(pogStream,{volume: 2.0})
+      dc.stopStream()
+      setTimeout(() ->
+        dc.playStream(__dirname+'/soundboard/speed boost.mp3',{volume: 3.0})
+      ,1000)
     else
       dc.sendMessage("169555395860234240","Hmmmmm, I think you might want to join a Voice Channel first :wink:")
   else if msg.match(/^!talk\s/)
@@ -432,7 +460,11 @@ goThroughVideoList = () ->
             raven.captureException(e,{level:'error',tags:{system: 'youtube-stream'}})
             console.log("Error Occured Loading Youtube Video")
           )
-          dc.playStream(yStream,{volume: 0.5})
+          yStream.on("info", (info, format) ->
+            if info.loudness
+              console.log info.loudness
+          )
+          dc.playStream(yStream,{volume: 1})
           dur = convertTimestamp(results[0].duration)
           dc.sendMessage(channel_id,":play_pause: Now Playing: "+title+" ("+dur+")")
           console.log("Now Playing: "+title)
@@ -443,7 +475,7 @@ goThroughVideoList = () ->
 
 dc.on("songDone", () ->
   console.log("Song Done")
-  goThroughVideoList()
+  setTimeout(goThroughVideoList,1000)
 )
 
 dc.on("status", (user_id,status,game,raw_data) ->
