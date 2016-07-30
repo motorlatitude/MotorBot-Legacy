@@ -30,6 +30,7 @@ stream = null
 #Create Server
 express = require "express"
 MongoClient = require('mongodb').MongoClient
+ObjectID = require('mongodb').ObjectID
 
 app = express()
 compile = (str, path) ->
@@ -87,6 +88,76 @@ app.get("/", (req, res) ->
       res.render('playlist',{playlist:{}})
   )
 )
+
+app.get("/playSong/:trackId", (req, res) ->
+  console.log("PlaySong Page Loaded")
+  trackId = req.params.trackId
+  if !trackId
+    res.end(JSON.stringify({success: false, error: "No trackId supplied"}))
+  console.log trackId
+  trackId = new ObjectID(trackId)
+  playlistCollection = app.locals.db.collection("playlist")
+  playlistCollection.update({status: 'added'},{$set: {status: 'played'}}, {multi: true}, (err, result) ->
+    if err
+      debug("Error Occured Updating Document")
+    playlistCollection.find({}).sort({timestamp: 1}).toArray((err, results) ->
+      foundTrack = false
+      for r in results
+        if r._id.toString() == trackId.toString() || foundTrack
+          console.log "Found Track"
+          playlistCollection.update({timestamp: {$gte: r.timestamp}},{$set: {status: 'added'}}, {multi: true}, (err, result) ->
+            if err
+              debug("Error Occured Updating Document")
+            console.log("Cool, let's play that track")
+            dc.stopStream()
+            songDone()
+            res.end(JSON.stringify({success: true}))
+          )
+    )
+  )
+)
+
+app.get("/stopSong", (req, res) ->
+  dc.stopStream()
+  res.end(JSON.stringify({success: true}))
+)
+
+app.get("/prevSong", (req, res) ->
+  playlistCollection = app.locals.db.collection("playlist")
+  playlistCollection.find({status: {$ne: 'added'}}).sort({timestamp: 1}).toArray((err, results) ->
+    lastResult = results[results.length-1]
+    secondLastResult = results[results.length-2]
+    if lastResult.status == "playing"
+      playlistCollection.updateOne({_id: lastResult._id},{$set: {status: 'added'}},(err, result) ->
+        if err
+          console.log("Databse Updated Error Occured")
+        else
+          playlistCollection.updateOne({_id: secondLastResult._id},{$set: {status: 'added'}},(err, result) ->
+            if err
+              console.log("Databse Updated Error Occured")
+            else
+              dc.stopStream()
+              setTimeout(goThroughVideoList,1000)
+          )
+      )
+    else
+      playlistCollection.updateOne({_id: lastResult._id},{$set: {status: 'added'}},(err, result) ->
+        if err
+          console.log("Databse Updated Error Occured")
+        else
+          dc.stopStream()
+          setTimeout(goThroughVideoList,1000)
+      )
+  )
+  res.end(JSON.stringify({success: true}))
+)
+
+app.get("/skipSong", (req, res) ->
+  dc.stopStream()
+  songDone()
+  res.end(JSON.stringify({success: true}))
+)
+
 
 app.get("/redirect", (req, res) ->
   code = req.query.code

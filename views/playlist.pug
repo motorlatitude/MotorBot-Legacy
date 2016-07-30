@@ -4,10 +4,73 @@ html(lang="en")
     title Motorbot Playlist
     link(href='/css/playlist.css',rel='stylesheet')
     link(href='/font-awesome-4.6.3/css/font-awesome.min.css',rel='stylesheet')
+    script(src='/jquery-3.1.0.min.js')
+    script.
+      $(document).ready(function(){
+        $("#playlist li").each(function(index){
+          $(this).dblclick(function(){
+            $.ajax({
+              url: '/playSong/'+$(this).attr('id'),
+              dataType: 'json',
+              success: function(d){
+                console.log(d);
+                $(".item", this).html('<i class="fa fa-play" aria-hidden="true"></i>');
+                setTimeout(function(){window.location.reload()},2000);
+              },
+              error: function(err){
+                console.log(err);
+              }
+            });
+          });
+        });
+      });
+
+      function stopMusic(){
+        $.ajax({
+          url: '/stopSong',
+          dataType: 'json',
+          success: function(d){
+            setTimeout(function(){window.location.reload()},2000);
+          },
+          error: function(err){
+            console.log(err);
+          }
+        });
+      }
+
+      function prevMusic(){
+        $.ajax({
+          url: '/prevSong',
+          dataType: 'json',
+          success: function(d){
+            setTimeout(function(){window.location.reload()},2000);
+          },
+          error: function(err){
+            console.log(err);
+          }
+        });
+      }
+
+      function skipMusic(){
+        $.ajax({
+          url: '/skipSong',
+          dataType: 'json',
+          success: function(d){
+            setTimeout(function(){window.location.reload()},2000);
+          },
+          error: function(err){
+            console.log(err);
+          }
+        });
+      }
   body
     .header
-      .playing Now Playing - #{playing}
-    ul
+      if playing == ""
+        .playing Nothing Playing Currently
+      else
+        .playing #{playing}
+      .controls <i class="fa fa-step-backward" onclick='prevMusic();' style='cursor: pointer;' aria-hidden="true"></i> &nbsp; <i class="fa fa-stop" aria-hidden="true" onclick='stopMusic();' style='cursor: pointer;'></i> &nbsp; <i class="fa fa-step-forward" onclick='skipMusic();' style='cursor: pointer;' aria-hidden="true"></i>
+    ul#playlist
       li.titleRow
         .item
         .title Title
@@ -17,7 +80,8 @@ html(lang="en")
         .user UserId
       -var i = 1
       for song in playlist
-        li
+        -var songId = song._id.toString().replace(/\"/gmi,"");
+        li(id=songId)
           if song.status == "playing"
             .item <i class="fa fa-play" aria-hidden="true"></i>
           else
