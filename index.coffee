@@ -445,7 +445,7 @@ dc.on("message", (msg,channel_id,user_id,raw_data) ->
     if dc.internals.voice.ready
       dc.stopStream()
       setTimeout(() ->
-        dc.playStream(__dirname+'/soundboard/wsr.mp3',{volume: 3.0})
+        dc.playStream(__dirname+'/soundboard/wsr.mp3',{volume: 2.5})
       ,1000)
     else
       dc.sendMessage("169555395860234240","Hmmmmm, I think you might want to join a Voice Channel first :wink:")
@@ -493,13 +493,15 @@ goThroughVideoList = () ->
             console.log("Error Occured Loading Youtube Video")
           )
           yStream.on("info", (info, format) ->
+            volume = 0.5
             if info.loudness
-              console.log info.loudness
+              volume = (parseFloat(info.loudness)/-40.229000916)
+              console.log "Setting Volume Based on Video Loudness ("+info.loudness+"): "+volume
+            dc.playStream(yStream,{volume: volume})
+            dur = convertTimestamp(results[0].duration)
+            dc.sendMessage(channel_id,":play_pause: Now Playing: "+title+" ("+dur+")")
+            console.log("Now Playing: "+title)
           )
-          dc.playStream(yStream,{volume: 0.5})
-          dur = convertTimestamp(results[0].duration)
-          dc.sendMessage(channel_id,":play_pause: Now Playing: "+title+" ("+dur+")")
-          console.log("Now Playing: "+title)
     )
   else
     dc.sendMessage("169555395860234240","Hmmmmm, I think you might want to join a Voice Channel first :wink:")
