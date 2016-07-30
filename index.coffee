@@ -492,7 +492,7 @@ dc.on("message", (msg,channel_id,user_id,raw_data) ->
       dc.stopStream()
       songDone()
       setTimeout(() ->
-        dc.playStream(__dirname+'/soundboard/wsr.mp3',{volume: 2.5})
+        dc.playStream(__dirname+'/soundboard/wsr.mp3',{volume: 1.0})
       ,1000)
     else
       dc.sendMessage("169555395860234240","Hmmmmm, I think you might want to join a Voice Channel first :wink:")
