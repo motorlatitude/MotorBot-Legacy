@@ -11,15 +11,16 @@ apiai = apiai("ea1bdb33a83f48c795a585e44a4cdb4b")
 DiscordClient = require('./discordClient.js')
 youtubeStream = require('ytdl-core')
 raven = null
+debugLog = ""
 connectToSentry = () ->
   raven = new Raven("http://aff861c28dad6d5a7c4f3d60e5ec704e:4cb8957b04daa4d774871fafad470147@188.166.156.69:3001/api",{release: 'd9695b60430ccf9ca9a9f7752c40d640ba1be923', serverName: 'lolstat.net'}, (err, data) ->
     if err
-      dc.sendMessage("169555395860234240",":warning: Error Occured Connecting to Sentry `"+err+"`")
+      debugLog += "[!] Error Occured Connecting to Sentry `"+err+"`\n"
     else if data.success
-      dc.sendMessage("169555395860234240",":white_check_mark: Connected to :shield: Sentry Succesfully")
+      debugLog += "[i] Connected to Sentry Succesfully\n"
       raven.captureException("Motorbot Initilized",{level: 'info'})
     else
-      dc.sendMessage("169555395860234240",":warning: Error Occured Connecting to Sentry `returned success:false`")
+      debugLog += "[!] Error Occured Connecting to Sentry `returned success:false`\n"
   )
 
 
@@ -74,11 +75,14 @@ convertTimestamp = (input) ->
 
 app.get("/", (req, res) ->
   playlistCollection = app.locals.db.collection("playlist")
-  playlistCollection.find({status: "added"}).sort({timestamp: 1}).toArray((err, results) ->
+  playlistCollection.find({}).sort({timestamp: 1}).toArray((err, results) ->
     if results[0]
       for r in results
         r.formattedTimestamp = convertTimestamp(r.duration)
-      res.render('playlist',{playlist:results})
+      playlistCollection.find({status: "playing"}).sort({timestamp: 1}).toArray((err, presult) ->
+        title = if presult[0]then presult[0].title else ""
+        res.render('playlist',{playlist:results,playing:title})
+      )
     else
       res.render('playlist',{playlist:{}})
   )
@@ -210,13 +214,26 @@ app.get("/api/playlist/:videoId", (request,res) ->
 
 server = app.listen(3210)
 
-createDBConnection = () ->
+createDBConnection = (cb) ->
   MongoClient.connect('mongodb://localhost:27017/motorbot', (err, db) ->
     if err
       dc.sendMessage("169555395860234240",":name_badge: Fatal Error: I couldn't connect to the motorbot database :cry:")
       throw new Error("Failed to connect to database, exiting")
-    dc.sendMessage("169555395860234240",":white_check_mark: Connected to Motorbot Database Succesfully")
+    debugLog += "[i] Connected to Motorbot Database Succesfully\n"
     app.locals.db = db
+    cb()
+  )
+
+initPlaylist = () ->
+  playlistCollection = app.locals.db.collection("playlist")
+  playlistCollection.find({status: "playing"}).sort({timestamp: 1}).toArray((err, results) ->
+    for r in results
+      trackId = r._id
+      playlistCollection.updateOne({'_id': trackId},{'$set':{'status':'played'}},() ->
+        console.log("Track Status Changed")
+      )
+    debugLog += "[i] Initialised Playlist Succesfully\n"
+    dc.sendMessage("169555395860234240",":white_check_mark: Hi I'm now online :smiley:\n\n```\n"+debugLog+"\n```")
   )
 
 dc.on("ready", (msg) ->
@@ -224,8 +241,7 @@ dc.on("ready", (msg) ->
   time = "["+d.getDate()+"/"+(parseInt(d.getMonth())+1)+"/"+d.getFullYear()+" "+d.toLocaleTimeString()+"] "
   console.log(time+msg.user.username+"#"+msg.user.discriminator+" has connected to the gateway server and is at your command")
   connectToSentry()
-  createDBConnection()
-  dc.sendMessage("169555395860234240",":white_check_mark: Hi, I'm now online :smiley:")
+  createDBConnection(initPlaylist)
   dc.setStatus("with Discord API")
 )
 
@@ -307,6 +323,7 @@ dc.on("message", (msg,channel_id,user_id,raw_data) ->
       videoId = msg.split(" ")[1]
       if videoId == "stop"
         dc.stopStream()
+        songDone()
       else if videoId == "add"
         videoId = msg.split(" ")[2]
         if videoId.indexOf('https://') > -1
@@ -342,19 +359,34 @@ dc.on("message", (msg,channel_id,user_id,raw_data) ->
         )
       else if videoId == "prev"
         playlistCollection = app.locals.db.collection("playlist")
-        playlistCollection.find({status: "played"}).sort({timestamp: 1}).toArray((err, results) ->
+        playlistCollection.find({status: {$ne: 'added'}}).sort({timestamp: 1}).toArray((err, results) ->
           lastResult = results[results.length-1]
-          playlistCollection.updateOne({_id: lastResult._id},{$set: {status: 'added'}},(err, result) ->
-            if err
-              console.log("Databse Updated Error Occured")
-            else
-              dc.stopStream()
-              setTimeout(goThroughVideoList,1000)
-          )
+          secondLastResult = results[results.length-2]
+          if lastResult.status == "playing"
+            playlistCollection.updateOne({_id: lastResult._id},{$set: {status: 'added'}},(err, result) ->
+              if err
+                console.log("Databse Updated Error Occured")
+              else
+                playlistCollection.updateOne({_id: secondLastResult._id},{$set: {status: 'added'}},(err, result) ->
+                  if err
+                    console.log("Databse Updated Error Occured")
+                  else
+                    dc.stopStream()
+                    setTimeout(goThroughVideoList,1000)
+                )
+            )
+          else
+            playlistCollection.updateOne({_id: lastResult._id},{$set: {status: 'added'}},(err, result) ->
+              if err
+                console.log("Databse Updated Error Occured")
+              else
+                dc.stopStream()
+                setTimeout(goThroughVideoList,1000)
+            )
         )
       else if videoId == "skip"
         dc.stopStream()
-        setTimeout(goThroughVideoList,1000)
+        songDone()
       else if videoId == "play"
         goThroughVideoList()
       else if videoId == "list"
@@ -377,9 +409,18 @@ dc.on("message", (msg,channel_id,user_id,raw_data) ->
         dc.sendMessage(channel_id,"Unknown Voice Command :cry:")
     else
       dc.sendMessage(channel_id,"Hmmmmm, I think you might want to join a Voice Channel first :wink:")
+  else if msg.match(/^!volume\s/)
+    if dc.internals.voice.ready
+      if user_id == "95164972807487488"
+        dc.internals.voice.volume = parseFloat(msg.split(/\s/)[1])
+      else
+        dc.sendMessage("169555395860234240","Sorry, you're not authorised for this command :cry:")
+    else
+      dc.sendMessage("169555395860234240","Hmmmmm, I think you might want to join a Voice Channel first :wink:")
   else if msg.match(/^!sb\spog/)
     if dc.internals.voice.ready
       dc.stopStream()
+      songDone()
       setTimeout(() ->
         dc.playStream(__dirname+'/soundboard/play of the game.mp3',{volume: 3.0})
       ,1000)
@@ -388,6 +429,7 @@ dc.on("message", (msg,channel_id,user_id,raw_data) ->
   else if msg.match(/^!sb\swonder/)
     if dc.internals.voice.ready
       dc.stopStream()
+      songDone()
       setTimeout(() ->
         dc.playStream(__dirname+'/soundboard/wonder.mp3',{volume: 3.0})
       ,1000)
@@ -396,6 +438,7 @@ dc.on("message", (msg,channel_id,user_id,raw_data) ->
   else if msg.match(/^!sb\s1/)
     if dc.internals.voice.ready
       dc.stopStream()
+      songDone()
       setTimeout(() ->
         dc.playStream(__dirname+'/soundboard/1.mp3',{volume: 3.0})
       ,1000)
@@ -412,6 +455,7 @@ dc.on("message", (msg,channel_id,user_id,raw_data) ->
   else if msg.match(/^!sb\s3/)
     if dc.internals.voice.ready
       dc.stopStream()
+      songDone()
       setTimeout(() ->
         dc.playStream(__dirname+'/soundboard/3.mp3',{volume: 3.0})
       ,1000)
@@ -420,6 +464,7 @@ dc.on("message", (msg,channel_id,user_id,raw_data) ->
   else if msg.match(/^!sb\sgp/)
     if dc.internals.voice.ready
       dc.stopStream()
+      songDone()
       setTimeout(() ->
         dc.playStream(__dirname+'/soundboard/gp.mp3',{volume: 3.0})
       ,1000)
@@ -428,6 +473,7 @@ dc.on("message", (msg,channel_id,user_id,raw_data) ->
   else if msg.match(/^!sb\sj3/)
     if dc.internals.voice.ready
       dc.stopStream()
+      songDone()
       setTimeout(() ->
         dc.playStream(__dirname+'/soundboard/justice 3.mp3',{volume: 3.0})
       ,1000)
@@ -444,6 +490,7 @@ dc.on("message", (msg,channel_id,user_id,raw_data) ->
   else if msg.match(/^!sb\swsr/)
     if dc.internals.voice.ready
       dc.stopStream()
+      songDone()
       setTimeout(() ->
         dc.playStream(__dirname+'/soundboard/wsr.mp3',{volume: 2.5})
       ,1000)
@@ -452,6 +499,7 @@ dc.on("message", (msg,channel_id,user_id,raw_data) ->
   else if msg.match(/^!sb\saffirmative/)
     if dc.internals.voice.ready
       dc.stopStream()
+      songDone()
       setTimeout(() ->
         dc.playStream(__dirname+'/soundboard/affirmative.mp3',{volume: 3.0})
       ,1000)
@@ -483,7 +531,7 @@ goThroughVideoList = () ->
         title = results[0].title
         trackId = results[0]._id
         if videoId && !dc.internals.voice.allowPlay
-          playlistCollection.updateOne({'_id': trackId},{'$set':{'status':'played'}},() ->
+          playlistCollection.updateOne({'_id': trackId},{'$set':{'status':'playing'}},() ->
             console.log("Track Status Changed")
           )
           requestUrl = 'http://youtube.com/watch?v=' + videoId
@@ -506,11 +554,21 @@ goThroughVideoList = () ->
   else
     dc.sendMessage("169555395860234240","Hmmmmm, I think you might want to join a Voice Channel first :wink:")
 
-
-dc.on("songDone", () ->
+songDone = () ->
   console.log("Song Done")
-  setTimeout(goThroughVideoList,1000)
-)
+  playlistCollection = app.locals.db.collection("playlist")
+  playlistCollection.find({status: "playing"}).sort({timestamp: 1}).toArray((err, results) ->
+    if results[0]
+      trackId = results[0]._id
+      playlistCollection.updateOne({'_id': trackId},{'$set':{'status':'played'}},() ->
+        console.log("Track Status Changed")
+        setTimeout(goThroughVideoList,1000)
+      )
+    else
+      setTimeout(goThroughVideoList,1000)
+  )
+
+dc.on("songDone", songDone)
 
 dc.on("status", (user_id,status,game,raw_data) ->
   d = new Date()

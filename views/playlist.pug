@@ -3,7 +3,10 @@ html(lang="en")
   head
     title Motorbot Playlist
     link(href='/css/playlist.css',rel='stylesheet')
+    link(href='/font-awesome-4.6.3/css/font-awesome.min.css',rel='stylesheet')
   body
+    .header
+      .playing Now Playing - #{playing}
     ul
       li.titleRow
         .item
@@ -15,7 +18,10 @@ html(lang="en")
       -var i = 1
       for song in playlist
         li
-          .item=i
+          if song.status == "playing"
+            .item <i class="fa fa-play" aria-hidden="true"></i>
+          else
+            .item=i
           .title=song.title
           .videoId=song.videoId
           .time=song.formattedTimestamp

@@ -384,6 +384,7 @@ var DiscordClient = function (options){
         }
       }
     }
+    self.internals.voice.volume = volume;
     self.stopStream(function(){
       self.internals.voice.allowPlay = true;
       if(self.internals.voice.ready){
@@ -446,7 +447,7 @@ var DiscordClient = function (options){
     				}
             if(buff){
               let out = new Buffer(buff.length);
-              let multiplier =  Math.pow(volume, 1.660964);
+              let multiplier =  Math.pow(self.internals.voice.volume, 1.660964);
           		for (let i = 0; i < buff.length; i += 2) {
           			if (i >= buff.length - 1) {
           				break;
@@ -510,7 +511,20 @@ var DiscordClient = function (options){
             self.internals.voice.stream = null;
             self.internals.voice.enc = null;
             self.internals.voice.allowPlay = false;
+            self.stopStream();
           }
+  			});
+        process.stdout.on('error', function( err ) {
+          console.log("STDOUT ERROR: "+e);
+        });
+        self.internals.voice.enc.once('exit', function(code, signal) {
+          console.log("[!] Enc Exited");
+  			});
+        self.internals.voice.enc.on('error', function(error) {
+          console.log("[!] ENC ERROR: "+error);
+  			});
+        self.internals.voice.enc.once('disconnect', function() {
+          console.log("[!] Stdout Disconnected");
   			});
         self.internals.voice.enc.once('close', function(code, signal) {
           console.log("[!] Stdout Closed");
