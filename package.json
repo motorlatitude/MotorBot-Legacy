@@ -1,20 +1,25 @@
 {
   "name": "motorbot",
-  "version": "1.0.0",
+  "version": "0.3.0",
   "description": "Discord Bot",
   "main": "index.coffee",
   "private": true,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "dependencies":{
-    "request": "*",
-    "ws": "*",
-    "tweetnacl": "*",
-    "node-opus": "*",
-    "zlib": "*",
+  "dependencies": {
     "apiai": "*",
-    "node-ytdl-core": "*"
+    "node-opus": "*",
+    "node-ytdl-core": "*",
+    "pug": "^2.0.0-beta4",
+    "request": "*",
+    "simple-oauth2": "^0.7.0",
+    "spotify-web": "^1.3.0",
+    "stylus": "^0.54.5",
+    "tweetnacl": "*",
+    "unpipe": "^1.0.0",
+    "ws": "*",
+    "zlib": "*"
   },
   "author": "Lennart Hase",
   "license": "ISC"
