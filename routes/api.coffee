@@ -20,13 +20,15 @@ router.get("/playSong/:trackId", (req, res) ->
       for r in results
         if r._id.toString() == trackId.toString() || foundTrack
           console.log "Found Track"
+          track = r.title
           playlistCollection.update({timestamp: {$gte: r.timestamp}},{$set: {status: 'added'}}, {multi: true}, (err, result) ->
             if err
               debug("Error Occured Updating Document")
             console.log("Cool, let's play that track")
             globals.dc.stopStream()
-            globals.songDone()
-            res.end(JSON.stringify({success: true}))
+            globals.songDone(true)
+            globals.wss.broadcast(JSON.stringify({type: 'trackUpdate', track: track}))
+            return res.end(JSON.stringify({success: true}))
           )
     )
   )
@@ -34,11 +36,12 @@ router.get("/playSong/:trackId", (req, res) ->
 
 router.get("/stopSong", (req, res) ->
   globals.dc.stopStream()
+  globals.songDone(false)
   res.end(JSON.stringify({success: true}))
 )
 
 router.get("/playSong", (req, res) ->
-  globals.songDone()
+  globals.songDone(true)
   res.end(JSON.stringify({success: true}))
 )
 
@@ -74,7 +77,7 @@ router.get("/prevSong", (req, res) ->
 
 router.get("/skipSong", (req, res) ->
   globals.dc.stopStream()
-  globals.songDone()
+  globals.songDone(true)
   res.end(JSON.stringify({success: true}))
 )
 
@@ -103,7 +106,7 @@ router.get("/playlist/:videoId", (request,res) ->
             globals.dc.sendMessage(channel_id,":warning: A database error occurred adding this track... <@"+userId+">\nReport sent to sentry, please notify admin of the following error: \`Database insertion error at line 194: "+err.toString()+"\`")
           else
             globals.dc.sendMessage(channel_id,":notes: Added "+data.items[0].snippet.title+" <@"+userId+">")
-            globals.songDone()
+            globals.songDone(true)
             res.end(JSON.stringify({added: true}))
         )
       else

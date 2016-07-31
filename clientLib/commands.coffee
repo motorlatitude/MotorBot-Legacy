@@ -1,4 +1,7 @@
 globals = require '../models/globals.coffee'
+VoiceCommands = require './voiceCommands.coffee'
+apiai = require('apiai')
+apiai = apiai("ea1bdb33a83f48c795a585e44a4cdb4b") #AI for !talk method
 
 class exports.Commands
 
@@ -57,110 +60,13 @@ class exports.Commands
     else if msg.match(/\!voice\s/)
       command = msg.replace(/\!voice\s/,"")
       guild_id = "130734377066954752" #hard coded atm, need to get discord bot to return valid value for guild ID
-      if command.match(/join/)
-        chnl = command.replace(/join\s/,"")
-        chnl_id = null
-        console.log(chnl)
-        for channel in globals.dc.servers[guild_id].channels
-          if chnl == channel.name && channel.type == "voice"
-            chnl_id = channel.id
-        if chnl_id == null
-          chnl = "General"
-          for channel in globals.dc.servers[guild_id].channels
-            if chnl == channel.name && channel.type == "voice"
-              chnl_id = channel.id
-        globals.dc.joinVoice(chnl_id,guild_id)
-      else if command.match(/leave/)
-        globals.dc.leaveVoice(guild_id)
+      vc = new VoiceCommands()
+      vc.parseVoiceCommand(command,guild_id)
     else if msg.match(/^!music\s/)
       if globals.dc.internals.voice.ready
-        videoId = msg.split(" ")[1]
-        if videoId == "stop"
-          globals.dc.stopStream()
-          globals.songDone()
-        else if videoId == "add"
-          videoId = msg.split(" ")[2]
-          if videoId.indexOf('https://') > -1
-            videoId = getParameterByName("v",videoId)
-          req.get({
-            url: "https://www.googleapis.com/youtube/v3/videos?id="+videoId+"&key=AIzaSyAyoWcB_yzEqESeJm-W_eC5QDcOu5R1M90&part=snippet,contentDetails",
-            headers: {
-              "Content-Type": "application/json"
-            }
-          }, (err, httpResponse, body) ->
-            if err
-              globals.raven.captureException(err,{level:'error',request: httpResponse})
-              return console.error('Error Occured Fetching Youtube Metadata')
-            data = JSON.parse(body)
-            if data.items
-              if data.items[0]
-                console.log(videoId)
-                playlistCollection = globals.db.collection("playlist")
-                playlistCollection.insertOne({videoId: videoId, title: data.items[0].snippet.title, duration: data.items[0].contentDetails.duration, channel_id: channel_id, timestamp: new Date().getTime(), status: 'added'}, (err, result) ->
-                  if err
-                    globals.raven.captureException(err,{level:'error'})
-                    globals.dc.sendMessage(channel_id,":warning: A database error occurred adding this track...\nReport sent to sentry, please notify admin of the following error: \`Database insertion error at line 323: "+err.toString()+"\`")
-                  else
-                    globals.dc.sendMessage(channel_id,":notes: Added "+data.items[0].snippet.title)
-                    goThroughVideoList(channel_id)
-                )
-              else
-                globals.raven.captureException(new Error("Youtube Error: Googleapis returned video not found for videoId"),{level:'error',extra:{videoId: videoId},request: httpResponse})
-                globals.dc.sendMessage(channel_id,":warning: Youtube Error: Googleapis returned video not found for videoId ("+videoId+")")
-            else
-              globals.raven.captureException(new Error("Youtube Error: Googleapis returned video not found for videoId"),{level:'error',extra:{videoId: videoId},request: httpResponse})
-              globals.dc.sendMessage(channel_id,":warning: Youtube Error: Googleapis returned video not found for videoId ("+videoId+")")
-          )
-        else if videoId == "prev"
-          playlistCollection = globals.db.collection("playlist")
-          playlistCollection.find({status: {$ne: 'added'}}).sort({timestamp: 1}).toArray((err, results) ->
-            lastResult = results[results.length-1]
-            secondLastResult = results[results.length-2]
-            if lastResult.status == "playing"
-              playlistCollection.updateOne({_id: lastResult._id},{$set: {status: 'added'}},(err, result) ->
-                if err
-                  console.log("Databse Updated Error Occured")
-                else
-                  playlistCollection.updateOne({_id: secondLastResult._id},{$set: {status: 'added'}},(err, result) ->
-                    if err
-                      console.log("Databse Updated Error Occured")
-                    else
-                      globals.dc.stopStream()
-                      setTimeout(goThroughVideoList,1000)
-                  )
-              )
-            else
-              playlistCollection.updateOne({_id: lastResult._id},{$set: {status: 'added'}},(err, result) ->
-                if err
-                  console.log("Databse Updated Error Occured")
-                else
-                  globals.dc.stopStream()
-                  setTimeout(goThroughVideoList,1000)
-              )
-          )
-        else if videoId == "skip"
-          globals.dc.stopStream()
-          globals.songDone()
-        else if videoId == "play"
-          goThroughVideoList()
-        else if videoId == "list"
-          playlistCollection = globals.db.collection("playlist")
-          playlistCollection.find({status: "added"}).sort({timestamp: 1}).toArray((err, results) ->
-            if err
-              globals.raven.captureException(err,{level:'error'})
-              globals.dc.sendMessage(channel_id,":warning: A database error occurred whilst listing all tracks...\nReport sent to sentry, please notify admin of the following error: \`playlistCollection Error at line 239\`")
-            else
-              if(results.length > 0)
-                songNames = []
-                for r in results
-                  songTitle = r.title
-                  songNames.push(songTitle)
-                globals.dc.sendMessage(channel_id,":headphones: Playlist can be viewed here: https://mb.lolstat.net/")
-              else
-                globals.dc.sendMessage(channel_id,"No songs are currently in the playlist :grinning:")
-          )
-        else
-          globals.dc.sendMessage(channel_id,"Unknown Voice Command :cry:")
+        vc = new VoiceCommands()
+        command = msg.split(" ")[1]
+        vc.parseMusicCommand(msg, command, user_id)
       else
         globals.dc.sendMessage(channel_id,"Hmmmmm, I think you might want to join a Voice Channel first :wink:")
     else if msg.match(/^!volume\s/)
@@ -174,7 +80,7 @@ class exports.Commands
     else if msg.match(/^!sb\spog/)
       if globals.dc.internals.voice.ready
         globals.dc.stopStream()
-        globals.songDone()
+        globals.songDone(false)
         setTimeout(() ->
           globals.dc.playStream(__dirname+'/soundboard/play of the game.mp3',{volume: 3.0})
         ,1000)
@@ -183,7 +89,7 @@ class exports.Commands
     else if msg.match(/^!sb\swonder/)
       if globals.dc.internals.voice.ready
         globals.dc.stopStream()
-        globals.songDone()
+        globals.songDone(false)
         setTimeout(() ->
           globals.dc.playStream(__dirname+'/soundboard/wonder.mp3',{volume: 3.0})
         ,1000)
@@ -192,7 +98,7 @@ class exports.Commands
     else if msg.match(/^!sb\s1/)
       if globals.dc.internals.voice.ready
         globals.dc.stopStream()
-        globals.songDone()
+        globals.songDone(false)
         setTimeout(() ->
           globals.dc.playStream(__dirname+'/soundboard/1.mp3',{volume: 3.0})
         ,1000)
@@ -201,6 +107,7 @@ class exports.Commands
     else if msg.match(/^!sb\s2/)
       if globals.dc.internals.voice.ready
         globals.dc.stopStream()
+        globals.songDone(false)
         setTimeout(() ->
           globals.dc.playStream(__dirname+'/soundboard/2.mp3',{volume: 3.0})
         ,1000)
@@ -218,7 +125,7 @@ class exports.Commands
     else if msg.match(/^!sb\sgp/)
       if globals.dc.internals.voice.ready
         globals.dc.stopStream()
-        globals.songDone()
+        globals.songDone(false)
         setTimeout(() ->
           globals.dc.playStream(__dirname+'/soundboard/gp.mp3',{volume: 3.0})
         ,1000)
@@ -236,6 +143,7 @@ class exports.Commands
     else if msg.match(/^!sb\ssb/)
       if globals.dc.internals.voice.ready
         globals.dc.stopStream()
+        globals.songDone(false)
         setTimeout(() ->
           globals.dc.playStream(__dirname+'/soundboard/speed boost.mp3',{volume: 3.0})
         ,1000)
@@ -253,7 +161,7 @@ class exports.Commands
     else if msg.match(/^!sb\saffirmative/)
       if globals.dc.internals.voice.ready
         globals.dc.stopStream()
-        globals.songDone()
+        globals.songDone(false)
         setTimeout(() ->
           globals.dc.playStream(__dirname+'/soundboard/affirmative.mp3',{volume: 3.0})
         ,1000)

@@ -83,7 +83,7 @@ var DiscordClient = function (options){
       debug("Attempting to Reconnect");
       self.reconnect = true;
       startConnecting(self.internals.gateway);
-    },5000);
+    },10000);
   }
 
   function handleWSConnection(){
@@ -127,9 +127,14 @@ var DiscordClient = function (options){
     debug("Gateway Server Sent Frame");
     var msg = flags.binary ? JSON.parse(zlib.inflateSync(data).toString()) : JSON.parse(data);
     self.internals.sequence = msg.s;
+    //console.log(util.inspect(msg, false, null));
     switch(msg.t){
+      case "HELLO":
+        console.log("Hello Event Sent");
+        break;
       case "READY":
         //start sending heartbeat
+        //console.log(util.inspect(msg.d, false, null));
         self.internals.session_id = msg.d.session_id;
         self.internals.user_id = msg.d.user.id;
         hb = setInterval(function(){
@@ -138,7 +143,7 @@ var DiscordClient = function (options){
             "d": self.internals.sequence
           }
           if(ws.readyState === ws.OPEN){
-            //debug("Sending Heartbeat with Sequence Identifier: "+self.internals.sequence);
+            debug("Sending Heartbeat with Sequence Identifier: "+self.internals.sequence);
             ws.send(JSON.stringify(hbPackage));
           }
         },msg.d.heartbeat_interval);

@@ -3,19 +3,20 @@ globals = require __dirname+'/models/globals.coffee'
 {Commands} = require __dirname+'/clientLib/commands.coffee'
 commands = new Commands()
 MongoClient = require('mongodb').MongoClient
-req = require('request')
 fs = require('fs')
+req = require('request')
+https = require('https')
 stylus = require('stylus')
 nib = require 'nib'
 serveStatic = require 'serve-static'
-apiai = require('apiai')
-url_module = require('url')
-apiai = apiai("ea1bdb33a83f48c795a585e44a4cdb4b")
 youtubeStream = require('ytdl-core')
 DiscordClient = require('./discordClient.js') #my lib :D
 express = require "express"
+websocketServer = require("ws").Server
+globals.wss = new websocketServer({port: 3006})
 raven = null
 debugLog = ""
+
 connectToSentry = () ->
   globals.raven = new Raven("http://aff861c28dad6d5a7c4f3d60e5ec704e:4cb8957b04daa4d774871fafad470147@188.166.156.69:3001/api",{release: 'd9695b60430ccf9ca9a9f7752c40d640ba1be923', serverName: 'lolstat.net'}, (err, data) ->
     if err
@@ -31,8 +32,7 @@ globals.dc = new DiscordClient({token: "MTY5NTU0ODgyNjc0NTU2OTMw.CfAmNQ.WebsSsEe
 
 stream = null
 
-#Create Server
-
+#Express Setup
 app = express()
 compile = (str, path) ->
   stylus(str).set('filename',path).use(nib())
@@ -53,6 +53,7 @@ app.use((req, res, next) ->
   next()
 )
 
+#Express Routers
 app.use("/", require('./routes/playlist.coffee'))
 app.use("/api", require('./routes/api.coffee'))
 
@@ -65,6 +66,37 @@ app.get("/redirect", (req, res) ->
 )
 #create web server for web interface and google chrome extension
 server = app.listen(3210)
+
+###
+# WebSocket Connection For Web interface
+###
+
+###
+Websocket Server
+###
+
+###privateKey  = fs.readFileSync('/var/www/key.pem', 'utf8')
+certificate = fs.readFileSync('/var/www/cert.pem', 'utf8')
+
+credentials = {key: privateKey, cert: certificate}
+httpsServer = https.createServer(credentials, app)
+httpsServer.listen(3211)
+
+WebSocketServer = require('ws').Server
+globals.wss = new WebSocketServer({
+  server: httpsServer
+})
+###
+globals.wss.on('connection', (ws) ->
+  ws.on('message', (message) ->
+    #recieved message
+  )
+)
+
+globals.wss.broadcast = (data) ->
+  globals.wss.clients.forEach((client) ->
+    client.send(data)
+  )
 
 #create DB Connection
 createDBConnection = (cb) ->
@@ -128,13 +160,14 @@ goThroughVideoList = () ->
             console.log("Error Occured Loading Youtube Video")
           )
           yStream.on("info", (info, format) ->
-            volume = 0.5
+            volume = 0.5 #set default, as some videos (recently uploaded maybe?) don't have loudness value
             #stabilise volume to avoid really loud or really quiet playback
             if info.loudness
               volume = (parseFloat(info.loudness)/-40.229000916)
               console.log "Setting Volume Based on Video Loudness ("+info.loudness+"): "+volume
             globals.dc.playStream(yStream,{volume: volume})
             dur = globals.convertTimestamp(results[0].duration)
+            globals.wss.broadcast(JSON.stringify({type: 'trackUpdate', track: title}))
             globals.dc.sendMessage(channel_id,":play_pause: Now Playing: "+title+" ("+dur+")")
             console.log("Now Playing: "+title)
           )
@@ -143,7 +176,7 @@ goThroughVideoList = () ->
     globals.dc.sendMessage("169555395860234240","Hmmmmm, I think you might want to join a Voice Channel first :wink:")
 
 #once song is done, re-organise playlist and play next if available
-globals.songDone = () ->
+globals.songDone = (goToNext = false) ->
   if globals.dc.internals.voice.ready
     console.log("Song Done")
     playlistCollection = globals.db.collection("playlist")
@@ -152,13 +185,17 @@ globals.songDone = () ->
         trackId = results[0]._id
         playlistCollection.updateOne({'_id': trackId},{'$set':{'status':'played'}},() ->
           console.log("Track Status Changed")
-          setTimeout(goThroughVideoList,1000)
+          if goToNext
+            setTimeout(goThroughVideoList,1000)
         )
       else
-        setTimeout(goThroughVideoList,1000)
+        if goToNext
+          setTimeout(goThroughVideoList,1000)
     )
 
-globals.dc.on("songDone", globals.songDone)
+globals.dc.on("songDone", () ->
+  globals.songDone(true)
+)
 
 globals.dc.on("status", (user_id,status,game,raw_data) ->
   d = new Date()
