@@ -560,18 +560,20 @@ var DiscordClient = function (options){
   }
 
   self.stopStream = function(cb){
-    self.setSpeaking(false);
-    self.internals.voice.allowPlay = false;
-    if(self.internals.voice.enc){
-      self.internals.voice.enc.stdin.setEncoding('utf8');
-      try{
-        self.internals.voice.enc.stdin.write('q');
+    if(self.internals.voice.ready){
+      self.setSpeaking(false);
+      self.internals.voice.allowPlay = false;
+      if(self.internals.voice.enc){
+        self.internals.voice.enc.stdin.setEncoding('utf8');
+        try{
+          self.internals.voice.enc.stdin.write('q');
+        }
+        catch(err){
+          debug("Error: Write After End Occured\n"+err);
+        }
       }
-      catch(err){
-        debug("Error: Write After End Occured\n"+err);
-      }
+      if(cb) cb();
     }
-    if(cb) cb();
   }
 
 
