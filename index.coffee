@@ -8,10 +8,10 @@ nib = require 'nib'
 serveStatic = require 'serve-static'
 apiai = require('apiai')
 url_module = require('url')
-https = require('https')
 apiai = apiai("ea1bdb33a83f48c795a585e44a4cdb4b")
 youtubeStream = require('ytdl-core')
 DiscordClient = require('./discordClient.js') #my lib :D
+express = require "express"
 raven = null
 debugLog = ""
 connectToSentry = () ->
@@ -30,7 +30,6 @@ globals.dc = new DiscordClient({token: "MTY5NTU0ODgyNjc0NTU2OTMw.CfAmNQ.WebsSsEe
 stream = null
 
 #Create Server
-express = require "express"
 
 app = express()
 compile = (str, path) ->
