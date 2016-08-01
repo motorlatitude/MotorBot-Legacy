@@ -73,7 +73,7 @@ All commands should be preceded with a `!` followed by the name of the command, 
 
 ### VOICE
   Command: `!voice`<br>
-  Has Methods: `join <channel_name>, leave`<br>
+  Has Methods: `join [channel_name], leave`<br>
   The voice command can be used to establish a voice connection to discord.
 ###### JOIN
   The join method lets the user join a voice channel, if no channel is specified the bot will default to the General Channel
