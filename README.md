@@ -6,7 +6,23 @@
 [![Chrome Web Store](https://img.shields.io/chrome-web-store/v/pgkdpldhnmmhpdfmmkgpnpofaaagomab.svg)]()
 
 
-MotorBot is bot built from nodeJS, using discords public API (https://discordapp.com/developers/docs/)
+MotorBot is a bot for discord, built from nodeJS, using discords public API (https://discordapp.com/developers/docs/) to allow users access to a few extra commands (can be anything really, examples include league stats, dice roles, AI talks, etc.), and the voice system to allow things like music playback, souyndboard effects, etc.
+
+# DiscordClient Wrapper
+Motorbot uses a custom written wrapper for the discord API and a basic setup would look like this:
+
+```Javascript
+var dc = new DiscordClient({token: "{BOT_TOKEN}", debug: true, autorun: true});
+
+dc.on("ready", function(msg){
+  console.log("motorbot has connected");
+});
+
+dc.on("message",function((msg,channel_id,user_id,raw_data){
+  console.log(user_id+" sent a message");
+});
+```
+The DiscordClient wrapper has multiple events and methods which are described in the DiscordClientDocs.md file. *Still todo*
 
 # Commands
 All commands should be preceded with a `!` followed by the name of the command, which should be further followed by a method or a parameter of the given command.
@@ -26,31 +42,7 @@ All commands should be preceded with a `!` followed by the name of the command, 
 ### OS
   Command: `!os`<br>
   Has Methods: `[uptime]`<br>
-  This command lets you determine the OS on which the bot is currently running, it provides some general information. Sample Output:
-```Javascript
-{
-  platform: "linux",
-  release: "4.4.0-28-generic",
-  type: "Linux",
-  loadAvg: 0.03271484375,0.0283203125,0.0048828125,
-  hostname: "lolstat.net",
-  memory: "269MB / 1041MB",
-  arch: x64,
-  cpus: [
-  {
-    "model": "Intel(R) Xeon(R) CPU E5-2650L v3 @ 1.80GHz",
-    "speed": 1799,
-    "times": {
-        "user": 5652800,
-        "nice": 0,
-        "sys": 3032000,
-        "idle": 898510200,
-        "irq": 0
-    }
-  }
-]
-}
-```
+  This command lets you determine the OS on which the bot is currently running, it provides some general information. 
 ###### UPTIME
   The Uptime method returns the time since last boot of the server on which the bot is running.
 
