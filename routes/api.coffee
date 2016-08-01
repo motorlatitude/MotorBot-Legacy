@@ -122,4 +122,11 @@ router.get("/playlist/:videoId", (request,res) ->
     res.end(JSON.stringify({added: false, error: "Authentication Error"}))
 )
 
+router.get("/playlist", (request, res) ->
+  playlistCollection = globals.db.collection("playlist")
+  playlistCollection.find({}).sort({timestamp: 1}).toArray((err, results) ->
+    res.end(JSON.stringify(results))
+  )
+)
+
 module.exports = router

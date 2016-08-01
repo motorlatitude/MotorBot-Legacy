@@ -28,6 +28,22 @@ Plays the next available song. If a song is already playing it will skip the cur
 {}
 ```
 
+#### GET - /prevSong
+##### Info
+Plays the previous available song. If a song is already playing it will stop playback and go to the previously available song and start playback.
+##### Response
+```JSON
+{}
+```
+
+#### GET - /skipSong
+##### Info
+Plays the one after next available song. If a song is already playing it will stop playback and go to the next available song and start playback.
+##### Response
+```JSON
+{}
+```
+
 #### GET - /playSong/{trackId}
 ##### Info
 Plays the song with a specified `trackId`.
@@ -46,9 +62,31 @@ On failure:
 }
 ```
 
+#### GET - /playlist
+##### Info
+Retrieves a list of all available songs in the playlist, ordered after the timestamp in ascending order.
+##### Response
+```
+[
+  Song Objects
+]
+```
+Song Object Format
+```JSON
+{
+  "_id": "5786a610433f804462c6dc65",
+  "videoId": "trgR8_ARPcw",
+  "title": "AFI - The Embrace",
+  "duration": "PT3M26S",
+  "channel_id": "169555395860234240",
+  "timestamp": 1468442128269,
+  "status": "played"
+}
+```
+
 #### GET - /playlist/{videoId}
 ##### Info
-Adds a youtube video of a certain youtube video id `videoId` to the music playlist, if motorbot is currently not playing anything, it will start playing from the original end of the playlist. i.e. If you stopped playing songs half way through the playlist, motorbot will continue form there.
+Adds a youtube video of a certain youtube video id `videoId` to the music playlist, if MotorBot is currently not playing anything, it will start playing from the original end of the playlist. i.e. If you stopped playing songs half way through the playlist, motorbot will continue form there.
 ##### Response
 On success:
 ```Javascript
@@ -63,4 +101,3 @@ On failure:
   error: "Some Error Message"
 }
 ```
-
