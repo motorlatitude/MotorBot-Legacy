@@ -14,10 +14,12 @@ All commands should be preceded with a `!` followed by the name of the command, 
 
 ### API
   Command: `!api`<br>
-  Has Methods: `sid, status`<br>
+  Has Methods: `sid, vsid, status`<br>
   The API methods are for the developer to analyse the current status of the API Connection that the bot has established.
 ###### SID
   The sid method allows you to determine the last sequence identifier sent to the discord gateway server.
+###### VSID
+  The sid method allows you to determine the last sequence identifier sent to the discord voice server.
 ###### STATUS
   The status method returns the status of the current bot-to-server connection.
 
