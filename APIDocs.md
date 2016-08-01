@@ -83,6 +83,7 @@ Song Object Format
   "status": "played"
 }
 ```
+Where status can have the values `played`, `playing` or `added`. The duration is in the ISO 8601 format of PT{hours}H{minutes}M{seconds}S
 
 #### GET - /playlist/{videoId}
 ##### Info
