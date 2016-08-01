@@ -20,6 +20,9 @@ dc.on("ready", function(msg){
 
 dc.on("message",function((msg,channel_id,user_id,raw_data){
   console.log(user_id+" sent a message");
+  if(msg == "ping"){
+    dc.sendMessage(channel_id,"pong");
+  }
 });
 ```
 The DiscordClient wrapper has multiple events and methods which are described in the DiscordClientDocs.md file. *Still todo*
