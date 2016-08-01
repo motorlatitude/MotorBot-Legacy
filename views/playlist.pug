@@ -44,6 +44,7 @@ html(lang="en")
 
         socket.onclose = function (event){
           console.error("Websocket Closed...")
+          $("#socketClose").css("display","block");
         }
 
         window.addEventListener('beforeunload', function(event) {
@@ -71,6 +72,11 @@ html(lang="en")
                 console.log(err);
               }
             });
+          });
+        });
+        $(".errorList ul li").each(function(index){
+          $(this).click(function(){
+            $(this).remove();
           });
         });
       });
@@ -134,6 +140,16 @@ html(lang="en")
       else
         .playing #{playing}
         .controls <i class="fa fa-step-backward" onclick='prevMusic();' style='cursor: pointer;' aria-hidden="true"></i> &nbsp; <span id="playStop"><i class="fa fa-stop" aria-hidden="true" onclick='stopMusic();' style='cursor: pointer;'></i></span> &nbsp; <i class="fa fa-step-forward" onclick='skipMusic();' style='cursor: pointer;' aria-hidden="true"></i>
+    .errorList
+      ul
+        li.fatal#socketClose
+          .icon
+            .iconWrapper <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+          .content You've been disconnected from our server, please refresh the page!
+        li.info
+          .icon
+            .iconWrapper <i class="fa fa-info-circle" aria-hidden="true"></i>
+          .content What's up, I'm your notification!
     ul#playlist
       li.titleRow
         .item
@@ -141,6 +157,7 @@ html(lang="en")
         .videoId VIDEO
         .time TIME
         //.status Status
+        .added ADDED
         .user USER
       -var i = 1
       for song in playlist
@@ -149,16 +166,16 @@ html(lang="en")
           li(id=songId,class='trackPlaying')
             .item(data-trackNo=i) <i class="fa fa-volume-up play" aria-hidden="true"></i>
             .title=song.title
-            .videoId <a href="https://www.youtube.com/watch?v=#{song.videoId}" target="_blank">#{song.videoId}</a>
-            .time=song.formattedTimestamp
-            //.status=song.status
+            .videoId <a href="https://www.youtube.com/watch?v=#{song.videoId}" target="_blank"><i class="fa fa-external-link" aria-hidden="true"></i> #{song.videoId}</a>
+            .time #{song.formattedTimestamp}
+            .added #{song.formattedDiff} ago
             .user=song.userId
         else
           li(id=songId)
             .item(data-trackNo=i)=i
             .title=song.title
-            .videoId <a href="https://www.youtube.com/watch?v=#{song.videoId}" target="_blank">#{song.videoId}</a>
+            .videoId <a href="https://www.youtube.com/watch?v=#{song.videoId}" target="_blank"><i class="fa fa-external-link" aria-hidden="true"></i> #{song.videoId}</a>
             .time=song.formattedTimestamp
-            //.status=song.status
+            .added #{song.formattedDiff} ago
             .user=song.userId
         -i++

@@ -31,7 +31,7 @@ html
     top 20px
     left 50px
 
-ul
+#playlist
   list-style none
   margin 0
   padding 0
@@ -70,7 +70,7 @@ ul
         font-size 14px
     & .title
       display inline-block
-      width 60%
+      width 50%
     & .videoId
       display inline-block
       width 10%
@@ -83,8 +83,69 @@ ul
     & .status
       display inline-block
       width 15%
+    & .added
+      display inline-block
+      width 10%
     & .user
       display inline-block
       width 20%
     &.trackPlaying
       color rgba(103, 126, 213, 1.00) !important
+
+
+.errorList
+  position fixed
+  top 10px
+  right 10px
+  width 380px
+  height auto
+  color rgba(0,0,0,0.4)
+  z-index 10
+  & ul
+    list-style none
+    margin 0
+    padding 0
+    width 100%
+    height auto
+    & li
+      float left
+      width calc(100% - 8px)
+      margin 10px 0
+      position relative
+      top 0
+      border-radius 3px
+      overflow hidden
+      background rgba(92, 115, 207, 1.00)
+      cursor pointer
+      &.fatal
+        background rgba(238, 62, 62, 1.00)
+      &:hover
+        opacity 0.9
+    & li .icon
+      position absolute
+      top 0
+      left 0
+      bottom 0
+      font-size 20px
+      text-align center
+      width 55px
+      height auto
+      background rgba(255,255,255,0.2)
+      & .iconWrapper
+        position absolute
+        top calc(50% - 11px)
+        left calc(50% - 11px)
+        width 22px
+        height 22px
+        text-align center
+        line-height 22px
+    & li .content
+      padding 18px 8px
+      float left
+      margin-left 60px
+      height auto
+      width 300px
+      color rgba(0,0,0,0.4)
+
+#socketClose
+  display none

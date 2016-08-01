@@ -17,6 +17,26 @@ globals = {
       return minutes+":"+seconds
     else
       return hours+":"+minutes+":"+seconds
+  millisecondsToStr: (milliseconds) ->
+    numberEnding = (number) ->
+      if number > 1 then 's' else ''
+    temp = Math.floor(milliseconds / 1000)
+    years = Math.floor(temp / 31536000)
+    if years
+      return years + ' year' + numberEnding(years)
+    days = Math.floor((temp %= 31536000) / 86400)
+    if days
+      return days + ' day' + numberEnding(days)
+    hours = Math.floor((temp %= 86400) / 3600)
+    if hours
+      return hours + ' hour' + numberEnding(hours)
+    minutes = Math.floor((temp %= 3600) / 60)
+    if minutes
+      return minutes + ' minute' + numberEnding(minutes)
+    seconds = temp % 60
+    if seconds
+      return seconds + ' second' + numberEnding(seconds)
+    return 'less than a second'
   db: null
 }
 

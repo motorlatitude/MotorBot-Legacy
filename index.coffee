@@ -163,7 +163,7 @@ goThroughVideoList = () ->
             volume = 0.5 #set default, as some videos (recently uploaded maybe?) don't have loudness value
             #stabilise volume to avoid really loud or really quiet playback
             if info.loudness
-              volume = (parseFloat(info.loudness)/-40.229000916)
+              volume = (parseFloat(info.loudness)/-28)
               console.log "Setting Volume Based on Video Loudness ("+info.loudness+"): "+volume
             globals.dc.playStream(yStream,{volume: volume})
             dur = globals.convertTimestamp(results[0].duration)

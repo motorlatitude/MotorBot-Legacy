@@ -433,7 +433,8 @@ var DiscordClient = function (options){
             buff = self.internals.voice.streamOutput.read(1920*channels);
             if(!buff){
               if(onWarning){
-                self.setSpeaking(false);
+                console.log("[!] Empty Buffer Error");
+                setTimeout(function(){sendAudio(opusEncoder, cnt)}, 200);
                 return;
               }
               else{
@@ -541,6 +542,9 @@ var DiscordClient = function (options){
     	      self.internals.voice.enc.stdout.emit('end');
           }
   			});
+        self.internals.voice.enc.stderr.on('data', function(data){
+          //console.log('data: '+data);
+        });
   			self.internals.voice.enc.stdout.once('readable', function() {
           if(self.internals.voice.enc){
             self.setSpeaking(true);
