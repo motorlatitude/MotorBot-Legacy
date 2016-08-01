@@ -34,10 +34,15 @@ Plays the song with a specified `trackId`.
 ##### Response
 On success:
 ```JSON
-{success: true}
+{
+  success: true
+}
 ```
 On failure:
 ```JSON
-{success: false, error: "No trackId supplied"}
+{
+  success: false,
+  error: "No trackId supplied"
+}
 ```
 
