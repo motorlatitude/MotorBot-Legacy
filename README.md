@@ -105,7 +105,7 @@ All commands should be preceded with a `!` followed by the name of the command, 
 ### SB (Soundboard)
   Command: `!sb`<br>
   Has Methods: `null`<br>
-  Has Parameters: `pog, j3, gp, sb`<br>
+  Has Parameters: `pog, j3, gp, sb, wonder, wsr, 1, 2, 3`<br>
   Experimental soundboard command, the parameters define which effect to play.
 
 ### TALK
