@@ -33,13 +33,13 @@ Plays the next available song. If a song is already playing it will skip the cur
 Plays the song with a specified `trackId`.
 ##### Response
 On success:
-```JSON
+```Javascript
 {
   success: true
 }
 ```
 On failure:
-```JSON
+```Javascript
 {
   success: false,
   error: "No trackId supplied"
