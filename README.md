@@ -1,6 +1,5 @@
-[![MotorbotIcon](https://github.com/motorlatitude/MotorBot/blob/master/chrome/motorbotIcon.png?raw=true)]()
+[![MotorbotHeader](https://github.com/motorlatitude/MotorBot/blob/master/motorbotHeader.png?raw=true)]()
 
-# MotorBot
 [![PyPI](https://img.shields.io/pypi/status/Django.svg?style=flat)]() &nbsp; &nbsp;
 [![GitHub release](https://img.shields.io/github/release/motorlatitude/motorbot.svg)]() &nbsp; &nbsp;
 [![Chrome Web Store](https://img.shields.io/chrome-web-store/v/pgkdpldhnmmhpdfmmkgpnpofaaagomab.svg)]()
@@ -45,7 +44,7 @@ All commands should be preceded with a `!` followed by the name of the command, 
 ### OS
   Command: `!os`<br>
   Has Methods: `[uptime]`<br>
-  This command lets you determine the OS on which the bot is currently running, it provides some general information. 
+  This command lets you determine the OS on which the bot is currently running, it provides some general information.
 ###### UPTIME
   The Uptime method returns the time since last boot of the server on which the bot is running.
 
