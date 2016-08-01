@@ -48,7 +48,7 @@ On failure:
 
 #### GET - /playlist/{videoId}
 ##### Info
-Adds a youtube video of a certain youtube video id `videoId` to the music playlist, if motorbot is currently not playing anything, it will start playing from the original end of the playlist. i.e. If you stopped playing songs half way through the playlist, motorbot will continue form there all the way through to the end until it finishes your recently added song.
+Adds a youtube video of a certain youtube video id `videoId` to the music playlist, if motorbot is currently not playing anything, it will start playing from the original end of the playlist. i.e. If you stopped playing songs half way through the playlist, motorbot will continue form there.
 ##### Response
 On success:
 ```Javascript
