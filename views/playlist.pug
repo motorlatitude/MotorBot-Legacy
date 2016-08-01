@@ -2,6 +2,7 @@ doctype html
 html(lang="en")
   head
     title Motorbot Playlist
+    link(type='image/png',rel='icon',href='motorbotIcon.png')
     link(href='/css/playlist.css',rel='stylesheet')
     link(href='/font-awesome-4.6.3/css/font-awesome.min.css',rel='stylesheet')
     script(src='/jquery-3.1.0.min.js')
@@ -25,6 +26,18 @@ html(lang="en")
           if(data){
             if(data.type == "trackUpdate"){
               $(".playing").html(data.track);
+              $(".trackPlaying").removeClass("trackPlaying");
+              $(".play").parent().html($(".play").parent().attr('data-trackNo'));
+              $("#"+data.trackId+" .item").html('<i class="fa fa-volume-up play" aria-hidden="true"></i>');
+              $("#"+data.trackId).addClass("trackPlaying");
+            }
+            else if(data.type == "playUpdate"){
+              if(data.status == "stop"){
+                $("#playStop").html('<i class="fa fa-play" aria-hidden="true" onclick="playMusic();" style="cursor: pointer;""></i>')
+              }
+              else if(data.status == "play"){
+                $("#playStop").html('<i class="fa fa-stop" aria-hidden="true" onclick="stopMusic();" style="cursor: pointer;""></i>')
+              }
             }
           }
         }
@@ -42,14 +55,17 @@ html(lang="en")
       $(document).ready(function(){
         setUpWebSocketConnection();
         $("#playlist li").each(function(index){
-          $(this).dblclick(function(){
+          var self = $(this);
+          self.dblclick(function(){
             $.ajax({
-              url: '/api/playSong/'+$(this).attr('id'),
+              url: '/api/playSong/'+self.attr('id'),
               dataType: 'json',
               success: function(d){
                 console.log(d);
-                $(".item", this).html('<i class="fa fa-play" aria-hidden="true"></i>');
-                //setTimeout(function(){window.location.reload()},2000);
+                $(".trackPlaying").removeClass("trackPlaying");
+                $(".play").parent().html($(".play").parent().attr('data-trackNo'))
+                self.children('.item').html('<i class="fa fa-volume-up play" aria-hidden="true"></i>');
+                self.addClass('trackPlaying');
               },
               error: function(err){
                 console.log(err);
@@ -114,29 +130,35 @@ html(lang="en")
     .header
       if playing == ""
         .playing Nothing Playing Currently
-        .controls <i class="fa fa-step-backward" onclick='prevMusic();' style='cursor: pointer;' aria-hidden="true"></i> &nbsp; <i class="fa fa-play" aria-hidden="true" onclick='playMusic();' style='cursor: pointer;'></i> &nbsp; <i class="fa fa-step-forward" onclick='skipMusic();' style='cursor: pointer;' aria-hidden="true"></i>
+        .controls <i class="fa fa-step-backward" onclick='prevMusic();' style='cursor: pointer;' aria-hidden="true"></i> &nbsp; <span id="playStop"><i class="fa fa-play" aria-hidden="true" onclick='playMusic();' style='cursor: pointer;'></i></span> &nbsp; <i class="fa fa-step-forward" onclick='skipMusic();' style='cursor: pointer;' aria-hidden="true"></i>
       else
         .playing #{playing}
-        .controls <i class="fa fa-step-backward" onclick='prevMusic();' style='cursor: pointer;' aria-hidden="true"></i> &nbsp; <i class="fa fa-stop" aria-hidden="true" onclick='stopMusic();' style='cursor: pointer;'></i> &nbsp; <i class="fa fa-step-forward" onclick='skipMusic();' style='cursor: pointer;' aria-hidden="true"></i>
+        .controls <i class="fa fa-step-backward" onclick='prevMusic();' style='cursor: pointer;' aria-hidden="true"></i> &nbsp; <span id="playStop"><i class="fa fa-stop" aria-hidden="true" onclick='stopMusic();' style='cursor: pointer;'></i></span> &nbsp; <i class="fa fa-step-forward" onclick='skipMusic();' style='cursor: pointer;' aria-hidden="true"></i>
     ul#playlist
       li.titleRow
         .item
-        .title Title
-        .videoId Video ID
-        .time Time
-        .status Status
-        .user UserId
+        .title TITLE
+        .videoId VIDEO
+        .time TIME
+        //.status Status
+        .user USER
       -var i = 1
       for song in playlist
         -var songId = song._id.toString().replace(/\"/gmi,"");
-        li(id=songId)
-          if song.status == "playing"
-            .item <i class="fa fa-play" aria-hidden="true"></i>
-          else
-            .item=i
-          .title=song.title
-          .videoId=song.videoId
-          .time=song.formattedTimestamp
-          .status=song.status
-          .user=song.userId
+        if song.status == "playing"
+          li(id=songId,class='trackPlaying')
+            .item(data-trackNo=i) <i class="fa fa-volume-up play" aria-hidden="true"></i>
+            .title=song.title
+            .videoId <a href="https://www.youtube.com/watch?v=#{song.videoId}" target="_blank">#{song.videoId}</a>
+            .time=song.formattedTimestamp
+            //.status=song.status
+            .user=song.userId
+        else
+          li(id=songId)
+            .item(data-trackNo=i)=i
+            .title=song.title
+            .videoId <a href="https://www.youtube.com/watch?v=#{song.videoId}" target="_blank">#{song.videoId}</a>
+            .time=song.formattedTimestamp
+            //.status=song.status
+            .user=song.userId
         -i++

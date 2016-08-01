@@ -167,7 +167,8 @@ goThroughVideoList = () ->
               console.log "Setting Volume Based on Video Loudness ("+info.loudness+"): "+volume
             globals.dc.playStream(yStream,{volume: volume})
             dur = globals.convertTimestamp(results[0].duration)
-            globals.wss.broadcast(JSON.stringify({type: 'trackUpdate', track: title}))
+            globals.wss.broadcast(JSON.stringify({type: 'playUpdate', status: 'play'}))
+            globals.wss.broadcast(JSON.stringify({type: 'trackUpdate', track: title, trackId: trackId.toString()}))
             globals.dc.sendMessage(channel_id,":play_pause: Now Playing: "+title+" ("+dur+")")
             console.log("Now Playing: "+title)
           )

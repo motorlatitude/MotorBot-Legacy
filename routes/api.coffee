@@ -21,13 +21,14 @@ router.get("/playSong/:trackId", (req, res) ->
         if r._id.toString() == trackId.toString() || foundTrack
           console.log "Found Track"
           track = r.title
+          trackId = r._id.toString()
           playlistCollection.update({timestamp: {$gte: r.timestamp}},{$set: {status: 'added'}}, {multi: true}, (err, result) ->
             if err
               debug("Error Occured Updating Document")
             console.log("Cool, let's play that track")
             globals.dc.stopStream()
             globals.songDone(true)
-            globals.wss.broadcast(JSON.stringify({type: 'trackUpdate', track: track}))
+            globals.wss.broadcast(JSON.stringify({type: 'trackUpdate', track: track, trackId: trackId}))
             return res.end(JSON.stringify({success: true}))
           )
     )
@@ -37,11 +38,13 @@ router.get("/playSong/:trackId", (req, res) ->
 router.get("/stopSong", (req, res) ->
   globals.dc.stopStream()
   globals.songDone(false)
+  globals.wss.broadcast(JSON.stringify({type: 'playUpdate', status: 'stop'}))
   res.end(JSON.stringify({success: true}))
 )
 
 router.get("/playSong", (req, res) ->
   globals.songDone(true)
+  globals.wss.broadcast(JSON.stringify({type: 'playUpdate', status: 'play'}))
   res.end(JSON.stringify({success: true}))
 )
 
