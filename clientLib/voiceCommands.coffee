@@ -44,12 +44,16 @@ class VoiceCommands
           if data.items[0]
             console.log(videoId)
             playlistCollection = globals.db.collection("playlist")
-            playlistCollection.insertOne({videoId: videoId, title: data.items[0].snippet.title, duration: data.items[0].contentDetails.duration, channel_id: channel_id, timestamp: new Date().getTime(), status: 'added', userId: user_id}, (err, result) ->
+            insertionObj = {videoId: videoId, title: data.items[0].snippet.title, duration: data.items[0].contentDetails.duration, channel_id: channel_id, timestamp: new Date().getTime(), status: 'added', userId: user_id}
+            playlistCollection.insertOne(insertionObj, (err, result) ->
               if err
                 globals.raven.captureException(err,{level:'error'})
                 globals.dc.sendMessage(channel_id,":warning: A database error occurred adding this track...\nReport sent to sentry, please notify admin of the following error: \`Database insertion error at line 323: "+err.toString()+"\`")
               else
                 globals.dc.sendMessage(channel_id,":notes: Added "+data.items[0].snippet.title)
+                formattedTimestamp = globals.convertTimestamp(data.items[0].contentDetails.duration)
+                formattedDiff = "a few seconds"
+                globals.wss.broadcast(JSON.stringify({type: 'trackAdd', videoId: videoId, title: data.items[0].snippet.title, duration: data.items[0].contentDetails.duration, formattedTimestamp: formattedTimestamp, formattedDiff: formattedDiff, channel_id: channel_id, timestamp: new Date().getTime(), status: 'added', userId: userId, _id: insertionObj._id.toString()}))
                 goThroughVideoList(channel_id)
             )
           else

@@ -103,12 +103,16 @@ router.get("/playlist/:videoId", (request,res) ->
       if data.items[0]
         console.log(videoId)
         playlistCollection = globals.db.collection("playlist")
-        playlistCollection.insertOne({videoId: videoId, title: data.items[0].snippet.title, duration: data.items[0].contentDetails.duration, channel_id: channel_id, timestamp: new Date().getTime(), status: 'added', userId: userId}, (err, result) ->
+        insertionObj = {videoId: videoId, title: data.items[0].snippet.title, duration: data.items[0].contentDetails.duration, channel_id: channel_id, timestamp: new Date().getTime(), status: 'added', userId: userId}
+        playlistCollection.insertOne(insertionObj, (err, result) ->
           if(err)
             raven.captureException(err,{level:'error'})
             globals.dc.sendMessage(channel_id,":warning: A database error occurred adding this track... <@"+userId+">\nReport sent to sentry, please notify admin of the following error: \`Database insertion error at line 194: "+err.toString()+"\`")
           else
             globals.dc.sendMessage(channel_id,":notes: Added "+data.items[0].snippet.title+" <@"+userId+">")
+            formattedTimestamp = globals.convertTimestamp(data.items[0].contentDetails.duration)
+            formattedDiff = "a few seconds"
+            globals.wss.broadcast(JSON.stringify({type: 'trackAdd', videoId: videoId, title: data.items[0].snippet.title, duration: data.items[0].contentDetails.duration, formattedTimestamp: formattedTimestamp, formattedDiff: formattedDiff, channel_id: channel_id, timestamp: new Date().getTime(), status: 'added', userId: userId, _id: insertionObj._id.toString()}))
             globals.songDone(true)
             res.end(JSON.stringify({added: true}))
         )
@@ -120,6 +124,16 @@ router.get("/playlist/:videoId", (request,res) ->
   else
     raven.captureException(new Error("Chrome Extension: No UserId Provided"),{level:'warn',extra:{videoId: videoId}})
     res.end(JSON.stringify({added: false, error: "Authentication Error"}))
+)
+
+router.get("/playing", (request,res) ->
+  playlistCollection = globals.db.collection("playlist")
+  playlistCollection.find({status:'playing'}).sort({timestamp: 1}).toArray((err, results) ->
+    if results[0]
+      res.end(JSON.stringify(results[0]))
+    else
+      res.end(JSON.stringify({}))
+  )
 )
 
 router.get("/playlist", (request, res) ->

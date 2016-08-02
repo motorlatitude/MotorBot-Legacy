@@ -472,6 +472,7 @@ var DiscordClient = function (options){
                   if (err) throw err;
                   //debug('UDP message sent to ' + self.internals.voice.endpoint.split(":")[0] +':'+ self.internals.voice.port);
               });
+              self.emit("songTime",cnt*20);
               nextTime = startTime + (cnt+1) * 20;
             }
             return setTimeout(function() {

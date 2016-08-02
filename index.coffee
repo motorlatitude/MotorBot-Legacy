@@ -75,18 +75,6 @@ server = app.listen(3210)
 Websocket Server
 ###
 
-###privateKey  = fs.readFileSync('/var/www/key.pem', 'utf8')
-certificate = fs.readFileSync('/var/www/cert.pem', 'utf8')
-
-credentials = {key: privateKey, cert: certificate}
-httpsServer = https.createServer(credentials, app)
-httpsServer.listen(3211)
-
-WebSocketServer = require('ws').Server
-globals.wss = new WebSocketServer({
-  server: httpsServer
-})
-###
 globals.wss.on('connection', (ws) ->
   ws.on('message', (message) ->
     #recieved message

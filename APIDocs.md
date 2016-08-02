@@ -89,9 +89,17 @@ Song Object Format
 ```
 Where status can have the values `played`, `playing` or `added`. The duration is in the ISO 8601 format of PT{hours}H{minutes}M{seconds}S
 
+#### GET - /playing
+##### Info
+Retrieves a song object for the currently playing track, returns `{}` if no song is currently playing.
+##### Response
+```
+  Song Object
+```
+
 #### GET - /playlist/{videoId}
 ##### Info
-Adds a youtube video of a certain youtube video id `videoId` to the music playlist, if MotorBot is currently not playing anything, it will start playing from the original end of the playlist. i.e. If you stopped playing songs half way through the playlist, motorbot will continue form there.
+Adds a youtube video of a certain youtube video id `videoId` to the music playlist, if MotorBot is currently not playing anything, it will start playing from the original end of the playlist. i.e. If you stopped playing songs half way through the playlist, MotorBot will continue form there.
 ##### Response
 On success:
 ```Javascript

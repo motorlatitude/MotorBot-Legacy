@@ -3,6 +3,7 @@ html(lang="en")
   head
     title Motorbot Playlist
     link(type='image/png',rel='icon',href='motorbotIcon.png')
+    link(href="https://fonts.googleapis.com/css?family=Open+Sans|Ubuntu",rel="stylesheet")
     link(href='/css/playlist.css',rel='stylesheet')
     link(href='/font-awesome-4.6.3/css/font-awesome.min.css',rel='stylesheet')
     script(src='/jquery-3.1.0.min.js')
@@ -39,6 +40,14 @@ html(lang="en")
                 $("#playStop").html('<i class="fa fa-stop" aria-hidden="true" onclick="stopMusic();" style="cursor: pointer;""></i>')
               }
             }
+            else if(data.type == "trackAdd"){
+              var trackNo = $("#playlist li").length;
+              var formattedTimestamp = data.formattedTimestamp;
+              var added = data.formattedDiff + " ago";
+              $("#playlist").append("<li id='"+data._id+"'><div class='item' data-trackNo='"+trackNo+"'>"+trackNo+"</div><div class='title'>"+data.title+"</div><div class='videoId'><a href='https://www.youtube.com/watch?v="+data.videoId+"' target='_blank'><i class='fa fa-external-link' aria-hidden='true'></i> "+data.videoId+"</a></div><div class='time'>"+formattedTimestamp+"</div><div class='added'>"+added+"</div><div class='user'>"+data.userId+"</div></li>");
+              updateDblClicks();
+              $(".errorList ul").append("<li class='info'><div class='icon'><div class='iconWrapper'><i class='fa fa-play' aria-hidden='true'></i></div></div><div class='content'>Track Added: \""+data.title+"\"</div></li>");
+            }
           }
         }
 
@@ -54,7 +63,20 @@ html(lang="en")
       }
 
       $(document).ready(function(){
+        document.oncontextmenu = function(){return false;};
+        $(document).click(function(){
+          $(".contextMenu").css("display","none")
+        });
         setUpWebSocketConnection();
+        loadPlaylist();
+        $(".errorList ul li").each(function(index){
+          $(this).click(function(){
+            $(this).remove();
+          });
+        });
+      });
+
+      function updateDblClicks(){
         $("#playlist li").each(function(index){
           var self = $(this);
           self.dblclick(function(){
@@ -73,13 +95,111 @@ html(lang="en")
               }
             });
           });
-        });
-        $(".errorList ul li").each(function(index){
-          $(this).click(function(){
-            $(this).remove();
+          self.on('contextmenu', function(e){
+            $(".contextMenu").css("display","none")
+            console.log($(this).attr("id"));
+            if( e.button == 2 ) {
+              CurX = (window.Event) ? e.pageX : event.clientX + (document.documentElement.scrollLeft ? document.documentElement.scrollLeft : document.body.scrollLeft);
+              CurY = (window.Event) ? e.pageY : event.clientY + (document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop);
+              $(".contextMenu").css("display","block").css("top",CurY+"px").css("left",CurX+"px");
+              return false;
+            }
+            return true;
           });
         });
-      });
+      }
+
+      function convertTimestamp(input){
+        var reptms = /^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/
+        var hours = 0
+        var minutes = 0
+        var seconds = 0
+
+        if(reptms.test(input)){
+          matches = reptms.exec(input)
+          if (matches[1]) hours = Number(matches[1])
+          if (matches[2]) minutes = Number(matches[2])
+          if (matches[3]) seconds = Number(matches[3])
+          if (minutes < 10) minutes = "0"+minutes
+          if (seconds < 10) seconds = "0"+seconds
+        }
+        if(hours == 0){
+          return minutes+":"+seconds
+        }
+        else{
+          return hours+":"+minutes+":"+seconds
+        }
+      }
+
+      function millisecondsToStr(milliseconds){
+        var numberEnding = function (number){
+          if(number > 1){return 's'}else{return ''}
+        }
+        var temp = Math.floor(milliseconds / 1000)
+        var years = Math.floor(temp / 31536000)
+        if(years){
+          return years + ' year' + numberEnding(years)
+        }
+        var days = Math.floor((temp %= 31536000) / 86400)
+        if(days){
+          return days + ' day' + numberEnding(days)
+        }
+        var hours = Math.floor((temp %= 86400) / 3600)
+        if(hours){
+          return hours + ' hour' + numberEnding(hours)
+        }
+        var minutes = Math.floor((temp %= 3600) / 60)
+        if(minutes){
+          return minutes + ' minute' + numberEnding(minutes)
+        }
+        var seconds = temp % 60
+        if(seconds){
+          return seconds + ' second' + numberEnding(seconds)
+        }
+        return 'less than a second'
+      }
+
+      function loadPlaylist(){
+        $.ajax({
+          url: '/api/playlist',
+          dataType: 'json',
+          success: function(d){
+            for(var i=0;i<d.length;i++){
+              var data = d[i];
+              var trackNo = i+1;
+              var formattedTimestamp = convertTimestamp(data.duration);
+              var added = millisecondsToStr(new Date().getTime() - data.timestamp) + " ago";
+              var userId = data.userId || "";
+              $("#playlist").append("<li id='"+data._id+"'><div class='item' data-trackNo='"+trackNo+"'>"+trackNo+"</div><div class='title'>"+data.title+"</div><div class='videoId'><a href='https://www.youtube.com/watch?v="+data.videoId+"' target='_blank'><i class='fa fa-external-link' aria-hidden='true'></i> "+data.videoId+"</a></div><div class='time'>"+formattedTimestamp+"</div><div class='added'>"+added+"</div><div class='user'>"+userId+"</div></li>");
+            }
+            updateDblClicks();
+            loadPlaying();
+          },
+          error: function(err){
+            console.log(err);
+          }
+        });
+      }
+
+      function loadPlaying(){
+        $.ajax({
+          url: '/api/playing',
+          dataType: 'json',
+          success: function(data){
+            if(data._id){
+              $(".playing").html(data.title);
+              $(".trackPlaying").removeClass("trackPlaying");
+              $(".play").parent().html($(".play").parent().attr('data-trackNo'));
+              $("#"+data._id+" .item").html('<i class="fa fa-volume-up play" aria-hidden="true"></i>');
+              $("#"+data._id).addClass("trackPlaying");
+              $("#playStop").html('<i class="fa fa-stop" aria-hidden="true" onclick="stopMusic();" style="cursor: pointer;""></i>')
+            }
+          },
+          error: function(err){
+            console.log(err);
+          }
+        });
+      }
 
       function playMusic(){
         $.ajax({
@@ -133,49 +253,29 @@ html(lang="en")
         });
       }
   body
-    .header
-      if playing == ""
-        .playing Nothing Playing Currently
-        .controls <i class="fa fa-step-backward" onclick='prevMusic();' style='cursor: pointer;' aria-hidden="true"></i> &nbsp; <span id="playStop"><i class="fa fa-play" aria-hidden="true" onclick='playMusic();' style='cursor: pointer;'></i></span> &nbsp; <i class="fa fa-step-forward" onclick='skipMusic();' style='cursor: pointer;' aria-hidden="true"></i>
-      else
-        .playing #{playing}
-        .controls <i class="fa fa-step-backward" onclick='prevMusic();' style='cursor: pointer;' aria-hidden="true"></i> &nbsp; <span id="playStop"><i class="fa fa-stop" aria-hidden="true" onclick='stopMusic();' style='cursor: pointer;'></i></span> &nbsp; <i class="fa fa-step-forward" onclick='skipMusic();' style='cursor: pointer;' aria-hidden="true"></i>
-    .errorList
-      ul
-        li.fatal#socketClose
-          .icon
-            .iconWrapper <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
-          .content You've been disconnected from our server, please refresh the page!
-        li.info
-          .icon
-            .iconWrapper <i class="fa fa-info-circle" aria-hidden="true"></i>
-          .content What's up, I'm your notification!
-    ul#playlist
-      li.titleRow
-        .item
-        .title TITLE
-        .videoId VIDEO
-        .time TIME
-        //.status Status
-        .added ADDED
-        .user USER
-      -var i = 1
-      for song in playlist
-        -var songId = song._id.toString().replace(/\"/gmi,"");
-        if song.status == "playing"
-          li(id=songId,class='trackPlaying')
-            .item(data-trackNo=i) <i class="fa fa-volume-up play" aria-hidden="true"></i>
-            .title=song.title
-            .videoId <a href="https://www.youtube.com/watch?v=#{song.videoId}" target="_blank"><i class="fa fa-external-link" aria-hidden="true"></i> #{song.videoId}</a>
-            .time #{song.formattedTimestamp}
-            .added #{song.formattedDiff} ago
-            .user=song.userId
-        else
-          li(id=songId)
-            .item(data-trackNo=i)=i
-            .title=song.title
-            .videoId <a href="https://www.youtube.com/watch?v=#{song.videoId}" target="_blank"><i class="fa fa-external-link" aria-hidden="true"></i> #{song.videoId}</a>
-            .time=song.formattedTimestamp
-            .added #{song.formattedDiff} ago
-            .user=song.userId
-        -i++
+    .bodyWrapper
+      //-.titleBar
+      //-.sidebar
+      .contentView
+        .header
+          .playing Nothing Playing Currently
+          .controls <i class="fa fa-step-backward" onclick='prevMusic();' style='cursor: pointer;' aria-hidden="true"></i> &nbsp; <span id="playStop"><i class="fa fa-play" aria-hidden="true" onclick='playMusic();' style='cursor: pointer;'></i></span> &nbsp; <i class="fa fa-step-forward" onclick='skipMusic();' style='cursor: pointer;' aria-hidden="true"></i>
+        .errorList
+          ul
+            li.fatal#socketClose
+              .icon
+                .iconWrapper <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+              .content You've been disconnected from our server, please refresh the page!
+        ul#playlist
+          li.titleRow
+            .item
+            .title TITLE
+            .videoId VIDEO
+            .time TIME
+            //.status Status
+            .added ADDED
+            .user USER
+      .playerBar
+      .contextMenu
+        ul
+          li Remove From this Playlist
