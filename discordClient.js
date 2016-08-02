@@ -446,6 +446,9 @@ var DiscordClient = function (options){
             if(self.internals.voice.streamOutput.destroyed) return;
             self.internals.voice.sequence + 1 < 65535 ? self.internals.voice.sequence += 1 : self.internals.voice.sequence = 0;
             self.internals.voice.timestamp + 960 < 4294967295 ? self.internals.voice.timestamp += 960 : self.internals.voice.timestamp = 0;
+            if(buff){
+              self.emit("songTime",cnt*20);
+            }
             if (buff && buff.length !== 1920 * channels) {
     					var newBuffer = new Buffer(1920 * channels).fill(0);
     					buff.copy(newBuffer);
@@ -472,7 +475,6 @@ var DiscordClient = function (options){
                   if (err) throw err;
                   //debug('UDP message sent to ' + self.internals.voice.endpoint.split(":")[0] +':'+ self.internals.voice.port);
               });
-              self.emit("songTime",cnt*20);
               nextTime = startTime + (cnt+1) * 20;
             }
             return setTimeout(function() {

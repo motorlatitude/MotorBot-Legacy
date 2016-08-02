@@ -29,6 +29,70 @@ html
   height 60px
   border-top 1px solid rgba(22, 22, 22, 1.00)
   background rgba(27, 29, 32, 1.00)
+  .controls
+    position absolute
+    top 12px
+    left 15px
+    font-size 20px
+    & .prev
+      float left
+      margin-top 5px
+      line-height 30px
+      padding-bottom 2px
+      width 32px
+      text-align center
+      border-radius 50%
+    & .skip
+      float left
+      margin-left 10px
+      margin-top 5px
+      line-height 30px
+      padding-bottom 2px
+      width 32px
+      text-align center
+      border-radius 50%
+    & .playStopButton
+      float left
+      margin-left 10px
+      line-height 36px
+      padding-bottom 2px
+      width 38px
+      border 1px solid #fff
+      text-align center
+      border-radius 50%
+      cursor pointer
+      &:hover
+        border-color rgba(54, 142, 245, 1.00)
+  & .duration
+    font-size 11px
+    color rgba(255,255,255,0.6)
+    position absolute
+    top 23px
+    left 135px
+    text-align right
+    width 60px
+  & .songDuration
+    font-size 11px
+    color rgba(255,255,255,0.6)
+    position absolute
+    top 23px
+    right 0
+    text-align left
+    width 60px
+  & .timelineWrapper
+    float right
+    width calc(100% - 265px)
+    margin 27px 65px
+    height 5px
+    background rgba(255,255,255,0.1)
+    border-radius 30px
+    overflow hidden
+    & .timeline
+      width 0%
+      height 5px
+      border-radius 30px
+      background rgba(54, 142, 245, 1.00)
+
 
 .bodyWrapper
   position absolute
@@ -101,10 +165,6 @@ html
   font-weight 300
   position fixed
   top 0
-  & .controls
-    position absolute
-    top 60px
-    left 50px
   & .playing
     position absolute
     top 20px

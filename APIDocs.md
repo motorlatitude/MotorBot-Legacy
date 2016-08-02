@@ -66,6 +66,24 @@ On failure:
 }
 ```
 
+#### GET - /deleteSong/{trackId}
+##### Info
+Deletes the song with a specified `trackId` from the playlist.
+##### Response
+On success:
+```Javascript
+{
+  success: true
+}
+```
+On failure:
+```Javascript
+{
+  success: false,
+  error: "Some Error Message"
+}
+```
+
 #### GET - /playlist
 ##### Info
 Retrieves a list of all available songs in the playlist, ordered after the timestamp in ascending order.

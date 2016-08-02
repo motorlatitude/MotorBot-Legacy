@@ -22,13 +22,14 @@ router.get("/playSong/:trackId", (req, res) ->
           console.log "Found Track"
           track = r.title
           trackId = r._id.toString()
+          trackDuration = r.duration
           playlistCollection.update({timestamp: {$gte: r.timestamp}},{$set: {status: 'added'}}, {multi: true}, (err, result) ->
             if err
               debug("Error Occured Updating Document")
             console.log("Cool, let's play that track")
             globals.dc.stopStream()
             globals.songDone(true)
-            globals.wss.broadcast(JSON.stringify({type: 'trackUpdate', track: track, trackId: trackId}))
+            globals.wss.broadcast(JSON.stringify({type: 'trackUpdate', track: track, trackId: trackId, trackDuration: trackDuration}))
             return res.end(JSON.stringify({success: true}))
           )
     )
@@ -124,6 +125,17 @@ router.get("/playlist/:videoId", (request,res) ->
   else
     raven.captureException(new Error("Chrome Extension: No UserId Provided"),{level:'warn',extra:{videoId: videoId}})
     res.end(JSON.stringify({added: false, error: "Authentication Error"}))
+)
+
+router.get("/deleteSong/:trackId", (req, res) ->
+  trackId = req.params.trackId
+  playlistCollection = globals.db.collection("playlist")
+  playlistCollection.deleteOne({_id: new ObjectID(trackId)}, (err, results) ->
+    if err
+      res.end(JSON.stringify({success: false, error: "Database Error"}))
+    globals.wss.broadcast(JSON.stringify({type: 'trackDelete', trackId: trackId}))
+    res.end(JSON.stringify({success: true}))
+  )
 )
 
 router.get("/playing", (request,res) ->
