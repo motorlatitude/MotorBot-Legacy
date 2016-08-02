@@ -17,7 +17,9 @@ List of all endpoints.
 Stops the currently playing song. If no track is playing nothing happens...
 ##### Response
 ```JSON
-{}
+{
+  "success": true
+}
 ```
 
 #### GET - /playSong
@@ -25,7 +27,9 @@ Stops the currently playing song. If no track is playing nothing happens...
 Plays the next available song. If a song is already playing it will skip the currently playing song and play the next available song.
 ##### Response
 ```JSON
-{}
+{
+  "success": true
+}
 ```
 
 #### GET - /prevSong
