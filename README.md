@@ -1,8 +1,7 @@
 [![MotorbotHeader](https://github.com/motorlatitude/MotorBot/blob/master/motorbotHeader.png?raw=true)]()
 
 
-
-[![PyPI](https://img.shields.io/pypi/status/Django.svg?style=flat)]() &nbsp; &nbsp;
+[![Github Issues](https://img.shields.io/github/issues/motorlatitude/motorbot.svg)]() &nbsp; &nbsp;
 [![GitHub release](https://img.shields.io/github/release/motorlatitude/motorbot.svg)]() &nbsp; &nbsp;
 [![Chrome Web Store](https://img.shields.io/chrome-web-store/v/pgkdpldhnmmhpdfmmkgpnpofaaagomab.svg)]()
 
