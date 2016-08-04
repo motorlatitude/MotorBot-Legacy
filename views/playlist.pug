@@ -59,8 +59,16 @@ html(lang="en")
               });
             }
             else if(data.type == "songTime"){
-              $(".duration").html(new Date(data.time).toISOString().substr(11, 8));
-              $(".songDuration").html(new Date(songDuration*1000).toISOString().substr(11, 8));
+              var timeSpent = new Date(data.time).toISOString().substr(11, 8);
+              var songTimelineDuration = new Date(songDuration*1000).toISOString().substr(11, 8)
+              if(timeSpent.substr(0,3) == "00:"){
+                timeSpent = timeSpent.substr(3,5);
+              }
+              if(songTimelineDuration.substr(0,3) == "00:"){
+                songTimelineDuration = songTimelineDuration.substr(3,5);
+              }
+              $(".duration").html(timeSpent);
+              $(".songDuration").html(songTimelineDuration);
               $(".timeline").animate({
                 "width": ((data.time/1000)/songDuration)*100+"%"
               },1000);
@@ -115,6 +123,23 @@ html(lang="en")
               }
             });
           });
+          self.on('touchend', function(){
+            $.ajax({
+              url: '/api/playSong/'+self.attr('id'),
+              dataType: 'json',
+              success: function(d){
+                console.log(d);
+                $(".trackPlaying").removeClass("trackPlaying");
+                $(".play").parent().html($(".play").parent().attr('data-trackNo'))
+                self.children('.item').html('<i class="fa fa-volume-up play" aria-hidden="true"></i>');
+                self.addClass('trackPlaying');
+                songDuration = 0
+              },
+              error: function(err){
+                console.log(err);
+              }
+            });
+          });
           self.on('contextmenu', function(e){
             $(".contextMenu").css("display","none")
             if( e.button == 2 ) {
@@ -123,7 +148,7 @@ html(lang="en")
               $(".contextMenu").html("<ul></ul>");
               $(".contextMenu").css("display","block").css("top",CurY+"px").css("left",CurX+"px");
               if($(this).attr("id")){
-                $(".contextMenu ul").append("<li onclick=\"deleteSong('"+$(this).attr("id")+"')\">Remove This From Playlist</li>")
+                $(".contextMenu ul").append("<li>Add to Queue</li><li class='sep'></li><li onclick=\"deleteSong('"+$(this).attr("id")+"')\">Remove This From Playlist</li>")
               }
               return false;
             }
@@ -218,7 +243,6 @@ html(lang="en")
             for(var i=0;i<d.length;i++){
               var data = d[i];
               var trackNo = i+1;
-              songDuration = convertTimestampToSeconds(data.duration)
               var formattedTimestamp = convertTimestamp(data.duration);
               var added = millisecondsToStr(new Date().getTime() - data.timestamp) + " ago";
               var userId = data.userId || "";
@@ -240,6 +264,7 @@ html(lang="en")
           success: function(data){
             if(data._id){
               $(".playing").html(data.title);
+              songDuration = convertTimestampToSeconds(data.duration)
               $(".trackPlaying").removeClass("trackPlaying");
               $(".play").parent().html($(".play").parent().attr('data-trackNo'));
               $("#"+data._id+" .item").html('<i class="fa fa-volume-up play" aria-hidden="true"></i>');
@@ -307,10 +332,14 @@ html(lang="en")
   body
     .bodyWrapper
       //-.titleBar
-      //-.sidebar
+      .sidebar
+        img.motorbotIcon(src='/motorbotIcon.png')
+        .sep
       .contentView
         .header
           .playing Nothing Playing Currently
+          .channel Not currently in a voice channel
+          .playPlaylistButton <i class="fa fa-play" aria-hidden="true"></i> &nbsp; &nbsp;PLAY
         .errorList
           ul
             li.fatal#socketClose
@@ -336,5 +365,6 @@ html(lang="en")
         .timelineWrapper
           .timeline
         .songDuration 00:00:00
+        .queue <i class="fa fa-bars" aria-hidden="true"></i>
       .contextMenu
         ul

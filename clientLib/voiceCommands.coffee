@@ -47,8 +47,8 @@ class VoiceCommands
             insertionObj = {videoId: videoId, title: data.items[0].snippet.title, duration: data.items[0].contentDetails.duration, channel_id: channel_id, timestamp: new Date().getTime(), status: 'added', userId: user_id}
             playlistCollection.insertOne(insertionObj, (err, result) ->
               if err
-                globals.raven.captureException(err,{level:'error'})
-                globals.dc.sendMessage(channel_id,":warning: A database error occurred adding this track...\nReport sent to sentry, please notify admin of the following error: \`Database insertion error at line 323: "+err.toString()+"\`")
+                globals.raven.captureException(err,{level: 'error', tags:[{instigator: 'mongo'}]})
+                globals.dc.sendMessage(channel_id,":warning: A database error occurred adding this track...\nReport sent to sentry, please notify admin of the following error: \`Database insertion error at voiceCommands.coffee:51: "+err.toString()+"\`")
               else
                 globals.dc.sendMessage(channel_id,":notes: Added "+data.items[0].snippet.title)
                 formattedTimestamp = globals.convertTimestamp(data.items[0].contentDetails.duration)
@@ -66,6 +66,8 @@ class VoiceCommands
     else if command == "prev"
       playlistCollection = globals.db.collection("playlist")
       playlistCollection.find({status: {$ne: 'added'}}).sort({timestamp: 1}).toArray((err, results) ->
+        if err
+          globals.raven.captureException(err,{level: 'error', tags:[{instigator: 'mongo'}]})
         lastResult = results[results.length-1]
         secondLastResult = results[results.length-2]
         if lastResult.status == "playing"
@@ -84,6 +86,7 @@ class VoiceCommands
         else
           playlistCollection.updateOne({_id: lastResult._id},{$set: {status: 'added'}},(err, result) ->
             if err
+              globals.raven.captureException(err,{level: 'error', tags:[{instigator: 'mongo'}]})
               console.log("Databse Updated Error Occured")
             else
               globals.dc.stopStream()
@@ -93,20 +96,13 @@ class VoiceCommands
     else if command == "skip"
       globals.dc.stopStream()
       globals.songDone(true)
+    else if command == "pause"
+      globals.dc.pauseStream()
+      globals.songDone(false)
     else if command == "play"
       globals.songDone(true)
     else if command == "list"
-      playlistCollection = globals.db.collection("playlist")
-      playlistCollection.find({status: "added"}).sort({timestamp: 1}).toArray((err, results) ->
-        if err
-          globals.raven.captureException(err,{level:'error'})
-          globals.dc.sendMessage(channel_id,":warning: A database error occurred whilst listing all tracks...\nReport sent to sentry, please notify admin of the following error: \`playlistCollection Error at line 239\`")
-        else
-          if(results.length > 0)
-            globals.dc.sendMessage(channel_id,":headphones: Playlist can be viewed here: https://mb.lolstat.net/")
-          else
-            globals.dc.sendMessage(channel_id,"No songs are currently in the playlist :grinning:")
-      )
+      globals.dc.sendMessage(channel_id,":headphones: Playlist can be viewed here: https://mb.lolstat.net/")
     else
       globals.dc.sendMessage(channel_id,"Unknown Voice Command :cry:")
 

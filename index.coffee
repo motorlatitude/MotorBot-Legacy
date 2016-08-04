@@ -1,4 +1,4 @@
-{Raven} = require(__dirname+'/raven.coffee')
+Raven = require(__dirname+'/raven.coffee')
 globals = require __dirname+'/models/globals.coffee'
 {Commands} = require __dirname+'/clientLib/commands.coffee'
 commands = new Commands()
@@ -31,6 +31,8 @@ connectToSentry = () ->
 globals.dc = new DiscordClient({token: "MTY5NTU0ODgyNjc0NTU2OTMw.CfAmNQ.WebsSsEexNlFWaNc2u54EP-hIX0", debug: true, autorun: true})
 
 stream = null
+connectedChannel = null
+warning = false
 
 #Express Setup
 app = express()
@@ -90,6 +92,7 @@ globals.wss.broadcast = (data) ->
 createDBConnection = (cb) ->
   MongoClient.connect('mongodb://localhost:27017/motorbot', (err, db) ->
     if err
+      globals.raven.captureException(err,{level: 'fatal', tags:[{instigator: 'mongo'}]})
       globals.dc.sendMessage("169555395860234240",":name_badge: Fatal Error: I couldn't connect to the motorbot database :cry:")
       throw new Error("Failed to connect to database, exiting")
     debugLog += "[i] Connected to Motorbot Database Succesfully\n"
@@ -101,6 +104,8 @@ createDBConnection = (cb) ->
 initPlaylist = () ->
   playlistCollection = globals.db.collection("playlist")
   playlistCollection.find({status: "playing"}).sort({timestamp: 1}).toArray((err, results) ->
+    if err
+      globals.raven.captureException(err,{level: 'error', tags:[{instigator: 'mongo'}]})
     for r in results
       trackId = r._id
       playlistCollection.updateOne({'_id': trackId},{'$set':{'status':'played'}},() ->
@@ -108,6 +113,8 @@ initPlaylist = () ->
       )
     debugLog += "[i] Initialised Playlist Succesfully\n"
     globals.dc.sendMessage("169555395860234240",":white_check_mark: Hi I'm now online :smiley:\n\n```\n"+debugLog+"\n```")
+    debugLog = ""
+    warning = false
   )
 
 
@@ -117,6 +124,9 @@ globals.dc.on("ready", (msg) ->
   console.log(time+msg.user.username+"#"+msg.user.discriminator+" has connected to the gateway server and is at your command")
   connectToSentry()
   createDBConnection(initPlaylist)
+  if connectedChannel != null
+    guild_id = "130734377066954752"
+    globals.dc.joinVoice(connectedChannel, guild_id)
   globals.dc.setStatus("with Discord API")
 )
 
@@ -127,11 +137,30 @@ globals.dc.on("message", (msg,channel_id,user_id,raw_data) ->
   commands.parseMessageForCommand(msg,channel_id,user_id) #parse commands through commands class in clientLib dir
 )
 
+globals.dc.on("disconnect", () ->
+  if !warning
+    warning = true
+    globals.dc.sendMessage("169555395860234240",":warning: The connection to the Main Gateway Server `"+globals.dc.internals.gateway+"` Unexpectedly Closed! I will try to reconnect automatically :smiley:")
+    raven.captureException("The connection to the Gateway Server Unexpectedly Closed",{level: "warn", tags:[{instigator: 'discord'}]})
+    connectedChannel = globals.dc.internals.voice.channel_id
+)
+
+globals.dc.on("voiceClosed", () ->
+  console.log globals.dc.internals.voice.channel_id
+  if globals.dc.internals.voice.channel_id != undefined #check if unexpected leave
+    globals.dc.sendMessage("169555395860234240",":warning: The connection to the Voice Gateway Server `"+globals.dc.internals.voice.endpoint+"` Unexpectedly Closed! Discord is encountering issues, please try again later :cry:")
+    raven.captureException("The connection to the Voice Gateway Server Unexpectedly Closed",{level: "warn", tags:[{instigator: 'discord'}]})
+    guild_id = "130734377066954752"
+    globals.dc.leaveVoice(guild_id)
+)
+
 #continue through playlist and set status of currently playing track to 'playing' - TODO use ints to identify track status
 goThroughVideoList = () ->
   if globals.dc.internals.voice.ready
     playlistCollection = globals.db.collection("playlist")
     playlistCollection.find({status: "added"}).sort({timestamp: 1}).toArray((err, results) ->
+      if err
+        globals.raven.captureException(err,{level: 'error', tags:[{instigator: 'mongo'}]})
       if results[0]
         videoId = results[0].videoId
         channel_id = results[0].channel_id
@@ -145,7 +174,7 @@ goThroughVideoList = () ->
           requestUrl = 'http://youtube.com/watch?v=' + videoId
           yStream = youtubeStream(requestUrl,{quality: 'lowest', filter: 'audioonly'})
           yStream.on("error", (e) ->
-            globals.raven.captureException(e,{level:'error',tags:{system: 'youtube-stream'}})
+            globals.raven.captureException(e,{level:'error',tags:[{instigator: 'ytld-core'}]})
             console.log("Error Occured Loading Youtube Video")
           )
           yStream.on("info", (info, format) ->
@@ -171,6 +200,8 @@ globals.songDone = (goToNext = false) ->
     console.log("Song Done")
     playlistCollection = globals.db.collection("playlist")
     playlistCollection.find({status: "playing"}).sort({timestamp: 1}).toArray((err, results) ->
+      if err
+        globals.raven.captureException(err,{level: 'error', tags:[{instigator: 'mongo'}]})
       if results[0]
         trackId = results[0]._id
         playlistCollection.updateOne({'_id': trackId},{'$set':{'status':'played'}},() ->

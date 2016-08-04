@@ -1,4 +1,4 @@
-# Motorbot - Music API
+# MotorBot - Music API
 
 This is the documentation for the music api. Motorbot's music can be controlled through these endpoints.
 

@@ -1,3 +1,9 @@
+$sidebarWidth = 75px;
+
+*
+  -webkit-font-smoothing antialiased
+
+
 body
 html
   margin 0
@@ -44,7 +50,7 @@ html
       border-radius 50%
     & .skip
       float left
-      margin-left 10px
+      margin-left 7px
       margin-top 5px
       line-height 30px
       padding-bottom 2px
@@ -54,20 +60,18 @@ html
     & .playStopButton
       float left
       margin-left 10px
-      line-height 36px
+      line-height 38px
       padding-bottom 2px
       width 38px
-      border 1px solid #fff
+      font-size 24px
       text-align center
       border-radius 50%
       cursor pointer
-      &:hover
-        border-color rgba(54, 142, 245, 1.00)
   & .duration
     font-size 11px
     color rgba(255,255,255,0.6)
     position absolute
-    top 23px
+    top 24px
     left 135px
     text-align right
     width 60px
@@ -75,14 +79,14 @@ html
     font-size 11px
     color rgba(255,255,255,0.6)
     position absolute
-    top 23px
-    right 0
+    top 24px
+    right 25px
     text-align left
     width 60px
   & .timelineWrapper
     float right
-    width calc(100% - 265px)
-    margin 27px 65px
+    width calc(100% - 290px)
+    margin 28px 90px
     height 5px
     background rgba(255,255,255,0.1)
     border-radius 30px
@@ -92,6 +96,13 @@ html
       height 5px
       border-radius 30px
       background rgba(54, 142, 245, 1.00)
+  & .queue
+    position absolute
+    right 18px
+    top 19px
+    font-size 18px
+    cursor pointer
+    color rgba(255,255,255,0.5)
 
 
 .bodyWrapper
@@ -105,16 +116,25 @@ html
   height auto
   width 100%
   min-width 1200px
-/*
+
 .sidebar
-  width 200px
+  width $sidebarWidth
   height 100%
   position absolute
   top 0
   left 0
   bottom 60px
-  background rgba(41, 43, 47, 1.00)
-*/
+  background rgba(36, 36, 36, 1.00)
+  & .motorbotIcon
+    width 61px
+    height 61px
+    margin 8px 6px
+  & .sep
+    width 100%
+    height 1px
+    background rgba(22, 22, 22, 1.00)
+
+
 .contentView
   width 100%
   min-width 1000px
@@ -152,7 +172,7 @@ html
         background rgba(62, 152, 246, 1.00)
 
 .header
-  width 100%
+  width calc(100% - 75px)
   height 164px
   background rgba(36, 36, 36, 1.00)
   background-image url('../playlistbg.png')
@@ -162,23 +182,47 @@ html
   color #fff
   font-size 26px
   font-family Helvetica Neue, Helvetica, Arial, sans-serif
-  font-weight 300
+  font-weight 400
   position fixed
   top 0
+  left $sidebarWidth
   & .playing
     position absolute
     top 20px
     left 50px
+  & .channel
+    position absolute
+    top 55px
+    left 50px
+    color rgba(255,255,255,0.6)
+    font-size 15px
+  & .playPlaylistButton
+    position absolute
+    top 90px
+    left 50px
+    border-radius 50px
+    padding 6px 30px
+    font-family Helvetica Neue, Helvetica, Arial, sans-serif
+    font-weight 500
+    font-size 13px
+    color #fff
+    background rgba(62, 152, 246, 1.00)
+    cursor pointer
+    &:hover
+      opacity 0.8
 
 #playlist
   list-style none
   margin 0
+  margin-left 75px
   padding 0
-  width 100%
+  width calc(100% - 75px)
+  min-width 1125px
   height 100%
   & li
     float left
     width calc(100% - 60px)
+    min-width 1200px
     margin 0 20px
     padding 15px 10px
     cursor pointer
@@ -194,9 +238,9 @@ html
       font-size 12px
       border-bottom 1px solid rgba(36, 36, 36, 1.00)
       position fixed
-      top 120px
-      left 0
-      width calc(100% - 60px)
+      top 118px
+      left 75px
+      width calc(100% - 135px)
       right 20px
       background transparent
       cursor default
@@ -212,7 +256,11 @@ html
         font-size 14px
     & .title
       display inline-block
-      width 50%
+      width calc(50% - 10px)
+      white-space nowrap
+      overflow hidden
+      text-overflow ellipsis
+      padding-right 10px
     & .videoId
       display inline-block
       width 10%

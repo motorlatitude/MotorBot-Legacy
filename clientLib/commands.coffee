@@ -82,7 +82,7 @@ class exports.Commands
         globals.dc.stopStream()
         globals.songDone(false)
         setTimeout(() ->
-          globals.dc.playStream(__dirname+'/soundboard/play of the game.mp3',{volume: 3.0})
+          globals.dc.playStream('/var/www/motorbot/soundboard/play of the game.mp3',{volume: 3.0})
         ,1000)
       else
         globals.dc.sendMessage("169555395860234240","Hmmmmm, I think you might want to join a Voice Channel first :wink:")
@@ -91,7 +91,7 @@ class exports.Commands
         globals.dc.stopStream()
         globals.songDone(false)
         setTimeout(() ->
-          globals.dc.playStream(__dirname+'/soundboard/wonder.mp3',{volume: 3.0})
+          globals.dc.playStream('/var/www/motorbot/soundboard/wonder.mp3',{volume: 3.0})
         ,1000)
       else
         globals.dc.sendMessage("169555395860234240","Hmmmmm, I think you might want to join a Voice Channel first :wink:")
@@ -100,7 +100,7 @@ class exports.Commands
         globals.dc.stopStream()
         globals.songDone(false)
         setTimeout(() ->
-          globals.dc.playStream(__dirname+'/soundboard/1.mp3',{volume: 3.0})
+          globals.dc.playStream('/var/www/motorbot/soundboard/1.mp3',{volume: 3.0})
         ,1000)
       else
         globals.dc.sendMessage("169555395860234240","Hmmmmm, I think you might want to join a Voice Channel first :wink:")
@@ -109,7 +109,7 @@ class exports.Commands
         globals.dc.stopStream()
         globals.songDone(false)
         setTimeout(() ->
-          globals.dc.playStream(__dirname+'/soundboard/2.mp3',{volume: 3.0})
+          globals.dc.playStream('/var/www/motorbot/soundboard/2.mp3',{volume: 3.0})
         ,1000)
       else
         globals.dc.sendMessage("169555395860234240","Hmmmmm, I think you might want to join a Voice Channel first :wink:")
@@ -118,7 +118,7 @@ class exports.Commands
         globals.dc.stopStream()
         globals.songDone()
         setTimeout(() ->
-          globals.dc.playStream(__dirname+'/soundboard/3.mp3',{volume: 3.0})
+          globals.dc.playStream('/var/www/motorbot/soundboard/3.mp3',{volume: 3.0})
         ,1000)
       else
         globals.dc.sendMessage("169555395860234240","Hmmmmm, I think you might want to join a Voice Channel first :wink:")
@@ -127,7 +127,7 @@ class exports.Commands
         globals.dc.stopStream()
         globals.songDone(false)
         setTimeout(() ->
-          globals.dc.playStream(__dirname+'/soundboard/gp.mp3',{volume: 3.0})
+          globals.dc.playStream('/var/www/motorbot/soundboard/gp.mp3',{volume: 3.0})
         ,1000)
       else
         globals.dc.sendMessage("169555395860234240","Hmmmmm, I think you might want to join a Voice Channel first :wink:")
@@ -136,7 +136,7 @@ class exports.Commands
         globals.dc.stopStream()
         globals.songDone()
         setTimeout(() ->
-          globals.dc.playStream(__dirname+'/soundboard/justice 3.mp3',{volume: 3.0})
+          globals.dc.playStream('/var/www/motorbot/soundboard/justice 3.mp3',{volume: 3.0})
         ,1000)
       else
         globals.dc.sendMessage("169555395860234240","Hmmmmm, I think you might want to join a Voice Channel first :wink:")
@@ -145,7 +145,7 @@ class exports.Commands
         globals.dc.stopStream()
         globals.songDone(false)
         setTimeout(() ->
-          globals.dc.playStream(__dirname+'/soundboard/speed boost.mp3',{volume: 3.0})
+          globals.dc.playStream('/var/www/motorbot/soundboard/speed boost.mp3',{volume: 3.0})
         ,1000)
       else
         globals.dc.sendMessage("169555395860234240","Hmmmmm, I think you might want to join a Voice Channel first :wink:")
@@ -154,7 +154,7 @@ class exports.Commands
         globals.dc.stopStream()
         globals.songDone()
         setTimeout(() ->
-          globals.dc.playStream(__dirname+'/soundboard/wsr.mp3',{volume: 1.0})
+          globals.dc.playStream('/var/www/motorbot/soundboard/wsr.mp3',{volume: 1.0})
         ,1000)
       else
         globals.dc.sendMessage("169555395860234240","Hmmmmm, I think you might want to join a Voice Channel first :wink:")
@@ -163,7 +163,7 @@ class exports.Commands
         globals.dc.stopStream()
         globals.songDone(false)
         setTimeout(() ->
-          globals.dc.playStream(__dirname+'/soundboard/affirmative.mp3',{volume: 3.0})
+          globals.dc.playStream('/var/www/motorbot/soundboard/affirmative.mp3',{volume: 3.0})
         ,1000)
       else
         globals.dc.sendMessage("169555395860234240","Hmmmmm, I think you might want to join a Voice Channel first :wink:")
@@ -175,7 +175,7 @@ class exports.Commands
         globals.dc.sendMessage(channel_id,response.result.fulfillment.speech)
       )
       request.on('error', (error) ->
-        globals.raven.captureException(error,{level:'error'})
+        globals.raven.captureException(err,{level: 'error', tags:[{instigator: 'APIAI'}]})
         console.log(error)
       )
       request.end()

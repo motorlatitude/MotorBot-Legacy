@@ -14,19 +14,17 @@ router.get("/playSong/:trackId", (req, res) ->
   playlistCollection = globals.db.collection("playlist")
   playlistCollection.update({status: 'added'},{$set: {status: 'played'}}, {multi: true}, (err, result) ->
     if err
-      debug("Error Occured Updating Document")
+      globals.raven.captureException(err,{level: 'error', tags:[{instigator: 'mongo'}]})
     playlistCollection.find({}).sort({timestamp: 1}).toArray((err, results) ->
       foundTrack = false
       for r in results
         if r._id.toString() == trackId.toString() || foundTrack
-          console.log "Found Track"
           track = r.title
           trackId = r._id.toString()
           trackDuration = r.duration
           playlistCollection.update({timestamp: {$gte: r.timestamp}},{$set: {status: 'added'}}, {multi: true}, (err, result) ->
             if err
-              debug("Error Occured Updating Document")
-            console.log("Cool, let's play that track")
+              globals.raven.captureException(err,{level: 'error', tags:[{instigator: 'mongo'}]})
             globals.dc.stopStream()
             globals.songDone(true)
             globals.wss.broadcast(JSON.stringify({type: 'trackUpdate', track: track, trackId: trackId, trackDuration: trackDuration}))
@@ -52,6 +50,8 @@ router.get("/playSong", (req, res) ->
 router.get("/prevSong", (req, res) ->
   playlistCollection = globals.db.collection("playlist")
   playlistCollection.find({status: {$ne: 'added'}}).sort({timestamp: 1}).toArray((err, results) ->
+    if err
+      globals.raven.captureException(err,{level: 'error', tags:[{instigator: 'mongo'}]})
     lastResult = results[results.length-1]
     secondLastResult = results[results.length-2]
     if lastResult.status == "playing"
@@ -70,7 +70,7 @@ router.get("/prevSong", (req, res) ->
     else
       playlistCollection.updateOne({_id: lastResult._id},{$set: {status: 'added'}},(err, result) ->
         if err
-          console.log("Databse Updated Error Occured")
+          globals.raven.captureException(err,{level: 'error', tags:[{instigator: 'mongo'}]})
         else
           globals.dc.stopStream()
           setTimeout(goThroughVideoList,1000)
@@ -107,8 +107,8 @@ router.get("/playlist/:videoId", (request,res) ->
         insertionObj = {videoId: videoId, title: data.items[0].snippet.title, duration: data.items[0].contentDetails.duration, channel_id: channel_id, timestamp: new Date().getTime(), status: 'added', userId: userId}
         playlistCollection.insertOne(insertionObj, (err, result) ->
           if(err)
-            raven.captureException(err,{level:'error'})
-            globals.dc.sendMessage(channel_id,":warning: A database error occurred adding this track... <@"+userId+">\nReport sent to sentry, please notify admin of the following error: \`Database insertion error at line 194: "+err.toString()+"\`")
+            globals.raven.captureException(err,{level: 'error', tags:[{instigator: 'mongo'}]})
+            globals.dc.sendMessage(channel_id,":warning: A database error occurred adding this track... <@"+userId+">\nReport sent to sentry, please notify admin of the following error: \`Database insertion error at api.coffee:111: "+err.toString()+"\`")
           else
             globals.dc.sendMessage(channel_id,":notes: Added "+data.items[0].snippet.title+" <@"+userId+">")
             formattedTimestamp = globals.convertTimestamp(data.items[0].contentDetails.duration)
@@ -118,12 +118,12 @@ router.get("/playlist/:videoId", (request,res) ->
             res.end(JSON.stringify({added: true}))
         )
       else
-        raven.captureException(new Error("Youtube Error: Googleapis returned video not found for videoId"),{level:'error',extra:{videoId: videoId},request: httpResponse})
+        globals.raven.captureException(new Error("Youtube Error: Googleapis returned video not found for videoId"),{level:'error',extra:{videoId: videoId},request: httpResponse})
         globals.dc.sendMessage(channel_id,":warning: Youtube Error: Googleapis returned video not found for videoId ("+videoId+")")
         res.end(JSON.stringify({added: false, error: "Youtube Error"}))
     )
   else
-    raven.captureException(new Error("Chrome Extension: No UserId Provided"),{level:'warn',extra:{videoId: videoId}})
+    globals.raven.captureException(new Error("Chrome Extension: No UserId Provided"),{level:'warn',extra:{videoId: videoId}})
     res.end(JSON.stringify({added: false, error: "Authentication Error"}))
 )
 
@@ -132,6 +132,7 @@ router.get("/deleteSong/:trackId", (req, res) ->
   playlistCollection = globals.db.collection("playlist")
   playlistCollection.deleteOne({_id: new ObjectID(trackId)}, (err, results) ->
     if err
+      globals.raven.captureException(err,{level: 'error', tags:[{instigator: 'mongo'}]})
       res.end(JSON.stringify({success: false, error: "Database Error"}))
     globals.wss.broadcast(JSON.stringify({type: 'trackDelete', trackId: trackId}))
     res.end(JSON.stringify({success: true}))
@@ -141,6 +142,8 @@ router.get("/deleteSong/:trackId", (req, res) ->
 router.get("/playing", (request,res) ->
   playlistCollection = globals.db.collection("playlist")
   playlistCollection.find({status:'playing'}).sort({timestamp: 1}).toArray((err, results) ->
+    if err
+      globals.raven.captureException(err,{level: 'error', tags:[{instigator: 'mongo'}]})
     if results[0]
       res.end(JSON.stringify(results[0]))
     else
@@ -151,6 +154,8 @@ router.get("/playing", (request,res) ->
 router.get("/playlist", (request, res) ->
   playlistCollection = globals.db.collection("playlist")
   playlistCollection.find({}).sort({timestamp: 1}).toArray((err, results) ->
+    if err
+      globals.raven.captureException(err,{level: 'error', tags:[{instigator: 'mongo'}]})
     res.end(JSON.stringify(results))
   )
 )

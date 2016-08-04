@@ -88,21 +88,6 @@ var DiscordClient = function (options){
 
   function handleWSConnection(){
     debug("Connected to Gateway Server");
-    /*if(self.reconnect && self.internals.session_id != null){
-      //client resume - send op 6 package (should return all missed events, if op 9 returned reconnect using op 2)
-      var resumePackage = {
-        "op": 6,
-        "d": {
-          "token": self.internals.token,
-          "session_id": self.internals.session_id,
-          "seq": self.internals.sequence
-        }
-      }
-      debug("Sending OP 6 package to attempt reconnect");
-      ws.send(JSON.stringify(resumePackage));
-    }
-    else{*/
-      //send identity package
     debug("Using Compression: "+!!zlib.inflateSync);
     var identityPackage = {
       "op": 2,
@@ -120,18 +105,14 @@ var DiscordClient = function (options){
       }
     }
     ws.send(JSON.stringify(identityPackage));
-    //}
   }
 
   function handleWSMessage(data, flags){
-    debug("Gateway Server Sent Frame");
+    //debug("Gateway Server Sent Frame");
     var msg = flags.binary ? JSON.parse(zlib.inflateSync(data).toString()) : JSON.parse(data);
     self.internals.sequence = msg.s;
     //console.log(util.inspect(msg, false, null));
     switch(msg.t){
-      case "HELLO":
-        console.log("Hello Event Sent");
-        break;
       case "READY":
         //start sending heartbeat
         //console.log(util.inspect(msg.d, false, null));
@@ -143,7 +124,7 @@ var DiscordClient = function (options){
             "d": self.internals.sequence
           }
           if(ws.readyState === ws.OPEN){
-            debug("Sending Heartbeat with Sequence Identifier: "+self.internals.sequence);
+            //debug("Sending Heartbeat with Sequence Identifier: "+self.internals.sequence);
             ws.send(JSON.stringify(hbPackage));
           }
         },msg.d.heartbeat_interval);
@@ -297,6 +278,7 @@ var DiscordClient = function (options){
 
   function handleVoiceWSClose(){
     debug("Connection to Voice Gateway Server is CLOSED");
+    self.emit("voiceClosed");
     clearInterval(vhb);
     vhb = null;
   }
@@ -658,6 +640,7 @@ var DiscordClient = function (options){
           }
       }
       ws.send(JSON.stringify(msg));
+      self.internals.voice.channel_id = channel_id;
   }
 
   self.leaveVoice = function(guild_id){
@@ -675,6 +658,7 @@ var DiscordClient = function (options){
     clearInterval(vhb);
     self.internals.voice = {};
     vhb = null;
+    vws.close();
   }
 
   //Util

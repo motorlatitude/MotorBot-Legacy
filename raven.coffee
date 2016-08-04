@@ -8,7 +8,7 @@ path = require('path')
 stacktrace = require('stack-trace')
 requestModule = require('request')
 
-class exports.Raven
+class Raven
 
   constructor: (@dsn, @options=undefined, callback=undefined) ->
     console.log "Inititiating Raven"
@@ -312,3 +312,5 @@ class exports.Raven
     )
     req.write(data)
     req.on('error', (e) -> console.log "Connection to Sentry Refused")
+
+module.exports = Raven
