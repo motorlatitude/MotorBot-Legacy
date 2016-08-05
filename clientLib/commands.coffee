@@ -3,7 +3,7 @@ VoiceCommands = require './voiceCommands.coffee'
 apiai = require('apiai')
 apiai = apiai("ea1bdb33a83f48c795a585e44a4cdb4b") #AI for !talk method
 
-class exports.Commands
+class Commands
 
   #can set default output channel
   constructor: (@channelId = "169555395860234240") ->
@@ -12,6 +12,12 @@ class exports.Commands
   parseMessageForCommand: (msg, channel_id = @channelId, user_id = "") ->
     if msg == "!api sid"
       output_msg = "\`\`\`Javascript\nDiscordClient.prototype.internals.sequence = "+globals.dc.internals.sequence+"\n\`\`\`"
+      globals.dc.sendMessage(channel_id,output_msg)
+    else if msg.match(/cookies/gmi)
+      output_msg = "**Cookies?** I love cookies :cookie:"
+      globals.dc.sendMessage(channel_id,output_msg)
+    else if msg.match(/^(!(initiate\s|)self(\s|)destruct(\ssequence|)|!kill(\s|)me)/gmi)
+      output_msg = ":cold_sweat: No pleeeaaassssseee, I have children :cry: https://pbs.twimg.com/media/Cefcn6zW8AA09mQ.jpg"
       globals.dc.sendMessage(channel_id,output_msg)
     else if msg == "!api vsid"
       output_msg = "\`\`\`Javascript\nDiscordClient.prototype.internals.voice.sequence = "+globals.dc.internals.voice.sequence+"\n\`\`\`"
@@ -74,7 +80,7 @@ class exports.Commands
         if user_id == "95164972807487488"
           globals.dc.internals.voice.volume = parseFloat(msg.split(/\s/)[1])
         else
-          globals.dc.sendMessage("169555395860234240","Sorry, you're not authorised for this command :cry:")
+          globals.dc.sendMessage("169555395860234240",":rotating_light: Sorry, you're not authorised for this command")
       else
         globals.dc.sendMessage("169555395860234240","Hmmmmm, I think you might want to join a Voice Channel first :wink:")
     else if msg.match(/^!sb\spog/)
@@ -181,3 +187,5 @@ class exports.Commands
       request.end()
     else if msg.match(/^!/)
       globals.dc.sendMessage(channel_id,"I don't know what you want :cry:")
+
+module.exports = Commands

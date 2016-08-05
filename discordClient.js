@@ -5,11 +5,11 @@ var req = require('request'),                         //used to send http reques
     dgram = require('dgram'),                         //UDP connection
     fs = require('fs'),                               //file system methods
     os = require('os'),                               //system information
-    nacl = require('tweetnacl'),
-    Opus = require('node-opus'),
+    nacl = require('tweetnacl'),                      //encryption
+    Opus = require('node-opus'),                      //opus encoding
     zlib = require('zlib'),                           //compression
-    childProc = require('child_process');
-    unpipe = require('unpipe');
+    childProc = require('child_process'),             //spawn converting process for audio
+    unpipe = require('unpipe');                       //unpipe spawn
 /* Discord Client Class
  * Options (Array Object)
  *  - token: bot authorisation token
@@ -342,7 +342,7 @@ var DiscordClient = function (options){
 
         break;
       case 4: //session description
-        console.log(util.inspect(msg, false, null));
+        //console.log(util.inspect(msg, false, null));
         self.internals.voice.secretKey = msg.d.secret_key;
         self.internals.voice.mode = msg.d.mode;
         self.internals.voice.ready = true;
@@ -620,9 +620,9 @@ var DiscordClient = function (options){
       }
     }, function optionalCallback(err, httpResponse, body) {
         if (err) {
-          return debug("Error Sending Message "+err);
+          return debug("Error Sending Message with file"+err);
         }
-        debug("Message Create Sent to gateway");
+        debug("Message Create with File Sent to gateway");
       });
     form = r.form()
     form.append('file', file, {filename: 'profile.png'})
@@ -658,7 +658,7 @@ var DiscordClient = function (options){
     clearInterval(vhb);
     self.internals.voice = {};
     vhb = null;
-    vws.close();
+    if(vws) vws.close();
   }
 
   //Util
@@ -671,8 +671,6 @@ var DiscordClient = function (options){
   }
 
   self.connect = function(){
-    debug("############################# Server Initilized #############################");
-    debug("Running discordClient on "+os.platform());
     if(!self.connected) return init();
   }
 

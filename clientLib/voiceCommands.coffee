@@ -3,7 +3,7 @@ req = require('request')
 
 class VoiceCommands
   #can set default output channel
-  constructor: (@channelId = "169555395860234240") ->
+  constructor: (@channel_id = "169555395860234240") ->
     return true
 
   parseVoiceCommand: (command, guild_id) ->
@@ -23,6 +23,7 @@ class VoiceCommands
       globals.dc.leaveVoice(guild_id)
 
   parseMusicCommand: (msg, command, user_id) ->
+    self = @
     if command == "stop"
       globals.dc.stopStream()
       globals.songDone(false)
@@ -44,24 +45,26 @@ class VoiceCommands
           if data.items[0]
             console.log(videoId)
             playlistCollection = globals.db.collection("playlist")
-            insertionObj = {videoId: videoId, title: data.items[0].snippet.title, duration: data.items[0].contentDetails.duration, channel_id: channel_id, timestamp: new Date().getTime(), status: 'added', userId: user_id}
+            insertionObj = {videoId: videoId, title: data.items[0].snippet.title, duration: data.items[0].contentDetails.duration, channel_id: self.channel_id, timestamp: new Date().getTime(), status: 'added', userId: user_id}
             playlistCollection.insertOne(insertionObj, (err, result) ->
               if err
                 globals.raven.captureException(err,{level: 'error', tags:[{instigator: 'mongo'}]})
-                globals.dc.sendMessage(channel_id,":warning: A database error occurred adding this track...\nReport sent to sentry, please notify admin of the following error: \`Database insertion error at voiceCommands.coffee:51: "+err.toString()+"\`")
+                globals.dc.sendMessage(self.channel_id,":warning: A database error occurred adding this track...\nReport sent to sentry, please notify admin of the following error: \`Database insertion error at voiceCommands.coffee:51: "+err.toString()+"\`")
               else
-                globals.dc.sendMessage(channel_id,":notes: Added "+data.items[0].snippet.title)
+                globals.dc.sendMessage(self.channel_id,":notes: Added "+data.items[0].snippet.title)
                 formattedTimestamp = globals.convertTimestamp(data.items[0].contentDetails.duration)
                 formattedDiff = "a few seconds"
-                globals.wss.broadcast(JSON.stringify({type: 'trackAdd', videoId: videoId, title: data.items[0].snippet.title, duration: data.items[0].contentDetails.duration, formattedTimestamp: formattedTimestamp, formattedDiff: formattedDiff, channel_id: channel_id, timestamp: new Date().getTime(), status: 'added', userId: userId, _id: insertionObj._id.toString()}))
-                goThroughVideoList(channel_id)
+                globals.wss.broadcast(JSON.stringify({type: 'trackAdd', videoId: videoId, title: data.items[0].snippet.title, duration: data.items[0].contentDetails.duration, formattedTimestamp: formattedTimestamp, formattedDiff: formattedDiff, channel_id: self.channel_id, timestamp: new Date().getTime(), status: 'added', userId: user_id, _id: insertionObj._id.toString()}))
+                globals.songDone(true)
             )
           else
+            console.log self.channel_id
+            globals.dc.sendMessage(self.channel_id,":warning: Youtube Error: Googleapis returned video not found for videoId ("+videoId+")")
             globals.raven.captureException(new Error("Youtube Error: Googleapis returned video not found for videoId"),{level:'error',extra:{videoId: videoId},request: httpResponse})
-            globals.dc.sendMessage(channel_id,":warning: Youtube Error: Googleapis returned video not found for videoId ("+videoId+")")
         else
+          console.log self.channel_id
+          globals.dc.sendMessage(self.channel_id,":warning: Youtube Error: Googleapis returned video not found for videoId ("+videoId+")")
           globals.raven.captureException(new Error("Youtube Error: Googleapis returned video not found for videoId"),{level:'error',extra:{videoId: videoId},request: httpResponse})
-          globals.dc.sendMessage(channel_id,":warning: Youtube Error: Googleapis returned video not found for videoId ("+videoId+")")
       )
     else if command == "prev"
       playlistCollection = globals.db.collection("playlist")
@@ -90,7 +93,9 @@ class VoiceCommands
               console.log("Databse Updated Error Occured")
             else
               globals.dc.stopStream()
-              setTimeout(goThroughVideoList,1000)
+              setTimeout(() ->
+                globals.songDone(true)
+              ,1000)
           )
       )
     else if command == "skip"
@@ -102,8 +107,8 @@ class VoiceCommands
     else if command == "play"
       globals.songDone(true)
     else if command == "list"
-      globals.dc.sendMessage(channel_id,":headphones: Playlist can be viewed here: https://mb.lolstat.net/")
+      globals.dc.sendMessage(self.channel_id,":headphones: Playlist can be viewed here: https://mb.lolstat.net/")
     else
-      globals.dc.sendMessage(channel_id,"Unknown Voice Command :cry:")
+      globals.dc.sendMessage(self.channel_id,"Unknown Voice Command :cry:")
 
 module.exports = VoiceCommands

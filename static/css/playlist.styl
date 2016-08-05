@@ -158,6 +158,7 @@ html
   max-height 333px
   background rgba(27, 29, 32, 1.00)
   box-shadow 0 0 8px rgba(0,0,0,0.8)
+  overflow hidden
   & ul
     list-style none
     margin 0
@@ -170,6 +171,12 @@ html
       color #eee
       &:hover
         background rgba(62, 152, 246, 1.00)
+      &.sep
+        width 100%
+        height 1px
+        padding 0
+        margin 9px 0
+        background rgba(43, 45, 47, 0.8)
 
 .header
   width calc(100% - 75px)

@@ -38,6 +38,7 @@ globals = {
       return seconds + ' second' + numberEnding(seconds)
     return 'less than a second'
   db: null
+  raven: null
 }
 
 module.exports = globals

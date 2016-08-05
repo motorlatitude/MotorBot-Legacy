@@ -8,30 +8,31 @@ router.get("/playSong/:trackId", (req, res) ->
   console.log("PlaySong Page Loaded")
   trackId = req.params.trackId
   if !trackId
-    res.end(JSON.stringify({success: false, error: "No trackId supplied"}))
-  console.log trackId
-  trackId = new ObjectID(trackId)
-  playlistCollection = globals.db.collection("playlist")
-  playlistCollection.update({status: 'added'},{$set: {status: 'played'}}, {multi: true}, (err, result) ->
-    if err
-      globals.raven.captureException(err,{level: 'error', tags:[{instigator: 'mongo'}]})
-    playlistCollection.find({}).sort({timestamp: 1}).toArray((err, results) ->
-      foundTrack = false
-      for r in results
-        if r._id.toString() == trackId.toString() || foundTrack
-          track = r.title
-          trackId = r._id.toString()
-          trackDuration = r.duration
-          playlistCollection.update({timestamp: {$gte: r.timestamp}},{$set: {status: 'added'}}, {multi: true}, (err, result) ->
-            if err
-              globals.raven.captureException(err,{level: 'error', tags:[{instigator: 'mongo'}]})
-            globals.dc.stopStream()
-            globals.songDone(true)
-            globals.wss.broadcast(JSON.stringify({type: 'trackUpdate', track: track, trackId: trackId, trackDuration: trackDuration}))
-            return res.end(JSON.stringify({success: true}))
-          )
+    return res.end(JSON.stringify({success: false, error: "No trackId supplied"}))
+  else
+    console.log trackId
+    trackId = new ObjectID(trackId)
+    playlistCollection = globals.db.collection("playlist")
+    playlistCollection.update({status: 'added'},{$set: {status: 'played'}}, {multi: true}, (err, result) ->
+      if err
+        globals.raven.captureException(err,{level: 'error', tags:[{instigator: 'mongo'}]})
+      playlistCollection.find({}).sort({timestamp: 1}).toArray((err, results) ->
+        foundTrack = false
+        for r in results
+          if r._id.toString() == trackId.toString() || foundTrack
+            track = r.title
+            trackId = r._id.toString()
+            trackDuration = r.duration
+            playlistCollection.update({timestamp: {$gte: r.timestamp}},{$set: {status: 'added'}}, {multi: true}, (err, result) ->
+              if err
+                globals.raven.captureException(err,{level: 'error', tags:[{instigator: 'mongo'}]})
+              globals.dc.stopStream()
+              globals.songDone(true)
+              globals.wss.broadcast(JSON.stringify({type: 'trackUpdate', track: track, trackId: trackId, trackDuration: trackDuration}))
+              return res.end(JSON.stringify({success: true}))
+            )
+      )
     )
-  )
 )
 
 router.get("/stopSong", (req, res) ->

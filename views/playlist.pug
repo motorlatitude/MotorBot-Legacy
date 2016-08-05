@@ -123,23 +123,6 @@ html(lang="en")
               }
             });
           });
-          self.on('touchend', function(){
-            $.ajax({
-              url: '/api/playSong/'+self.attr('id'),
-              dataType: 'json',
-              success: function(d){
-                console.log(d);
-                $(".trackPlaying").removeClass("trackPlaying");
-                $(".play").parent().html($(".play").parent().attr('data-trackNo'))
-                self.children('.item').html('<i class="fa fa-volume-up play" aria-hidden="true"></i>');
-                self.addClass('trackPlaying');
-                songDuration = 0
-              },
-              error: function(err){
-                console.log(err);
-              }
-            });
-          });
           self.on('contextmenu', function(e){
             $(".contextMenu").css("display","none")
             if( e.button == 2 ) {
@@ -334,7 +317,6 @@ html(lang="en")
       //-.titleBar
       .sidebar
         img.motorbotIcon(src='/motorbotIcon.png')
-        .sep
       .contentView
         .header
           .playing Nothing Playing Currently

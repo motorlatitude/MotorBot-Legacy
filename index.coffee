@@ -1,19 +1,18 @@
-Raven = require(__dirname+'/raven.coffee')
+Raven = require __dirname+'/raven.coffee'
 globals = require __dirname+'/models/globals.coffee'
-{Commands} = require __dirname+'/clientLib/commands.coffee'
-commands = new Commands()
+Commands = require __dirname+'/clientLib/commands.coffee'
 MongoClient = require('mongodb').MongoClient
-fs = require('fs')
-req = require('request')
-https = require('https')
-stylus = require('stylus')
+fs = require 'fs'
+req = require 'request'
+https = require 'https'
+stylus = require 'stylus'
 nib = require 'nib'
 serveStatic = require 'serve-static'
-youtubeStream = require('ytdl-core')
-DiscordClient = require('./discordClient.js') #my lib :D
+youtubeStream = require 'ytdl-core'
+DiscordClient = require './discordClient.js' #my lib :D
 express = require "express"
 websocketServer = require("ws").Server
-globals.wss = new websocketServer({port: 3006})
+globals.wss = new websocketServer({port: 3006}) #public port is 3211 and local 3006 via nginx proxy
 raven = null
 debugLog = ""
 
@@ -33,6 +32,7 @@ globals.dc = new DiscordClient({token: "MTY5NTU0ODgyNjc0NTU2OTMw.CfAmNQ.WebsSsEe
 stream = null
 connectedChannel = null
 warning = false
+commands = null
 
 #Express Setup
 app = express()
@@ -122,6 +122,7 @@ globals.dc.on("ready", (msg) ->
   d = new Date()
   time = "["+d.getDate()+"/"+(parseInt(d.getMonth())+1)+"/"+d.getFullYear()+" "+d.toLocaleTimeString()+"] "
   console.log(time+msg.user.username+"#"+msg.user.discriminator+" has connected to the gateway server and is at your command")
+  commands = new Commands()
   connectToSentry()
   createDBConnection(initPlaylist)
   if connectedChannel != null
@@ -131,9 +132,6 @@ globals.dc.on("ready", (msg) ->
 )
 
 globals.dc.on("message", (msg,channel_id,user_id,raw_data) ->
-  d = new Date()
-  time = "["+d.getDate()+"/"+(parseInt(d.getMonth())+1)+"/"+d.getFullYear()+" "+d.toLocaleTimeString()+"] "
-  console.log(time+"\""+msg+"\" sent by user <@"+user_id+"> in <#"+channel_id+">")
   commands.parseMessageForCommand(msg,channel_id,user_id) #parse commands through commands class in clientLib dir
 )
 
@@ -141,7 +139,7 @@ globals.dc.on("disconnect", () ->
   if !warning
     warning = true
     globals.dc.sendMessage("169555395860234240",":warning: The connection to the Main Gateway Server `"+globals.dc.internals.gateway+"` Unexpectedly Closed! I will try to reconnect automatically :smiley:")
-    raven.captureException("The connection to the Gateway Server Unexpectedly Closed",{level: "warn", tags:[{instigator: 'discord'}]})
+    globals.raven.captureException("The connection to the Gateway Server Unexpectedly Closed",{level: "warn", tags:[{instigator: 'discord'}]})
     connectedChannel = globals.dc.internals.voice.channel_id
 )
 
@@ -181,7 +179,7 @@ goThroughVideoList = () ->
             volume = 0.5 #set default, as some videos (recently uploaded maybe?) don't have loudness value
             #stabilise volume to avoid really loud or really quiet playback
             if info.loudness
-              volume = (parseFloat(info.loudness)/-28)
+              volume = (parseFloat(info.loudness)/-27)
               console.log "Setting Volume Based on Video Loudness ("+info.loudness+"): "+volume
             globals.dc.playStream(yStream,{volume: volume})
             dur = globals.convertTimestamp(results[0].duration)
