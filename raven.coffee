@@ -35,7 +35,7 @@ class Raven
     process.on("uncaughtException", (err) ->
       console.log "Uncaught Exception, Exiting"
       self.captureException(err,{level:'fatal'}, (d) ->
-        process.exit(1)
+        #process.exit(1)
       )
     )
 

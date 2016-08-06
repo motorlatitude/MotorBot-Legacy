@@ -103,7 +103,8 @@ class VoiceCommands
       globals.songDone(true)
     else if command == "pause"
       globals.dc.pauseStream()
-      globals.songDone(false)
+    else if command == "resume"
+      globals.dc.resumeStream()
     else if command == "play"
       globals.songDone(true)
     else if command == "list"

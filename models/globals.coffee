@@ -39,6 +39,7 @@ globals = {
     return 'less than a second'
   db: null
   raven: null
+  streamByteLength: null
 }
 
 module.exports = globals

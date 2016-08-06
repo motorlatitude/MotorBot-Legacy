@@ -154,7 +154,7 @@ globals.dc.on("voiceClosed", () ->
 
 #continue through playlist and set status of currently playing track to 'playing' - TODO use ints to identify track status
 goThroughVideoList = () ->
-  if globals.dc.internals.voice.ready
+  if globals.dc.internals.voice.ready && !globals.dc.internals.voice.pause
     playlistCollection = globals.db.collection("playlist")
     playlistCollection.find({status: "added"}).sort({timestamp: 1}).toArray((err, results) ->
       if err
@@ -194,7 +194,7 @@ goThroughVideoList = () ->
 
 #once song is done, re-organise playlist and play next if available
 globals.songDone = (goToNext = false) ->
-  if globals.dc.internals.voice.ready
+  if globals.dc.internals.voice.ready && !globals.dc.internals.voice.pause
     console.log("Song Done")
     playlistCollection = globals.db.collection("playlist")
     playlistCollection.find({status: "playing"}).sort({timestamp: 1}).toArray((err, results) ->
