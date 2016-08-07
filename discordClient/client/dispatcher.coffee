@@ -21,7 +21,7 @@ class Dispatcher
       when 'VOICE_STATE_UPDATE' then utils.debug("VOICE_STATE_UPDATE event caught")
       when 'VOICE_SERVER_UPDATE' then @handleVoiceConnection(data)
       else
-        console.log data
+        utils.debug("Unhandled Dispatch t: "+data.t, "warn")
 
   handleReady: (data) ->
     utils.debug("Gateway Ready, Guilds: 0 Available / "+data.d.guilds.length+" Unavailable", "info")
@@ -41,7 +41,7 @@ class Dispatcher
     @discordClient.emit("ready", data.d)
     #console.log(util.inspect(data, false, null))
 
-  handleGuildCreate: (data) -> #fired when bot lazy loads available guilds and join a new guild
+  handleGuildCreate: (data) -> #fired when bot lazy loads available guilds and joins a new guild
     @discordClient.internals.servers[data.d.id] = data.d
     @discordClient.internals.servers[data.d.id].voice = {}
     thisServer = @discordClient.internals.servers[data.d.id]
@@ -50,9 +50,8 @@ class Dispatcher
   handleMessageCreate: (data) ->
     @discordClient.emit("message",data.d.content,data.d.channel_id,data.d.author.id,data.d)
 
-  handleVoiceConnection: (data) ->
-    #start dealing with voice stuff
-    utils.debug("I've joined a voice channel :D")
+  handleVoiceConnection: (data) -> #bot has connected to voice channel
+    utils.debug("Joined Voice Channel","info")
     vc = new voiceConnection(@discordClient)
     vc.connect(data.d)
 
