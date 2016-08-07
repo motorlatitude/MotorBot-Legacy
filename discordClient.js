@@ -459,7 +459,7 @@ var DiscordClient = function (options){
                 buff = out;
                 encoded = opusEncoder.encode(buff, 1920);
                 audioPacket = VoicePacket(encoded)
-                if(self.internals.voice.pause){
+                if(self.internals.voice.pause){ //if paused store voicepackets in pauseData
                   if(self.internals.voice.pauseData == null) self.internals.voice.pauseData = [];
                   self.internals.voice.pauseData.push(audioPacket)
                   if(!onSendEmpty){
@@ -474,7 +474,7 @@ var DiscordClient = function (options){
                   }
                 }
                 else{
-                  if(self.internals.voice.pauseData != null && self.internals.voice.pauseData.length > 0){
+                  if(self.internals.voice.pauseData != null && self.internals.voice.pauseData.length > 0){ //play pauseData if available
                     self.internals.voice.pauseData.push(audioPacket)
                     var voicePacket = self.internals.voice.pauseData.shift();
                     if(voicePacket){
@@ -489,7 +489,7 @@ var DiscordClient = function (options){
                       self.internals.voice.pauseData = null;
                     }
                   }
-                  else{
+                  else{ //if no pause data and not paused play as normal
                     self.internals.voice.udpClient.send(audioPacket, 0, audioPacket.length, self.internals.voice.port, self.internals.voice.endpoint.split(":")[0], function(err, bytes) {
                         if (err) throw err;
                         //debug('UDP message sent to ' + self.internals.voice.endpoint.split(":")[0] +':'+ self.internals.voice.port);
@@ -504,10 +504,12 @@ var DiscordClient = function (options){
                   self.internals.voice.udpClient.send(voicePacket, 0, voicePacket.length, self.internals.voice.port, self.internals.voice.endpoint.split(":")[0], function(err, bytes) {
                       if (err) throw err;
                       onSendEmpty = false
-                      if(self.internals.voice.pauseData.length < 1){
-                        self.internals.voice.pauseData = null;
-                        self.emit("songDone");
-                        self.stopStream();
+                      if(self.internals.voice.pauseData){
+                        if(self.internals.voice.pauseData.length < 1){
+                          self.internals.voice.pauseData = null;
+                          self.emit("songDone");
+                          self.stopStream();
+                        }
                       }
                       //debug('UDP message sent to ' + self.internals.voice.endpoint.split(":")[0] +':'+ self.internals.voice.port);
                   });
@@ -560,7 +562,9 @@ var DiscordClient = function (options){
       				self.internals.voice.enc.kill();
               self.internals.voice.stream = null;
               self.internals.voice.enc = null;
-              self.stopStream();
+              if(self.internals.voice.pauseData == null){
+                self.stopStream();
+              }
             }
     			});
           /*process.stdout.on('error', function( err ) {
@@ -577,7 +581,9 @@ var DiscordClient = function (options){
     			});*/
           self.internals.voice.enc.once('close', function(code, signal) {
             console.log("[!] Stdout Closed");
-            self.emit("songDone");
+            if(self.internals.voice.pauseData == null){
+              self.emit("songDone");
+            }
     			});
     			self.internals.voice.enc.stdout.once('error', function(e) {
             console.log("[!] Stdout Disconnected");
@@ -628,6 +634,7 @@ var DiscordClient = function (options){
     if(self.internals.voice.ready && !self.internals.voice.pause){
       self.setSpeaking(false);
       self.internals.voice.allowPlay = false;
+      self.internals.voice.pauseData = null;
       if(self.internals.voice.enc){
         self.internals.voice.enc.stdin.setEncoding('utf8');
         try{

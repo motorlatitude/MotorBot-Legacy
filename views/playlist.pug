@@ -47,8 +47,8 @@ html(lang="en")
               var formattedTimestamp = data.formattedTimestamp;
               var added = data.formattedDiff + " ago";
               $("#playlist").append("<li id='"+data._id+"'><div class='item' data-trackNo='"+trackNo+"'>"+trackNo+"</div><div class='title'>"+data.title+"</div><div class='videoId'><a href='https://www.youtube.com/watch?v="+data.videoId+"' target='_blank'><i class='fa fa-external-link' aria-hidden='true'></i> "+data.videoId+"</a></div><div class='time'>"+formattedTimestamp+"</div><div class='added'>"+added+"</div><div class='user'>"+data.userId+"</div></li>");
-              updateDblClicks();
               $(".errorList ul").append("<li class='info'><div class='icon'><div class='iconWrapper'><i class='fa fa-play' aria-hidden='true'></i></div></div><div class='content'>Track Added: \""+data.title+"\"</div></li>");
+              updateDblClicks();
             }
             else if(data.type == "trackDelete"){
               $("#"+data.trackId).remove();
@@ -69,9 +69,7 @@ html(lang="en")
               }
               $(".duration").html(timeSpent);
               $(".songDuration").html(songTimelineDuration);
-              $(".timeline").animate({
-                "width": ((data.time/1000)/songDuration)*100+"%"
-              },1000);
+              $(".timeline").css("width",((data.time/1000)/songDuration)*100+"%");
             }
             else{
             }
@@ -104,6 +102,11 @@ html(lang="en")
       });
 
       function updateDblClicks(){
+        $(".errorList ul li").each(function(index){
+          $(this).click(function(){
+            $(this).remove();
+          });
+        });
         $("#playlist li").each(function(index){
           var self = $(this);
           self.dblclick(function(){
