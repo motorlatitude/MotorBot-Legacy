@@ -24,7 +24,7 @@ class DiscordClient extends EventEmitter
     utils.debug("Retrieving Discord Gateway Server")
     req.get({url: "https://discordapp.com/api/gateway", json: true, time: true}, (err, res, data) ->
       if res.statusCode != 200 || err
-        utils.debug("Error Occured Obtaining Gateyway Server: "+res.statusCode+" "+res.statusMessage,"error")
+        utils.debug("Error Occurred Obtaining Gateway Server: "+res.statusCode+" "+res.statusMessage,"error")
         return @emit("disconnect")
       ping = res.elapsedTime
       utils.debug("Gateway Server: "+data.url+" ("+ping+"ms)")
