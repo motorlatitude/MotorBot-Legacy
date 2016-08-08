@@ -4,6 +4,7 @@ Constants = require './../constants.coffee'
 ws = require 'ws'
 zlib = require 'zlib'
 UDPClient = require './udpClient'
+playStream = require './playStream.coffee'
 
 class VoiceConnection
 
@@ -113,5 +114,23 @@ class VoiceConnection
   ###
   # PUBLIC FACING METHODS
   ###
+
+  playFromStream: (stream) ->
+    ps = new playStream(stream)
+    return ps
+
+  playFromFile: (file) ->
+
+  pause: (streamObj) ->
+
+  play: (streamObj) ->
+    #start sending voice data and turn speaking on for bot
+
+  stop: (streamObj) ->
+    #stop sending voice data and turn speaking off for bot
+
+  setVolume: (streamObj) ->
+
+  getVolume: (streamObj) ->
 
 module.exports = VoiceConnection
