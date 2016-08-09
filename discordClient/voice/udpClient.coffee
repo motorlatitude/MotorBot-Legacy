@@ -37,5 +37,7 @@ class UDPClient extends EventEmitter
     utils.debug("Local Address: "+localIP+":"+localPort)
     @emit("ready", localIP, localPort)
 
+  send: (packet, x, packetLength, port, endpoint, cb) ->
+    @udpClient.send(packet, x, packetLength, port, endpoint, cb)
 
 module.exports = UDPClient

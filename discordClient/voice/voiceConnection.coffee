@@ -75,6 +75,9 @@ class VoiceConnection
       self.vws.send(JSON.stringify(hbpackage))
     , msg.d.heartbeat_interval)
 
+    @ssrc = msg.d.ssrc
+    @port = msg.d.port
+
     conn = {
       "ssrc": msg.d.ssrc
       "port": msg.d.port
@@ -111,12 +114,22 @@ class VoiceConnection
     @mode = msg.d.mode
     utils.debug("Received Voice Session Description")
 
+  setSpeaking: (value) ->
+    speakingPackage = {
+      "op": 5
+      "d":{
+        "speaking": value
+        "delay": 0
+      }
+    }
+    @vws.send(JSON.stringify(speakingPackage))
+
   ###
-  # PUBLIC FACING METHODS
+  # PUBLIC METHODS
   ###
 
   playFromStream: (stream) ->
-    ps = new playStream(stream)
+    ps = new playStream(stream, @)
     return ps
 
   playFromFile: (file) ->
@@ -125,6 +138,8 @@ class VoiceConnection
 
   play: (streamObj) ->
     #start sending voice data and turn speaking on for bot
+    @setSpeaking(true)
+    streamObj.send(new Date().getTime(), 1)
 
   stop: (streamObj) ->
     #stop sending voice data and turn speaking off for bot
