@@ -1,5 +1,13 @@
 language: node_js
 sudo: true
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - g++-4.8
+env:
+  CXX=g++-4.8
 before_install:
   - npm install -g node-gyp
   - node-gyp install
@@ -7,6 +15,3 @@ before_install:
 node_js:
   - "6"
   - "6.3.0"
-  - "5.11"
-  - "0.6"
-  - "iojs"
