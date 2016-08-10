@@ -5,7 +5,7 @@
   "main": "index.coffee",
   "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha spec"
   },
   "dependencies": {
     "apiai": "*",
@@ -22,7 +22,9 @@
     "tweetnacl": "*",
     "unpipe": "^1.0.0",
     "ws": "*",
-    "ytdl-core": "^0.7.17"
+    "ytdl-core": "^0.7.17",
+    "mocha": "*",
+    "chai": "*"
   },
   "author": "Lennart Hase",
   "license": "ISC"
