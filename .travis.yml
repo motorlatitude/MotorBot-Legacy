@@ -1,4 +1,9 @@
 language: node_js
+sudo: true
+before_install:
+  - sudo npm install -g node-gyp
+  - node-gyp install
+  - node-gyp rebuild
 node_js:
   - "6"
   - "6.3.0"
