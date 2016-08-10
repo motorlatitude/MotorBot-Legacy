@@ -5,7 +5,7 @@
   "main": "index.coffee",
   "private": true,
   "scripts": {
-    "test": "mocha spec"
+    "test": "./node_modules/.bin/mocha --compilers coffee:coffee-script/register --reporter spec"
   },
   "dependencies": {
     "apiai": "*",

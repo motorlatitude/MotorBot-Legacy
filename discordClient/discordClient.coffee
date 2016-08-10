@@ -1,4 +1,4 @@
-{EventEmitter} = require('events')
+EventEmitter = require('events').EventEmitter
 req = require 'request'
 pjson = require '../package.json'
 u = require('./utils.coffee')
