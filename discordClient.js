@@ -9,8 +9,7 @@ var req = require('request'),                         //used to send http reques
     Opus = require('node-opus'),                      //opus encoding
     zlib = require('zlib'),                           //compression
     childProc = require('child_process'),             //spawn converting process for audio
-    unpipe = require('unpipe'),                       //unpipe spawn
-    ps = require('pause-stream')();
+    unpipe = require('unpipe');                       //unpipe spawn
 /* Discord Client Class
  * Options (Array Object)
  *  - token: bot authorisation token
