@@ -35,6 +35,7 @@ class DiscordClient extends EventEmitter
     self = @
     @internals.gateway = gateway
     @internals.token = @options.token
+    @internals.connected = false
 
     cc = new clientConnection(@)
     cc.connect(gateway) #connect to discord gateway server
