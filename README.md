@@ -2,6 +2,7 @@
 
 
 [![Github Issues](https://img.shields.io/github/issues/motorlatitude/motorbot.svg)]() &nbsp; &nbsp;
+[![Build Status](https://travis-ci.org/motorlatitude/MotorBot.svg?branch=master)](https://travis-ci.org/motorlatitude/MotorBot)
 [![GitHub release](https://img.shields.io/github/release/motorlatitude/motorbot.svg)]() &nbsp; &nbsp;
 [![Chrome Web Store](https://img.shields.io/chrome-web-store/v/pgkdpldhnmmhpdfmmkgpnpofaaagomab.svg)]()
 
