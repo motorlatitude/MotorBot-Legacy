@@ -20,6 +20,7 @@
     "tweetnacl": "*",
     "unpipe": "^1.0.0",
     "ws": "*",
+    "node-gyp": "^3.4.0",
     "ytdl-core": "^0.7.17"
   },
   "author": "Lennart Hase",
