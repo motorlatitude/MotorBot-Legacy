@@ -11,14 +11,6 @@ class DiscordClient extends EventEmitter
   constructor: (@options) ->
     if !@options.token then throw new Error("No Token Provided")
 
-  connect: () ->
-    utils.debug("Starting MotorBot "+pjson.version,"info")
-    @internals = {}
-    @internals.servers = {}
-    @internals.voice = {}
-    @internals.sequence = 0
-    @getGateway()
-
   getGateway: () ->
     self = @
     utils.debug("Retrieving Discord Gateway Server")
@@ -40,6 +32,15 @@ class DiscordClient extends EventEmitter
     cc = new clientConnection(@)
     cc.connect(gateway) #connect to discord gateway server
 
+  #PUBLIC METHODS
+  connect: () ->
+    utils.debug("Starting MotorBot "+pjson.version,"info")
+    @internals = {}
+    @internals.servers = {}
+    @internals.voice = {}
+    @internals.sequence = 0
+    @getGateway()
+  
   joinVoiceChannel: (channel_id) ->
     #get server for channel_id
     channelId = null
@@ -62,5 +63,17 @@ class DiscordClient extends EventEmitter
       }
     }
     @gatewayWS.send(JSON.stringify(joinVoicePackage))
+  
+  leaveVoiceChannel: (server) ->
+    leaveVoicePackage = {
+      "op": 4,
+      "d": {
+        "guild_id": server,
+        "channel_id": null,
+        "self_mute": false,
+        "self_deaf": false
+      }
+    }
+    @gatewayWS.send(JSON.stringify(leaveVoicePackage))
 
 module.exports = DiscordClient

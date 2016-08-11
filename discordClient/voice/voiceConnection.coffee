@@ -3,6 +3,7 @@ utils = new u()
 Constants = require './../constants.coffee'
 ws = require 'ws'
 zlib = require 'zlib'
+fs = require 'fs'
 UDPClient = require './udpClient'
 playStream = require './playStream.coffee'
 
@@ -14,6 +15,8 @@ class VoiceConnection
 
   constructor: (@discordClient) ->
     utils.debug("New Voice Connection Started")
+    @sequence = 0
+    @timestamp = 0
 
   connect: (params) ->
     @token = params.token
@@ -129,23 +132,11 @@ class VoiceConnection
   ###
 
   playFromStream: (stream) ->
-    ps = new playStream(stream, @)
+    ps = new playStream(stream, @, @discordClient)
     return ps
 
   playFromFile: (file) ->
-
-  pause: (streamObj) ->
-
-  play: (streamObj) ->
-    #start sending voice data and turn speaking on for bot
-    @setSpeaking(true)
-    streamObj.send(new Date().getTime(), 1)
-
-  stop: (streamObj) ->
-    #stop sending voice data and turn speaking off for bot
-
-  setVolume: (streamObj) ->
-
-  getVolume: (streamObj) ->
+    ps = new playStream(file, @, @discordClient)
+    return ps
 
 module.exports = VoiceConnection
