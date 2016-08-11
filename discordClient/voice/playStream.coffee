@@ -4,7 +4,6 @@ utils = new u()
 VoicePacket = require './voicePacket.coffee'
 childProc = require 'child_process'
 Opus = require 'node-opus'
-ffmpeg = require 'fluent-ffmpeg'
 
 class playStream extends EventEmitter
   
