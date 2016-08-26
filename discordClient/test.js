@@ -52,24 +52,26 @@
     } else if (msg === "!v pause") {
       return musicStream.pause();
     } else if (msg === "!sb") {
-      soundboard = dc.internals.servers["130734377066954752"].voice.playFromFile("/var/www/motorbot/soundboard/kled.mp3");
-      soundboard.on('ready', function() {
-        if (musicStream) {
-          musicStream.pause();
-          return musicStream.on("paused", function() {
+      return setTimeout(function() {
+        soundboard = dc.internals.servers["130734377066954752"].voice.playFromFile("/var/www/motorbot/soundboard/kled.mp3");
+        soundboard.on('ready', function() {
+          if (musicStream) {
+            musicStream.pause();
+            return musicStream.on("paused", function() {
+              return soundboard.play();
+            });
+          } else {
             return soundboard.play();
-          });
-        } else {
-          return soundboard.play();
-        }
-      });
-      return soundboard.on('streamDone', function() {
-        soundboard.destroy();
-        soundboard = null;
-        if (musicStream) {
-          return musicStream.play();
-        }
-      });
+          }
+        });
+        return soundboard.on('streamDone', function() {
+          soundboard.destroy();
+          soundboard = null;
+          if (musicStream) {
+            return musicStream.play();
+          }
+        });
+      }, 5000);
     }
   });
 

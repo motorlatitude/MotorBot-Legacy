@@ -132,7 +132,7 @@
           globals.dc.stopStream();
           globals.songDone(false);
           return setTimeout(function() {
-            return globals.dc.playStream('/var/www/motorbot/soundboard/Kled.mp3', {
+            return globals.dc.playStream('/var/www/motorbot/soundboard/kled.mp3', {
               volume: 2.0
             });
           }, 1000);

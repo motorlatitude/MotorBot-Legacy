@@ -39,22 +39,24 @@ dc.on("message", (msg, channel_id, user_id, raw) ->
   else if msg == "!v pause"
     musicStream.pause()
   else if msg == "!sb"
-    soundboard = dc.internals.servers["130734377066954752"].voice.playFromFile("/var/www/motorbot/soundboard/kled.mp3")
-    soundboard.on('ready', () ->
-      if musicStream
-        musicStream.pause()
-        musicStream.on("paused", () ->
+    return setTimeout(() ->
+      soundboard = dc.internals.servers["130734377066954752"].voice.playFromFile("/var/www/motorbot/soundboard/kled.mp3")
+      soundboard.on('ready', () ->
+        if musicStream
+          musicStream.pause()
+          musicStream.on("paused", () ->
+            soundboard.play()
+          )
+        else
           soundboard.play()
-        )
-      else
-        soundboard.play()
-    )
-    soundboard.on('streamDone', () ->
-      soundboard.destroy()
-      soundboard = null
-      if musicStream
-        musicStream.play()
-    )
+      )
+      soundboard.on('streamDone', () ->
+        soundboard.destroy()
+        soundboard = null
+        if musicStream
+          musicStream.play()
+      )
+    , 5000)
 )
 
 dc.connect()

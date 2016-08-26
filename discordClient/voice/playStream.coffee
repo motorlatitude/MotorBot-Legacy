@@ -62,6 +62,10 @@ class playStream extends EventEmitter
       self.enc.stdout.emit("end")
     )
 
+    @enc.stderr.on('data', (d) ->
+      console.log 'data: '+d
+    )
+
     @enc.stdout.once('readable', () ->
       utils.debug("Storing Voice Packets")
       self.packageList = []
@@ -122,7 +126,13 @@ class playStream extends EventEmitter
         return setTimeout(() ->
           self.send(startTime, cnt + 1)
         , 20 + (nextTime - new Date().getTime()))
-
+    else
+      packet = new Buffer([0xF8, 0xFF, 0xFE]) #5 frames of silence
+      @voiceConnection.udpClient.send(packet, 0, packet.length, @voiceConnection.port, @voiceConnection.endpoint.split(":")[0], (err, bytes) ->
+        if err
+          utils.debug("Error Sending Voice Packet: "+err.toString(),"error")
+      )
+    
 
   stopSending: () ->
     @stopSend = true

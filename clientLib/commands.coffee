@@ -106,7 +106,7 @@ class Commands
         globals.dc.stopStream()
         globals.songDone(false)
         setTimeout(() ->
-          globals.dc.playStream('/var/www/motorbot/soundboard/Kled.mp3',{volume: 2.0})
+          globals.dc.playStream('/var/www/motorbot/soundboard/kled.mp3',{volume: 2.0})
         ,1000)
       else
         globals.dc.sendMessage("169555395860234240","Hmmmmm, I think you might want to join a Voice Channel first :wink:")
