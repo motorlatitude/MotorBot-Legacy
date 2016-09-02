@@ -13,7 +13,7 @@ class Commands
     if msg == "!api sid"
       output_msg = "\`\`\`Javascript\nDiscordClient.prototype.internals.sequence = "+globals.dc.internals.sequence+"\n\`\`\`"
       globals.dc.sendMessage(channel_id,output_msg)
-    else if msg.match(/cookies/gmi)
+    else if msg == "cookies" || msg == "cookie"
       output_msg = "**Cookies?** I love cookies :cookie:"
       globals.dc.sendMessage(channel_id,output_msg)
     else if msg.match(/^(!(initiate\s|)self(\s|)destruct(\ssequence|)|!kill(\s|)me)/gmi)

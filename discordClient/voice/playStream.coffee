@@ -12,6 +12,7 @@ class playStream extends EventEmitter
   ###
   
   constructor: (stream, @voiceConnection, @discordClient) ->
+    @glob_stream = stream
     #setup stream
     utils.debug("Setting up new stream")
     @ffmpegDone = false
@@ -131,12 +132,17 @@ class playStream extends EventEmitter
       @voiceConnection.udpClient.send(packet, 0, packet.length, @voiceConnection.port, @voiceConnection.endpoint.split(":")[0], (err, bytes) ->
         if err
           utils.debug("Error Sending Voice Packet: "+err.toString(),"error")
+        else
+          self.voiceConnection.setSpeaking(false)
+          utils.debug("Sending Empty Packet","debug")
       )
     
 
   stopSending: () ->
     @stopSend = true
-  
+    @glob_stream.end();
+    @glob_stream.destroy();
+
   ###
   # PUBLIC METHODS
   ###
@@ -156,7 +162,6 @@ class playStream extends EventEmitter
   stop: () ->
     #stop sending voice data and turn speaking off for bot
     utils.debug("Stopping Stream")
-    @voiceConnection.setSpeaking(false)
     @emit("streamDone")
     try
       @stopSending()
