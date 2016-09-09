@@ -9,6 +9,7 @@ var req = require('request'),                         //used to send http reques
     Opus = require('node-opus'),                      //opus encoding
     zlib = require('zlib'),                           //compression
     childProc = require('child_process'),             //spawn converting process for audio
+    keys = require('/var/www/motorbot/keys.json'),    //project tokens
     unpipe = require('unpipe');                       //unpipe spawn
 /* Discord Client Class
  * Options (Array Object)
@@ -106,7 +107,7 @@ var DiscordClient = function (options){
         "compress": !!zlib.inflateSync,
         "large_threshold": 250
       }
-    }
+    };
     ws.send(JSON.stringify(identityPackage));
   }
 
@@ -125,7 +126,7 @@ var DiscordClient = function (options){
           var hbPackage = {
             "op": 1,
             "d": self.internals.sequence
-          }
+          };
           if(ws.readyState === ws.OPEN){
             //debug("Sending Heartbeat with Sequence Identifier: "+self.internals.sequence);
             ws.send(JSON.stringify(hbPackage));
@@ -143,7 +144,7 @@ var DiscordClient = function (options){
           var hbPackage = {
             "op": 1,
             "d": self.internals.sequence
-          }
+          };
           if(ws.readyState === ws.OPEN){
             debug("Sending Heartbeat with Sequence Identifier: "+self.internals.sequence);
             ws.send(JSON.stringify(hbPackage));
@@ -240,7 +241,7 @@ var DiscordClient = function (options){
           "endpoint": msg.d.endpoint,
           "user_id": self.internals.user_id,
           "session_id": self.internals.session_id
-        }
+        };
         //console.log(util.inspect(msg, false, null));
         debug("Generating New Websocket Connection to Voice Gateway");
         vws = new websocket("wss://"+msg.d.endpoint.split(":")[0]);
@@ -270,7 +271,7 @@ var DiscordClient = function (options){
             "session_id": self.internals.voice.session_id,
             "token": self.internals.voice.token
             }
-    }
+    };
     vws.send(JSON.stringify(identityPackage));
   }
 
@@ -295,7 +296,7 @@ var DiscordClient = function (options){
           var vhbPackage = {
             "op": 3,
             "d": null
-          }
+          };
           if(vws.readyState === vws.OPEN){
             //debug("Sending Voice Heartbeat with Sequence Identifier: null");
             vws.send(JSON.stringify(vhbPackage));
@@ -320,7 +321,7 @@ var DiscordClient = function (options){
             debug("UDP Package Recieved From: "+rinfo.address + ':' + rinfo.port);
             var buffArr = JSON.parse(JSON.stringify(msg)).data;
             //Parse received packet for client ip and port number
-            var vDiscIP = ""
+            var vDiscIP = "";
       			for (var i=4; i<buffArr.indexOf(0, i); i++) {
       				vDiscIP += String.fromCharCode(buffArr[i]);
       			}
@@ -413,7 +414,7 @@ var DiscordClient = function (options){
         		}
 
         		return returnBuffer;
-          }
+          };
 
           function sendAudio(opusEncoder, cnt){
             if(self.internals.voice.ready && self.internals.voice.allowPlay){
@@ -457,10 +458,10 @@ var DiscordClient = function (options){
             		}
                 buff = out;
                 encoded = opusEncoder.encode(buff, 1920);
-                audioPacket = VoicePacket(encoded)
+                audioPacket = VoicePacket(encoded);
                 if(self.internals.voice.pause){ //if paused store voicepackets in pauseData
                   if(self.internals.voice.pauseData == null) self.internals.voice.pauseData = [];
-                  self.internals.voice.pauseData.push(audioPacket)
+                  self.internals.voice.pauseData.push(audioPacket);
                   if(!onSendEmpty){
                     debug("Sending Empty Packet Before Pause");
                     var emptyBuffer = new Buffer([0xF8, 0xFF, 0xFE]);
@@ -474,12 +475,12 @@ var DiscordClient = function (options){
                 }
                 else{
                   if(self.internals.voice.pauseData != null && self.internals.voice.pauseData.length > 0){ //play pauseData if available
-                    self.internals.voice.pauseData.push(audioPacket)
+                    self.internals.voice.pauseData.push(audioPacket);
                     var voicePacket = self.internals.voice.pauseData.shift();
                     if(voicePacket){
                       self.internals.voice.udpClient.send(voicePacket, 0, voicePacket.length, self.internals.voice.port, self.internals.voice.endpoint.split(":")[0], function(err, bytes) {
                           if (err) throw err;
-                          onSendEmpty = false
+                          onSendEmpty = false;
                           //debug('UDP message sent to ' + self.internals.voice.endpoint.split(":")[0] +':'+ self.internals.voice.port);
                       });
                       self.emit("songTime",cnt*20);
@@ -502,7 +503,7 @@ var DiscordClient = function (options){
                 if(voicePacket){
                   self.internals.voice.udpClient.send(voicePacket, 0, voicePacket.length, self.internals.voice.port, self.internals.voice.endpoint.split(":")[0], function(err, bytes) {
                       if (err) throw err;
-                      onSendEmpty = false
+                      onSendEmpty = false;
                       if(self.internals.voice.pauseData){
                         if(self.internals.voice.pauseData.length < 1){
                           self.internals.voice.pauseData = null;
@@ -550,7 +551,7 @@ var DiscordClient = function (options){
               console.log("ERROR");
             });
             self.internals.voice.stream = stream;
-            self.internals.voice.stream.pipe(self.internals.voice.enc.stdin)
+            self.internals.voice.stream.pipe(self.internals.voice.enc.stdin);
             /*self.internals.voice.stream.on('error', function(code, signal) {
               console.log("[!] STREAM ERROR");
       			});*/
@@ -605,17 +606,17 @@ var DiscordClient = function (options){
         }
       });
     }
-  }
+  };
 
   self.pauseStream = function(){
     self.setSpeaking(false);
     self.internals.voice.pause = true
-  }
+  };
 
   self.resumeStream = function(){
     self.setSpeaking(true);
     self.internals.voice.pause = false
-  }
+  };
 
   self.setSpeaking = function(value){
     var wsSpeaking = {
@@ -626,7 +627,7 @@ var DiscordClient = function (options){
       }
     };
     vws.send(JSON.stringify(wsSpeaking));
-  }
+  };
 
   self.stopStream = function(cb){
     console.log("Stopping Stream");
@@ -645,7 +646,7 @@ var DiscordClient = function (options){
       }
       if(cb) cb();
     }
-  }
+  };
 
 
   self.setStatus = function(name){
@@ -657,7 +658,7 @@ var DiscordClient = function (options){
           "name": name
         }
       }
-    }
+    };
     if(ws.readyState === ws.OPEN){
       ws.send(JSON.stringify(dataMsg));
       debug("Status Succesfully Set to \""+name+"\"");
@@ -665,34 +666,34 @@ var DiscordClient = function (options){
     else{
       debug("Error Occured Setting Status: Gateway Connection Interuption");
     }
-  }
+  };
 
   self.sendMessage = function(channel_id, msg, tts){
-    tts = tts || "false";
-    req.post({
-      url: "https://discordapp.com/api/channels/"+channel_id+"/messages",
-      headers: {
-        "Authorization": "MTY5NTU0ODgyNjc0NTU2OTMw.CfAmNQ.WebsSsEexNlFWaNc2u54EP-hIX0",
-        "Content-Type": "application/json"
-      },
-      form: {
-        content: msg,
-        tts: tts
-      }
-    }, function optionalCallback(err, httpResponse, body) {
-        if (err) {
-          return debug("Error Sending Message "+err);
-        }
-        debug("Message Create Sent to gateway");
+      console.log(keys.token);
+      tts = tts || "false";
+      req.post({
+          url: "https://discordapp.com/api/channels/"+channel_id+"/messages",
+          headers: {
+              "Authorization": "Bot "+keys.token
+          },
+          form: {
+              content: msg,
+              tts: tts
+          }
+      }, function optionalCallback(err, httpResponse, body) {
+          if (err) {
+              return debug("Error Sending Message "+err);
+          }
+          debug("Message Create Sent to gateway");
       });
-  }
+  };
 
   self.sendFile = function(channel_id, file, msg, tts){
     tts = tts || "false";
     r = req.post({
       url: "https://discordapp.com/api/channels/"+channel_id+"/messages",
       headers: {
-        "Authorization": "MTY5NTU0ODgyNjc0NTU2OTMw.CfAmNQ.WebsSsEexNlFWaNc2u54EP-hIX0",
+        "Authorization": "Bot "+keys.token,
         "Content-Type": "multipart/form-data"
       }
     }, function optionalCallback(err, httpResponse, body) {
@@ -701,9 +702,9 @@ var DiscordClient = function (options){
         }
         debug("Message Create with File Sent to gateway");
       });
-    form = r.form()
+    form = r.form();
     form.append('file', file, {filename: 'profile.png'})
-  }
+  };
 
   self.joinVoice = function(channel_id, guild_id){
     //join a voice channel
@@ -715,10 +716,10 @@ var DiscordClient = function (options){
             "self_mute": false,
             "self_deaf": false
           }
-      }
+      };
       ws.send(JSON.stringify(msg));
       self.internals.voice.channel_id = channel_id;
-  }
+  };
 
   self.leaveVoice = function(guild_id){
     //leave any voice channel
@@ -730,13 +731,13 @@ var DiscordClient = function (options){
             "self_mute": false,
             "self_deaf": false
           }
-      }
+      };
     ws.send(JSON.stringify(msg));
     clearInterval(vhb);
     self.internals.voice = {};
     vhb = null;
     if(vws) vws.close();
-  }
+  };
 
   //Util
   function debug(msg){
@@ -749,7 +750,7 @@ var DiscordClient = function (options){
 
   self.connect = function(){
     if(!self.connected) return init();
-  }
+  };
 
   if(options.autorun){ //when using autorun, care for load times of modules, early events may not be sent to parent
     self.connect();
@@ -772,7 +773,7 @@ var DiscordClient = function (options){
           process.exit(1);
       }
   });
-}
+};
 
 util.inherits(DiscordClient,EE); //get DiscordClient class to inherit event emitter class and act as an event emitter
 module.exports = DiscordClient;

@@ -137,11 +137,11 @@ globals.dc.on("message", (msg,channel_id,user_id,raw_data) ->
 )
 
 globals.dc.on("disconnect", () ->
-  if !warning
+  ###if !warning
     warning = true
     globals.dc.sendMessage("169555395860234240",":warning: The connection to the Main Gateway Server `"+globals.dc.internals.gateway+"` Unexpectedly Closed! I will try to reconnect automatically :smiley:")
     globals.raven.captureException("The connection to the Gateway Server Unexpectedly Closed",{level: "warn", tags:[{instigator: 'discord'}]})
-    connectedChannel = globals.dc.internals.voice.channel_id
+    connectedChannel = globals.dc.internals.voice.channel_id###
 )
 
 globals.dc.on("voiceClosed", () ->
