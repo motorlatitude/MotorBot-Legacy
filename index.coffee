@@ -15,9 +15,10 @@ websocketServer = require("ws").Server
 globals.wss = new websocketServer({port: 3006}) #public port is 3211 and local 3006 via nginx proxy
 raven = null
 debugLog = ""
+keys = require __dirname+'/keys.json'
 
 connectToSentry = () ->
-  globals.raven = new Raven("http://aff861c28dad6d5a7c4f3d60e5ec704e:4cb8957b04daa4d774871fafad470147@188.166.156.69:3001/api",{release: 'd9695b60430ccf9ca9a9f7752c40d640ba1be923', serverName: 'lolstat.net'}, (err, data) ->
+  globals.raven = new Raven(keys.sentryDSN,{release: 'd9695b60430ccf9ca9a9f7752c40d640ba1be923', serverName: 'lolstat.net'}, (err, data) ->
     if err
       debugLog += "[!] Error Occured Connecting to Sentry `"+err+"`\n"
     else if data.success
@@ -27,7 +28,7 @@ connectToSentry = () ->
       debugLog += "[!] Error Occured Connecting to Sentry `returned success:false`\n"
   )
 
-globals.dc = new DiscordClient({token: "MTY5NTU0ODgyNjc0NTU2OTMw.CfAmNQ.WebsSsEexNlFWaNc2u54EP-hIX0", debug: true, autorun: true})
+globals.dc = new DiscordClient({token: keys.token, debug: true, autorun: true})
 
 stream = null
 connectedChannel = null

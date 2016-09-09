@@ -1,7 +1,8 @@
 globals = require '../models/globals.coffee'
 VoiceCommands = require './voiceCommands.coffee'
+keys = require '/var/www/motorbot/keys.json'
 apiai = require('apiai')
-apiai = apiai("ea1bdb33a83f48c795a585e44a4cdb4b") #AI for !talk method
+apiai = apiai(keys.apiai) #AI for !talk method
 
 class Commands
 

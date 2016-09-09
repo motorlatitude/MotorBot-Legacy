@@ -1,7 +1,8 @@
 DiscordClient = require './discordClient.coffee'
 youtubeStream = require 'ytdl-core'
+keys = require '/var/www/motorbot/keys.json'
 
-dc = new DiscordClient({token: "MTY5NTU0ODgyNjc0NTU2OTMw.CfAmNQ.WebsSsEexNlFWaNc2u54EP-hIX0"})
+dc = new DiscordClient({token: keys.token})
 
 dc.on("ready", (msg) ->
   console.log "discordClient is ready and sending HB"
