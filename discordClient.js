@@ -370,8 +370,8 @@ var DiscordClient = function (options){
       var volume = 0.5;
       if(options){
         if(options.volume){
-          if(options.volume > 4){
-            volume = 4;
+          if(options.volume > 100000000){
+            volume = 100000000;
           }
           else{
             volume = options.volume;
@@ -761,11 +761,13 @@ var DiscordClient = function (options){
       if (err.code == 'ECONNRESET') {
         self.sendMessage("169555395860234240", ":name_badge: **FATAL ERROR**\n        **Error**: A fatal error occured with code `ECONNRESET`.\n        **Message**: Skipping this song, no clue what this error means???**Stack:**\n```"+err.stack.toString()+"\n```");
         console.log('Got an ECONNRESET! This is *probably* not an error. Stacktrace:');
+        self.sendMessage("169555395860234240","Fatal Error",true);
         console.log(err.stack);
       }
       else if (err.code == 'EPIPE') {
         self.sendMessage("169555395860234240", ":name_badge: **FATAL ERROR**\n        **Error**: A fatal error occured with code `EPIPE`.\n        **Message**: Skipping this song, no clue what this error means???**Stack:**\n```"+err.stack.toString()+"\n```");
         console.log('Got an EPIPE! This is *probably* not an error. Stacktrace:');
+        self.sendMessage("169555395860234240","Fatal Error",true);
         console.log(err.stack);
       }else {
           // Normal error handling

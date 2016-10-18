@@ -1,6 +1,6 @@
 DiscordClient = require './discordClient.coffee'
 youtubeStream = require 'ytdl-core'
-keys = require '/var/www/motorbot/keys.json'
+keys = require '../keys.json'
 
 dc = new DiscordClient({token: keys.token})
 
@@ -10,6 +10,7 @@ dc.on("ready", (msg) ->
 
 musicStream = null
 soundboard = null
+yStream = null
 
 dc.on("message", (msg, channel_id, user_id, raw) ->
   if msg == "!v"
@@ -18,10 +19,10 @@ dc.on("message", (msg, channel_id, user_id, raw) ->
     dc.leaveVoiceChannel("130734377066954752")
   else if msg == "!v play"
     if musicStream == null
-      requestUrl = 'https://www.youtube.com/watch?v=Qzw6A2WC5Qo'
+      requestUrl = 'https://www.youtube.com/watch?v=aYuADRV2qO4'
       yStream = youtubeStream(requestUrl,{quality: 'lowest', filter: 'audioonly'})
       yStream.on("error", (e) ->
-        console.log("Error Occured Loading Youtube Video")
+        console.log("Error Occurred Loading Youtube Video")
       )
       yStream.on("info", (info, format) ->
         musicStream = dc.internals.servers["130734377066954752"].voice.playFromStream(yStream)
@@ -36,16 +37,22 @@ dc.on("message", (msg, channel_id, user_id, raw) ->
     else
       musicStream.play()
   else if msg == "!v stop"
+    yStream.end()
     musicStream.stop()
   else if msg == "!v pause"
     musicStream.pause()
   else if msg == "!sb"
-    soundboard = dc.internals.servers["130734377066954752"].voice.playFromFile("/var/www/motorbot/soundboard/kled.mp3")
+    soundboard = dc.internals.servers["130734377066954752"].voice.playFromFile("../soundboard/gp.mp3")
     soundboard.on('ready', () ->
+      console.log("SOUNDBOARD READY");
       if musicStream
         musicStream.pause()
         musicStream.on("paused", () ->
-          soundboard.play()
+          console.log("MUSIC STREAM PAUSED")
+          if soundboard
+            soundboard.play()
+          else
+            console.log("SOUNDBOARD HAS VANISHED")
         )
       else
         soundboard.play()

@@ -4,6 +4,7 @@ Constants = require './../constants.coffee'
 ws = require 'ws'
 zlib = require 'zlib'
 fs = require 'fs'
+Opus = require 'node-opus'
 UDPClient = require './udpClient'
 playStream = require './playStream.coffee'
 
@@ -29,6 +30,7 @@ class VoiceConnection
     utils.debug("Generating new voice WebSocket connection")
     @vws = new ws("wss://"+@endpoint.split(":")[0])
     self = @
+    @opusEncoder = new Opus.OpusEncoder(48000, 2)
     @vws.once('open', () -> self.voiceGatewayOpen())
     @vws.once('close', () -> self.voiceGatewayClose())
     @vws.once('error', (err) -> self.voiceGatewayError(err))

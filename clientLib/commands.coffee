@@ -15,6 +15,9 @@ class Commands
     if msg == "!api sid"
       output_msg = "\`\`\`Javascript\nDiscordClient.prototype.internals.sequence = "+globals.dc.internals.sequence+"\n\`\`\`"
       globals.dc.sendMessage(channel_id,output_msg)
+    if msg == "!api report"
+      output_msg = "All services are running as intended!"
+      globals.dc.sendMessage(channel_id,output_msg,true)
     else if msg == "cookies" || msg == "cookie"
       output_msg = "**Cookies?** I love cookies :cookie:"
       globals.dc.sendMessage(channel_id,output_msg)

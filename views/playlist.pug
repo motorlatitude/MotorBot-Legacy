@@ -38,8 +38,11 @@ html(lang="en")
               if(data.status == "stop"){
                 $("#playStop").html('<i class="fa fa-play" aria-hidden="true" onclick="playMusic();" style="cursor: pointer;""></i>')
               }
+              else if (data.status == "pause") {
+                $("#playStop").html('<i class="fa fa-play" aria-hidden="true" onclick="resumeMusic();" style="cursor: pointer;""></i>')
+              }
               else if(data.status == "play"){
-                $("#playStop").html('<i class="fa fa-stop" aria-hidden="true" onclick="stopMusic();" style="cursor: pointer;""></i>')
+                $("#playStop").html('<i class="fa fa-pause" aria-hidden="true" onclick="pauseMusic();" style="cursor: pointer;""></i>')
               }
             }
             else if(data.type == "trackAdd"){
@@ -255,7 +258,7 @@ html(lang="en")
               $(".play").parent().html($(".play").parent().attr('data-trackNo'));
               $("#"+data._id+" .item").html('<i class="fa fa-volume-up play" aria-hidden="true"></i>');
               $("#"+data._id).addClass("trackPlaying");
-              $("#playStop").html('<i class="fa fa-stop" aria-hidden="true" onclick="stopMusic();" style="cursor: pointer;""></i>')
+              $("#playStop").html('<i class="fa fa-pause" aria-hidden="true" onclick="pauseMusic();" style="cursor: pointer;""></i>')
             }
           },
           error: function(err){
@@ -315,18 +318,55 @@ html(lang="en")
           }
         });
       }
+
+      function pauseMusic() {
+        $.ajax({
+          url: '/api/pauseSong',
+          dataType: 'json',
+          success: function (d) {
+            //setTimeout(function(){window.location.reload()},2000);
+          },
+          error: function (err) {
+            console.log(err);
+          }
+        });
+      }
+
+      function resumeMusic() {
+        $.ajax({
+          url: '/api/resumeSong',
+          dataType: 'json',
+          success: function (d) {
+            //setTimeout(function(){window.location.reload()},2000);
+          },
+          error: function (err) {
+            console.log(err);
+          }
+        });
+      }
   body
     .bodyWrapper
-      //-.titleBar
-      .sidebar
+      .titleBar
+        input.search(type="search",placeholder="Search Something...")
+        ul.nav
+          li.active Home
+          li Playlists
+        .bell <i class="fa fa-bell" aria-hidden="true"></i>
+        .profileIcon(style="background: url('https://discordapp.com/api/users/"+user.id+"/avatars/"+user.avatar+".jpg') no-repeat center; background-size: cover;")
+      //-.sidebar
         img.motorbotIcon(src='/motorbotIcon.png')
       .contentView
         .header
+          .bg(style="background: url('./demoCover1.jpg') no-repeat center; background-size: cover;")
           .playing Nothing Playing Currently
           .channel Not currently in a voice channel
           .playPlaylistButton <i class="fa fa-play" aria-hidden="true"></i> &nbsp; &nbsp;PLAY
         .errorList
           ul
+            li.info
+              .icon
+                .iconWrapper <i class="fa fa-wrench" aria-hidden="true"></i>
+              .content Playlist is under current development, some features may not work. <br><br>Click to make me vanish.
             li.fatal#socketClose
               .icon
                 .iconWrapper <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>

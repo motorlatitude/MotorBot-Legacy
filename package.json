@@ -9,12 +9,16 @@
   },
   "dependencies": {
     "apiai": "*",
+    "chai": "*",
+    "coffee-script": "*",
+    "fluent-ffmpeg": "^2.1.0",
+    "mocha": "*",
     "mongodb": "^2.2.5",
-    "ref": "^1.3.2",
-    "node-gyp": "^3.4.0",
     "nib": "^1.1.2",
+    "node-gyp": "^3.4.0",
     "node-opus": "^0.2.1",
     "pug": "^2.0.0-beta4",
+    "ref": "^1.3.2",
     "request": "^2.74.0",
     "simple-oauth2": "^0.7.0",
     "stack-trace": "0.0.9",
@@ -22,10 +26,7 @@
     "tweetnacl": "*",
     "unpipe": "^1.0.0",
     "ws": "*",
-    "coffee-script": "*",
-    "ytdl-core": "^0.7.17",
-    "mocha": "*",
-    "chai": "*"
+    "ytdl-core": "^0.7.17"
   },
   "author": "Lennart Hase",
   "license": "ISC"

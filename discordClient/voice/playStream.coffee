@@ -3,7 +3,7 @@ u = require '../utils.coffee'
 utils = new u()
 VoicePacket = require './voicePacket.coffee'
 childProc = require 'child_process'
-Opus = require 'node-opus'
+#ffmpeg = require 'fluent-ffmpeg'
 
 class playStream extends EventEmitter
   
@@ -17,6 +17,7 @@ class playStream extends EventEmitter
     utils.debug("Setting up new stream")
     @ffmpegDone = false
     @emptyPacket = false
+    @outputStream = null;
     self = @
     if typeof(stream) == "string"
       @enc = childProc.spawn('ffmpeg', [
@@ -55,22 +56,22 @@ class playStream extends EventEmitter
     @enc.stdout.once('end', () ->
       utils.debug("Stdout END")
       self.enc.kill()
-      self.ffmpegDone = true
     )
 
     @enc.once('close', (code, signal) ->
       utils.debug("Enc CLOSE")
       self.enc.stdout.emit("end")
+      self.ffmpegDone = true
     )
-
+    ###
     @enc.stderr.on('data', (d) ->
       console.log 'data: '+d
     )
-
+    ###
     @enc.stdout.once('readable', () ->
       utils.debug("Storing Voice Packets")
       self.packageList = []
-      self.opusEncoder = new Opus.OpusEncoder(48000, 2)
+      self.opusEncoder = self.voiceConnection.opusEncoder
       self.packageData(self.enc.stdout, new Date().getTime(), 1)
       self.stopSend = false
       self.emit("ready")
@@ -79,54 +80,51 @@ class playStream extends EventEmitter
   packageData: (stream, startTime, cnt) ->
     channels = 2 #just assume it's 2 for now
     self = @
+    if stream
+      streamBuff=stream.read(1920*channels)
+      if stream.destroyed
+        return
+      self.voiceConnection.sequence = if (self.voiceConnection.sequence + 1) < 65535 then self.voiceConnection.sequence += 1 else self.voiceConnection.sequence = 0
+      self.voiceConnection.timestamp = if (self.voiceConnection.timestamp + 960) < 4294967295 then self.voiceConnection.timestamp += 960 else self.voiceConnection.timestamp = 0
 
-    streamBuff=stream.read(1920*channels)
-    if stream.destroyed
-      return
-    self.voiceConnection.sequence = if (self.voiceConnection.sequence + 1) < 65535 then self.voiceConnection.sequence += 1 else self.voiceConnection.sequence = 0
-    self.voiceConnection.timestamp = if (self.voiceConnection.timestamp + 960) < 4294967295 then self.voiceConnection.timestamp += 960 else self.voiceConnection.timestamp = 0
+      if streamBuff && streamBuff.length != 1920 * channels
+        newBuffer = new Buffer(1920 * channels).fill(0)
+        streamBuff.copy(newBuffer)
+        streamBuff = newBuffer
 
-    if streamBuff && streamBuff.length != 1920 * channels
-      newBuffer = new Buffer(1920 * channels).fill(0)
-      streamBuff.copy(newBuffer)
-      streamBuff = newBuffer
-
-    if streamBuff
-      # TODO volume transformation
-      encoded = @opusEncoder.encode(streamBuff, 1920)
-      audioPacket = new VoicePacket(encoded, @, @voiceConnection)
-      @packageList.push(audioPacket)
-      nextTime = startTime + (cnt+1) * 20
+      if streamBuff
+        # TODO volume transformation
+        encoded = @opusEncoder.encode(streamBuff, 1920)
+        audioPacket = new VoicePacket(encoded, @, @voiceConnection)
+        @packageList.push(audioPacket)
+        nextTime = startTime + (cnt+1) * 20
+        return setTimeout(() ->
+          self.packageData(stream, startTime, cnt + 1)
+        , 20 + (nextTime - new Date().getTime()));
+    else
       return setTimeout(() ->
-        self.packageData(stream, startTime, cnt + 1)
-      , 20 + (nextTime - new Date().getTime()));
+        self.packageData(stream, startTime, cnt)
+      , 200);
 
   send: (startTime, cnt) ->
     self = @
     if !@stopSend
       packet = @packageList.shift()
+      if @ffmpegDone && @packageList.length < 1
+        utils.debug "Stream Done :("
+        @stopSend = true
+        self.emit("streamDone")
       if !packet
-        if @emptyPacket
-          @stopSend = true
-          utils.debug("Empty Packet","warn")
-          packet = new Buffer([0xF8, 0xFF, 0xFE]) #5 frames of silence
-          @emit("streamDone")
-        else
-          @emptyPacket = true
-          packet = new Buffer([0xF8, 0xFF, 0xFE]) #5 frames of silence
+        packet = new Buffer([0xF8, 0xFF, 0xFE]) #5 frames of silence
+        utils.debug("Sending Empty Packet","debug")
       @voiceConnection.udpClient.send(packet, 0, packet.length, @voiceConnection.port, @voiceConnection.endpoint.split(":")[0], (err, bytes) ->
         if err
           utils.debug("Error Sending Voice Packet: "+err.toString(),"error")
       )
-      if @emptyPacket && @ffmpegDone
-        @stopSend = true
-        utils.debug("Stream Done")
-        @emit("streamDone")
-      else
-        nextTime = startTime + (cnt+1) * 20
-        return setTimeout(() ->
-          self.send(startTime, cnt + 1)
-        , 20 + (nextTime - new Date().getTime()))
+      nextTime = startTime + (cnt+1) * 15
+      return setTimeout(() ->
+        self.send(startTime, cnt + 1)
+      , 15 + (nextTime - new Date().getTime()))
     else
       packet = new Buffer([0xF8, 0xFF, 0xFE]) #5 frames of silence
       @voiceConnection.udpClient.send(packet, 0, packet.length, @voiceConnection.port, @voiceConnection.endpoint.split(":")[0], (err, bytes) ->
@@ -135,13 +133,12 @@ class playStream extends EventEmitter
         else
           self.voiceConnection.setSpeaking(false)
           utils.debug("Sending Empty Packet","debug")
+          self.emit("paused")
       )
-    
+
 
   stopSending: () ->
     @stopSend = true
-    @glob_stream.end();
-    @glob_stream.destroy();
 
   ###
   # PUBLIC METHODS
@@ -157,14 +154,23 @@ class playStream extends EventEmitter
     utils.debug("Playing Stream")
     @stopSend = false
     @voiceConnection.setSpeaking(true)
-    @send(new Date().getTime(), 1)
+    self = @
+    self.send(new Date().getTime(), 1)
 
   stop: () ->
     #stop sending voice data and turn speaking off for bot
     utils.debug("Stopping Stream")
     @emit("streamDone")
+    self = @
     try
       @stopSending()
+      @glob_stream.end()
+      @glob_stream.destroy()
+      @enc.kill("SIGSTOP")
+      setTimeout(() ->
+        #completely kill the process after delay
+        self.enc.kill()
+      ,1000)
     catch err
       utils.debug("Error stopping sending of voice packets: "+err.toString(),"error")
 

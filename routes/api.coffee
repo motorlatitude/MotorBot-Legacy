@@ -42,6 +42,18 @@ router.get("/stopSong", (req, res) ->
   res.end(JSON.stringify({success: true}))
 )
 
+router.get("/pauseSong", (req, res) ->
+  globals.dc.pauseStream()
+  globals.wss.broadcast(JSON.stringify({type: 'playUpdate', status: 'pause'}))
+  res.end(JSON.stringify({success: true}))
+)
+
+router.get("/resumeSong", (req, res) ->
+  globals.dc.resumeStream()
+  globals.wss.broadcast(JSON.stringify({type: 'playUpdate', status: 'play'}))
+  res.end(JSON.stringify({success: true}))
+)
+
 router.get("/playSong", (req, res) ->
   globals.songDone(true)
   globals.wss.broadcast(JSON.stringify({type: 'playUpdate', status: 'play'}))
@@ -62,7 +74,7 @@ router.get("/prevSong", (req, res) ->
         else
           playlistCollection.updateOne({_id: secondLastResult._id},{$set: {status: 'added'}},(err, result) ->
             if err
-              console.log("Databse Updated Error Occured")
+              console.log("Database Updated Error Occurred")
             else
               globals.dc.stopStream()
               setTimeout(goThroughVideoList,1000)
@@ -74,7 +86,12 @@ router.get("/prevSong", (req, res) ->
           globals.raven.captureException(err,{level: 'error', tags:[{instigator: 'mongo'}]})
         else
           globals.dc.stopStream()
-          setTimeout(goThroughVideoList,1000)
+          setTimeout(() ->
+            if goThroughVideoList
+              goThroughVideoList
+            else
+              console.log "Ummmmm, wtf you do?"
+          ,1000)
       )
   )
   res.end(JSON.stringify({success: true}))

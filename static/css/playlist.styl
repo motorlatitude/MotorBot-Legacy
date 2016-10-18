@@ -8,7 +8,7 @@ body
 html
   margin 0
   padding 0
-  background rgba(23, 23, 23, 1.00)
+  background rgba(29, 29, 35, 1.00)
   color #fff
   font-family 'Ubuntu', 'Open Sans', sans-serif
   font-size 13px
@@ -21,9 +21,60 @@ html
   top 0
   left 0
   right 0
-  height 30px
+  height 50px
   width 100%
-  background rgba(22, 22, 22, 1.00)
+  background rgba(20, 20, 24, 1.00)
+  & .search
+    float left
+    margin-left 60px
+    padding 0
+    width 280px
+    background transparent
+    border 0 solid transparent
+    line-height 34px
+    font-size 14px
+    margin-top 8px
+    color #fff
+    &:focus
+      outline none
+  & .nav
+    float left
+    list-style none
+    margin 0
+    padding 0
+    margin-left 20px
+    & li
+      float left
+      margin-top 10px
+      line-height 30px
+      padding 0 20px
+      cursor pointer
+      font-size 14px
+      color rgba(255,255,255,0.6)
+      &:first-child
+        border-left 1px solid rgba(255,255,255,0.1)
+      &:hover
+        color #fff
+      &.active
+        color rgba(0, 179, 237, 1.00)
+        &:hover
+          color rgba(0, 179, 237, 1.00)
+  & .bell
+    position absolute
+    top 6px
+    right 120px
+    line-height 40px
+    color rgba(255,255,255,0.4)
+    font-size 15px
+    cursor pointer
+  & .profileIcon
+    position absolute
+    top 5px
+    right 40px
+    width 40px
+    height 40px
+    border-radius 50%
+    background rgba(0,0,0,0.4)
 
 .playerBar
   position fixed
@@ -33,8 +84,7 @@ html
   right 0
   width 100%
   height 60px
-  border-top 1px solid rgba(22, 22, 22, 1.00)
-  background rgba(27, 29, 32, 1.00)
+  background rgba(22, 21, 26, 1.00)
   .controls
     position absolute
     top 12px
@@ -179,20 +229,30 @@ html
         background rgba(43, 45, 47, 0.8)
 
 .header
-  width calc(100% - 75px)
+  width 100%
   height 164px
-  background rgba(36, 36, 36, 1.00)
-  background-image url('../playlistbg.png')
-  background-repeat no-repeat
-  background-position center
-  background-size cover
+  background rgba(29, 29, 35, 1.00)
   color #fff
   font-size 26px
   font-family Helvetica Neue, Helvetica, Arial, sans-serif
   font-weight 400
   position fixed
-  top 0
-  left $sidebarWidth
+  top 50px
+  left 0
+  overflow hidden
+  & .bg
+    width 120%
+    height 120%
+    position absolute
+    top -10%
+    left -10%
+    right -10%
+    bottom -10%
+    opacity 0.2
+    -webkit-filter blur(15px)
+    -moz-filter blur(15px)
+    -o-filter blur(15px)
+    filter blur(15px)
   & .playing
     position absolute
     top 20px
@@ -221,33 +281,32 @@ html
 #playlist
   list-style none
   margin 0
-  margin-left 75px
+  margin-top 46px
   padding 0
-  width calc(100% - 75px)
+  width 100%
   min-width 1125px
   height 100%
   & li
     float left
-    width calc(100% - 60px)
+    width 100%
     min-width 1200px
-    margin 0 20px
-    padding 15px 10px
+    padding 10px 10px
     cursor pointer
-    background transparent
-    border-bottom 1px solid rgba(36, 36, 36, 1.00)
+    background rgba(34, 34, 41, 1.00)
+    font-size 12px
+    //border-bottom 1px solid rgba(36, 36, 36, 1.00)
     &:nth-child(2n)
-      //background #2c323c
+      background rgba(41, 41, 49, 1.00)
     &:hover
-      background rgba(36, 36, 36, 1.00)
+      background rgba(255,255,255,0.1)
     &.titleRow
       font-weight 400
       color rgba(255,255,255,0.8)
       font-size 12px
-      border-bottom 1px solid rgba(36, 36, 36, 1.00)
       position fixed
-      top 118px
-      left 75px
-      width calc(100% - 135px)
+      top 178px
+      left 0
+      width 100%
       right 20px
       background transparent
       cursor default
@@ -292,7 +351,7 @@ html
 
 .errorList
   position fixed
-  top 0
+  top 50px
   right 10px
   width 380px
   height auto
