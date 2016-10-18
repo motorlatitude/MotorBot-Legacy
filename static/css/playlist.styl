@@ -24,9 +24,16 @@ html
   height 50px
   width 100%
   background rgba(20, 20, 24, 1.00)
+  & .siteIcon
+    position absolute
+    top 5px
+    left 20px
+    line-height 50px
+    & img
+      width 40px
   & .search
     float left
-    margin-left 60px
+    margin-left 90px
     padding 0
     width 280px
     background transparent
@@ -42,16 +49,17 @@ html
     list-style none
     margin 0
     padding 0
-    margin-left 20px
+    margin-left 30px
     & li
       float left
       margin-top 10px
       line-height 30px
-      padding 0 20px
+      padding 0 25px
       cursor pointer
       font-size 14px
       color rgba(255,255,255,0.6)
       &:first-child
+        padding-left 50px
         border-left 1px solid rgba(255,255,255,0.1)
       &:hover
         color #fff
@@ -117,35 +125,59 @@ html
       text-align center
       border-radius 50%
       cursor pointer
+  & .activeArtwork
+    position absolute
+    top 5px
+    left 150px
+    height 50px
+    width 50px
+    border-radius 3px
   & .duration
+    display none
     font-size 11px
     color rgba(255,255,255,0.6)
     position absolute
     top 24px
-    left 135px
+    left 335px
     text-align right
     width 60px
   & .songDuration
-    font-size 11px
     color rgba(255,255,255,0.6)
     position absolute
-    top 24px
-    right 25px
-    text-align left
+    top 14px
+    right 60px
+    with 60px
+    text-align right
     width 60px
+    font-size 13px
+  & .activeTrack
+    position absolute
+    top 10px
+    font-size 14px
+    font-weight 600
+    left 225px
+    color #fff
+    width 440px
+    overflow hidden
+    white-space nowrap
+    text-overflow ellipsis
+    & span
+      font-weight 500
+      color rgba(255,255,255,0.8)
   & .timelineWrapper
     float right
-    width calc(100% - 290px)
-    margin 28px 90px
+    width calc(100% - 280px)
+    margin 38px 59px
     height 5px
     background rgba(255,255,255,0.1)
     border-radius 30px
     overflow hidden
     & .timeline
       width 0%
-      height 5px
+      height 3px
       border-radius 30px
-      background rgba(54, 142, 245, 1.00)
+      background rgba(0, 179, 237, 0.8)
+      border 1px solid rgba(0, 179, 237, 1.00)
   & .queue
     position absolute
     right 18px
@@ -207,7 +239,8 @@ html
   height auto
   max-height 333px
   background rgba(27, 29, 32, 1.00)
-  box-shadow 0 0 8px rgba(0,0,0,0.8)
+  box-shadow 0 0 5px rgba(0,0,0,0.3)
+  border-radius 4px
   overflow hidden
   & ul
     list-style none
@@ -230,13 +263,13 @@ html
 
 .header
   width 100%
-  height 164px
+  height 300px
   background rgba(29, 29, 35, 1.00)
   color #fff
   font-size 26px
   font-family Helvetica Neue, Helvetica, Arial, sans-serif
   font-weight 400
-  position fixed
+  position absolute
   top 50px
   left 0
   overflow hidden
@@ -253,60 +286,95 @@ html
     -moz-filter blur(15px)
     -o-filter blur(15px)
     filter blur(15px)
+  & .playlistType
+    position absolute
+    left calc(50% - 564px)
+    top 85px
+    width 1128px
+    font-size 16px
+    font-weight 400
+    color rgba(200,200,200,0.8)
+  & .playlistName
+    position absolute
+    left calc(50% - 564px)
+    top 110px
+    width 1128px
+    font-size 38px
+    color #fff
+  & .playlistStats
+    position absolute
+    left calc(50% - 564px)
+    top 160px
+    width 1128px
+    font-size 15px
+    font-weight 500
+    color rgba(200,200,200,0.8)
+    & span.user
+      color #fff
+      cursor pointer
+      &:hover
+        text-decoration underline
   & .playing
     position absolute
     top 20px
     left 50px
-  & .channel
+  & .playPlaylistButton, .followPlaylistButton
     position absolute
-    top 55px
-    left 50px
-    color rgba(255,255,255,0.6)
-    font-size 15px
-  & .playPlaylistButton
-    position absolute
-    top 90px
-    left 50px
+    top 200px
+    left calc(50% - 564px)
     border-radius 50px
     padding 6px 30px
     font-family Helvetica Neue, Helvetica, Arial, sans-serif
     font-weight 500
     font-size 13px
+    border: 1px solid rgba(0, 179, 237, 1.00)
     color #fff
-    background rgba(62, 152, 246, 1.00)
+    background rgba(0, 179, 237, 1.00)
     cursor pointer
+    opacity 0.9
     &:hover
-      opacity 0.8
+      opacity 1
+  & .followPlaylistButton
+    background rgba(0,0,0,0.4)
+    border: 1px solid rgba(200,200,200,1.0)
+    left calc(50% - 424px)
+  & .artwork
+    position absolute
+    top 56px
+    left calc(50% + 389px)
+    width 175px
+    height 175px
+    box-shadow 0 0 6px rgba(0,0,0,0.4)
 
 #playlist
   list-style none
   margin 0
-  margin-top 46px
+  margin-top 182px
   padding 0
   width 100%
-  min-width 1125px
+  min-width 1128px
   height 100%
   & li
     float left
-    width 100%
-    min-width 1200px
-    padding 10px 10px
+    width calc(100% - 20px)
+    min-width 1128ox
+    padding 13px 10px
     cursor pointer
-    background rgba(34, 34, 41, 1.00)
+    //background rgba(34, 34, 41, 1.00)
     font-size 12px
-    //border-bottom 1px solid rgba(36, 36, 36, 1.00)
+    border-bottom 1px solid rgba(36, 36, 36, 1.00)
     &:nth-child(2n)
-      background rgba(41, 41, 49, 1.00)
+      //background rgba(41, 41, 49, 1.00)
     &:hover
-      background rgba(255,255,255,0.1)
+      background rgba(69, 69, 78, 0.4)
     &.titleRow
       font-weight 400
       color rgba(255,255,255,0.8)
       font-size 12px
-      position fixed
-      top 178px
+      position absolute
+      top 308px
       left 0
-      width 100%
+      width calc(100% - 20px)
       right 20px
       background transparent
       cursor default
@@ -314,40 +382,48 @@ html
         background transparent
     &:nth-child(2)
       margin-top 167px
-    & .item
-      display inline-block
-      width 3%
-      text-align center
-      & .play
-        font-size 14px
-    & .title
-      display inline-block
-      width calc(50% - 10px)
-      white-space nowrap
-      overflow hidden
-      text-overflow ellipsis
-      padding-right 10px
-    & .videoId
-      display inline-block
-      width 10%
-      & a
-        text-decoration none
-        color inherit
-    & .time
-      display inline-block
-      width 7%
-    & .status
-      display inline-block
-      width 15%
-    & .added
-      display inline-block
-      width 10%
-    & .user
-      display inline-block
-      width 20%
+    & .trackRow
+      max-width 1128px
+      margin-left calc(50% - 564px)
+      & .item
+        display inline-block
+        width 45px
+        text-align left
+        & .play
+          font-size 14px
+      & .title
+        display inline-block
+        width 362px
+        white-space nowrap
+        overflow hidden
+        text-overflow ellipsis
+        padding-right 10px
+      & .artist
+        display inline-block
+        width 250px
+        white-space nowrap
+        overflow hidden
+        text-overflow ellipsis
+        padding-right 10px
+      & .album
+        display inline-block
+        width 250px
+        white-space nowrap
+        overflow hidden
+        text-overflow ellipsis
+        padding-right 10px
+      & .time
+        display inline-block
+        width 90px
+        text-align right
+        opacity 0.6
+      & .added
+        display inline-block
+        width 100px
+        opacity 0.6
     &.trackPlaying
-      color rgba(62, 152, 246, 1.00) !important
-
+      color rgba(0, 179, 237, 1.00) !important
+      opacity 1.0 !impotant
 
 .errorList
   position fixed

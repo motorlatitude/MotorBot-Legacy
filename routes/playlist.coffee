@@ -23,8 +23,7 @@ router.use(passport.initialize());
 router.use(passport.session());
 
 passport.serializeUser((user, done) ->
-  console.log user
-  sessionUser = {id: user.id, name: user.username, disc: user.discriminator, avatar: user.avatar, email: user.email}
+  sessionUser = {id: user.id, name: user.username, disc: user.discriminator, avatar: user.avatar, email: user.email, guilds: user.guilds}
   done(null, sessionUser)
 )
 
@@ -46,7 +45,14 @@ passport.use(new DiscordStrategy({
 router.get('/playlist', (req, res) ->
   sess = req.session
   if sess.passport
-    res.render('playlist',{user: sess.passport.user})
+    userInChannel = false
+    if sess.passport.user.guilds
+      for guild in sess.passport.user.guilds
+        if guild.id == "130734377066954752" then userInChannel = true
+    if userInChannel
+      res.render('playlist',{user: sess.passport.user})
+    else
+      res.end("Sorry, not in valid guild :(")
   else
     res.redirect('/auth/discord')
 )
@@ -57,6 +63,7 @@ router.get('/auth/discord/callback', passport.authenticate('discord', {failureRe
 )
 
 router.get('/', (req, res, next) ->
+  sess = req.session
   if sess.passport
     res.redirect('/playlist')
   else
