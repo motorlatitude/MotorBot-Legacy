@@ -166,6 +166,8 @@ goThroughVideoList = () ->
         title = results[0].title
         trackId = results[0]._id
         trackDuration = results[0].duration
+        artist = results[0].artist
+        albumArt = results[0].albumArt
         if videoId && !globals.dc.internals.voice.allowPlay
           playlistCollection.updateOne({'_id': trackId},{'$set':{'status':'playing'}},() ->
             console.log("Track Status Changed")
@@ -185,7 +187,7 @@ goThroughVideoList = () ->
             globals.dc.playStream(yStream,{volume: volume})
             dur = globals.convertTimestamp(results[0].duration)
             globals.wss.broadcast(JSON.stringify({type: 'playUpdate', status: 'play'}))
-            globals.wss.broadcast(JSON.stringify({type: 'trackUpdate', track: title, trackId: trackId.toString(),trackDuration: trackDuration}))
+            globals.wss.broadcast(JSON.stringify({type: 'trackUpdate', track: title, artist: artist, albumArt, albumArt, trackId: trackId.toString(),trackDuration: trackDuration}))
             globals.dc.sendMessage(channel_id,":play_pause: Now Playing: "+title+" ("+dur+")")
             console.log("Now Playing: "+title)
           )
@@ -218,7 +220,7 @@ globals.dc.on("songDone", () ->
 )
 startTime = 0
 globals.dc.on("songTime", (time) ->
-  if time == 20
+  if time < 1000
     startTime = 0
   if time >= startTime+1000
     startTime += 1000

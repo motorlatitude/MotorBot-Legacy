@@ -3,6 +3,7 @@ router = express.Router()
 ObjectID = require('mongodb').ObjectID
 globals = require '../models/globals.coffee'
 req = require('request')
+async = require('async')
 
 router.get("/playSong/:trackId", (req, res) ->
   console.log("PlaySong Page Loaded")
@@ -21,6 +22,8 @@ router.get("/playSong/:trackId", (req, res) ->
         for r in results
           if r._id.toString() == trackId.toString() || foundTrack
             track = r.title
+            artist = r.artist
+            albumArt = r.albumArt
             trackId = r._id.toString()
             trackDuration = r.duration
             playlistCollection.update({timestamp: {$gte: r.timestamp}},{$set: {status: 'added'}}, {multi: true}, (err, result) ->
@@ -28,7 +31,7 @@ router.get("/playSong/:trackId", (req, res) ->
                 globals.raven.captureException(err,{level: 'error', tags:[{instigator: 'mongo'}]})
               globals.dc.stopStream()
               globals.songDone(true)
-              globals.wss.broadcast(JSON.stringify({type: 'trackUpdate', track: track, trackId: trackId, trackDuration: trackDuration}))
+              globals.wss.broadcast(JSON.stringify({type: 'trackUpdate', track: track, artist: artist, albumArt: albumArt, trackId: trackId, trackDuration: trackDuration}))
               return res.end(JSON.stringify({success: true}))
             )
       )
@@ -116,24 +119,37 @@ router.get("/playlist/:videoId", (request,res) ->
       }
     }, (err, httpResponse, body) ->
       if err
-        raven.captureException(err,{level:'error',request: httpResponse})
-        return console.error('Error Occured Fetching Youtube Metadata')
+        #raven.captureException(err,{level:'error',request: httpResponse})
+        return console.error('Error Occurred Fetching Youtube Metadata')
       data = JSON.parse(body)
       if data.items[0]
         console.log(videoId)
         playlistCollection = globals.db.collection("playlist")
-        insertionObj = {videoId: videoId, title: data.items[0].snippet.title, duration: data.items[0].contentDetails.duration, channel_id: channel_id, timestamp: new Date().getTime(), status: 'added', userId: userId}
-        playlistCollection.insertOne(insertionObj, (err, result) ->
-          if(err)
-            globals.raven.captureException(err,{level: 'error', tags:[{instigator: 'mongo'}]})
-            globals.dc.sendMessage(channel_id,":warning: A database error occurred adding this track... <@"+userId+">\nReport sent to sentry, please notify admin of the following error: \`Database insertion error at api.coffee:111: "+err.toString()+"\`")
+        modifiedTitle = data.items[0].snippet.title.replace(/\[.*?\]/g, '').replace(/\(.*?\)/g, '').replace(/\-(\s|)[0-9]*(\s|)\-/g, '').replace(/(video|high\squality|official|\sOST|playlist|\sHD|\s1080p)/gmi, '');
+        modifiedTitle = modifiedTitle.replace(/\s/g,'+')
+        insertionObj = {videoId: videoId, title: data.items[0].snippet.title, duration: data.items[0].contentDetails.duration, channel_id: channel_id, timestamp: new Date().getTime(), status: 'added', userId: userId, album: "", albumId: "", artist:"", artistId:""}
+        req.get({url: "https://api.spotify.com/v1/search?type=track&q="+modifiedTitle, json: true}, (err, httpResponse, body) ->
+          if err
+            console.log err
           else
-            globals.dc.sendMessage(channel_id,":notes: Added "+data.items[0].snippet.title+" <@"+userId+">")
-            formattedTimestamp = globals.convertTimestamp(data.items[0].contentDetails.duration)
-            formattedDiff = "a few seconds"
-            globals.wss.broadcast(JSON.stringify({type: 'trackAdd', videoId: videoId, title: data.items[0].snippet.title, duration: data.items[0].contentDetails.duration, formattedTimestamp: formattedTimestamp, formattedDiff: formattedDiff, channel_id: channel_id, timestamp: new Date().getTime(), status: 'added', userId: userId, _id: insertionObj._id.toString()}))
-            globals.songDone(true)
-            res.end(JSON.stringify({added: true}))
+            if body.tracks
+              if body.tracks.items[0]
+                insertionObj.album = body.tracks.items[0]["album"].name
+                insertionObj.albumId = body.tracks.items[0]["album"].id
+                insertionObj.artist = body.tracks.items[0]["artists"][0].name
+                insertionObj.artistId = body.tracks.items[0]["artists"][0].id
+          playlistCollection.insertOne(insertionObj, (err, result) ->
+            if(err)
+              #globals.raven.captureException(err,{level: 'error', tags:[{instigator: 'mongo'}]})
+              globals.dc.sendMessage(channel_id,":warning: A database error occurred adding this track... <@"+userId+">\nReport sent to sentry, please notify admin of the following error: \`Database insertion error at api.coffee:111: "+err.toString()+"\`")
+            else
+              globals.dc.sendMessage(channel_id,":notes: Added "+data.items[0].snippet.title+" <@"+userId+">")
+              formattedTimestamp = globals.convertTimestamp(data.items[0].contentDetails.duration)
+              formattedDiff = "a few seconds"
+              globals.wss.broadcast(JSON.stringify({type: 'trackAdd', videoId: videoId, title: data.items[0].snippet.title, duration: data.items[0].contentDetails.duration, formattedTimestamp: formattedTimestamp, formattedDiff: formattedDiff, channel_id: channel_id, timestamp: new Date().getTime(), status: 'added', userId: userId, _id: insertionObj._id.toString()}))
+              #globals.songDone(true) don't auto play for now, bit annoying
+              res.end(JSON.stringify({added: true}))
+          )
         )
       else
         globals.raven.captureException(new Error("Youtube Error: Googleapis returned video not found for videoId"),{level:'error',extra:{videoId: videoId},request: httpResponse})
@@ -143,6 +159,45 @@ router.get("/playlist/:videoId", (request,res) ->
   else
     globals.raven.captureException(new Error("Chrome Extension: No UserId Provided"),{level:'warn',extra:{videoId: videoId}})
     res.end(JSON.stringify({added: false, error: "Authentication Error"}))
+)
+
+router.get("/updateSpotify/:start/:length", (request, res) ->
+  console.log "Updating Spotify Data"
+  playlistCollection = globals.db.collection("playlist")
+  playlistCollection.find({}).toArray((err, results) ->
+    if err then res.end(JSON.stringify({success: false, error: "Database Error"}))
+    async.forEach(results, (row, callback) ->
+      if results.indexOf(row) >= parseInt(request.params.start) && results.indexOf(row) <= (parseInt(request.params.start)+parseInt(request.params.length))
+        console.log "parsing in range"
+        modifiedTitle = row.title.replace(/\[.*?\]/g, '').replace(/\(.*?\)/g, '').replace(/\-(\s|)[0-9]*(\s|)\-/g, '').replace(/(video|high\squality|official|\sOST|playlist|\sHD|\s1080p)/gmi, '');
+        modifiedTitle = modifiedTitle.replace(/\s/g,'+')
+        console.log modifiedTitle
+        insertionObj = {trackId: "", album: "", albumId: "", albumArt: "", artist: "", artistId: ""}
+        req.get({url: "https://api.spotify.com/v1/search?type=track&q="+modifiedTitle, json: true}, (err, httpResponse, body) ->
+          if err
+            console.log err
+          else
+            if body.tracks
+              if body.tracks.items[0]
+                #console.log body.tracks.items[0]
+                insertionObj.album = body.tracks.items[0]["album"].name
+                insertionObj.albumId = body.tracks.items[0]["album"].id
+                insertionObj.albumArt = body.tracks.items[0]["album"].images[0].url
+                insertionObj.artist = body.tracks.items[0]["artists"][0].name
+                insertionObj.artistId = body.tracks.items[0]["artists"][0].id
+                insertionObj.trackId = body.tracks.items[0].id
+          playlistCollection.update({_id: row._id},{$set: {trackId: insertionObj.trackId, album: insertionObj.album, albumId: insertionObj.albumId, albumArt: insertionObj.albumArt, artist: insertionObj.artist, artistId: insertionObj.artistId}}, (err, result) ->
+            if err then console.log err
+            callback(err)
+          )
+        )
+      else
+        callback(err)
+    , (err) ->
+      console.log err
+      res.end("Done")
+    )
+  )
 )
 
 router.get("/deleteSong/:trackId", (req, res) ->

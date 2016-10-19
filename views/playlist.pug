@@ -2,6 +2,7 @@ doctype html
 html(lang="en")
   head
     title Motorbot Playlist
+    meta(name="viewport",content="width=1128px, initial-scale=1")
     link(type='image/png',rel='icon',href='motorbotIcon.png')
     link(href="https://fonts.googleapis.com/css?family=Open+Sans|Ubuntu",rel="stylesheet")
     link(href='/css/playlist.css',rel='stylesheet')
@@ -10,6 +11,7 @@ html(lang="en")
     script.
       socket = null;
       hb = null;
+      musicPaused = false;
       songDuration = 0;
       function sendHB(){
         socket.send(JSON.stringify({type:"hb",data:{}}));
@@ -28,7 +30,13 @@ html(lang="en")
           if(data){
             if(data.type == "trackUpdate"){
               //$(".playing").html(data.track);
-              $(".activeTrack").html(data.track+"<span> &nbsp; &nbsp; </span>");
+              $(".activeTrack").html(data.track+"<span> &nbsp; &nbsp; "+data.artist+"</span>");
+              if(data.albumArt) {
+                $(".activeArtwork").attr("style", "background: url('" + data.albumArt + "') no-repeat center; background-size: cover;");
+              }
+              else{
+                $(".activeArtwork").attr("style", "");
+              }
               $(".trackPlaying").removeClass("trackPlaying");
               $(".play").parent().html($(".play").parent().attr('data-trackNo'));
               $("#"+data.trackId+" .item").html('<i class="fa fa-play play" aria-hidden="true"></i>');
@@ -38,12 +46,15 @@ html(lang="en")
             else if(data.type == "playUpdate"){
               if(data.status == "stop"){
                 $("#playStop").html('<i class="fa fa-play" aria-hidden="true" onclick="playMusic();" style="cursor: pointer;""></i>')
+                $(".playPlaylistButton").html('<i class="fa fa-play" aria-hidden="true"></i> &nbsp; &nbsp;PLAY').click(function(event){playMusic()})
               }
               else if (data.status == "pause") {
                 $("#playStop").html('<i class="fa fa-play" aria-hidden="true" onclick="resumeMusic();" style="cursor: pointer;""></i>')
+                $(".playPlaylistButton").html('<i class="fa fa-play" aria-hidden="true"></i> &nbsp; &nbsp;PLAY').click(function(event){resumeMusic()})
               }
               else if(data.status == "play"){
                 $("#playStop").html('<i class="fa fa-pause" aria-hidden="true" onclick="pauseMusic();" style="cursor: pointer;""></i>')
+                $(".playPlaylistButton").html('<i class="fa fa-pause" aria-hidden="true"></i> &nbsp; &nbsp;PAUSE').click(function(event){pauseMusic()})
               }
             }
             else if(data.type == "trackAdd"){
@@ -125,6 +136,11 @@ html(lang="en")
         $("#playlist li").each(function(index){
           var self = $(this);
           self.dblclick(function(){
+            if (musicPaused) {
+              console.log("Stopping Music First");
+              resumeMusic();
+              stopMusic();
+            }
             $.ajax({
               url: '/api/playSong/'+self.attr('id'),
               dataType: 'json',
@@ -237,19 +253,33 @@ html(lang="en")
       }
 
       function loadPlaylist(){
+        var loadedPlaylistArtwork = false
+        var totalDuration = 0;
         $.ajax({
           url: '/api/playlist',
           dataType: 'json',
           success: function(d){
-            for(var i=0;i<d.length;i++){
+            $.each(d, function(i, item){
               var data = d[i];
-              var trackNo = i+1;
+              var trackNo = i + 1;
               var formattedTimestamp = convertTimestamp(data.duration);
+              var songDuration = convertTimestampToSeconds(data.duration)
+              totalDuration += songDuration
               var added = millisecondsToStr(new Date().getTime() - data.timestamp) + " ago";
               var userId = data.userId || "";
-              $("#playlist").append("<li id='"+data._id+"'><div class='trackRow'><div class='item' data-trackNo='"+trackNo+"'>"+trackNo+"</div><div class='title'>"+data.title+"</div><div class='artist'></div><div class='album'></div><div class='added'>"+added+"</div><div class='time'>"+formattedTimestamp+"</div></div></li>");
-            }
+              if(data.albumArt != "" && !loadedPlaylistArtwork){
+                console.log("Using Artwork for track: "+i);
+                $(".header .bg").attr("style","background: url('"+data.albumArt+"') no-repeat center; background-size: cover;");
+                $(".header .artwork").attr("style","background: url('"+data.albumArt+"') no-repeat center; background-size: cover;");
+                loadedPlaylistArtwork = true;
+              }
+              $("#playlist").append("<li id='" + data._id + "'><div class='trackRow'><div class='item' data-trackNo='" + trackNo + "'>" + trackNo + "</div><div class='title'>" + data.title + "</div><div class='artist'>" + data.artist + "</div><div class='album'>" + data.album + "</div><div class='added'>" + added + "</div><div class='time'>" + formattedTimestamp + "</div></div></li>");
+            })
+            //$("#playlist").append("<li id='"+data._id+"'><div class='trackRow'><div class='item' data-trackNo='"+trackNo+"'>"+trackNo+"</div><div class='title'>"+data.title+"</div><div class='artist'>"+artist+"</div><div class='album'>"+album+"</div><div class='added'>"+added+"</div><div class='time'>"+formattedTimestamp+"</div></div></li>");
             $(".songTotal").html(d.length);
+            var hrs = Math.floor((totalDuration/60)/60)
+            var mins = Math.round((((totalDuration/60)/60) - hrs)*60);
+            $(".songTotalPlaytime").html(hrs+" hr "+mins+" mins");
             updateDblClicks();
             loadPlaying();
           },
@@ -266,13 +296,21 @@ html(lang="en")
           success: function(data){
             if(data._id){
               //$(".playing").html(data.title);
-              $(".activeTrack").html(data.title+"<span> &nbsp; &nbsp; </span>");
+              $(".activeTrack").html(data.title+"<span> &nbsp; &nbsp; "+data.artist+"</span>");
+              if (data.albumArt) {
+                $(".activeArtwork").attr("style", "background: url('" + data.albumArt + "') no-repeat center; background-size: cover;")
+              }
+              else {
+                $(".activeArtwork").attr("style", "");
+              }
               songDuration = convertTimestampToSeconds(data.duration)
               $(".trackPlaying").removeClass("trackPlaying");
               $(".play").parent().html($(".play").parent().attr('data-trackNo'));
               $("#"+data._id+" .item").html('<i class="fa fa-play play" aria-hidden="true"></i>');
               $("#"+data._id).addClass("trackPlaying");
               $("#playStop").html('<i class="fa fa-pause" aria-hidden="true" onclick="pauseMusic();" style="cursor: pointer;""></i>')
+              $(".playPlaylistButton").html('<i class="fa fa-pause" aria-hidden="true"></i> &nbsp; &nbsp;PAUSE').click(function(event){pauseMusic()});
+              $(".timeline").css("width","0%");
             }
           },
           error: function(err){
@@ -338,6 +376,7 @@ html(lang="en")
           url: '/api/pauseSong',
           dataType: 'json',
           success: function (d) {
+            musicPaused = true;
             //setTimeout(function(){window.location.reload()},2000);
           },
           error: function (err) {
@@ -373,14 +412,14 @@ html(lang="en")
         img.motorbotIcon(src='/motorbotIcon.png')
       .contentView
         .header
-          .bg(style="background: url('./demoCover2.jpg') no-repeat center; background-size: cover;")
+          .bg(style="")
           //.playing Nothing Playing Currently
           .playlistType PLAYLIST
           .playlistName Original MotorBot Playlist
-          .playlistStats Created By: <span class="user">squírrel#2549</span> &bull; <span class="songTotal">460</span> Songs &bull; 1.6 days
-          .playPlaylistButton(onclick='playMusic();') <i class="fa fa-play" aria-hidden="true"></i> &nbsp; &nbsp;PLAY
-          .followPlaylistButton FOLLOW
-          .artwork(style="background: url('./demoCover2.jpg') no-repeat center; background-size: cover;")
+          .playlistStats Created By: <span class="user">squírrel#2549</span> &bull; <span class="songTotal">0</span> Songs &bull; <span class="songTotalPlaytime">0 hr 0 mins</span>
+          .playPlaylistButton <i class="fa fa-play" aria-hidden="true"></i> &nbsp; &nbsp;PLAY
+          .followPlaylistButton FOLLOWING
+          .artwork(style="background: rgba(20, 20, 23, 1.00);")
         .errorList
           ul
             li.info
@@ -406,7 +445,7 @@ html(lang="en")
           .prev <i class="fa fa-step-backward" onclick='prevMusic();' style='cursor: pointer;' aria-hidden="true"></i>
           .playStopButton <span id="playStop"><i class="fa fa-play" aria-hidden="true" onclick='playMusic();' style='cursor: pointer;'></i></span>
           .skip <i class="fa fa-step-forward" onclick='skipMusic();' style='cursor: pointer;' aria-hidden="true"></i>
-        .activeArtwork(style="background: url('./demoCover2.jpg') no-repeat center; background-size: cover;")
+        .activeArtwork(style="")
         .duration 00:00:00
         .activeTrack Nothing Playing <span>&nbsp; &nbsp; </span>
         .timelineWrapper

@@ -29,6 +29,13 @@ class VoiceCommands
     if command == "stop"
       globals.dc.stopStream()
       globals.songDone(false)
+    else if command == "playing"
+      req.get({url: "https://mb.lolstat.net/api/playing"}, (err, httpResponse, body) ->
+        if err
+          console.log err
+        else
+          globals.dc.sendMessage(self.channel_id,"```JSON\n"+body+"\n```")
+      )
     else if command == "add"
       videoId = msg.split(" ")[2]
       if videoId.indexOf('https://') > -1
