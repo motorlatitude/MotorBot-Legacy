@@ -96,13 +96,20 @@ Retrieves a list of all available songs in the playlist, ordered after the times
 Song Object Format
 ```JSON
 {
-  "_id": "5786a610433f804462c6dc65",
-  "videoId": "trgR8_ARPcw",
-  "title": "AFI - The Embrace",
-  "duration": "PT3M26S",
-  "channel_id": "169555395860234240",
-  "timestamp": 1468442128269,
-  "status": "played"
+    "_id":"5807e4c4136773c914cb3b49",
+    "videoId":"VSk5JOg6nQQ",
+    "title":"Alan Walker - Faded (Dash Berlin Remix)",
+    "duration":"PT3M36S",
+    "channel_id":"169555395860234240",
+    "timestamp":1476912324011,
+    "status":"playing",
+    "userId":"95164972807487488",
+    "album":"Faded",
+    "albumId":"4pvMZr2Kfe1typbTqMHa8z",
+    "artist":"Alan Walker",
+    "artistId":"7vk5e3vY1uw9plTHJAMwjN",
+    "trackId":"1brwdYwjltrJo7WHpIvbYt",
+    "albumArt":"https://i.scdn.co/image/88b7bb773811fa4fabf36e4c49d306f01d27527c"
 }
 ```
 Where status can have the values `played`, `playing` or `added`. The duration is in the ISO 8601 format of PT{hours}H{minutes}M{seconds}S
