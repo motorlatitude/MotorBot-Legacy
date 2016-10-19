@@ -125,9 +125,9 @@ router.get("/playlist/:videoId", (request,res) ->
       if data.items[0]
         console.log(videoId)
         playlistCollection = globals.db.collection("playlist")
-        modifiedTitle = data.items[0].snippet.title.replace(/\[.*?\]/g, '').replace(/\(.*?\)/g, '').replace(/\-(\s|)[0-9]*(\s|)\-/g, '').replace(/(video|high\squality|official|\sOST|playlist|\sHD|\s1080p)/gmi, '');
+        modifiedTitle = data.items[0].snippet.title.replace(/\[.*?\]/g, '').replace(/\(.*?\)/g, '').replace(/\-(\s|)[0-9]*(\s|)\-/g, '').replace(/(video|high\squality|official|\sOST|playlist|\sHD|\s1080p|ft\.|feat\.|ft\s)/gmi, '')
         modifiedTitle = modifiedTitle.replace(/\s/g,'+')
-        insertionObj = {videoId: videoId, title: data.items[0].snippet.title, duration: data.items[0].contentDetails.duration, channel_id: channel_id, timestamp: new Date().getTime(), status: 'added', userId: userId, album: "", albumId: "", artist:"", artistId:""}
+        insertionObj = {videoId: videoId, title: data.items[0].snippet.title, duration: data.items[0].contentDetails.duration, channel_id: channel_id, timestamp: new Date().getTime(), status: 'added', userId: userId, trackId: "", album: "", albumId: "", albumArt: "", artist: "", artistId: ""}
         req.get({url: "https://api.spotify.com/v1/search?type=track&q="+modifiedTitle, json: true}, (err, httpResponse, body) ->
           if err
             console.log err
@@ -136,8 +136,10 @@ router.get("/playlist/:videoId", (request,res) ->
               if body.tracks.items[0]
                 insertionObj.album = body.tracks.items[0]["album"].name
                 insertionObj.albumId = body.tracks.items[0]["album"].id
+                insertionObj.albumArt = body.tracks.items[0]["album"].images[0].url
                 insertionObj.artist = body.tracks.items[0]["artists"][0].name
                 insertionObj.artistId = body.tracks.items[0]["artists"][0].id
+                insertionObj.trackId = body.tracks.items[0].id
           playlistCollection.insertOne(insertionObj, (err, result) ->
             if(err)
               #globals.raven.captureException(err,{level: 'error', tags:[{instigator: 'mongo'}]})
@@ -169,7 +171,7 @@ router.get("/updateSpotify/:start/:length", (request, res) ->
     async.forEach(results, (row, callback) ->
       if results.indexOf(row) >= parseInt(request.params.start) && results.indexOf(row) <= (parseInt(request.params.start)+parseInt(request.params.length))
         console.log "parsing in range"
-        modifiedTitle = row.title.replace(/\[.*?\]/g, '').replace(/\(.*?\)/g, '').replace(/\-(\s|)[0-9]*(\s|)\-/g, '').replace(/(video|high\squality|official|\sOST|playlist|\sHD|\s1080p)/gmi, '');
+        modifiedTitle = row.title.replace(/\[.*?\]/g, '').replace(/\(.*?\)/g, '').replace(/\-(\s|)[0-9]*(\s|)\-/g, '').replace(/(video|high\squality|official|\sOST|playlist|\sHD|\s1080p|ft\.|feat\.|ft\s)/gmi, '');
         modifiedTitle = modifiedTitle.replace(/\s/g,'+')
         console.log modifiedTitle
         insertionObj = {trackId: "", album: "", albumId: "", albumArt: "", artist: "", artistId: ""}

@@ -17,17 +17,6 @@ raven = null
 debugLog = ""
 keys = require __dirname+'/keys.json'
 
-connectToSentry = () ->
-  globals.raven = new Raven(keys.sentryDSN,{release: 'd9695b60430ccf9ca9a9f7752c40d640ba1be923', serverName: 'lolstat.net'}, (err, data) ->
-    if err
-      debugLog += "[!] Error Occured Connecting to Sentry `"+err+"`\n"
-    else if data.success
-      debugLog += "[i] Connected to Sentry Succesfully\n"
-      globals.raven.captureException("Motorbot Initilized",{level: 'info'})
-    else
-      debugLog += "[!] Error Occured Connecting to Sentry `returned success:false`\n"
-  )
-
 globals.dc = new DiscordClient({token: keys.token, debug: true, autorun: true})
 
 stream = null
@@ -86,17 +75,18 @@ globals.wss.on('connection', (ws) ->
 
 globals.wss.broadcast = (data) ->
   globals.wss.clients.forEach((client) ->
-    client.send(data)
+    client.send(data, (err) ->
+      if err then console.log err
+    )
   )
 
 #create DB Connection
 createDBConnection = (cb) ->
   MongoClient.connect('mongodb://localhost:27017/motorbot', (err, db) ->
     if err
-      globals.raven.captureException(err,{level: 'fatal', tags:[{instigator: 'mongo'}]})
       globals.dc.sendMessage("169555395860234240",":name_badge: Fatal Error: I couldn't connect to the motorbot database :cry:")
       throw new Error("Failed to connect to database, exiting")
-    debugLog += "[i] Connected to Motorbot Database Succesfully\n"
+    debugLog += "[i] Connected to MotorBot Database Successfully\n"
     globals.db = db
     cb()
   )
@@ -105,8 +95,7 @@ createDBConnection = (cb) ->
 initPlaylist = () ->
   playlistCollection = globals.db.collection("playlist")
   playlistCollection.find({status: "playing"}).sort({timestamp: 1}).toArray((err, results) ->
-    if err
-      globals.raven.captureException(err,{level: 'error', tags:[{instigator: 'mongo'}]})
+    if err then console.log err
     for r in results
       trackId = r._id
       playlistCollection.updateOne({'_id': trackId},{'$set':{'status':'played'}},() ->
@@ -124,7 +113,6 @@ globals.dc.on("ready", (msg) ->
   time = "["+d.getDate()+"/"+(parseInt(d.getMonth())+1)+"/"+d.getFullYear()+" "+d.toLocaleTimeString()+"] "
   console.log(time+msg.user.username+"#"+msg.user.discriminator+" has connected to the gateway server and is at your command")
   commands = new Commands()
-  connectToSentry()
   createDBConnection(initPlaylist)
   if connectedChannel != null
     guild_id = "130734377066954752"

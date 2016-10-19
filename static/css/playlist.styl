@@ -133,41 +133,48 @@ html
     border-radius 3px
     background-color rgba(255,255,255,0.1)
   & .duration
-    display none
-    font-size 11px
     color rgba(255,255,255,0.6)
     position absolute
     top 24px
-    left 335px
+    left 425px
     text-align right
     width 60px
+    font-size 13px
   & .songDuration
     color rgba(255,255,255,0.6)
     position absolute
-    top 14px
-    right 60px
+    top 24px
+    right 82px
     with 60px
-    text-align right
+    text-align left
     width 60px
     font-size 13px
   & .activeTrack
     position absolute
-    top 10px
+    top 14px
     font-size 14px
     font-weight 600
-    left 225px
+    left 210px
     color #fff
-    width 440px
+    width 220px
     overflow hidden
     white-space nowrap
     text-overflow ellipsis
-    & span
-      font-weight 500
-      color rgba(255,255,255,0.8)
+  & .activeArtist
+    position absolute
+    top 34px
+    font-size 12px
+    left 210px
+    width 200px
+    overflow hidden
+    white-space nowrap
+    text-overflow ellipsis
+    font-weight 500
+    color rgba(255,255,255,0.8)
   & .timelineWrapper
     float right
-    width calc(100% - 280px)
-    margin 38px 59px
+    width calc(100% - 640px)
+    margin 30px 150px
     height 5px
     background rgba(255,255,255,0.1)
     border-radius 30px
@@ -178,13 +185,32 @@ html
       border-radius 30px
       background rgba(0, 179, 237, 0.8)
       border 1px solid rgba(0, 179, 237, 1.00)
-  & .queue
+  & .random
     position absolute
-    right 18px
-    top 19px
+    right 10px
+    top 13px
+    line-height 38px
+    padding-bottom 2px
+    width 38px
     font-size 18px
+    text-align center
+    border-radius 50%
     cursor pointer
-    color rgba(255,255,255,0.5)
+    &.active
+      color rgba(0, 179, 237, 1)
+  & .repeat
+    position absolute
+    right 50px
+    top 13px
+    line-height 38px
+    padding-bottom 2px
+    width 38px
+    font-size 18px
+    text-align center
+    border-radius 50%
+    cursor pointer
+    &.active
+      color rgba(0, 179, 237, 1)
 
 .bodyWrapper
   position absolute
@@ -254,6 +280,7 @@ html
   top 50px
   left 0
   overflow hidden
+  z-index 9
   & .bg
     width 120%
     height 120%
@@ -359,6 +386,7 @@ html
       right 20px
       background transparent
       cursor default
+      z-index 10
       &:hover
         background transparent
     &:nth-child(2)
@@ -397,14 +425,21 @@ html
         display inline-block
         width 90px
         text-align right
+        white-space nowrap
+        overflow hidden
+        text-overflow ellipsis
         opacity 0.6
       & .added
         display inline-block
         width 100px
+        white-space nowrap
+        overflow hidden
+        text-overflow ellipsis
         opacity 0.6
     &.trackPlaying
       color rgba(0, 179, 237, 1.00) !important
       opacity 1.0 !impotant
+      font-weight bold
 
 .errorList
   position fixed
@@ -413,7 +448,7 @@ html
   width 380px
   height auto
   color rgba(0,0,0,0.4)
-  z-index 10
+  z-index 15
   & ul
     list-style none
     margin 0
