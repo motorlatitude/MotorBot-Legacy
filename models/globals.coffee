@@ -40,6 +40,7 @@ globals = {
   db: null
   raven: null
   streamByteLength: null
+  randomPlayback: false
 }
 
 module.exports = globals

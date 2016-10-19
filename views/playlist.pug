@@ -99,6 +99,14 @@ html(lang="en")
                 $(".channel").html("Currently not in voice channel")
               }*/
             }
+            else if(data.type == "randomUpdate"){
+              if (data.status) {
+                $(".random").addClass("active");
+              }
+              else{
+                $(".random").removeClass("active");
+              }
+            }
             else{
             }
           }
@@ -286,6 +294,15 @@ html(lang="en")
             console.log(err);
           }
         });
+        $.ajax({
+          url: '/api/getRandomPlayback',
+          dataType: 'json',
+          success: function (d) {
+            if (d.randomPlayback) {
+              $(".random").addClass("active");
+            }
+          }
+        });
       }
 
       function loadPlaying(){
@@ -399,12 +416,13 @@ html(lang="en")
       }
 
       function randomMusic(){
-        if($(".random").hasClass("active")){
-          $(".random").toggleClass("active");
-        }
-        else{
-          $(".random").toggleClass("active");
-        }
+        $.ajax({
+          url: '/api/toggleRandomPlayback',
+          dataType: 'json',
+          success: function (d) {
+
+          }
+        });
       }
 
       function repeatMusic() {
@@ -418,20 +436,18 @@ html(lang="en")
   body
     .bodyWrapper
       .titleBar
-        //-.siteIcon <img src="https://mb.lolstat.net/siteIcon.png">
-        input.search(type="text",placeholder="Search Something...")
+        .siteIcon <img src="https://mb.lolstat.net/siteIcon.png">
+        input.search(type="text",placeholder="Search Something New...")
+        .searchIcon <i class="fa fa-search" aria-hidden="true"></i>
         ul.nav
           li.active Home
           li Library
           li Playlists
         .bell <i class="fa fa-bell" aria-hidden="true"></i>
         .profileIcon(style="background: url('https://discordapp.com/api/users/"+user.id+"/avatars/"+user.avatar+".jpg') no-repeat center; background-size: cover;")
-      //-.sidebar
-        img.motorbotIcon(src='/motorbotIcon.png')
       .contentView
         .header
           .bg(style="")
-          //.playing Nothing Playing Currently
           .playlistType PLAYLIST
           .playlistName Original MotorBot Playlist
           .playlistStats Created By: <span class="user">squírrel#2549</span> &bull; <span class="songTotal">0</span> Songs &bull; <span class="songTotalPlaytime">0 hr 0 mins</span>
@@ -443,7 +459,7 @@ html(lang="en")
             li.info
               .icon
                 .iconWrapper <i class="fa fa-wrench" aria-hidden="true"></i>
-              .content Playlist is under active development, some features may not work. <br><br>Click me to make me vanish.
+              .content Playlist is under active development, some features may not work.
             li.fatal#socketClose
               .icon
                 .iconWrapper <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>

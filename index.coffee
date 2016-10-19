@@ -145,40 +145,77 @@ globals.dc.on("voiceClosed", () ->
 goThroughVideoList = () ->
   if globals.dc.internals.voice.ready && !globals.dc.internals.voice.pause
     playlistCollection = globals.db.collection("playlist")
-    playlistCollection.find({status: "added"}).sort({timestamp: 1}).toArray((err, results) ->
-      if err
-        globals.raven.captureException(err,{level: 'error', tags:[{instigator: 'mongo'}]})
-      if results[0]
-        videoId = results[0].videoId
-        channel_id = results[0].channel_id
-        title = results[0].title
-        trackId = results[0]._id
-        trackDuration = results[0].duration
-        artist = results[0].artist
-        albumArt = results[0].albumArt
-        if videoId && !globals.dc.internals.voice.allowPlay
-          playlistCollection.updateOne({'_id': trackId},{'$set':{'status':'playing'}},() ->
-            console.log("Track Status Changed")
-          )
-          requestUrl = 'http://youtube.com/watch?v=' + videoId
-          yStream = youtubeStream(requestUrl,{quality: 'lowest', filter: 'audioonly'})
-          yStream.on("error", (e) ->
-            globals.raven.captureException(e,{level:'error',tags:[{instigator: 'ytld-core'}]})
-            console.log("Error Occured Loading Youtube Video")
-          )
-          yStream.on("info", (info, format) ->
-            volume = 0.5 #set default, as some videos (recently uploaded maybe?) don't have loudness value
-            #stabilise volume to avoid really loud or really quiet playback
-            if info.loudness
-              volume = (parseFloat(info.loudness)/-27)
-              console.log "Setting Volume Based on Video Loudness ("+info.loudness+"): "+volume
-            globals.dc.playStream(yStream,{volume: volume})
-            dur = globals.convertTimestamp(results[0].duration)
-            globals.wss.broadcast(JSON.stringify({type: 'playUpdate', status: 'play'}))
-            globals.wss.broadcast(JSON.stringify({type: 'trackUpdate', track: title, artist: artist, albumArt, albumArt, trackId: trackId.toString(),trackDuration: trackDuration}))
-            globals.dc.sendMessage(channel_id,":play_pause: Now Playing: "+title+" ("+dur+")")
-            console.log("Now Playing: "+title)
-          )
+    if globals.randomPlayback
+      playlistCollection.find({}).sort({timestamp: 1}).toArray((err, results) ->
+        if err then console.log err
+        if results[0]
+          newResult = results[Math.round(Math.random()*results.length)];
+          videoId = newResult.videoId
+          channel_id = newResult.channel_id
+          title = newResult.title
+          trackId = newResult._id
+          trackDuration = newResult.duration
+          artist = newResult.artist
+          albumArt = newResult.albumArt
+          if videoId && !globals.dc.internals.voice.allowPlay
+            playlistCollection.updateOne({'_id': trackId},{'$set':{'status':'playing'}},() ->
+              console.log("Track Status Changed")
+            )
+            requestUrl = 'http://youtube.com/watch?v=' + videoId
+            yStream = youtubeStream(requestUrl,{quality: 'lowest', filter: 'audioonly'})
+            yStream.on("error", (e) ->
+              globals.raven.captureException(e,{level:'error',tags:[{instigator: 'ytld-core'}]})
+              console.log("Error Occurred Loading Youtube Video")
+            )
+            yStream.on("info", (info, format) ->
+              volume = 0.5 #set default, as some videos (recently uploaded maybe?) don't have loudness value
+              #stabilise volume to avoid really loud or really quiet playback
+              if info.loudness
+                volume = (parseFloat(info.loudness)/-27)
+                console.log "Setting Volume Based on Video Loudness ("+info.loudness+"): "+volume
+              globals.dc.playStream(yStream,{volume: volume})
+              dur = globals.convertTimestamp(results[0].duration)
+              globals.wss.broadcast(JSON.stringify({type: 'playUpdate', status: 'play'}))
+              globals.wss.broadcast(JSON.stringify({type: 'trackUpdate', track: title, artist: artist, albumArt, albumArt, trackId: trackId.toString(),trackDuration: trackDuration}))
+              globals.dc.sendMessage(channel_id,":play_pause: Now Playing: "+title+" ("+dur+")")
+              console.log("Now Playing: "+title)
+            )
+      )
+    else
+      playlistCollection.find({status: "added"}).sort({timestamp: 1}).toArray((err, results) ->
+        if err
+          globals.raven.captureException(err,{level: 'error', tags:[{instigator: 'mongo'}]})
+        if results[0]
+          videoId = results[0].videoId
+          channel_id = results[0].channel_id
+          title = results[0].title
+          trackId = results[0]._id
+          trackDuration = results[0].duration
+          artist = results[0].artist
+          albumArt = results[0].albumArt
+          if videoId && !globals.dc.internals.voice.allowPlay
+            playlistCollection.updateOne({'_id': trackId},{'$set':{'status':'playing'}},() ->
+              console.log("Track Status Changed")
+            )
+            requestUrl = 'http://youtube.com/watch?v=' + videoId
+            yStream = youtubeStream(requestUrl,{quality: 'lowest', filter: 'audioonly'})
+            yStream.on("error", (e) ->
+              globals.raven.captureException(e,{level:'error',tags:[{instigator: 'ytld-core'}]})
+              console.log("Error Occured Loading Youtube Video")
+            )
+            yStream.on("info", (info, format) ->
+              volume = 0.5 #set default, as some videos (recently uploaded maybe?) don't have loudness value
+              #stabilise volume to avoid really loud or really quiet playback
+              if info.loudness
+                volume = (parseFloat(info.loudness)/-27)
+                console.log "Setting Volume Based on Video Loudness ("+info.loudness+"): "+volume
+              globals.dc.playStream(yStream,{volume: volume})
+              dur = globals.convertTimestamp(results[0].duration)
+              globals.wss.broadcast(JSON.stringify({type: 'playUpdate', status: 'play'}))
+              globals.wss.broadcast(JSON.stringify({type: 'trackUpdate', track: title, artist: artist, albumArt, albumArt, trackId: trackId.toString(),trackDuration: trackDuration}))
+              globals.dc.sendMessage(channel_id,":play_pause: Now Playing: "+title+" ("+dur+")")
+              console.log("Now Playing: "+title)
+            )
     )
   else
     globals.dc.sendMessage("169555395860234240","Hmmmmm, I think you might want to join a Voice Channel first :wink:")

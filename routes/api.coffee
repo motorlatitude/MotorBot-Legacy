@@ -202,6 +202,19 @@ router.get("/updateSpotify/:start/:length", (request, res) ->
   )
 )
 
+router.get("/getRandomPlayback", (req, res) ->
+  res.end(JSON.stringify({randomPlayback: globals.randomPlayback}))
+)
+
+router.get("/toggleRandomPlayback", (req, res) ->
+  if globals.randomPlayback
+    globals.randomPlayback = false
+    globals.wss.broadcast(JSON.stringify({type: 'randomUpdate', status: false}))
+  else
+    globals.randomPlayback = true
+    globals.wss.broadcast(JSON.stringify({type: 'randomUpdate', status: true}))
+)
+
 router.get("/deleteSong/:trackId", (req, res) ->
   trackId = req.params.trackId
   playlistCollection = globals.db.collection("playlist")

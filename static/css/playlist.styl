@@ -11,6 +11,7 @@ html
   font-size 13px
   font-weight 500
   min-width 1128px
+  overflow hidden
 
 .titleBar
   position fixed
@@ -24,11 +25,11 @@ html
   background rgba(20, 20, 24, 1.00)
   & .siteIcon
     position absolute
-    top 5px
+    top 8px
     left 20px
     line-height 50px
     & img
-      width 40px
+      width 25px
   & .search
     float left
     margin-left 90px
@@ -39,9 +40,17 @@ html
     line-height 34px
     font-size 14px
     margin-top 8px
-    color #fff
+    color rgba(255,255,255,0.8)
+    &::-webkit-input-placeholder
+      color rgba(255,255,255,0.2)
     &:focus
       outline none
+  & .searchIcon
+    position absolute
+    top 17px
+    left 70px
+    font-size 14px
+    color rgba(255,255,255,0.2)
   & .nav
     float left
     list-style none
