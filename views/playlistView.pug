@@ -1,0 +1,24 @@
+.header
+    .bg(style="")
+    .playlistType PLAYLIST
+    .playlistName
+    .playlistStats Created By: <span class="user"></span> &bull; <span class="songTotal">0</span> Songs &bull; <span class="songTotalPlaytime">0 hr 0 mins</span>
+    .playPlaylistButton <i class="fa fa-play" aria-hidden="true"></i> &nbsp; &nbsp;PLAY
+    -var isFollowingPlaylist = false
+    each playlist in user.playlists
+        if playlist == playlistId
+            - isFollowingPlaylist = true
+    if isFollowingPlaylist
+        .followPlaylistButton FOLLOWING
+    else
+        .followPlaylistButton FOLLOW
+    .artwork(style="background: rgba(20, 20, 23, 1.00);")
+ul#playlist
+    li.titleRow
+        .trackRow
+            .item
+            .title SONG
+            .artist ARTIST
+            .album ALBUM
+            .added <i class="fa fa-calendar" aria-hidden="true"></i>
+            .time <i class="fa fa-clock-o" aria-hidden="true"></i>

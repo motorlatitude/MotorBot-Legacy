@@ -23,34 +23,100 @@ router.use(passport.initialize());
 router.use(passport.session());
 
 passport.serializeUser((user, done) ->
-  sessionUser = {id: user.id, name: user.username, disc: user.discriminator, avatar: user.avatar, email: user.email, guilds: user.guilds}
-  done(null, sessionUser)
+  done(null, user.id)
 )
 
-passport.deserializeUser((sessionUser, done) ->
-  done(null, sessionUser)
+passport.deserializeUser((id, done) ->
+  usersCollection = globals.db.collection("users")
+  usersCollection.find({id: id}).toArray((err, results) ->
+    if results[0]
+      done(null, results[0])
+  )
 )
 
 passport.use(new DiscordStrategy({
     clientID: keys.clientId,
     clientSecret: keys.clientSecret,
-    scope: ["identify","email","guilds"],
+    scope: ["identify","guilds"],
     callbackURL: 'https://mb.lolstat.net/auth/discord/callback'
   },
   (accessToken, refreshToken, profile, cb) ->
-    err = null
-    return cb(err, profile)
+    usersCollection = globals.db.collection("users")
+    usersCollection.find({id: profile.id}).toArray((err, results) ->
+      if err then console.log err
+      if results[0]
+        return cb(err, profile)
+      else
+        userObj = {
+          id: profile.id,
+          username: profile.username,
+          discriminator: profile.discriminator,
+          avatar: profile.avatar,
+          guilds: profile.guilds,
+          playlists: []
+        }
+      usersCollection.insertOne(userObj, (err, result) ->
+        if err then console.log err
+        return cb(err, profile)
+      )
+    )
 ))
 
 router.get('/playlist', (req, res) ->
   sess = req.session
-  if sess.passport
+  if req.user
     userInChannel = false
-    if sess.passport.user.guilds
-      for guild in sess.passport.user.guilds
+    if req.user.guilds
+      for guild in req.user.guilds
         if guild.id == "130734377066954752" then userInChannel = true
     if userInChannel
-      res.render('playlist',{user: sess.passport.user})
+      res.render('playlist',{user: req.user})
+    else
+      res.end("Sorry, not in valid guild :(")
+  else
+    res.redirect('/auth/discord')
+)
+
+router.get('/views/:view/:param?', (req, res) ->
+  sess = req.session
+  if req.user
+    userInChannel = false
+    if req.user.guilds
+      for guild in req.user.guilds
+        if guild.id == "130734377066954752" then userInChannel = true
+    if userInChannel
+      if req.params.view
+        if req.params.view == "playlists" && req.params.param
+          res.render("playlistView",{user: req.user, playlistId: req.params.param})
+        else if req.params.view == "playlists"
+          res.render("playlists",{user: req.user})
+        else
+          res.render(req.params.view,{user: req.user})
+      else
+        res.end("You seem lost m9")
+    else
+      res.end("Sorry, not in valid guild :(")
+  else
+    res.redirect('/auth/discord')
+)
+
+router.get('/dashboard/:view/:param?', (req, res) ->
+  sess = req.session
+  if req.user
+    userInChannel = false
+    if req.user.guilds
+      for guild in req.user.guilds
+        if guild.id == "130734377066954752" then userInChannel = true
+    if userInChannel
+      if req.params.view == "playlists"
+        if req.params.param
+          res.render('layout',{user: req.user, view: 'playlists', param: req.params.param})
+        else
+          res.render('layout',{user: req.user, view: 'playlists', param: undefined})
+      else if req.params.view == "home"
+        res.render('layout',{user: req.user, view: 'home', param: undefined})
+      else
+        res.render('layout',{user: req.user, view: 'home', param: undefined})
     else
       res.end("Sorry, not in valid guild :(")
   else
@@ -64,7 +130,7 @@ router.get('/auth/discord/callback', passport.authenticate('discord', {failureRe
 
 router.get('/', (req, res, next) ->
   sess = req.session
-  if sess.passport
+  if req.user
     res.redirect('/playlist')
   else
     res.redirect('/auth/discord')

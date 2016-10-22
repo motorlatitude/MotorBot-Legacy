@@ -315,9 +315,12 @@ html
     position absolute
     left calc(50% - 564px)
     top 110px
-    width 1128px
+    width 800px
     font-size 38px
     color #fff
+    white-space nowrap
+    overflow hidden
+    text-overflow ellipsis
   & .playlistStats
     position absolute
     left calc(50% - 564px)
@@ -506,3 +509,241 @@ html
 
 #socketClose
   display none
+
+.contentWrapper
+  position absolute
+  top 50px
+  left calc(50% - 564px)
+  min-width 1128px
+  width 1128px
+  height auto
+  & .contentTitle
+    float left
+    color #fff
+    font-size 30px
+    font-weight bold
+
+.button
+  display inline-block
+  border-radius 50px
+  padding 6px 20px
+  font-family Helvetica Neue, Helvetica, Arial, sans-serif
+  font-weight 500
+  font-size 13px
+  border: 1px solid rgba(200,200,200,1.0)
+  color #fff
+  cursor pointer
+  opacity 0.9
+  background rgba(0,0,0,0.4)
+  &.blue
+    background rgba(0, 179, 237, 1.00)
+    border: 1px solid rgba(0, 179, 237, 1.00)
+  &:hover
+    opacity 1
+
+.modalityOverlay
+  display none
+  position absolute
+  z-index 10000
+  top 0
+  left 0
+  right 0
+  bottom 0
+  background rgba(0,0,0,0.3)
+
+.modalFrame
+  display none
+  position absolute
+  left calc(50% - 340px)
+  top calc(50% - 200px)
+  z-index 10001
+  max-width 1128px
+  min-height 50px
+  max-height 260px
+  width 680px
+  background rgba(34, 34, 41, 1.00)
+  border-radius 3px
+  box-shadow 0 0 6px rgba(0,0,0,0.1)
+  & input[type="text"]
+    float left
+    margin-left 20px
+    padding 0
+    width calc(100% - 40px)
+    background transparent
+    border 0 solid transparent
+    line-height 34px
+    font-size 14px
+    margin-top 8px
+    color rgba(255,255,255,0.8)
+    &::-webkit-input-placeholder
+      color rgba(255,255,255,0.2)
+    &:focus
+      outline none
+  & input[type="submit"]
+    position absolute
+    bottom -60px
+    left calc(50% - 45px)
+    border-radius 50px
+    padding 6px 20px
+    font-family Helvetica Neue, Helvetica, Arial, sans-serif
+    font-weight 500
+    font-size 13px
+    border: 2px solid rgba(200,200,200,1.0)
+    color #fff
+    cursor pointer
+    opacity 0.9
+    background transparent
+    &.blue
+      color rgba(0, 179, 237, 1.00)
+      border 2px solid rgba(0, 179, 237, 1.00)
+      &:hover
+        color #fff
+        background rgba(0, 179, 237, 1.00)
+    &:focus
+      outline none
+    &:active
+      otuline none
+  & .cancel
+    position absolute
+    right 5px
+    bottom -20px
+    color rgba(255,255,255,0.7)
+    cursor pointer
+    &:hover
+      color rgba(255,255,255,0.9)
+  #addToPlaylist_confirmNewPlaylistName
+    position absolute
+    top 15px
+    right 10px
+    font-weight bold
+    cursor pointer
+  & .scrollWrapper
+    margin-top 50px
+    max-height 210px
+    overflow-y auto
+    overflow-x hidden
+    & .modal_playlistList
+      list-style none
+      margin 0
+      padding 0
+      width 100%
+      height auto
+      & li
+        float left
+        width 100%
+        height 50px
+        line-height 50px
+        cursor pointer
+        & .artwork
+          width 40px
+          height 40px
+          background-color rgba(0,0,0,0.2)
+          border-radius 50%
+          float left
+          margin 5px 10px
+        & .playlistName
+          color #fff
+          margin-left 60px
+          font-weight bold
+        &:hover
+          background rgba(255,255,255,0.1)
+
+
+.loader
+  position absolute
+  display none
+  top 120px
+  left calc(50% + 9px)
+  width 18px
+  height 18px
+  z-index 100
+  border-radius 50%
+  box-sizing border-box
+  border solid 2px transparent
+  border-top-color rgba(0, 179, 237, 1.00)
+  border-left-color rgba(0, 179, 237, 1.00)
+  animation spinner 1.0s infinite linear
+
+@keyframes spinner
+  0%{
+    transform rotate(0deg)
+  }
+  100%{
+    transform rotate(360deg)
+  }
+
+// HOME VIEW
+
+#commitHistory
+  list-style none
+  margin 0
+  padding 0
+  &>li
+    float left
+    width calc(100% - 20px)
+    height auto
+    margin 5px 0
+    background rgba(0,0,0,0.1)
+    border-radius 3px
+    padding 0 10px
+    & p
+      font-size 12px
+      color #ddd
+      & a
+        text-decoration none
+        color rgba(0, 179, 237, 1.00)
+        &:hover
+          text-decoration underline
+    & p:last-child
+      font-size 12px
+      color rgba(255,255,255,0.5)
+    & p:first-child
+      font-size 15px
+      color #fff
+      font-weight 600
+
+
+// PLAYLISTS VIEW
+
+.newPlaylistButton
+  float right
+
+.playlistList
+  list-style none
+  margin 0
+  margin-top 70px
+  padding 0
+  & li
+    float left
+    margin-left 82px
+    margin-bottom 30px
+    width 160px
+    height 200px
+    cursor pointer
+    &:nth-child(5n+1)
+      margin-left 0
+    & .artwork
+      width 160px
+      height 160px
+      background-color rgba(0,0,0,0.1)
+      border-radius 3px
+    & .playlistName
+      width 160px
+      margin-top 8px
+      margin-left 2px
+      color rgba(255,255,255,0.8)
+      overflow hidden
+      white-space nowrap
+      text-overflow ellipsis
+    & .creator
+      width 160px
+      margin-top 3px
+      margin-left 2px
+      color rgba(255,255,255,0.7)
+      & .username
+        float left
+        line-height 20px
+        font-size 12px
+        overflow hidden
+        white-space nowrap
+        text-overflow ellipsis

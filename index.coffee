@@ -164,7 +164,6 @@ goThroughVideoList = () ->
             requestUrl = 'http://youtube.com/watch?v=' + videoId
             yStream = youtubeStream(requestUrl,{quality: 'lowest', filter: 'audioonly'})
             yStream.on("error", (e) ->
-              globals.raven.captureException(e,{level:'error',tags:[{instigator: 'ytld-core'}]})
               console.log("Error Occurred Loading Youtube Video")
             )
             yStream.on("info", (info, format) ->
@@ -183,8 +182,7 @@ goThroughVideoList = () ->
       )
     else
       playlistCollection.find({status: "added"}).sort({timestamp: 1}).toArray((err, results) ->
-        if err
-          globals.raven.captureException(err,{level: 'error', tags:[{instigator: 'mongo'}]})
+        if err then console.log err
         if results[0]
           videoId = results[0].videoId
           channel_id = results[0].channel_id
@@ -200,8 +198,7 @@ goThroughVideoList = () ->
             requestUrl = 'http://youtube.com/watch?v=' + videoId
             yStream = youtubeStream(requestUrl,{quality: 'lowest', filter: 'audioonly'})
             yStream.on("error", (e) ->
-              globals.raven.captureException(e,{level:'error',tags:[{instigator: 'ytld-core'}]})
-              console.log("Error Occured Loading Youtube Video")
+              console.log("Error Occurred Loading Youtube Video")
             )
             yStream.on("info", (info, format) ->
               volume = 0.5 #set default, as some videos (recently uploaded maybe?) don't have loudness value
@@ -226,8 +223,7 @@ globals.songDone = (goToNext = false) ->
     console.log("Song Done")
     playlistCollection = globals.db.collection("playlist")
     playlistCollection.find({status: "playing"}).sort({timestamp: 1}).toArray((err, results) ->
-      if err
-        globals.raven.captureException(err,{level: 'error', tags:[{instigator: 'mongo'}]})
+      if err then console.log err
       if results[0]
         trackId = results[0]._id
         playlistCollection.updateOne({'_id': trackId},{'$set':{'status':'played'}},() ->
