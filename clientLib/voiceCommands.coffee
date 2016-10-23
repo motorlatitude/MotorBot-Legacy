@@ -18,9 +18,13 @@ class VoiceCommands
         for channel in globals.dc.servers[guild_id].channels
           if chnl == channel.name && channel.type == "voice"
             chnl_id = channel.id
+      globals.connectedChannel = chnl_id
+      globals.connectedChannelName = chnl
       globals.wss.broadcast(JSON.stringify({type: 'voiceUpdate', status: 'join', channel: chnl}))
       globals.dc.joinVoice(chnl_id,guild_id)
     else if command.match(/leave/)
+      globals.connectedChannel = null
+      globals.connectedChannelName = null
       globals.wss.broadcast(JSON.stringify({type: 'voiceUpdate', status: 'leave'}))
       globals.dc.leaveVoice(guild_id)
 

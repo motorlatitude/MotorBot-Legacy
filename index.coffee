@@ -114,7 +114,7 @@ globals.dc.on("ready", (msg) ->
   console.log(time+msg.user.username+"#"+msg.user.discriminator+" has connected to the gateway server and is at your command")
   commands = new Commands()
   createDBConnection(initPlaylist)
-  if connectedChannel != null
+  if globals.connectedChannel != null
     guild_id = "130734377066954752"
     globals.dc.joinVoice(connectedChannel, guild_id)
   globals.dc.setStatus("with Discord API")
@@ -238,7 +238,7 @@ globals.songDone = (goToNext = false) ->
 
 goThroughSongQueue = () ->
   songQueueCollection = globals.db.collection("songQueue")
-  songQueueCollection.find({status: "added"}).toArray((err, results) ->
+  songQueueCollection.find({status: "queued"}).toArray((err, results) ->
     if err then console.log err
     if results[0]
       videoId = results[0].videoId
@@ -268,14 +268,53 @@ goThroughSongQueue = () ->
           globals.wss.broadcast(JSON.stringify({type: 'playUpdate', status: 'play'}))
           globals.wss.broadcast(JSON.stringify({type: 'trackUpdate', track: title, artist: artist, albumArt, albumArt, trackId: trackId.toString(),trackDuration: trackDuration}))
           globals.dc.setStatus(title)
+          globals.isPlayling = true
           #globals.dc.sendMessage(channel_id,":play_pause: Now Playing: "+title+" ("+dur+")")
           console.log("Now Playing: "+title)
         )
+    else
+      #no songs in queue, go to nextSong
+      songQueueCollection.find({status: "added"}).toArray((err, results) ->
+        if err then console.log err
+        if results[0]
+          videoId = results[0].videoId
+          title = results[0].title
+          trackId = results[0]._id
+          trackDuration = results[0].duration
+          artist = results[0].artist
+          albumArt = results[0].albumArt
+          playlistId = results[0].playlistId
+          if videoId && !globals.dc.internals.voice.allowPlay
+            songQueueCollection.updateOne({'_id': trackId, 'playlistId': playlistId},{'$set':{'status':'playing'}},() ->
+              console.log("Track Status Changed")
+            )
+            requestUrl = 'http://youtube.com/watch?v=' + videoId
+            yStream = youtubeStream(requestUrl,{quality: 'lowest', filter: 'audioonly'})
+            yStream.on("error", (e) ->
+              console.log("Error Occurred Loading Youtube Video")
+            )
+            yStream.on("info", (info, format) ->
+              volume = 0.5 #set default, as some videos (recently uploaded maybe?) don't have loudness value
+              #stabilise volume to avoid really loud or really quiet playback
+              if info.loudness
+                volume = (parseFloat(info.loudness)/-27)
+                console.log "Setting Volume Based on Video Loudness ("+info.loudness+"): "+volume
+              globals.dc.playStream(yStream,{volume: volume})
+              dur = globals.convertTimestamp(results[0].duration)
+              globals.wss.broadcast(JSON.stringify({type: 'playUpdate', status: 'play'}))
+              globals.wss.broadcast(JSON.stringify({type: 'trackUpdate', track: title, artist: artist, albumArt, albumArt, trackId: trackId.toString(),trackDuration: trackDuration}))
+              globals.dc.setStatus(title)
+              globals.isPlayling = true
+              #globals.dc.sendMessage(channel_id,":play_pause: Now Playing: "+title+" ("+dur+")")
+              console.log("Now Playing: "+title)
+            )
+      )
   )
 
 globals.songComplete = (goToNext) ->
   if globals.dc.internals.voice.ready && !globals.dc.internals.voice.pause
     console.log("Song Complete")
+    globals.isPlayling = false
     songQueueCollection = globals.db.collection("songQueue")
     songQueueCollection.find({status: "playing"}).sort({timestamp: 1}).toArray((err, results) ->
       if err then console.log err

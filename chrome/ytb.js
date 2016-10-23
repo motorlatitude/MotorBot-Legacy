@@ -30,9 +30,49 @@ function addExtraButton(){
               url: "https://mb.lolstat.net/api/getPlaylistsForUser/" + value.userInfo.id,
               dataType: "json",
               success: function (data) {
-                dropDownMenu.html("<h3 class='motorbot-user-h3'>Add to</h3><div class='motorbot-user-scrollview'><ul id='motorbot-user-playlists' class='yt-uix-kbd-nav yt-uix-kbd-nav-list'></ul></div><div class='motorbot-create-new-playlist'>Create a new playlist</div></div><style type='text/css'>.motorbot-user-h3{padding: 0 10px; height: 25px; line-height: 25px; width: calc(100% - 20px);} .motorbot-user-scrollview{overflow-y: auto; overflow-x: hidden; width: 100%; max-height: 170px; border-bottom: 1px solid #ccc; padding-bottom: 10px;} #motorbot-user-playlists li{font-size: 13px; padding: 0 10px; height: 30px; line-height: 30px; width: calc(100% - 20px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer;} #motorbot-user-playlists li:hover{background: #efefef;} .motorbot-create-new-playlist{margin-top: 10px; padding: 0 10px; height: 25px; line-height: 25px; width: calc(100% - 20px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer;} .motorbot-create-new-playlist:hover{background: #efefef;}</style>");
+                dropDownMenu.html("<h3 class='motorbot-user-h3'>Add to</h3><div class='motorbot-user-scrollview'><ul id='motorbot-user-playlists' class='yt-uix-kbd-nav yt-uix-kbd-nav-list'></ul></div><div id='motorbot-create-new-playlist'>Create a new playlist</div></div><style type='text/css'>.motorbot-user-h3{padding: 0 15px; height: 25px; line-height: 25px; width: calc(100% - 30px);} .motorbot-user-scrollview{overflow-y: auto; overflow-x: hidden; width: 100%; max-height: 155px; border-bottom: 1px solid #ccc; margin-top: 10px; padding-bottom: 10px;} #motorbot-user-playlists li{font-size: 13px; padding: 0 15px; height: 30px; line-height: 30px; width: calc(100% - 30px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer;} #motorbot-user-playlists li:hover{background: #efefef;} #motorbot-create-new-playlist{margin-top: 10px; padding: 0 15px; height: 25px; line-height: 25px; width: calc(100% - 30px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer;} #motorbot-create-new-playlist:hover{background: #efefef;}</style>");
                 $.each(data, function (i, item) {
                   $("#motorbot-user-playlists").append("<li class='motorbot-playlist-item' data-playlistId='" + item.id + "'>" + item.name + "</li>");
+                });
+                $("#motorbot-create-new-playlist").click(function(e){
+                  $(this).css("display","none");
+                  dropDownMenu.append("<input type='text' class='yt-uix-form-input-text title-input' style='width: 210px; margin: 15px;' title='Enter name of new playlist' id='motorbot-create-new-playlist-textfield'/><br/><button type='button' id='motorbot-create-new-playlist-button' class='yt-uix-button yt-uix-button-size-default yt-uix-button-primary create-button disabled' disabled style='float: right; margin-right: 15px;'><span class='yt-uix-button-content disabled'>Create</span></button>");
+                  $("#motorbot-create-new-playlist-textfield").on("keyup", function(e){
+                    if($(this).val().length > 1){
+                      $("#motorbot-create-new-playlist-button").prop("disabled",false)
+                    }
+                    else{
+                      $("#motorbot-create-new-playlist-button").prop("disabled",true)
+                    }
+                  });
+                  $("#motorbot-create-new-playlist-button").click(function(e){
+                    if(!$(this).prop("disabled")){
+                      console.log("[Motorbot] Create new playlists named: "+$("#motorbot-create-new-playlist-textfield").val());
+                      var videoId = getParameterByName("v", window.location.href);
+                      chrome.storage.sync.get('userInfo', function (value) {
+                        if (value.userInfo == null) {
+                          $("#action-panel-overflow-button-motorbot").attr("disabled", "true").css("opacity", "1").html("<span class=\"yt-uix-button-content\" style='color: rgba(230, 33, 23, 1.00); vertical-align: middle;'>Authentication Error</span> <style type='text/css'>.motorbot{opacity: 1; cursor: pointer; font-family: Roboto,arial,sans-serif; font-size: 11px; font-style: normal; font-weight: 500;} .motorbot:before{content:''; opacity: 0.5; background-image:url('" + chrome.extension.getURL("icon_20x20.png") + "'); background-size: cover; height: 20px; width: 20px; margin-left: 4px; margin-right: 6px; display: inline-block; vertical-align: middle;}</style>");
+                          console.error("[Motorbot] Error Occurred Sending Video to motorbot: You're not authenticated :(");
+                        }
+                        else {
+                          $.ajax({
+                            url: "https://mb.lolstat.net/api/addToNewPlaylistFromSource/ytb/" + videoId + "/" + encodeURIComponent($("#motorbot-create-new-playlist-textfield").val()) + "/" + value.userInfo.id,
+                            dataType: "json",
+                            success: function(data){
+                              if (data.added) {
+                                $("#action-panel-overflow-button-motorbot").attr("disabled", "true").css("opacity", "1").html("<span class=\"yt-uix-button-content\" style='color: rgba(46, 177, 111, 1.00); vertical-align: middle;'>Added</span> <style type='text/css'>.motorbot{opacity: 1; cursor: pointer; font-family: Roboto,arial,sans-serif; font-size: 11px; font-style: normal; font-weight: 500;} .motorbot:before{content:''; opacity: 0.5; background-image:url('" + chrome.extension.getURL("icon_20x20.png") + "'); background-size: cover; height: 20px; width: 20px; margin-left: 4px; margin-right: 6px; display: inline-block; vertical-align: middle;}</style>");
+                              }
+                              $("#motorbotDropDown").css("display", "none");
+                            },
+                            error: function(err){
+                              $("#action-panel-overflow-button-motorbot").attr("disabled", "true").css("opacity", "1").html("<span class=\"yt-uix-button-content\" style='color: rgba(230, 33, 23, 1.00); vertical-align: middle;'>Error</span> <style type='text/css'>.motorbot{opacity: 1; cursor: pointer; font-family: Roboto,arial,sans-serif; font-size: 11px; font-style: normal; font-weight: 500;} .motorbot:before{content:''; opacity: 0.5; background-image:url('" + chrome.extension.getURL("icon_20x20.png") + "'); background-size: cover; height: 20px; width: 20px; margin-left: 4px; margin-right: 6px; display: inline-block; vertical-align: middle;}</style>");
+                              console.error("Error Occurred Sending Video to motorbot: " + err);
+                            }
+                          });
+                        }
+                      });
+                    }
+                  });
                 });
                 $(".motorbot-playlist-item").each(function (index) {
                   $(this).click(function (e) {

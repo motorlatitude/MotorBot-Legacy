@@ -41,6 +41,7 @@ globals = {
   raven: null
   streamByteLength: null
   randomPlayback: false
+  isPlaying: false
 }
 
 module.exports = globals

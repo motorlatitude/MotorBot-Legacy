@@ -125,12 +125,12 @@ html(lang="en")
                             },1000, "linear")
                         }
                         else if(data.type == "voiceUpdate"){
-                            /*if(data.status == "join") {
-                             $(".channel").html("Currently in " + data.channel)
-                             }
-                             else{
-                             $(".channel").html("Currently not in voice channel")
-                             }*/
+                            if(data.status == "join") {
+                                $(".channel").html("<div class=\"status green\"></div> Currently in " + data.channel)
+                            }
+                            else{
+                                $(".channel").html("<div class=\"status yellow\"></div> Currently not in voice channel")
+                            }
                         }
                         else if(data.type == "randomUpdate"){
                             if (data.status) {
@@ -190,8 +190,7 @@ html(lang="en")
                                      $(".artwork").css("top","8px").css("left","calc(50% + 504px)").css("width","56px").css("height","56px");
                                      $(".playlistType").css("display","none");
                                      $(".playlistName").css("top","22px").css("font-size","25px");
-                                     $(".playPlaylistButton").css("top","21px").css("left","calc(50% + 204px)");
-                                     $(".followPlaylistButton").css("top","21px").css("left","calc(50% + 350px)");
+                                     $(".playlistOptions").css("top","21px").css("left","calc(50% + 204px)").css("text-align","right");
                                  }
                                  else {
                                      $(".header").css("position", "absolute").css("height","300px");
@@ -199,8 +198,7 @@ html(lang="en")
                                      $(".artwork").css("top","56px").css("left","calc(50% + 389px)").css("width","175px").css("height","175px");
                                      $(".playlistType").css("display","block");
                                      $(".playlistName").css("top","110px").css("font-size","38px");
-                                     $(".playPlaylistButton").css("top","200px").css("left","calc(50% - 564px)");
-                                     $(".followPlaylistButton").css("top","200px").css("left","calc(50% - 424px)");
+                                     $(".playlistOptions").css("top","200px").css("left","calc(50% - 564px)").css("text-align","right");
                                  }
                              });
                         }
@@ -230,7 +228,7 @@ html(lang="en")
                                 if(newPlaylistName && newPlaylistName != ""){
                                     //ajax
                                     $.ajax({
-                                        url: "/api/newPlaylist/"+encodeURI(newPlaylistName),
+                                        url: "/api/newPlaylist/"+encodeURIComponent(newPlaylistName),
                                         dataType: "json",
                                         success: function(data){
                                             loadView("playlists", "undefined");
@@ -269,10 +267,11 @@ html(lang="en")
                                 url: "/api/getSongQueue",
                                 dataType: "json",
                                 success: function (data) {
-                                    var k = 0, x = 0;
+                                    var k = 0, x = 0, m=0;
                                     $.each(data, function (i, item) {
                                         var duration = convertTimestamp(item.duration)
                                         if(item.status == "added") {
+                                            m++
                                             $("#nextSongsList").append("<li id='" + item._id + "' data-songId='" + item._id + "' data-playlistId='" + item.playlistId + "'><div class='trackRow'><div class='title'>" + item.title + "</div><div class='artist'>" + item.artist + "</div><div class='album'>" + item.album + "</div><div class='time'>" + duration + "</div></div></li>");
                                         }
                                         else if (item.status == "playing") {
@@ -286,6 +285,9 @@ html(lang="en")
                                     });
                                     if(k == 0){
                                         $("#queueList").parent(".playlistQueueContainer").css("display","none");
+                                    }
+                                    if (m == 0) {
+                                        $("#nextSongsList").parent(".playlistQueueContainer").css("display", "none");
                                     }
                                     if (x == 0) {
                                         $("#currentSong").append("<li><div class='trackRow' style='color: #aaa; text-align: center;'>Nothing Currently Playing</div></li>");
@@ -318,11 +320,34 @@ html(lang="en")
                 loadView("#{view}","#{param}");
                 loadPlaying();
                 loadRandom();
+                getCurrentChannel();
                 $("#mainNavBar li").each(function(index){
                     $(this).click(function(){
                         loadView($(this).attr("data-view"),"undefined");
                     });
-                })
+                });
+                $("#addToPlaylist_confirmNewPlaylistName").click(function(e){
+                    var newPlaylistName = $("#addToPlaylist_newPlaylistName").val()
+                    var songId = $("#addToPlaylist_confirmNewPlaylistName").attr("data-songId")
+                    if (newPlaylistName && newPlaylistName != "" &&  songId != "") {
+                        //ajax
+                        $.ajax({
+                            url: "/api/addSongToNewPlaylist/"+songId+"/" + encodeURIComponent(newPlaylistName),
+                            dataType: "json",
+                            success: function (data) {
+                                $(".modalityOverlay").css("display", "none");
+                                $(".modalFrame.addToPlaylist").css("display", "none");
+                            },
+                            error: function (err) {
+                                console.log(err);
+                            }
+                        });
+                    }
+                    else {
+                        //no name given :(
+                        alert("Please give your new playlist a name.");
+                    }
+                });
             });
 
             function updateDblClicks(){
@@ -363,12 +388,43 @@ html(lang="en")
                             $(".contextMenu").html("<ul></ul>");
                             $(".contextMenu").css("display","block").css("top",CurY+"px").css("left",CurX+"px");
                             if($(this).attr("id")){
-                                $(".contextMenu ul").append("<li>Add to Queue</li><li class='sep'></li><li>Add to Library</li><li onclick=\"addToPlaylist('"+$(this).attr("data-songId")+"')\">Add to Playlist</li><li class='sep'></li><li onclick=\"deleteSongFromPlaylist('"+$(this).attr("data-songId")+"','"+$(this).attr("data-playlistId")+"')\">Remove This From Playlist</li>")
+                                $(".contextMenu ul").append("<li onclick=\"addSongToQueue('"+$(this).attr("data-songId")+"','"+$(this).attr("data-playlistId")+"')\">Add to Queue</li><li class='sep'></li><li>Add to Library</li><li onclick=\"addToPlaylist('"+$(this).attr("data-songId")+"')\">Add to Playlist</li><li class='sep'></li><li onclick=\"deleteSongFromPlaylist('"+$(this).attr("data-songId")+"','"+$(this).attr("data-playlistId")+"')\">Remove This From Playlist</li>")
                             }
                             return false;
                         }
                         return true;
                     });
+                });
+            }
+
+            function getCurrentChannel(){
+                $.ajax({
+                    url: "/api/getCurrentChannel",
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.channel) {
+                            $(".channel").html("<div class=\"status green\"></div> Currently in " + data.channel)
+                        }
+                        else {
+                            $(".channel").html("<div class=\"status yellow\"></div> Currently not in voice channel")
+                        }
+                    },
+                    error: function (err) {
+                        console.log(err);
+                    }
+                });
+            }
+
+            function addSongToQueue(songId, playlistId){
+                $.ajax({
+                    url: "/api/addSongToQueue/" + songId + "/" + playlistId,
+                    dataType: "json",
+                    success: function (data) {
+
+                    },
+                    error: function (err) {
+                        console.log(err);
+                    }
                 });
             }
 
@@ -390,6 +446,8 @@ html(lang="en")
                 $(".modalityOverlay").css("display", "block");
                 $(".modalFrame.addToPlaylist").css("display","block");
                 $(".modal_playlistList").html("");
+                $("#addToPlaylist_confirmNewPlaylistName").attr("data-songId","");
+                $("#addToPlaylist_newPlaylistName").val("");
                 $.ajax({
                     url: "/api/getPlaylists",
                     dataType: 'json',
@@ -401,6 +459,7 @@ html(lang="en")
                                     artwork = "background: url(\"" + item.artwork + "\") no-repeat center; background-size: cover;";
                                 }
                                 $(".modal_playlistList").append("<li onClick=\"addSongToThisPlaylist('"+songId+"','"+item.id+"')\"><div class='artwork' style='" + artwork + "'></div><div class='playlistName'>" + item.name + "</div></li>")
+                                $("#addToPlaylist_confirmNewPlaylistName").attr("data-songId",songId)
                             }
                         });
                     },
@@ -661,6 +720,7 @@ html(lang="en")
                     li(data-view="library") Library
                     li(data-view="playlists") Playlists
                     li(data-view="queue") Queue
+                .channel <div class="status yellow"></div> Not Currently In Voice Channel
                 .bell <i class="fa fa-bell" aria-hidden="true"></i>
                 .profileIcon(style="background: url('https://discordapp.com/api/users/"+user.id+"/avatars/"+user.avatar+".jpg') no-repeat center; background-size: cover;")
             .errorList
