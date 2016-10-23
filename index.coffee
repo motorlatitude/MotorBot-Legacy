@@ -236,6 +236,62 @@ globals.songDone = (goToNext = false) ->
           setTimeout(goThroughVideoList,1000)
     )
 
+goThroughSongQueue = () ->
+  songQueueCollection = globals.db.collection("songQueue")
+  songQueueCollection.find({status: "added"}).toArray((err, results) ->
+    if err then console.log err
+    if results[0]
+      videoId = results[0].videoId
+      title = results[0].title
+      trackId = results[0]._id
+      trackDuration = results[0].duration
+      artist = results[0].artist
+      albumArt = results[0].albumArt
+      playlistId = results[0].playlistId
+      if videoId && !globals.dc.internals.voice.allowPlay
+        songQueueCollection.updateOne({'_id': trackId, 'playlistId': playlistId},{'$set':{'status':'playing'}},() ->
+          console.log("Track Status Changed")
+        )
+        requestUrl = 'http://youtube.com/watch?v=' + videoId
+        yStream = youtubeStream(requestUrl,{quality: 'lowest', filter: 'audioonly'})
+        yStream.on("error", (e) ->
+          console.log("Error Occurred Loading Youtube Video")
+        )
+        yStream.on("info", (info, format) ->
+          volume = 0.5 #set default, as some videos (recently uploaded maybe?) don't have loudness value
+          #stabilise volume to avoid really loud or really quiet playback
+          if info.loudness
+            volume = (parseFloat(info.loudness)/-27)
+            console.log "Setting Volume Based on Video Loudness ("+info.loudness+"): "+volume
+          globals.dc.playStream(yStream,{volume: volume})
+          dur = globals.convertTimestamp(results[0].duration)
+          globals.wss.broadcast(JSON.stringify({type: 'playUpdate', status: 'play'}))
+          globals.wss.broadcast(JSON.stringify({type: 'trackUpdate', track: title, artist: artist, albumArt, albumArt, trackId: trackId.toString(),trackDuration: trackDuration}))
+          globals.dc.setStatus(title)
+          #globals.dc.sendMessage(channel_id,":play_pause: Now Playing: "+title+" ("+dur+")")
+          console.log("Now Playing: "+title)
+        )
+  )
+
+globals.songComplete = (goToNext) ->
+  if globals.dc.internals.voice.ready && !globals.dc.internals.voice.pause
+    console.log("Song Complete")
+    songQueueCollection = globals.db.collection("songQueue")
+    songQueueCollection.find({status: "playing"}).sort({timestamp: 1}).toArray((err, results) ->
+      if err then console.log err
+      if results[0]
+        trackId = results[0]._id
+        playlistId = results[0].playlistId
+        songQueueCollection.updateOne({'_id': trackId, 'playlistId': playlistId},{'$set':{'status':'played'}},() ->
+          console.log("Track Status Changed")
+          if goToNext
+            setTimeout(goThroughSongQueue,1000)
+        )
+      else
+        if goToNext
+          setTimeout(goThroughSongQueue,1000)
+    )
+
 globals.dc.on("songDone", () ->
   globals.songDone(true)
 )

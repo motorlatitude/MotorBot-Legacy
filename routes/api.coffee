@@ -499,12 +499,14 @@ router.get("/deleteSongFromPlaylist/:songId/:playlistId", (request, res) ->
               playlistCollection.update({id: playlistId},{$pull: {songs: songId}, $set: {artwork: new_albumart}}, (err, result) ->
                 if err then console.log err
                 res.end(JSON.stringify({success: true, message: undefined}))
+                globals.wss.broadcast(JSON.stringify({type: 'trackDelete', songId: songId, playlistId: playlistId, newAlbumArt: new_albumart}))
               )
             )
           else
             playlistCollection.update({id: playlistId},{$pull: {songs: songId}}, (err, result) ->
               if err then console.log err
               res.end(JSON.stringify({success: true, message: undefined}))
+              globals.wss.broadcast(JSON.stringify({type: 'trackDelete', songId: songId, playlistId: playlistId}))
             )
       )
     else
@@ -533,7 +535,6 @@ router.get("/playSongFromPlaylistWithSort/:songId/:playlistId/:playlistSort/:pla
     if err then console.log err
     if results[0]
       playlist = results[0]
-      #TODO need to only find and insert the songs below the song clicked
       songsCollection.find({_id: {$in: playlist.songs}}).sort(sortObj).toArray((err, results) ->
         if err then console.log err
         if results[0]
@@ -547,14 +548,18 @@ router.get("/playSongFromPlaylistWithSort/:songId/:playlistId/:playlistSort/:pla
               song.status = "added"
               song.playlistId = playlistId
               songsToInsert.push(song)
-          console.log("songsToInsert")
-          console.log songsToInsert
+            else
+              song.status = "played"
+              song.playlistId = playlistId
+              songsToInsert.push(song)
           songQueueCollection.drop()
           songQueueCollection.insert(songsToInsert, (err, results) ->
             if err
               res.end(JSON.stringify({success: false, message: err.toString()}))
             else
               res.end(JSON.stringify({success: true, message: "OKAY"}))
+              globals.dc.stopStream()
+              globals.songComplete(true)
           )
       )
     else
