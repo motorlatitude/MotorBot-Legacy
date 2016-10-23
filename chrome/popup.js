@@ -13,7 +13,7 @@ $(document).ready(function(){
       $(".frame").css("display","none");
       $(".successFrame").css("display","block");
       $(".successFrame .title .titleText").html(value.userInfo.username+"<br><span>#"+value.userInfo.discriminator+"</span>");
-      $(".successFrame .title .icon .iconImg").css("background","url('https://cdn.discordapp.com/avatars/"+value.userInfo.id+"/"+value.userInfo.avatar+".jpg') no-repeat center").css("background-size","120%");
+      $(".successFrame .title .icon .iconImg").css("background","url('https://discordapp.com/api/users/"+value.userInfo.id+"/avatars/"+value.userInfo.avatar+".jpg') no-repeat center").css("background-size","120%");
     }
   });
   $("#signInButton").click(function(){

@@ -15,6 +15,10 @@ html(lang="en")
             hb = null;
             musicPaused = false;
             songDuration = 0;
+            playlistSort = "timestamp";
+            playlistSortDir = 1;
+            loadedPlaylistArtwork = false
+
             function sendHB(){
                 socket.send(JSON.stringify({type:"hb",data:{}}));
             }
@@ -63,6 +67,7 @@ html(lang="en")
                             }
                         }
                         else if(data.type == "trackAdd"){
+                            //old chrome extenstion
                             if($("#playlist").length) {
                                 var trackNo = $("#playlist li").length;
                                 var formattedTimestamp = data.formattedTimestamp;
@@ -70,6 +75,28 @@ html(lang="en")
                                 $("#playlist").append("<li id='" + data._id + "'><div class='trackRow'><div class='item' data-trackNo='" + trackNo + "'>" + trackNo + "</div><div class='title'>" + data.title + "</div><div class='artist'></div><div class='album'></div><div class='added'>" + added + "</div><div class='time'>" + formattedTimestamp + "</div></div></li>");
                                 $(".errorList ul").append("<li class='info'><div class='icon'><div class='iconWrapper'><i class='fa fa-play' aria-hidden='true'></i></div></div><div class='content'>Track Added: \"" + data.title + "\"</div></li>");
                                 updateDblClicks();
+                            }
+                        }
+                        else if(data.type == "trackAdded"){
+                            //new chrome extension
+                            console.log(data);
+                            if($("#playlist").length) {
+                                if($("#playlist").attr("data-playlistId") == data.playlistId){
+                                    var trackNo = $("#playlist li").length;
+                                    var formattedTimestamp = convertTimestamp(data.duration)
+                                    var added = "a few seconds ago";
+                                    $("#playlist").append("<li id='" + data._id + "'><div class='trackRow'><div class='item' data-trackNo='" + trackNo + "'>" + trackNo + "</div><div class='title'>" + data.title + "</div><div class='artist'>"+data.artist+"</div><div class='album'>"+data.album+"</div><div class='added'>" + added + "</div><div class='time'>" + formattedTimestamp + "</div></div></li>");
+                                    $(".errorList ul").append("<li class='info'><div class='icon'><div class='iconWrapper'><i class='fa fa-play' aria-hidden='true'></i></div></div><div class='content'>Track Added: \"" + data.title + "\"</div></li>");
+                                    if (data.albumArt != "" && !loadedPlaylistArtwork) {
+                                        $(".header .bg").attr("style", "background: url('" + data.albumArt + "') no-repeat center; background-size: cover;");
+                                        $(".header .artwork").attr("style", "background: url('" + data.albumArt + "') no-repeat center; background-size: cover;");
+                                        loadedPlaylistArtwork = true;
+                                    }
+                                    updateDblClicks();
+                                }
+                                else{
+                                    console.log("New Track Added, not in current playlist though");
+                                }
                             }
                         }
                         else if(data.type == "trackDelete"){
@@ -142,6 +169,8 @@ html(lang="en")
                     url = "/views/"+view+"/"+param;
                     window.history.pushState('MotorBot Dashboard View', view, 'https://mb.lolstat.net/dashboard/'+view+'/'+param);
                 }
+                $("#mainNavBar").find("li.active").removeClass("active");
+                $("#mainNavBar").find("li[data-view='"+view+"']").addClass("active");
                 $(".contentView").html("");
                 $(".loader").css("display","block");
                 $.ajax({
@@ -153,11 +182,12 @@ html(lang="en")
                         if(view == "playlists" && param){
                             $(".contentView").css("display","none");
                             $(".loader").css("display","block");
+                            $("#playlist").attr("data-playlistId",param);
                             loadPlaylist(param);
                              $(".contentView").scroll(function () {
                                  if ($(".contentView").scrollTop() > 200) {
                                      $(".header").css("position", "fixed").css("height","100px");
-                                     $(".titleRow").css("position","fixed").css("top","108px");
+                                     $("#playlist").find(".titleRow").css("position","fixed").css("top","108px");
                                      $(".artwork").css("top","8px").css("left","calc(50% + 504px)").css("width","56px").css("height","56px");
                                      $(".playlistType").css("display","none");
                                      $(".playlistName").css("top","22px").css("font-size","25px");
@@ -166,7 +196,7 @@ html(lang="en")
                                  }
                                  else {
                                      $(".header").css("position", "absolute").css("height","300px");
-                                     $(".titleRow").css("position","absolute").css("top","308px");
+                                     $("#playlist").find(".titleRow").css("position","absolute").css("top","308px");
                                      $(".artwork").css("top","56px").css("left","calc(50% + 389px)").css("width","175px").css("height","175px");
                                      $(".playlistType").css("display","block");
                                      $(".playlistName").css("top","110px").css("font-size","38px");
@@ -225,10 +255,45 @@ html(lang="en")
                                 dataType: "json",
                                 success: function(data){
                                     $.each(data, function (i, item) {
-                                        $("#commitHistory").append("<li>"+marked(item.commit.message)+"</li>");
+                                        $("#commitHistory").append("<li>"+marked(item.commit.message.replace(/<(.*?)>$/gmi,"&lt;$1&gt;"))+"</li>");
                                     });
                                 },
                                 error: function(err){
+                                    console.log(err);
+                                }
+                            })
+                        }
+                        else if (view == "queue") {
+                            $(".contentView").css("display", "none");
+                            $(".loader").css("display", "block");
+                            $.ajax({
+                                url: "/api/getSongQueue",
+                                dataType: "json",
+                                success: function (data) {
+                                    var k = 0, x = 0;
+                                    $.each(data, function (i, item) {
+                                        if(item.status == "added") {
+                                            $("#nextSongsList").append("<li id='" + item._id + "' data-songId='" + item._id + "' data-playlistId='" + item.playlistId + "'><div class='trackRow'><div class='title'>" + item.title + "</div><div class='artist'>" + item.artist + "</div><div class='album'>" + item.album + "</div><div class='time'>" + item.duration + "</div></div></li>");
+                                        }
+                                        else if (item.status == "playing") {
+                                            x++
+                                            $("#currentSong").append("<li id='" + item._id + "' data-songId='" + item._id + "' data-playlistId='" + item.playlistId + "'><div class='trackRow'><div class='title'>" + item.title + "</div><div class='artist'>" + item.artist + "</div><div class='album'>" + item.album + "</div><div class='time'>" + item.duration + "</div></div></li>");
+                                        }
+                                        else if (item.status == "queued") {
+                                            k++
+                                            $("#queueList").append("<li id='" + item._id + "' data-songId='" + item._id + "' data-playlistId='" + item.playlistId + "'><div class='trackRow'><div class='title'>" + item.title + "</div><div class='artist'>" + item.artist + "</div><div class='album'>" + item.album + "</div><div class='time'>" + item.duration + "</div></div></li>");
+                                        }
+                                    });
+                                    if(k == 0){
+                                        $("#queueList").parent(".playlistQueueContainer").css("display","none");
+                                    }
+                                    if (x == 0) {
+                                        $("#currentSong").append("<li><div class='trackRow' style='color: #aaa; text-align: center;'>Nothing Currently Playing</div></li>");
+                                    }
+                                    $(".contentView").css("display", "block");
+                                    $(".loader").css("display", "none");
+                                },
+                                error: function (err) {
                                     console.log(err);
                                 }
                             })
@@ -255,8 +320,6 @@ html(lang="en")
                 loadRandom();
                 $("#mainNavBar li").each(function(index){
                     $(this).click(function(){
-                        $("#mainNavBar li.active").removeClass("active");
-                        $(this).addClass("active");
                         loadView($(this).attr("data-view"),"undefined");
                     });
                 })
@@ -277,7 +340,7 @@ html(lang="en")
                             stopMusic();
                         }
                         $.ajax({
-                            url: '/api/playSong/'+self.attr('id'),
+                            url: '/api/playSongFromPlaylistWithSort/'+self.attr('data-songId')+'/'+self.attr('data-playlistId')+'/'+playlistSort+'/'+playlistSortDir,
                             dataType: 'json',
                             success: function(d){
                                 console.log(d);
@@ -404,7 +467,7 @@ html(lang="en")
             }
 
             function loadPlaylist(playlistID){
-                var loadedPlaylistArtwork = false
+                loadedPlaylistArtwork = false
                 var totalDuration = 0;
                 $.ajax({
                     url: '/api/getPlaylist/'+playlistID,
@@ -597,11 +660,12 @@ html(lang="en")
                     li.active(data-view="home") Home
                     li(data-view="library") Library
                     li(data-view="playlists") Playlists
+                    li(data-view="queue") Queue
                 .bell <i class="fa fa-bell" aria-hidden="true"></i>
                 .profileIcon(style="background: url('https://discordapp.com/api/users/"+user.id+"/avatars/"+user.avatar+".jpg') no-repeat center; background-size: cover;")
             .errorList
                 ul
-                    li.info
+                    li.warn
                         .icon
                             .iconWrapper <i class="fa fa-wrench" aria-hidden="true"></i>
                         .content Playlist is under active development, some features may not work.
