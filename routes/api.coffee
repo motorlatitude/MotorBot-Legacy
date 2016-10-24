@@ -28,8 +28,7 @@ router.get("/playSong/:trackId", (req, res) ->
             trackId = r._id.toString()
             trackDuration = r.duration
             playlistCollection.update({timestamp: {$gte: r.timestamp}},{$set: {status: 'added'}}, {multi: true}, (err, result) ->
-              if err
-                globals.raven.captureException(err,{level: 'error', tags:[{instigator: 'mongo'}]})
+              if err then console.log err
               globals.dc.stopStream()
               globals.songDone(true)
               globals.wss.broadcast(JSON.stringify({type: 'trackUpdate', track: track, artist: artist, albumArt: albumArt, trackId: trackId, trackDuration: trackDuration}))
@@ -41,7 +40,7 @@ router.get("/playSong/:trackId", (req, res) ->
 
 router.get("/stopSong", (req, res) ->
   globals.dc.stopStream()
-  globals.songDone(false)
+  globals.songComplete(false)
   globals.wss.broadcast(JSON.stringify({type: 'playUpdate', status: 'stop'}))
   res.end(JSON.stringify({success: true}))
 )
@@ -59,51 +58,20 @@ router.get("/resumeSong", (req, res) ->
 )
 
 router.get("/playSong", (req, res) ->
-  globals.songDone(true)
+  globals.songComplete(true)
   globals.wss.broadcast(JSON.stringify({type: 'playUpdate', status: 'play'}))
   res.end(JSON.stringify({success: true}))
 )
 
 router.get("/prevSong", (req, res) ->
-  playlistCollection = globals.db.collection("playlist")
-  playlistCollection.find({status: {$ne: 'added'}}).sort({timestamp: 1}).toArray((err, results) ->
-    if err
-      globals.raven.captureException(err,{level: 'error', tags:[{instigator: 'mongo'}]})
-    lastResult = results[results.length-1]
-    secondLastResult = results[results.length-2]
-    if lastResult.status == "playing"
-      playlistCollection.updateOne({_id: lastResult._id},{$set: {status: 'added'}},(err, result) ->
-        if err
-          console.log("Databse Updated Error Occured")
-        else
-          playlistCollection.updateOne({_id: secondLastResult._id},{$set: {status: 'added'}},(err, result) ->
-            if err
-              console.log("Database Updated Error Occurred")
-            else
-              globals.dc.stopStream()
-              setTimeout(goThroughVideoList,1000)
-          )
-      )
-    else
-      playlistCollection.updateOne({_id: lastResult._id},{$set: {status: 'added'}},(err, result) ->
-        if err
-          globals.raven.captureException(err,{level: 'error', tags:[{instigator: 'mongo'}]})
-        else
-          globals.dc.stopStream()
-          setTimeout(() ->
-            if goThroughVideoList
-              goThroughVideoList
-            else
-              console.log "Ummmmm, wtf you do?"
-          ,1000)
-      )
-  )
+  songQueueCollection = globals.db.collection("songQueue")
+  #TODO
   res.end(JSON.stringify({success: true}))
 )
 
 router.get("/skipSong", (req, res) ->
   globals.dc.stopStream()
-  globals.songDone(true)
+  globals.songComplete(true)
   res.end(JSON.stringify({success: true}))
 )
 
@@ -187,6 +155,8 @@ router.get("/getPlaylistsForUser/:userId", (req, res) ->
               if playlist.creator == userId
                 returnedPlaylists.push(playlist)
             res.send(JSON.stringify(returnedPlaylists))
+          else
+            res.send(JSON.stringify([]))
         )
       else
         res.send(JSON.stringify({status: 403, message: "Unauthorised"}))
@@ -527,6 +497,17 @@ router.get("/playing", (request,res) ->
   )
 )
 
+router.get("/getPlaying", (request,res) ->
+  songQueueCollection = globals.db.collection("songQueue")
+  songQueueCollection.find({status:'playing'}).toArray((err, results) ->
+    if err then console.log err
+    if results[0]
+      res.end(JSON.stringify(results[0]))
+    else
+      res.end(JSON.stringify({}))
+  )
+)
+
 router.get("/playlist", (request, res) ->
   playlistCollection = globals.db.collection("playlist")
   playlistCollection.find({}).sort({timestamp: 1}).toArray((err, results) ->
@@ -722,9 +703,13 @@ router.get("/playSongFromPlaylistWithSort/:songId/:playlistId/:playlistSort/:pla
         if results[0]
           songsToInsert = []
           inserting = false
+          songPlaying = {}
           for song in results
             if song._id.toString() == songId
-              console.log "Found Song"
+              song.status = "added"
+              song.songId = song._id.toString()
+              song.playlistId = playlistId
+              songPlaying = song
               inserting = true
             if inserting
               song.status = "added"
@@ -746,6 +731,7 @@ router.get("/playSongFromPlaylistWithSort/:songId/:playlistId/:playlistSort/:pla
               res.end(JSON.stringify({success: true, message: "OKAY"}))
               globals.dc.stopStream()
               globals.songComplete(true)
+              globals.wss.broadcast(JSON.stringify({type: 'trackUpdate', song: songPlaying}))
           )
       )
     else

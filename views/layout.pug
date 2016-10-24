@@ -35,22 +35,61 @@ html(lang="en")
                     //console.log(data)
                     if(data){
                         if(data.type == "trackUpdate"){
-                            //$(".playing").html(data.track);
-                            $(".activeTrack").html("<marquee>"+data.track+"</marquee>");
-                            $(".activeArtist").html(data.artist);
-                            if(data.albumArt) {
-                                $(".activeArtwork").attr("style", "background: url('" + data.albumArt + "') no-repeat center; background-size: cover;");
+                            if(data.song) {
+                                $(".activeTrack").html("<marquee>" + data.song.title + "</marquee>");
+                                $(".activeArtist").html(data.song.artist);
+                                if (data.song.albumArt) {
+                                    $(".activeArtwork").attr("style", "background: url('" + data.song.albumArt + "') no-repeat center; background-size: cover;");
+                                }
+                                else {
+                                    $(".activeArtwork").attr("style", "");
+                                }
+                                if ($("#playlist").length) {
+                                    if($("#playlist").attr("data-playlistId") == data.song.playlistId) {
+                                        $(".trackPlaying").removeClass("trackPlaying");
+                                        $(".play").parent().html($(".play").parent().attr('data-trackNo'));
+                                        $("#" + data.song.songId + " .item").html('<i class="fa fa-play play" aria-hidden="true"></i>');
+                                        $("#" + data.song.songId).addClass("trackPlaying");
+                                    }
+                                }
+                                if($("#currentSong").length) {
+                                    $(".currentSongListItem").remove();
+                                    $("li[data-songId='" + data.song.songId + "']").each(function(index){
+                                       if(index == 0){
+                                           $(this).remove();
+                                       }
+                                    });
+                                    $("#currentSong").append("<li class='currentSongListItem' data-songId='" + data.song.songId + "' data-playlistId='" + data.song.playlistId + "'><div class='trackRow'><div class='title'>" + data.song.title + "</div><div class='artist'>"+data.song.artist+"</div><div class='album'>"+data.song.album+"</div><div class='time'>" + convertTimestamp(data.song.duration) + "</div></div></li>");
+                                }
+                                songDuration = convertTimestampToSeconds(data.song.duration);
                             }
-                            else{
-                                $(".activeArtwork").attr("style", "");
+                            else {
+                                $(".activeTrack").html("<marquee>" + data.track + "</marquee>");
+                                $(".activeArtist").html(data.artist);
+                                if (data.albumArt) {
+                                    $(".activeArtwork").attr("style", "background: url('" + data.albumArt + "') no-repeat center; background-size: cover;");
+                                }
+                                else {
+                                    $(".activeArtwork").attr("style", "");
+                                }
+                                if ($("#playlist").length) {
+                                    $(".trackPlaying").removeClass("trackPlaying");
+                                    $(".play").parent().html($(".play").parent().attr('data-trackNo'));
+                                    $("#" + data.trackId + " .item").html('<i class="fa fa-play play" aria-hidden="true"></i>');
+                                    $("#" + data.trackId).addClass("trackPlaying");
+                                }
+                                songDuration = convertTimestampToSeconds(data.trackDuration);
                             }
-                            if($("#playlist").length) {
-                                $(".trackPlaying").removeClass("trackPlaying");
-                                $(".play").parent().html($(".play").parent().attr('data-trackNo'));
-                                $("#" + data.trackId + " .item").html('<i class="fa fa-play play" aria-hidden="true"></i>');
-                                $("#" + data.trackId).addClass("trackPlaying");
+                        }
+                        else if(data.type == "songDone"){
+                            $("#playStop").html('<i class="fa fa-play" aria-hidden="true" onclick="resumeMusic();" style="cursor: pointer;""></i>');
+                            $(".playPlaylistButton").html('<i class="fa fa-play" aria-hidden="true"></i> &nbsp; &nbsp;PLAY').click(function(event){playMusic()})
+                            if ($("#currentSong").length) {
+                                $(".currentSongListItem").remove();
                             }
-                            songDuration = convertTimestampToSeconds(data.trackDuration);
+                            $(".activeTrack").html("");
+                            $(".activeArtist").html("");
+                            $(".activeArtwork").attr("style", "");
                         }
                         else if(data.type == "playUpdate"){
                             if(data.status == "stop"){
@@ -190,7 +229,7 @@ html(lang="en")
                                      $(".artwork").css("top","8px").css("left","calc(50% + 504px)").css("width","56px").css("height","56px");
                                      $(".playlistType").css("display","none");
                                      $(".playlistName").css("top","22px").css("font-size","25px");
-                                     $(".playlistOptions").css("top","21px").css("left","calc(50% + 204px)").css("text-align","right");
+                                     $(".playlistOptions").css("top","21px").css("left","calc(50% + 104px)").css("text-align","right");
                                  }
                                  else {
                                      $(".header").css("position", "absolute").css("height","300px");
@@ -198,7 +237,7 @@ html(lang="en")
                                      $(".artwork").css("top","56px").css("left","calc(50% + 389px)").css("width","175px").css("height","175px");
                                      $(".playlistType").css("display","block");
                                      $(".playlistName").css("top","110px").css("font-size","38px");
-                                     $(".playlistOptions").css("top","200px").css("left","calc(50% - 564px)").css("text-align","right");
+                                     $(".playlistOptions").css("top","200px").css("left","calc(50% - 564px)").css("text-align","left");
                                  }
                              });
                         }
@@ -272,15 +311,15 @@ html(lang="en")
                                         var duration = convertTimestamp(item.duration)
                                         if(item.status == "added") {
                                             m++
-                                            $("#nextSongsList").append("<li id='" + item._id + "' data-songId='" + item._id + "' data-playlistId='" + item.playlistId + "'><div class='trackRow'><div class='title'>" + item.title + "</div><div class='artist'>" + item.artist + "</div><div class='album'>" + item.album + "</div><div class='time'>" + duration + "</div></div></li>");
+                                            $("#nextSongsList").append("<li id='" + item._id + "' data-songId='" + item.songId + "' data-playlistId='" + item.playlistId + "'><div class='trackRow'><div class='title'>" + item.title + "</div><div class='artist'>" + item.artist + "</div><div class='album'>" + item.album + "</div><div class='time'>" + duration + "</div></div></li>");
                                         }
                                         else if (item.status == "playing") {
                                             x++
-                                            $("#currentSong").append("<li id='" + item._id + "' data-songId='" + item._id + "' data-playlistId='" + item.playlistId + "'><div class='trackRow'><div class='title'>" + item.title + "</div><div class='artist'>" + item.artist + "</div><div class='album'>" + item.album + "</div><div class='time'>" + duration + "</div></div></li>");
+                                            $("#currentSong").append("<li class='currentSongListItem' id='" + item.songId + "' data-songId='" + item._id + "' data-playlistId='" + item.playlistId + "'><div class='trackRow'><div class='title'>" + item.title + "</div><div class='artist'>" + item.artist + "</div><div class='album'>" + item.album + "</div><div class='time'>" + duration + "</div></div></li>");
                                         }
                                         else if (item.status == "queued") {
                                             k++
-                                            $("#queueList").append("<li id='" + item._id + "' data-songId='" + item._id + "' data-playlistId='" + item.playlistId + "'><div class='trackRow'><div class='title'>" + item.title + "</div><div class='artist'>" + item.artist + "</div><div class='album'>" + item.album + "</div><div class='time'>" + duration + "</div></div></li>");
+                                            $("#queueList").append("<li id='" + item._id + "' data-songId='" + item.songId + "' data-playlistId='" + item.playlistId + "'><div class='trackRow'><div class='title'>" + item.title + "</div><div class='artist'>" + item.artist + "</div><div class='album'>" + item.album + "</div><div class='time'>" + duration + "</div></div></li>");
                                         }
                                     });
                                     if(k == 0){
@@ -388,7 +427,7 @@ html(lang="en")
                             $(".contextMenu").html("<ul></ul>");
                             $(".contextMenu").css("display","block").css("top",CurY+"px").css("left",CurX+"px");
                             if($(this).attr("id")){
-                                $(".contextMenu ul").append("<li onclick=\"addSongToQueue('"+$(this).attr("data-songId")+"','"+$(this).attr("data-playlistId")+"')\">Add to Queue</li><li class='sep'></li><li>Add to Library</li><li onclick=\"addToPlaylist('"+$(this).attr("data-songId")+"')\">Add to Playlist</li><li class='sep'></li><li onclick=\"deleteSongFromPlaylist('"+$(this).attr("data-songId")+"','"+$(this).attr("data-playlistId")+"')\">Remove This From Playlist</li>")
+                                $(".contextMenu ul").append("<li onclick=\"addSongToQueue('"+$(this).attr("data-songId")+"','"+$(this).attr("data-playlistId")+"')\">Add to Queue</li><li class='sep'></li><li disabled='true'>Add to Library</li><li onclick=\"addToPlaylist('"+$(this).attr("data-songId")+"')\">Add to Playlist</li><li class='sep'></li><li onclick=\"deleteSongFromPlaylist('"+$(this).attr("data-songId")+"','"+$(this).attr("data-playlistId")+"')\">Remove This From Playlist</li>")
                             }
                             return false;
                         }
@@ -583,11 +622,10 @@ html(lang="en")
 
             function loadPlaying(){
                 $.ajax({
-                    url: '/api/playing',
+                    url: '/api/getPlaying',
                     dataType: 'json',
                     success: function(data){
                         if(data._id){
-                            //$(".playing").html(data.title);
                             $(".activeTrack").html("<marquee>"+data.title+"</marquee>");
                             $(".activeArtist").html(data.artist);
                             if (data.albumArt) {
@@ -597,12 +635,18 @@ html(lang="en")
                                 $(".activeArtwork").attr("style", "");
                             }
                             songDuration = convertTimestampToSeconds(data.duration)
-                            $(".trackPlaying").removeClass("trackPlaying");
-                            $(".play").parent().html($(".play").parent().attr('data-trackNo'));
-                            $("#"+data._id+" .item").html('<i class="fa fa-play play" aria-hidden="true"></i>');
-                            $("#"+data._id).addClass("trackPlaying");
+                            if ($("#playlist").length) {
+                                if ($("#playlist").attr("data-playlistId") == data.playlistId) {
+                                    $(".trackPlaying").removeClass("trackPlaying");
+                                    $(".play").parent().html($(".play").parent().attr('data-trackNo'));
+                                    $("#" + data.songId + " .item").html('<i class="fa fa-play play" aria-hidden="true"></i>');
+                                    $("#" + data.songId).addClass("trackPlaying");
+                                    $(".playPlaylistButton").html('<i class="fa fa-pause" aria-hidden="true"></i> &nbsp; &nbsp;PAUSE').click(function (event) {
+                                        pauseMusic()
+                                    });
+                                }
+                            }
                             $("#playStop").html('<i class="fa fa-pause" aria-hidden="true" onclick="pauseMusic();" style="cursor: pointer;""></i>')
-                            $(".playPlaylistButton").html('<i class="fa fa-pause" aria-hidden="true"></i> &nbsp; &nbsp;PAUSE').click(function(event){pauseMusic()});
                             $(".timeline").css("width","0%");
                         }
                     },
@@ -717,7 +761,7 @@ html(lang="en")
                 .searchIcon <i class="fa fa-search" aria-hidden="true"></i>
                 ul.nav#mainNavBar
                     li.active(data-view="home") Home
-                    li(data-view="library") Library
+                    li(data-view="library",style="opacity: 0.4; cursor: default;") Library
                     li(data-view="playlists") Playlists
                     li(data-view="queue") Queue
                 .channel <div class="status yellow"></div> Not Currently In Voice Channel

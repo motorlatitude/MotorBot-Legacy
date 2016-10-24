@@ -248,6 +248,7 @@ goThroughSongQueue = () ->
       artist = results[0].artist
       albumArt = results[0].albumArt
       playlistId = results[0].playlistId
+      song = results[0];
       if videoId && !globals.dc.internals.voice.allowPlay
         songQueueCollection.updateOne({'_id': trackId, 'playlistId': playlistId},{'$set':{'status':'playing'}},() ->
           console.log("Track Status Changed")
@@ -266,7 +267,7 @@ goThroughSongQueue = () ->
           globals.dc.playStream(yStream,{volume: volume})
           dur = globals.convertTimestamp(results[0].duration)
           globals.wss.broadcast(JSON.stringify({type: 'playUpdate', status: 'play'}))
-          globals.wss.broadcast(JSON.stringify({type: 'trackUpdate', track: title, artist: artist, albumArt, albumArt, trackId: trackId.toString(),trackDuration: trackDuration}))
+          globals.wss.broadcast(JSON.stringify({type: 'trackUpdate', song: song}))
           globals.dc.setStatus(title)
           globals.isPlayling = true
           #globals.dc.sendMessage(channel_id,":play_pause: Now Playing: "+title+" ("+dur+")")
@@ -284,6 +285,7 @@ goThroughSongQueue = () ->
           artist = results[0].artist
           albumArt = results[0].albumArt
           playlistId = results[0].playlistId
+          song = results[0]
           if videoId && !globals.dc.internals.voice.allowPlay
             songQueueCollection.updateOne({'_id': trackId, 'playlistId': playlistId},{'$set':{'status':'playing'}},() ->
               console.log("Track Status Changed")
@@ -302,7 +304,7 @@ goThroughSongQueue = () ->
               globals.dc.playStream(yStream,{volume: volume})
               dur = globals.convertTimestamp(results[0].duration)
               globals.wss.broadcast(JSON.stringify({type: 'playUpdate', status: 'play'}))
-              globals.wss.broadcast(JSON.stringify({type: 'trackUpdate', track: title, artist: artist, albumArt, albumArt, trackId: trackId.toString(),trackDuration: trackDuration}))
+              globals.wss.broadcast(JSON.stringify({type: 'trackUpdate', song: song}))
               globals.dc.setStatus(title)
               globals.isPlayling = true
               #globals.dc.sendMessage(channel_id,":play_pause: Now Playing: "+title+" ("+dur+")")
@@ -332,7 +334,8 @@ globals.songComplete = (goToNext) ->
     )
 
 globals.dc.on("songDone", () ->
-  globals.songDone(true)
+  globals.wss.broadcast(JSON.stringify({type: 'songDone'}))
+  globals.songComplete(true)
 )
 startTime = 0
 globals.dc.on("songTime", (time) ->

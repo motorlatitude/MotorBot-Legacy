@@ -127,13 +127,13 @@ router.get('/dashboard/:view/:param?', (req, res) ->
 
 router.get('/auth/discord', passport.authenticate('discord'))
 router.get('/auth/discord/callback', passport.authenticate('discord', {failureRedirect: '/auth/discord', session: true}), (req, res) ->
-  res.redirect('/playlist')
+  res.redirect('/dashboard/home')
 )
 
 router.get('/', (req, res, next) ->
   sess = req.session
   if req.user
-    res.redirect('/playlist')
+    res.redirect('/dashboard/home')
   else
     res.redirect('/auth/discord')
 )

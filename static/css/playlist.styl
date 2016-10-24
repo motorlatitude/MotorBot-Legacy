@@ -223,7 +223,8 @@ html
     font-size 18px
     text-align center
     border-radius 50%
-    cursor pointer
+    //cursor pointer
+    opacity 0.2
     &.active
       color rgba(0, 179, 237, 1)
   & .repeat
@@ -236,7 +237,8 @@ html
     font-size 18px
     text-align center
     border-radius 50%
-    cursor pointer
+    //cursor pointer
+    opacity 0.2
     &.active
       color rgba(0, 179, 237, 1)
 
@@ -288,6 +290,11 @@ html
       color #eee
       &:hover
         background rgba(62, 152, 246, 1.00)
+      &[disabled='true']
+        color rgba(255,255,255,0.2)
+        cursor default
+        &:hover
+          background transparent
       &.sep
         width 100%
         height 1px
@@ -361,6 +368,7 @@ html
     position absolute
     top 200px
     left calc(50% - 564px)
+    width 360px
     & .playPlaylistButton, .followPlaylistButton, .playlistExtraOptions
       display inline-block
       border-radius 50px
