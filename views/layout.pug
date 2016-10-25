@@ -24,7 +24,7 @@ html(lang="en")
             }
 
             function setUpWebSocketConnection(){
-                socket = new WebSocket("wss://mb.lolstat.net:3211")
+                socket = new WebSocket("wss://wss.lolstat.net")
                 socket.onopen = function (event){
                     console.info("Connected to WS");
                     hb = setInterval(sendHB,5000);

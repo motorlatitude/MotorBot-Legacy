@@ -115,7 +115,8 @@ globals.dc.on("ready", (msg) ->
   console.log(time+msg.user.username+"#"+msg.user.discriminator+" has connected to the gateway server and is at your command")
   commands = new Commands()
   createDBConnection(initPlaylist)
-  if globals.connectedChannel != null
+  if globals.connectedChannel
+    console.log "Attempt to reconnect to voice channel: "+globals.connectedChannel
     guild_id = "130734377066954752"
     globals.dc.joinVoice(connectedChannel, guild_id)
 )
