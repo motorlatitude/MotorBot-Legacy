@@ -53,7 +53,7 @@ passport.use(new DiscordStrategy({
           discriminator: profile.discriminator,
           avatar: profile.avatar,
           guilds: profile.guilds,
-          playlists: []
+          playlists: ["YFX7clE6pCquMNnsHtxlzgJiHXIixFxk"]
         }
       usersCollection.insertOne(userObj, (err, result) ->
         if err then console.log err

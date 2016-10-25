@@ -86,23 +86,24 @@ createDBConnection = (cb) ->
     if err
       globals.dc.sendMessage("169555395860234240",":name_badge: Fatal Error: I couldn't connect to the motorbot database :cry:")
       throw new Error("Failed to connect to database, exiting")
-    debugLog += "[i] Connected to MotorBot Database Successfully\n"
+    debugLog += "+ [i] Connected to MotorBot Database Successfully\n"
     globals.db = db
     cb()
   )
 
 #Init Playlist i.e. clear out all playing statuses, incase of hard shutdown/crash
 initPlaylist = () ->
-  playlistCollection = globals.db.collection("playlist")
-  playlistCollection.find({status: "playing"}).sort({timestamp: 1}).toArray((err, results) ->
+  songQueueCollection = globals.db.collection("songQueue")
+  songQueueCollection.find({status: "playing"}).toArray((err, results) ->
     if err then console.log err
     for r in results
       trackId = r._id
-      playlistCollection.updateOne({'_id': trackId},{'$set':{'status':'played'}},() ->
+      songQueueCollection.updateOne({'_id': trackId},{'$set':{'status':'played'}},() ->
         console.log("Track Status Changed")
       )
-    debugLog += "[i] Initialised Playlist Succesfully\n"
-    globals.dc.sendMessage("169555395860234240",":white_check_mark: Hi I'm now online :smiley:\n\n```\n"+debugLog+"\n```")
+    debugLog += "+ [i] Initialised Playlist Successfully\n"
+    globals.dc.sendMessage("169555395860234240",":black_joker: Hi, I'm now online\n\n```diff\n"+debugLog+"\n```")
+    globals.dc.setStatus("with Discord API")
     debugLog = ""
     warning = false
   )
@@ -117,7 +118,6 @@ globals.dc.on("ready", (msg) ->
   if globals.connectedChannel != null
     guild_id = "130734377066954752"
     globals.dc.joinVoice(connectedChannel, guild_id)
-  globals.dc.setStatus("with Discord API")
 )
 
 globals.dc.on("message", (msg,channel_id,user_id,raw_data) ->

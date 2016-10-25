@@ -436,11 +436,20 @@ html
       z-index 10
       &:hover
         background transparent
+      & .sortDir
+        color rgba(0, 170, 234, 1.00)
+        margin-left 10px
+        opacity 1
     &:nth-child(2)
       margin-top 167px
     & .trackRow
       max-width 1128px
       margin-left calc(50% - 564px)
+      & div
+        cursor pointer
+      & div:hover
+        color #fff
+        opacity 1
       & .item
         display inline-block
         width 45px
@@ -475,18 +484,22 @@ html
         white-space nowrap
         overflow hidden
         text-overflow ellipsis
-        opacity 0.6
-      & .added
+        color rgba(255,255,255,0.6)
+      & .timestamp
         display inline-block
         width 100px
         white-space nowrap
         overflow hidden
         text-overflow ellipsis
-        opacity 0.6
+        color rgba(255,255,255,0.6)
     &.trackPlaying
       color rgba(0, 179, 237, 1.00) !important
       opacity 1.0 !impotant
       font-weight bold
+      & .trackRow .timestamp
+        color rgba(0, 179, 237, 1.00)
+      & .trackRow .time
+        color rgba(0, 179, 237, 1.00)
 
 .errorList
   position fixed

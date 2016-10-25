@@ -3,7 +3,7 @@ html(lang="en")
     head
         title Motorbot Playlist
         meta(name="viewport",content="width=1128px, initial-scale=1")
-        link(type='image/png',rel='icon',href='motorbotIcon.png')
+        link(type='image/png',rel='icon',href='https://mb.lolstat.net/motorbotIcon.png')
         link(href="https://fonts.googleapis.com/css?family=Open+Sans|Ubuntu",rel="stylesheet")
         link(href='/css/playlist.css',rel='stylesheet')
         link(href='/font-awesome-4.6.3/css/font-awesome.min.css',rel='stylesheet')
@@ -17,7 +17,7 @@ html(lang="en")
             songDuration = 0;
             playlistSort = "timestamp";
             playlistSortDir = 1;
-            loadedPlaylistArtwork = false
+            loadedPlaylistArtwork = false;
 
             function sendHB(){
                 socket.send(JSON.stringify({type:"hb",data:{}}));
@@ -59,7 +59,7 @@ html(lang="en")
                                            $(this).remove();
                                        }
                                     });
-                                    $("#currentSong").append("<li class='currentSongListItem' data-songId='" + data.song.songId + "' data-playlistId='" + data.song.playlistId + "'><div class='trackRow'><div class='title'>" + data.song.title + "</div><div class='artist'>"+data.song.artist+"</div><div class='album'>"+data.song.album+"</div><div class='time'>" + convertTimestamp(data.song.duration) + "</div></div></li>");
+                                    $("#currentSong").append("<li class='currentSongListItem trackPlaying' data-songId='" + data.song.songId + "' data-playlistId='" + data.song.playlistId + "'><div class='trackRow'><div class='title'>" + data.song.title + "</div><div class='artist'>"+data.song.artist+"</div><div class='album'>"+data.song.album+"</div><div class='time'>" + convertTimestamp(data.song.duration) + "</div></div></li>");
                                 }
                                 songDuration = convertTimestampToSeconds(data.song.duration);
                             }
@@ -113,7 +113,7 @@ html(lang="en")
                                     var trackNo = $("#playlist li").length;
                                     var formattedTimestamp = convertTimestamp(data.duration)
                                     var added = "a few seconds ago";
-                                    $("#playlist").append("<li id='" + data._id + "' data-songId='" + data._id + "' data-playlistId='" + data.playlistId + "'><div class='trackRow'><div class='item' data-trackNo='" + trackNo + "'>" + trackNo + "</div><div class='title'>" + data.title + "</div><div class='artist'>"+data.artist+"</div><div class='album'>"+data.album+"</div><div class='added'>" + added + "</div><div class='time'>" + formattedTimestamp + "</div></div></li>");
+                                    $("#playlist").append("<li id='" + data._id + "' data-songId='" + data._id + "' data-playlistId='" + data.playlistId + "'><div class='trackRow'><div class='item' data-trackNo='" + trackNo + "'>" + trackNo + "</div><div class='title'>" + data.title + "</div><div class='artist'>"+data.artist+"</div><div class='album'>"+data.album+"</div><div class='timestamp'>" + added + "</div><div class='time'>" + formattedTimestamp + "</div></div></li>");
                                     $(".errorList ul").append("<li class='info'><div class='icon'><div class='iconWrapper'><i class='fa fa-play' aria-hidden='true'></i></div></div><div class='content'>Track Added: \"" + data.title + "\"</div></li>");
                                     if (data.albumArt != "" && !loadedPlaylistArtwork) {
                                         $(".header .bg").attr("style", "background: url('" + data.albumArt + "') no-repeat center; background-size: cover;");
@@ -315,7 +315,7 @@ html(lang="en")
                                         }
                                         else if (item.status == "playing") {
                                             x++
-                                            $("#currentSong").append("<li class='currentSongListItem' id='" + item.songId + "' data-songId='" + item._id + "' data-playlistId='" + item.playlistId + "'><div class='trackRow'><div class='title'>" + item.title + "</div><div class='artist'>" + item.artist + "</div><div class='album'>" + item.album + "</div><div class='time'>" + duration + "</div></div></li>");
+                                            $("#currentSong").append("<li class='currentSongListItem trackPlaying' id='" + item.songId + "' data-songId='" + item._id + "' data-playlistId='" + item.playlistId + "'><div class='trackRow'><div class='title'>" + item.title + "</div><div class='artist'>" + item.artist + "</div><div class='album'>" + item.album + "</div><div class='time'>" + duration + "</div></div></li>");
                                         }
                                         else if (item.status == "queued") {
                                             k++
@@ -395,7 +395,7 @@ html(lang="en")
                         $(this).remove();
                     });
                 });
-                $("#playlist li").each(function(index){
+                $("#playlist li:not(.titleRow)").each(function(index){
                     var self = $(this);
                     self.dblclick(function(){
                         if (musicPaused) {
@@ -433,6 +433,86 @@ html(lang="en")
                         }
                         return true;
                     });
+                });
+                $(".titleRow .timestamp").click(function(){
+                    if (playlistSortDir == 1) {
+                        $(".titleRow .sortDir").remove();
+                        $(".titleRow .timestamp").append("<span class='sortDir' data-sortdir='-1' data-sort='timestamp'><i class=\"fa fa-chevron-up\" aria-hidden=\"true\"></i></div>");
+                        $("#playlist > li:not(.titleRow)").sort(function dec_sort(a, b) {
+                            return ($(b).find(".timestamp").attr("data-sortIndex")) > ($(a).find(".timestamp").attr("data-sortIndex")) ? 1 : -1;
+                        }).appendTo('#playlist');
+                        playlistSortDir = -1;
+                        playlistSort = "timestamp";
+                    }
+                    else if (playlistSortDir == -1) {
+                        $(".titleRow .sortDir").remove();
+                        $(".titleRow .timestamp").append("<span class='sortDir' data-sortdir='1' data-sort='timestamp'><i class=\"fa fa-chevron-down\" aria-hidden=\"true\"></i></div>");
+                        $("#playlist > li:not(.titleRow)").sort(function dec_sort(a, b) {
+                            return ($(b).find(".timestamp").attr("data-sortIndex")) < ($(a).find(".timestamp").attr("data-sortIndex")) ? 1 : -1;
+                        }).appendTo('#playlist');
+                        playlistSortDir = 1;
+                        playlistSort = "timestamp";
+                    }
+                });
+                $(".titleRow .title").click(function () {
+                    if (playlistSortDir == 1) {
+                        $(".titleRow .sortDir").remove();
+                        $(".titleRow .title").append("<span class='sortDir' data-sortdir='-1' data-sort='title'><i class=\"fa fa-chevron-up\" aria-hidden=\"true\"></i></div>");
+                        $("#playlist > li:not(.titleRow)").sort(function dec_sort(a, b) {
+                            return ($(b).find(".title").attr("data-sortIndex")) > ($(a).find(".title").attr("data-sortIndex")) ? 1 : -1;
+                        }).appendTo('#playlist');
+                        playlistSortDir = -1;
+                        playlistSort = "title";
+                    }
+                    else if (playlistSortDir == -1) {
+                        $(".titleRow .sortDir").remove();
+                        $(".titleRow .title").append("<span class='sortDir' data-sortdir='1' data-sort='title'><i class=\"fa fa-chevron-down\" aria-hidden=\"true\"></i></div>");
+                        $("#playlist > li:not(.titleRow)").sort(function dec_sort(a, b) {
+                            return ($(b).find(".title").attr("data-sortIndex")) < ($(a).find(".title").attr("data-sortIndex")) ? 1 : -1;
+                        }).appendTo('#playlist');
+                        playlistSortDir = 1;
+                        playlistSort = "title";
+                    }
+                });
+                $(".titleRow .artist").click(function () {
+                    if (playlistSortDir == 1) {
+                        $(".titleRow .sortDir").remove();
+                        $(".titleRow .artist").append("<span class='sortDir' data-sortdir='-1' data-sort='artist'><i class=\"fa fa-chevron-up\" aria-hidden=\"true\"></i></div>");
+                        $("#playlist > li:not(.titleRow)").sort(function dec_sort(a, b) {
+                            return ($(b).find(".artist").attr("data-sortIndex")) > ($(a).find(".artist").attr("data-sortIndex")) ? 1 : -1;
+                        }).appendTo('#playlist');
+                        playlistSortDir = -1;
+                        playlistSort = "artist";
+                    }
+                    else if (playlistSortDir == -1) {
+                        $(".titleRow .sortDir").remove();
+                        $(".titleRow .artist").append("<span class='sortDir' data-sortdir='1' data-sort='artist'><i class=\"fa fa-chevron-down\" aria-hidden=\"true\"></i></div>");
+                        $("#playlist > li:not(.titleRow)").sort(function dec_sort(a, b) {
+                            return ($(b).find(".artist").attr("data-sortIndex")) < ($(a).find(".artist").attr("data-sortIndex")) ? 1 : -1;
+                        }).appendTo('#playlist');
+                        playlistSortDir = 1;
+                        playlistSort = "artist";
+                    }
+                });
+                $(".titleRow .album").click(function () {
+                    if (playlistSortDir == 1) {
+                        $(".titleRow .sortDir").remove();
+                        $(".titleRow .album").append("<span class='sortDir' data-sortdir='-1' data-sort='album'><i class=\"fa fa-chevron-up\" aria-hidden=\"true\"></i></div>");
+                        $("#playlist > li:not(.titleRow)").sort(function dec_sort(a, b) {
+                            return ($(b).find(".album").attr("data-sortIndex")) > ($(a).find(".album").attr("data-sortIndex")) ? 1 : -1;
+                        }).appendTo('#playlist');
+                        playlistSortDir = -1;
+                        playlistSort = "album";
+                    }
+                    else if (playlistSortDir == -1) {
+                        $(".titleRow .sortDir").remove();
+                        $(".titleRow .album").append("<span class='sortDir' data-sortdir='1' data-sort='album'><i class=\"fa fa-chevron-down\" aria-hidden=\"true\"></i></div>");
+                        $("#playlist > li:not(.titleRow)").sort(function dec_sort(a, b) {
+                            return ($(b).find(".album").attr("data-sortIndex")) < ($(a).find(".album").attr("data-sortIndex")) ? 1 : -1;
+                        }).appendTo('#playlist');
+                        playlistSortDir = 1;
+                        playlistSort = "album";
+                    }
                 });
             }
 
@@ -585,7 +665,7 @@ html(lang="en")
                                 $(".header .artwork").attr("style","background: url('"+data.albumArt+"') no-repeat center; background-size: cover;");
                                 loadedPlaylistArtwork = true;
                             }
-                            $("#playlist").append("<li id='" + data._id + "' data-songId='" + data._id + "' data-playlistId='" + playlistID + "'><div class='trackRow'><div class='item' data-trackNo='" + trackNo + "'>" + trackNo + "</div><div class='title'>" + data.title + "</div><div class='artist'>" + data.artist + "</div><div class='album'>" + data.album + "</div><div class='added'>" + added + "</div><div class='time'>" + formattedTimestamp + "</div></div></li>");
+                            $("#playlist").append("<li id='" + data._id + "' data-songId='" + data._id + "' data-playlistId='" + playlistID + "'><div class='trackRow'><div class='item' data-trackNo='" + trackNo + "'>" + trackNo + "</div><div class='title' data-sortIndex='"+data.title.toUpperCase()+"'>" + data.title + "</div><div class='artist' data-sortIndex='"+data.artist.toUpperCase()+"'>" + data.artist + "</div><div class='album' data-sortIndex='"+data.album.toUpperCase()+"'>" + data.album + "</div><div class='timestamp' data-sortIndex='"+data.timestamp+"'>" + added + "</div><div class='time'>" + formattedTimestamp + "</div></div></li>");
                         });
                         $(".contentView").css("display","block");
                         $(".loader").css("display","none");
@@ -598,6 +678,20 @@ html(lang="en")
                         var hrs = Math.floor((totalDuration/60)/60)
                         var mins = Math.round((((totalDuration/60)/60) - hrs)*60);
                         $(".songTotalPlaytime").html(hrs+" hr "+mins+" mins");
+                        if (playlistSortDir == 1) {
+                            $(".titleRow .sortDir").remove();
+                            $(".titleRow ."+playlistSort).append("<span class='sortDir' data-sortdir='-1' data-sort='"+playlistSort+"'><i class=\"fa fa-chevron-down\" aria-hidden=\"true\"></i></div>");
+                            $("#playlist > li:not(.titleRow)").sort(function asc_sort(a, b) {
+                                return ($(b).find("."+playlistSort).attr("data-sortIndex")) < ($(a).find("."+playlistSort).attr("data-sortIndex")) ? 1 : -1;
+                            }).appendTo('#playlist');
+                        }
+                        else if (playlistSortDir == -1) {
+                            $(".titleRow .sortDir").remove();
+                            $(".titleRow ."+playlistSort).append("<span class='sortDir' data-sortdir='1' data-sort='"+playlistSort+"'><i class=\"fa fa-chevron-up\" aria-hidden=\"true\"></i></div>");
+                            $("#playlist > li:not(.titleRow)").sort(function dec_sort(a, b) {
+                                return ($(b).find("."+playlistSort).attr("data-sortIndex")) > ($(a).find("."+playlistSort).attr("data-sortIndex")) ? 1 : -1;
+                            }).appendTo('#playlist');
+                        }
                         updateDblClicks();
                         loadPlaying();
                         loadRandom();
@@ -736,22 +830,22 @@ html(lang="en")
             }
 
             function randomMusic(){
-                $.ajax({
+                /*$.ajax({
                     url: '/api/toggleRandomPlayback',
                     dataType: 'json',
                     success: function (d) {
 
                     }
-                });
+                });*/
             }
 
             function repeatMusic() {
-                if ($(".repeat").hasClass("active")) {
+                /*if ($(".repeat").hasClass("active")) {
                     $(".repeat").toggleClass("active");
                 }
                 else {
                     $(".repeat").toggleClass("active");
-                }
+                }*/
             }
     body
         .bodyWrapper

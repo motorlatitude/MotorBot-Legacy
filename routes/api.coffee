@@ -691,6 +691,12 @@ router.get("/playSongFromPlaylistWithSort/:songId/:playlistId/:playlistSort/:pla
   sortObj = {timestamp: 1}
   if playlistSort == "timestamp"
     sortObj = {timestamp: playlistSortDir}
+  else if playlistSort == "title"
+    sortObj = {title: playlistSortDir}
+  else if playlistSort == "artist"
+    sortObj = {artist: playlistSortDir}
+  else if playlistSort == "album"
+    sortObj = {album: playlistSortDir}
   playlistCollection = globals.db.collection("playlists")
   songsCollection = globals.db.collection("songs")
   songQueueCollection = globals.db.collection("songQueue")
