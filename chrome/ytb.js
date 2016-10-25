@@ -11,7 +11,7 @@ function addExtraButton(){
     newButton.type = "button";
     newButton.innerHTML = "<span class=\"yt-uix-button-content\" style='vertical-align: middle;'>MotorBot</span> <style type='text/css'>.motorbot{opacity: 0.5; cursor: pointer; font-family: Roboto,arial,sans-serif; font-size: 11px; font-style: normal; font-weight: 500;} .motorbot:before{content:''; background-image:url('" + chrome.extension.getURL("icon_20x20.png") + "'); background-size: cover; height: 20px; width: 20px; margin-left: 6px; margin-right: 6px; display: inline-block; vertical-align: middle;} .loader{width: 11px; height: 11px; border: 2px solid transparent; border-top-color: rgba(22, 122, 198, 1.00); border-left-color: rgba(22, 122, 198, 1.00); border-radius: 50%; box-sizing: border-box; display: inline-block; margin-left: 8px; vertical-align: middle; animation: spinner 0.5s infinite linear} @keyframes spinner{0%{transform: rotate(0deg)} 100%{transform: rotate(360deg);}}</style>";
     newMenuItem.appendChild(newButton);
-    $("body").append("<div class='yt-ui-menu-content yt-uix-menu-content yt-uix-menu-content-external yt-uix-kbd-nav' style='min-width: 260px; max-width: 260px;  left: 560px; top: 920px; display: none;' id='motorbotDropDown'><ul id='motorbot-user-playlists'></ul></div>");
+    $("body").append("<div class='yt-ui-menu-content yt-uix-menu-content yt-uix-menu-content-external yt-uix-kbd-nav' style='min-width: 260px; max-width: 260px;  left: 560px; top: "+($("#watch7-container").offset().top+145)+"px; display: none;' id='motorbotDropDown'><ul id='motorbot-user-playlists'></ul></div>");
     dropDownMenu = $("#motorbotDropDown");
     document.getElementById('watch8-secondary-actions').appendChild(newMenuItem);
     document.getElementById('action-panel-overflow-button-motorbot').addEventListener('click', function (evt) {
@@ -23,6 +23,7 @@ function addExtraButton(){
             console.error("[Motorbot] Error Occurred Sending Video to motorbot: You're not authenticated :(");
           }
           else {
+            $("#motorbotDropDown").css("top",($("#watch7-container").offset().top+145)+"px");
             dropDownMenu.css("display", "block");
             dropDownMenu.html("<div class='loader'></div>");
             var videoId = getParameterByName("v", window.location.href);

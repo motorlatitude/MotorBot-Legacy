@@ -294,6 +294,7 @@ goThroughSongQueue = () ->
             yStream = youtubeStream(requestUrl,{quality: 'lowest', filter: 'audioonly'})
             yStream.on("error", (e) ->
               console.log("Error Occurred Loading Youtube Video")
+              globals.songComplete(true)
             )
             yStream.on("info", (info, format) ->
               volume = 0.5 #set default, as some videos (recently uploaded maybe?) don't have loudness value
