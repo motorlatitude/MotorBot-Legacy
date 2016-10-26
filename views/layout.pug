@@ -158,10 +158,12 @@ html(lang="en")
                             }
                             $(".duration").html(timeSpent);
                             $(".songDuration").html(songTimelineDuration);
-                            //$(".timeline").css("width",((data.time/1000)/songDuration)*100+"%");
-                            $(".timeline").animate({
-                                "width": ((data.time/1000)/songDuration)*100+"%"
-                            },1000, "linear")
+                            var newWidth = ((data.time/1000)/songDuration)*100;
+                            if(newWidth <= 100) {
+                                $(".timeline").animate({
+                                    "width": newWidth + "%"
+                                }, 1000, "linear");
+                            }
                         }
                         else if(data.type == "voiceUpdate"){
                             if(data.status == "join") {
@@ -261,7 +263,7 @@ html(lang="en")
                                         if(item.artwork != ""){
                                             artwork = "background: url(\""+item.artwork+"\") no-repeat center; background-size: cover;";
                                         }
-                                        $(".playlistList").append("<li onClick=\"loadView('playlists','"+item.id+"')\"><div class='artwork' style='"+artwork+"'></div><div class='playlistName'>"+item.name+"</div><div class='creator'><div class='username'>"+item.creatorName.username+"#"+item.creatorName.discriminator+"</div></div></li>")
+                                        $(".playlistList").append("<li onClick=\"loadView('playlists','"+item.id+"')\"><div class='artwork' style='"+artwork+"'><div class='playState'><i class=\"fa fa-play\" aria-hidden=\"true\"></i></div></div><div class='playlistName'>"+item.name+"</div><div class='creator'><div class='username'>"+item.creatorName.username+"#"+item.creatorName.discriminator+"</div></div></li>")
                                     });
                                 },
                                 error: function(err){
@@ -300,8 +302,9 @@ html(lang="en")
                                 url: "https://api.github.com/repos/motorlatitude/motorbot/commits",
                                 dataType: "json",
                                 success: function(data){
+                                    console.log(data);
                                     $.each(data, function (i, item) {
-                                        $("#commitHistory").append("<li>"+marked(item.commit.message.replace(/<(.*?)>$/gmi,"&lt;$1&gt;"))+"</li>");
+                                        $("#commitHistory").append("<li><div class='date'>"+item.commit.author.date.replace(/T/gmi,"<br/>").replace(/Z/gmi,"")+"</div><div class='container'>"+marked(item.commit.message.replace(/<(.*?)>$/gmi,"&lt;$1&gt;").replace(/FIX/g,"<div class='type fix'>FIX</div>").replace(/NEW/g,"<div class='type new'>NEW</div>").replace(/TODO/g,"<div class='type todo'>TODO</div>").replace(/CODE\sIMPROVEMENT/g,"<div class='type code'>CODE</div>").replace(/IMPROVEMENT/g,"<div class='type improvement'>IMPROVEMENT</div>"))+"</div></li>");
                                     });
                                 },
                                 error: function(err){
@@ -440,7 +443,12 @@ html(lang="en")
                             $(".contextMenu").html("<ul></ul>");
                             $(".contextMenu").css("display","block").css("top",CurY+"px").css("left",CurX+"px");
                             if($(this).attr("id")){
-                                $(".contextMenu ul").append("<li onclick=\"addSongToQueue('"+$(this).attr("data-songId")+"','"+$(this).attr("data-playlistId")+"')\">Add to Queue</li><li class='sep'></li><li disabled='true'>Add to Library</li><li onclick=\"addToPlaylist('"+$(this).attr("data-songId")+"')\">Add to Playlist</li><li class='sep'></li><li onclick=\"deleteSongFromPlaylist('"+$(this).attr("data-songId")+"','"+$(this).attr("data-playlistId")+"')\">Remove This From Playlist</li>")
+                                if($("#playlist").attr("data-playlistCreator") == "#{user.id}"){
+                                    $(".contextMenu ul").append("<li onclick=\"addSongToQueue('"+$(this).attr("data-songId")+"','"+$(this).attr("data-playlistId")+"')\">Add to Queue</li><li class='sep'></li><li disabled='true'>Add to Library</li><li onclick=\"addToPlaylist('"+$(this).attr("data-songId")+"')\">Add to Playlist</li><li class='sep'></li><li onclick=\"deleteSongFromPlaylist('"+$(this).attr("data-songId")+"','"+$(this).attr("data-playlistId")+"')\" style='color: rgba(242, 52, 51, 1.00);'>Remove This From Playlist</li>");
+                                }
+                                else{
+                                    $(".contextMenu ul").append("<li onclick=\"addSongToQueue('"+$(this).attr("data-songId")+"','"+$(this).attr("data-playlistId")+"')\">Add to Queue</li><li class='sep'></li><li disabled='true'>Add to Library</li><li onclick=\"addToPlaylist('"+$(this).attr("data-songId")+"')\">Add to Playlist</li>")
+                                }
                             }
                             return false;
                         }
@@ -669,6 +677,7 @@ html(lang="en")
                             $(".header .artwork").attr("style", "background: url('" + d.artwork + "') no-repeat center; background-size: cover;");
                             loadedPlaylistArtwork = true;
                         }
+                        $("#playlist").attr("data-playlistCreator", d.creator);
                         $.each(d.songs, function(i, item){
                             var data = d.songs[i];
                             var trackNo = i + 1;
@@ -716,7 +725,7 @@ html(lang="en")
                             $(".contextMenu").html("<ul></ul>");
                             $(".contextMenu").css("display", "block").css("top", CurY + "px").css("left", CurX + "px");
                             if("#{user.id}" == d.creator.toString()){
-                                $(".contextMenu ul").append("<li>Copy Playlist Link</li><li>Copy Playlist ID</li><li class='sep'></li><li>Collaborative Playlist</li><li>Make Private</li><li class='sep'></li><li>Edit Details</li><li style='color: red;'>Delete</li>");
+                                $(".contextMenu ul").append("<li>Copy Playlist Link</li><li>Copy Playlist ID</li><li class='sep'></li><li>Collaborative Playlist</li><li>Make Private</li><li class='sep'></li><li>Edit Details</li><li style='color: rgba(242, 52, 51, 1.00);' onclick=\"deletePlaylist('"+playlistID+"')\">Delete</li>");
                             }
                             else{
                                 $(".contextMenu ul").append("<li>Copy Playlist Link</li><li>Copy Playlist ID</li><li class='sep'></li><li disabled='true'>Collaborative Playlist</li><li>Unfollow/Follow</li>");
@@ -728,6 +737,19 @@ html(lang="en")
                     },
                     error: function(err){
                         console.log(err);
+                    }
+                });
+            }
+
+            function deletePlaylist(playlistID){
+                $.ajax({
+                    url: '/api/deletePlaylist/' + playlistID,
+                    dataType: 'json',
+                    success: function (d) {
+                        loadView("playlists","undefined");
+                    },
+                    error: function(err){
+                        console.log(err)
                     }
                 });
             }

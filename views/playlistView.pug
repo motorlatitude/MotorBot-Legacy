@@ -10,7 +10,7 @@
             if playlist == playlistId
                 - isFollowingPlaylist = true
         if isFollowingPlaylist
-            .followPlaylistButton FOLLOWING
+            .followPlaylistButton.following FOLLOWING
         else
             .followPlaylistButton FOLLOW
         .playlistExtraOptions#playlistMore <i class="fa fa-ellipsis-h" aria-hidden="true"></i>

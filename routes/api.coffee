@@ -468,9 +468,11 @@ router.get("/toggleRandomPlayback", (req, res) ->
   if globals.randomPlayback
     globals.randomPlayback = false
     globals.wss.broadcast(JSON.stringify({type: 'randomUpdate', status: false}))
+    res.send(JSON.stringify({status: 200, message: "OKAY"}))
   else
     globals.randomPlayback = true
     globals.wss.broadcast(JSON.stringify({type: 'randomUpdate', status: true}))
+    res.send(JSON.stringify({status: 200, message: "OKAY"}))
 )
 
 router.get("/deleteSong/:trackId", (req, res) ->
@@ -634,47 +636,51 @@ router.get("/deleteSongFromPlaylist/:songId/:playlistId", (request, res) ->
   songQueueCollection = globals.db.collection("songQueue")
   playlistId = request.params.playlistId
   songId = new ObjectID(request.params.songId)
-  playlistCollection.find({id: playlistId}).toArray((err, results) ->
-    if err then console.log err
-    if results[0]
-      playlist = results[0]
-      songsCollection.find({_id: songId}).toArray((err, result) ->
-        if err
-          console.log err
-        else
-          if result[0].albumArt == playlist.artwork
-            new_albumart = ""
-            songsCollection.find({_id: {$in: playlist.songs}}).toArray((err, results) ->
-              if err then console.log err
-              for song in results
-                if song._id.toString() != songId.toString() && song.albumArt != ""
-                  new_albumart = song.albumArt
-                  break;
-              console.log "New Album Art Set: "+new_albumart
-              playlistCollection.update({id: playlistId},{$pull: {songs: songId}, $set: {artwork: new_albumart}}, (err, result) ->
+  if req.user
+    userId = req.user.id.toString()
+    playlistCollection.find({id: playlistId, creator: userId}).toArray((err, results) ->
+      if err then console.log err
+      if results[0]
+        playlist = results[0]
+        songsCollection.find({_id: songId}).toArray((err, result) ->
+          if err
+            console.log err
+          else
+            if result[0].albumArt == playlist.artwork
+              new_albumart = ""
+              songsCollection.find({_id: {$in: playlist.songs}}).toArray((err, results) ->
+                if err then console.log err
+                for song in results
+                  if song._id.toString() != songId.toString() && song.albumArt != ""
+                    new_albumart = song.albumArt
+                    break;
+                console.log "New Album Art Set: "+new_albumart
+                playlistCollection.update({id: playlistId},{$pull: {songs: songId}, $set: {artwork: new_albumart}}, (err, result) ->
+                  if err then console.log err
+                  res.end(JSON.stringify({success: true, message: undefined}))
+                  globals.wss.broadcast(JSON.stringify({type: 'trackDelete', songId: songId, playlistId: playlistId, newAlbumArt: new_albumart}))
+                  songQueueCollection.remove({songId: songId.toString(), playlistId: playlistId}, (err, results) ->
+                    if err then console.log err
+                    #wss event for queue
+                  )
+                )
+              )
+            else
+              playlistCollection.update({id: playlistId},{$pull: {songs: songId}}, (err, result) ->
                 if err then console.log err
                 res.end(JSON.stringify({success: true, message: undefined}))
-                globals.wss.broadcast(JSON.stringify({type: 'trackDelete', songId: songId, playlistId: playlistId, newAlbumArt: new_albumart}))
+                globals.wss.broadcast(JSON.stringify({type: 'trackDelete', songId: songId, playlistId: playlistId}))
                 songQueueCollection.remove({songId: songId.toString(), playlistId: playlistId}, (err, results) ->
                   if err then console.log err
                   #wss event for queue
                 )
               )
-            )
-          else
-            playlistCollection.update({id: playlistId},{$pull: {songs: songId}}, (err, result) ->
-              if err then console.log err
-              res.end(JSON.stringify({success: true, message: undefined}))
-              globals.wss.broadcast(JSON.stringify({type: 'trackDelete', songId: songId, playlistId: playlistId}))
-              songQueueCollection.remove({songId: songId.toString(), playlistId: playlistId}, (err, results) ->
-                if err then console.log err
-                #wss event for queue
-              )
-            )
-      )
-    else
-      res.end(JSON.stringify({success: false, message: "Unknown Playlist"}))
-  )
+        )
+      else
+        res.end(JSON.stringify({success: false, message: "Unknown Playlist"}))
+    )
+  else
+    res.end(JSON.stringify({success: false, message: "Unauthorised"}))
 )
 
 router.get("/playSongFromPlaylistWithSort/:songId/:playlistId/:playlistSort/:playlistSortDir", (request, res) ->
@@ -795,6 +801,31 @@ router.get("/getSongQueue", (request, res) ->
       res.end(JSON.stringify(results))
     )
 )
+
+router.get("/deletePlaylist/:playlistId", (req, res) ->
+  playlistsCollection = globals.db.collection("playlists")
+  usersCollection = globals.db.collection("users")
+  if req.user
+    userId = req.user.id.toString()
+    playlistId = req.params.playlistId.toString()
+    playlistsCollection.remove({"id": playlistId, "creator": userId}, (err, result) ->
+      if err
+        res.send(JSON.stringify({"status": 500,"message":err.toString()}))
+      else
+        if result.nModified == 1
+          usersCollection.update({}, {"$pull":{"playlists": playlistId}}, {multi: true}, (err, result) ->
+            if err
+              res.send(JSON.stringify({"status": 500,"message":err.toString()}))
+            else
+              res.send(JSON.stringify({"status": 200,"message":"OKAY"}))
+          )
+        else
+          res.send(JSON.stringify({"status": 403,"message":"Unauthorized"}))
+    )
+  else
+    res.send(JSON.stringify({"status": 403,"message":"Unauthorized"}))
+)
+
 ###
 router.get("/tempURL1", (request, res) ->
   songsCollection = globals.db.collection("songs")

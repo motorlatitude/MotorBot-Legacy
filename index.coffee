@@ -1,9 +1,7 @@
-Raven = require __dirname+'/raven.coffee'
 globals = require __dirname+'/models/globals.coffee'
 Commands = require __dirname+'/clientLib/commands.coffee'
 MongoClient = require('mongodb').MongoClient
 fs = require 'fs'
-req = require 'request'
 https = require 'https'
 stylus = require 'stylus'
 nib = require 'nib'
@@ -12,15 +10,13 @@ youtubeStream = require 'ytdl-core'
 DiscordClient = require './discordClient.js' #my lib :D
 express = require "express"
 websocketServer = require("ws").Server
-globals.wss = new websocketServer({port: 3006}) #public port is 3211 and local 3006 via nginx proxy
+globals.wss = new websocketServer({port: 3006}) #public port is 443 (wss://wss.lolstat.net) and local 3006 via nginx proxy
 raven = null
 debugLog = ""
 keys = require __dirname+'/keys.json'
 
 globals.dc = new DiscordClient({token: keys.token, debug: true, autorun: true})
 
-stream = null
-connectedChannel = null
 warning = false
 commands = null
 
@@ -51,9 +47,9 @@ app.use("/api", require('./routes/api.coffee'))
 
 #redirect for when adding bot
 app.get("/redirect", (req, res) ->
-  code = req.query.code
+  #code = req.query.code
   guildId = req.query.guild_id
-  console.log req
+  #console.log req
   res.end(JSON.stringify({guildId: guildId, connected: true}))
 )
 #create web server for web interface and google chrome extension
@@ -86,7 +82,9 @@ createDBConnection = (cb) ->
     if err
       globals.dc.sendMessage("169555395860234240",":name_badge: Fatal Error: I couldn't connect to the motorbot database :cry:")
       throw new Error("Failed to connect to database, exiting")
-    debugLog += "+ [i] Connected to MotorBot Database Successfully\n"
+    d = new Date()
+    time = "["+d.getDate()+"/"+(parseInt(d.getMonth())+1)+"/"+d.getFullYear()+" "+d.toLocaleTimeString()+"] "
+    debugLog += "+ [i]"+time+"Connected to MotorBot Database Successfully\n"
     globals.db = db
     cb()
   )
@@ -101,8 +99,10 @@ initPlaylist = () ->
       songQueueCollection.updateOne({'_id': trackId},{'$set':{'status':'played'}},() ->
         console.log("Track Status Changed")
       )
-    debugLog += "+ [i] Initialised Playlist Successfully\n"
-    globals.dc.sendMessage("169555395860234240",":black_joker: Hi, I'm now online\n\n```diff\n"+debugLog+"\n```")
+    d = new Date()
+    time = "["+d.getDate()+"/"+(parseInt(d.getMonth())+1)+"/"+d.getFullYear()+" "+d.toLocaleTimeString()+"] "
+    debugLog += "+ [i]"+time+"Initialised Playlist Successfully\n"
+    globals.dc.sendMessage("169555395860234240",":robot: Hi, I'm now online\n\n```diff\n"+debugLog+"\n```")
     globals.dc.setStatus("with Discord API")
     debugLog = ""
     warning = false
@@ -122,16 +122,20 @@ globals.dc.on("ready", (msg) ->
       data = JSON.parse(data)
       if data.connectedChannel
         console.log "Attempt to reconnect to voice channel: "+globals.connectedChannel
-        guild_id = "130734377066954752"
-        globals.connectedChannel = data.connectedChannel
-        globals.connectedChannelName = data.connectedChannelName
-        globals.wss.broadcast(JSON.stringify({type: 'voiceUpdate', status: 'join', channel: data.connectedChannelName}))
-        globals.dc.joinVoice(data.connectedChannel, guild_id)
-        if data.isPlaying
-          globals.dc.on("voiceReady", () ->
-            console.log("voice is ready")
-            globals.songComplete(true)
-          )
+        setTimeout( () ->
+          guild_id = "130734377066954752"
+          globals.connectedChannel = data.connectedChannel
+          globals.connectedChannelName = data.connectedChannelName
+          globals.wss.broadcast(JSON.stringify({type: 'voiceUpdate', status: 'join', channel: data.connectedChannelName}))
+          globals.dc.joinVoice(data.connectedChannel, guild_id)
+          if data.randomPlayback
+            globals.randomPlayback = data.randomPlayback
+          if data.isPlaying
+            globals.dc.on("voiceReady", () ->
+              console.log("voice is ready")
+              globals.songComplete(true)
+            )
+        , 1500)
   )
 )
 
@@ -181,7 +185,6 @@ streamNewTrack = (results) ->
           volume = (parseFloat(info.loudness)/-27)
           console.log "Setting Volume Based on Video Loudness ("+info.loudness+"): "+volume
         globals.dc.playStream(yStream,{volume: volume})
-        dur = globals.convertTimestamp(results[0].duration)
         globals.wss.broadcast(JSON.stringify({type: 'playUpdate', status: 'play'}))
         globals.wss.broadcast(JSON.stringify({type: 'trackUpdate', song: song}))
         globals.dc.setStatus(title)
@@ -263,46 +266,14 @@ globals.dc.on("status", (user_id,status,game,raw_data) ->
 # Other Methods
 ###
 
-millisecondsToStr = (milliseconds) ->
-  numberEnding = (number) ->
-    if number > 1 then 's' else ''
-  temp = Math.floor(milliseconds / 1000)
-  years = Math.floor(temp / 31536000)
-  if years
-    return years + ' year' + numberEnding(years)
-  days = Math.floor((temp %= 31536000) / 86400)
-  if days
-    return days + ' day' + numberEnding(days)
-  hours = Math.floor((temp %= 86400) / 3600)
-  if hours
-    return hours + ' hour' + numberEnding(hours)
-  minutes = Math.floor((temp %= 3600) / 60)
-  if minutes
-    return minutes + ' minute' + numberEnding(minutes)
-  seconds = temp % 60
-  if seconds
-    return seconds + ' second' + numberEnding(seconds)
-  return 'less than a second'
-
-getParameterByName = (name, url) ->
-  if (!url)
-    url = window.location.href
-  name = name.replace(/[\[\]]/g, "\\$&")
-  regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)")
-  results = regex.exec(url)
-  if (!results)
-    return null
-  if (!results[2])
-    return ''
-  return decodeURIComponent(results[2].replace(/\+/g, " "))
-
 process.stdin.resume()
 
 globals.updateCleanup = () ->
   cleanupJSON = {
     connectedChannel: globals.connectedChannel,
     connectedChannelName: globals.connectedChannelName,
-    isPlaying: globals.isPlaying
+    isPlaying: globals.isPlaying,
+    randomPlayback: globals.randomPlayback
   }
   fs.writeFileSync("/var/www/motorbot/cleanup.json", JSON.stringify(cleanupJSON), "utf8")
 
@@ -311,7 +282,8 @@ exitHandler = (options, err) ->
     cleanupJSON = {
       connectedChannel: globals.connectedChannel,
       connectedChannelName: globals.connectedChannelName,
-      isPlaying: globals.isPlaying
+      isPlaying: globals.isPlaying,
+      randomPlayback: globals.randomPlayback
     }
     fs.writeFileSync("/var/www/motorbot/cleanup.json", JSON.stringify(cleanupJSON), "utf8")
     console.log('cleanup')
