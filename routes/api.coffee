@@ -170,109 +170,183 @@ router.get("/addToPlaylistFromSource/:source/:videoId/:playlistId/:userId", (req
   videoId = request.params.videoId
   playlistId = request.params.playlistId
   userId = request.params.userId
+  songsCollection = globals.db.collection("songs")
   if userId && source == "ytb"
     #add to songs collection
     #then add ObjectId to playlists collection
-    req.get({
-        url: "https://www.googleapis.com/youtube/v3/videos?id="+videoId+"&key=AIzaSyAyoWcB_yzEqESeJm-W_eC5QDcOu5R1M90&part=snippet,contentDetails",
-        json: true
-    }, (err, httpResponse, data) ->
+    songsCollection.find({"videoId":videoId}).toArray((err, results) ->
       if err
-        console.log err
-        res.end(JSON.stringify({added: false, error: "Youtube API error: "+err.toString()}))
-      else
-        if data.items[0]
-          modifiedTitle = data.items[0].snippet.title.replace(/\[((?!Remix).)[^\]]*\]/gmi, '').replace(/\(((?!Remix).)[^\)]*\)/gmi, '').replace(/\-(\s|)[0-9]*(\s|)\-/g, '').replace(/(\s|)-(\s|)/gmi," ").replace(/(high\squality|\sOST|playlist|\sHD|\sHQ|\s1080p|ft\.|feat\.|ft\s|lyrics|official\svideo|\"|official|video)/gmi, '')
-          modifiedTitle = encodeURIComponent(modifiedTitle)
-          console.log modifiedTitle
-          insertionObj = {videoId: videoId, title: data.items[0].snippet.title, duration: data.items[0].contentDetails.duration, channel_id: null, timestamp: new Date().getTime(), status: 'added', userId: userId, trackId: "", album: "", albumId: "", albumArt: "", artist: "", artistId: ""}
-          req.get({url: "https://api.spotify.com/v1/search?type=track&q="+modifiedTitle+"+NOT+Karaoke", json: true}, (err, httpResponse, body) ->
-            if err
-              console.log err
-            else
-              if body.tracks
-                if body.tracks.items[0]
-                  insertionObj.album = body.tracks.items[0]["album"].name
-                  insertionObj.albumId = body.tracks.items[0]["album"].id
-                  insertionObj.albumArt = body.tracks.items[0]["album"].images[0].url
-                  insertionObj.artist = body.tracks.items[0]["artists"][0].name
-                  insertionObj.artistId = body.tracks.items[0]["artists"][0].id
-                  insertionObj.trackId = body.tracks.items[0].id
-            songsCollection = globals.db.collection("songs")
-            songsCollection.insertOne(insertionObj, (err, result) ->
-              if err
-                res.end(JSON.stringify({added: false, error: "Insertion Error: "+err.toString()}))
-              else
-                insertionObj.type = "trackAdded"
-                insertionObj.playlistId = playlistId
-                #add to playlist
-                playlistsCollection = globals.db.collection("playlists")
-                playlistsCollection.find({"id":playlistId,"creator":userId}).toArray((err, results) ->
+        res.end(JSON.stringify({added: false, error: "Find Error: "+err.toString()}))
+      else if results[0]
+        #song already exists, add this to playlist
+        insertionObj = results[0]
+        insertionObj.type = "trackAdded"
+        insertionObj.playlistId = playlistId
+        #add to playlist
+        playlistsCollection = globals.db.collection("playlists")
+        playlistsCollection.find({"id":playlistId,"creator":userId}).toArray((err, results) ->
+          if err
+            res.end(JSON.stringify({added: false, error: "Find Error: "+err.toString()}))
+          else
+            if results[0]
+              playlist = results[0]
+              if playlist.artwork == "" && insertionObj.albumArt != ""
+                playlistsCollection.update({"id":playlistId,"creator":userId},{"$push": {songs: insertionObj._id}, "$set": {artwork: insertionObj.albumArt}}, (err, result) ->
                   if err
-                    res.end(JSON.stringify({added: false, error: "Find Error: "+err.toString()}))
+                    res.end(JSON.stringify({added: false, error: "Update Error: "+err.toString()}))
                   else
-                    if results[0]
-                      playlist = results[0]
-                      if playlist.artwork == "" && insertionObj.albumArt != ""
-                        playlistsCollection.update({"id":playlistId,"creator":userId},{"$push": {songs: insertionObj._id}, "$set": {artwork: insertionObj.albumArt}}, (err, result) ->
-                          if err
-                            res.end(JSON.stringify({added: false, error: "Update Error: "+err.toString()}))
-                          else
-                            songsQueueCollection = globals.db.collection("songQueue")
-                            songsQueueCollection.find({status: {$in: ["added","playing"]}}).toArray((err, results) ->
-                              if err then console.log err
-                              globals.wss.broadcast(JSON.stringify(insertionObj))
-                              res.end(JSON.stringify({added: true}))
-                              if results[0]
-                                addToQueue = false
-                                for song in results[0]
-                                  if song.playlistId == playlistId
-                                    addToQueue = true
-                                    break;
-                                if addToQueue
-                                  insertionObj.status = "added"
-                                  insertionObj.songId = insertionObj._id.toString()
-                                  insertionObj._id = undefined
-                                  insertionObj.playlistId = playlistId
-                                  songsQueueCollection.insert(insertionObj, (err, result) ->
-                                    if err then console.log err
+                    songsQueueCollection = globals.db.collection("songQueue")
+                    songsQueueCollection.find({status: {$in: ["added","playing"]}}).toArray((err, results) ->
+                      if err then console.log err
+                      globals.wss.broadcast(JSON.stringify(insertionObj))
+                      res.end(JSON.stringify({added: true}))
+                      if results[0]
+                        addToQueue = false
+                        for song in results[0]
+                          if song.playlistId == playlistId
+                            addToQueue = true
+                            break;
+                        if addToQueue
+                          insertionObj.status = "added"
+                          insertionObj.songId = insertionObj._id.toString()
+                          insertionObj._id = undefined
+                          insertionObj.playlistId = playlistId
+                          songsQueueCollection.insert(insertionObj, (err, result) ->
+                            if err then console.log err
 
-                                  )
-                            )
-                        )
-                      else
-                        playlistsCollection.update({"id":playlistId,"creator":userId},{"$push":{songs: insertionObj._id}}, (err, results) ->
-                          if err
-                            res.end(JSON.stringify({added: false, error: "Update Error: "+err.toString()}))
-                          else
-                            songsQueueCollection = globals.db.collection("songQueue")
-                            songsQueueCollection.find({status: {$in: ["added","playing"]}}).toArray((err, results) ->
-                              if err then console.log err
-                              globals.wss.broadcast(JSON.stringify(insertionObj))
-                              res.end(JSON.stringify({added: true}))
-                              if results[0]
-                                addToQueue = false
-                                for song in results
-                                  if song.playlistId == playlistId
-                                    addToQueue = true
-                                    break;
-                                if addToQueue
-                                  insertionObj.status = "added"
-                                  insertionObj.songId = insertionObj._id.toString()
-                                  insertionObj._id = undefined
-                                  insertionObj.playlistId = playlistId
-                                  songsQueueCollection.insert(insertionObj, (err, result) ->
-                                    if err then console.log err
-                                  )
-                            )
-                        )
-                    else
-                      res.end(JSON.stringify({added: false, error: "Playlist not found"}))
+                          )
+                    )
                 )
-            )
-          )
-        else
-          res.end(JSON.stringify({added: false, error: "Video not found"}))
+              else
+                playlistsCollection.update({"id":playlistId,"creator":userId},{"$push":{songs: insertionObj._id}}, (err, results) ->
+                  if err
+                    res.end(JSON.stringify({added: false, error: "Update Error: "+err.toString()}))
+                  else
+                    songsQueueCollection = globals.db.collection("songQueue")
+                    songsQueueCollection.find({status: {$in: ["added","playing"]}}).toArray((err, results) ->
+                      if err then console.log err
+                      globals.wss.broadcast(JSON.stringify(insertionObj))
+                      res.end(JSON.stringify({added: true}))
+                      if results[0]
+                        addToQueue = false
+                        for song in results
+                          if song.playlistId == playlistId
+                            addToQueue = true
+                            break;
+                        if addToQueue
+                          insertionObj.status = "added"
+                          insertionObj.songId = insertionObj._id.toString()
+                          insertionObj._id = undefined
+                          insertionObj.playlistId = playlistId
+                          songsQueueCollection.insert(insertionObj, (err, result) ->
+                            if err then console.log err
+                          )
+                    )
+                )
+            else
+              res.end(JSON.stringify({added: false, error: "Playlist not found"}))
+        )
+      else
+        req.get({
+          url: "https://www.googleapis.com/youtube/v3/videos?id="+videoId+"&key=AIzaSyAyoWcB_yzEqESeJm-W_eC5QDcOu5R1M90&part=snippet,contentDetails",
+          json: true
+        }, (err, httpResponse, data) ->
+          if err
+            console.log err
+            res.end(JSON.stringify({added: false, error: "Youtube API error: "+err.toString()}))
+          else
+            if data.items[0]
+              modifiedTitle = data.items[0].snippet.title.replace(/\[((?!Remix).)[^\]]*\]/gmi, '').replace(/\(((?!Remix).)[^\)]*\)/gmi, '').replace(/\-(\s|)[0-9]*(\s|)\-/g, '').replace(/(\s|)-(\s|)/gmi," ").replace(/(high\squality|\sOST|playlist|\sHD|\sHQ|\s1080p|ft\.|feat\.|ft\s|lyrics|official\svideo|\"|official|video)/gmi, '')
+              modifiedTitle = encodeURIComponent(modifiedTitle)
+              console.log modifiedTitle
+              insertionObj = {videoId: videoId, title: data.items[0].snippet.title, duration: data.items[0].contentDetails.duration, channel_id: null, timestamp: new Date().getTime(), status: 'added', userId: userId, trackId: "", album: "", albumId: "", albumArt: "", artist: "", artistId: ""}
+              req.get({url: "https://api.spotify.com/v1/search?type=track&q="+modifiedTitle+"+NOT+Karaoke", json: true}, (err, httpResponse, body) ->
+                if err
+                  console.log err
+                else
+                  if body.tracks
+                    if body.tracks.items[0]
+                      insertionObj.album = body.tracks.items[0]["album"].name
+                      insertionObj.albumId = body.tracks.items[0]["album"].id
+                      insertionObj.albumArt = body.tracks.items[0]["album"].images[0].url
+                      insertionObj.artist = body.tracks.items[0]["artists"][0].name
+                      insertionObj.artistId = body.tracks.items[0]["artists"][0].id
+                      insertionObj.trackId = body.tracks.items[0].id
+                songsCollection.insertOne(insertionObj, (err, result) ->
+                  if err
+                    res.end(JSON.stringify({added: false, error: "Insertion Error: "+err.toString()}))
+                  else
+                    insertionObj.type = "trackAdded"
+                    insertionObj.playlistId = playlistId
+                    #add to playlist
+                    playlistsCollection = globals.db.collection("playlists")
+                    playlistsCollection.find({"id":playlistId,"creator":userId}).toArray((err, results) ->
+                      if err
+                        res.end(JSON.stringify({added: false, error: "Find Error: "+err.toString()}))
+                      else
+                        if results[0]
+                          playlist = results[0]
+                          if playlist.artwork == "" && insertionObj.albumArt != ""
+                            playlistsCollection.update({"id":playlistId,"creator":userId},{"$push": {songs: insertionObj._id}, "$set": {artwork: insertionObj.albumArt}}, (err, result) ->
+                              if err
+                                res.end(JSON.stringify({added: false, error: "Update Error: "+err.toString()}))
+                              else
+                                songsQueueCollection = globals.db.collection("songQueue")
+                                songsQueueCollection.find({status: {$in: ["added","playing"]}}).toArray((err, results) ->
+                                  if err then console.log err
+                                  globals.wss.broadcast(JSON.stringify(insertionObj))
+                                  res.end(JSON.stringify({added: true}))
+                                  if results[0]
+                                    addToQueue = false
+                                    for song in results[0]
+                                      if song.playlistId == playlistId
+                                        addToQueue = true
+                                        break;
+                                    if addToQueue
+                                      insertionObj.status = "added"
+                                      insertionObj.songId = insertionObj._id.toString()
+                                      insertionObj._id = undefined
+                                      insertionObj.playlistId = playlistId
+                                      songsQueueCollection.insert(insertionObj, (err, result) ->
+                                        if err then console.log err
+
+                                      )
+                                )
+                            )
+                          else
+                            playlistsCollection.update({"id":playlistId,"creator":userId},{"$push":{songs: insertionObj._id}}, (err, results) ->
+                              if err
+                                res.end(JSON.stringify({added: false, error: "Update Error: "+err.toString()}))
+                              else
+                                songsQueueCollection = globals.db.collection("songQueue")
+                                songsQueueCollection.find({status: {$in: ["added","playing"]}}).toArray((err, results) ->
+                                  if err then console.log err
+                                  globals.wss.broadcast(JSON.stringify(insertionObj))
+                                  res.end(JSON.stringify({added: true}))
+                                  if results[0]
+                                    addToQueue = false
+                                    for song in results
+                                      if song.playlistId == playlistId
+                                        addToQueue = true
+                                        break;
+                                    if addToQueue
+                                      insertionObj.status = "added"
+                                      insertionObj.songId = insertionObj._id.toString()
+                                      insertionObj._id = undefined
+                                      insertionObj.playlistId = playlistId
+                                      songsQueueCollection.insert(insertionObj, (err, result) ->
+                                        if err then console.log err
+                                      )
+                                )
+                            )
+                        else
+                          res.end(JSON.stringify({added: false, error: "Playlist not found"}))
+                    )
+                )
+              )
+            else
+              res.end(JSON.stringify({added: false, error: "Video not found"}))
+        )
     )
   else
     res.end(JSON.stringify({added: false, error: "Authentication Error"}))
@@ -283,79 +357,130 @@ router.get("/addToNewPlaylistFromSource/:source/:videoId/:playlistName/:userId",
   videoId = request.params.videoId
   playlistName = request.params.playlistName
   userId = request.params.userId
+  songsCollection = globals.db.collection("songs")
   if userId && source == "ytb"
-    req.get({
-      url: "https://www.googleapis.com/youtube/v3/videos?id="+videoId+"&key=AIzaSyAyoWcB_yzEqESeJm-W_eC5QDcOu5R1M90&part=snippet,contentDetails",
-      json: true
-    }, (err, httpResponse, data) ->
+    #add to songs collection
+    #then add ObjectId to playlists collection
+    songsCollection.find({"videoId":videoId}).toArray((err, results) ->
       if err
-        console.log err
-        res.end(JSON.stringify({added: false, error: "Youtube API error: "+err.toString()}))
-      else
-        if data.items[0]
-          modifiedTitle = data.items[0].snippet.title.replace(/\[((?!Remix).)[^\]]*\]/gmi, '').replace(/\(((?!Remix).)[^\)]*\)/gmi, '').replace(/\-(\s|)[0-9]*(\s|)\-/g, '').replace(/(\s|)-(\s|)/gmi," ").replace(/(high\squality|\sOST|playlist|\sHD|\sHQ|\s1080p|ft\.|feat\.|ft\s|lyrics|official\svideo|\"|official|video)/gmi, '')
-          modifiedTitle = encodeURIComponent(modifiedTitle)
-          console.log modifiedTitle
-          insertionObj = {videoId: videoId, title: data.items[0].snippet.title, duration: data.items[0].contentDetails.duration, channel_id: null, timestamp: new Date().getTime(), status: 'added', userId: userId, trackId: "", album: "", albumId: "", albumArt: "", artist: "", artistId: ""}
-          req.get({url: "https://api.spotify.com/v1/search?type=track&q="+modifiedTitle+"+NOT+Karaoke", json: true}, (err, httpResponse, body) ->
-            if err
-              console.log err
-            else
-              if body.tracks
-                if body.tracks.items[0]
-                  insertionObj.album = body.tracks.items[0]["album"].name
-                  insertionObj.albumId = body.tracks.items[0]["album"].id
-                  insertionObj.albumArt = body.tracks.items[0]["album"].images[0].url
-                  insertionObj.artist = body.tracks.items[0]["artists"][0].name
-                  insertionObj.artistId = body.tracks.items[0]["artists"][0].id
-                  insertionObj.trackId = body.tracks.items[0].id
-            songsCollection = globals.db.collection("songs")
-            songsCollection.insertOne(insertionObj, (err, result) ->
-              if err
-                res.end(JSON.stringify({added: false, error: "Insertion Error: "+err.toString()}))
-              else
-                playlistId = uid(32);
-                songId = insertionObj._id
-                if insertionObj.albumArt != ""
-                  playlistObj = {
-                    id: playlistId,
-                    name: decodeURIComponent(playlistName),
-                    songs: [new ObjectID(songId)],
-                    creator: userId,
-                    timestamp: new Date().getTime(),
-                    duration: 0,
-                    artwork: insertionObj.albumArt
-                  }
-                else
-                  playlistObj = {
-                    id: playlistId,
-                    name: decodeURIComponent(playlistName),
-                    songs: [new ObjectID(songId)],
-                    creator: userId,
-                    timestamp: new Date().getTime(),
-                    duration: 0,
-                    artwork: ""
-                  }
-                playlistsCollection = globals.db.collection("playlists")
-                playlistsCollection.insertOne(playlistObj, (err, result) ->
+        res.end(JSON.stringify({added: false, error: "Find Error: "+err.toString()}))
+      else if results[0]
+        if err
+          res.end(JSON.stringify({added: false, error: "Insertion Error: "+err.toString()}))
+        else
+          playlistId = uid(32)
+          insertionObj = results[0]
+          songId = insertionObj._id
+          if insertionObj.albumArt != ""
+            playlistObj = {
+              id: playlistId,
+              name: decodeURIComponent(playlistName),
+              songs: [new ObjectID(songId)],
+              creator: userId,
+              timestamp: new Date().getTime(),
+              duration: 0,
+              artwork: insertionObj.albumArt
+            }
+          else
+            playlistObj = {
+              id: playlistId,
+              name: decodeURIComponent(playlistName),
+              songs: [new ObjectID(songId)],
+              creator: userId,
+              timestamp: new Date().getTime(),
+              duration: 0,
+              artwork: ""
+            }
+          playlistsCollection = globals.db.collection("playlists")
+          playlistsCollection.insertOne(playlistObj, (err, result) ->
+            if err then console.log err
+            usersCollection = globals.db.collection("users")
+            usersCollection.find({id: userId}).toArray((err, results) ->
+              if err then console.log err
+              if results[0]
+                playlists = results[0].playlists
+                playlists.push(playlistId)
+                usersCollection = globals.db.collection("users")
+                usersCollection.update({id: userId},{$set: {playlists: playlists}}, (err, result) ->
                   if err then console.log err
-                  usersCollection = globals.db.collection("users")
-                  usersCollection.find({id: userId}).toArray((err, results) ->
-                    if err then console.log err
-                    if results[0]
-                      playlists = results[0].playlists
-                      playlists.push(playlistId)
-                      usersCollection = globals.db.collection("users")
-                      usersCollection.update({id: userId},{$set: {playlists: playlists}}, (err, result) ->
-                        if err then console.log err
-                        res.send(JSON.stringify({added: true, message: "OKAY"}))
-                      )
-                  )
+                  res.send(JSON.stringify({added: true, message: "OKAY"}))
                 )
             )
           )
-        else
-          res.end(JSON.stringify({added: false, error: "Video not found"}))
+      else
+        req.get({
+          url: "https://www.googleapis.com/youtube/v3/videos?id="+videoId+"&key=AIzaSyAyoWcB_yzEqESeJm-W_eC5QDcOu5R1M90&part=snippet,contentDetails",
+          json: true
+        }, (err, httpResponse, data) ->
+          if err
+            console.log err
+            res.end(JSON.stringify({added: false, error: "Youtube API error: "+err.toString()}))
+          else
+            if data.items[0]
+              modifiedTitle = data.items[0].snippet.title.replace(/\[((?!Remix).)[^\]]*\]/gmi, '').replace(/\(((?!Remix).)[^\)]*\)/gmi, '').replace(/\-(\s|)[0-9]*(\s|)\-/g, '').replace(/(\s|)-(\s|)/gmi," ").replace(/(high\squality|\sOST|playlist|\sHD|\sHQ|\s1080p|ft\.|feat\.|ft\s|lyrics|official\svideo|\"|official|video)/gmi, '')
+              modifiedTitle = encodeURIComponent(modifiedTitle)
+              console.log modifiedTitle
+              insertionObj = {videoId: videoId, title: data.items[0].snippet.title, duration: data.items[0].contentDetails.duration, channel_id: null, timestamp: new Date().getTime(), status: 'added', userId: userId, trackId: "", album: "", albumId: "", albumArt: "", artist: "", artistId: ""}
+              req.get({url: "https://api.spotify.com/v1/search?type=track&q="+modifiedTitle+"+NOT+Karaoke", json: true}, (err, httpResponse, body) ->
+                if err
+                  console.log err
+                else
+                  if body.tracks
+                    if body.tracks.items[0]
+                      insertionObj.album = body.tracks.items[0]["album"].name
+                      insertionObj.albumId = body.tracks.items[0]["album"].id
+                      insertionObj.albumArt = body.tracks.items[0]["album"].images[0].url
+                      insertionObj.artist = body.tracks.items[0]["artists"][0].name
+                      insertionObj.artistId = body.tracks.items[0]["artists"][0].id
+                      insertionObj.trackId = body.tracks.items[0].id
+                songsCollection = globals.db.collection("songs")
+                songsCollection.insertOne(insertionObj, (err, result) ->
+                  if err
+                    res.end(JSON.stringify({added: false, error: "Insertion Error: "+err.toString()}))
+                  else
+                    playlistId = uid(32);
+                    songId = insertionObj._id
+                    if insertionObj.albumArt != ""
+                      playlistObj = {
+                        id: playlistId,
+                        name: decodeURIComponent(playlistName),
+                        songs: [new ObjectID(songId)],
+                        creator: userId,
+                        timestamp: new Date().getTime(),
+                        duration: 0,
+                        artwork: insertionObj.albumArt
+                      }
+                    else
+                      playlistObj = {
+                        id: playlistId,
+                        name: decodeURIComponent(playlistName),
+                        songs: [new ObjectID(songId)],
+                        creator: userId,
+                        timestamp: new Date().getTime(),
+                        duration: 0,
+                        artwork: ""
+                      }
+                    playlistsCollection = globals.db.collection("playlists")
+                    playlistsCollection.insertOne(playlistObj, (err, result) ->
+                      if err then console.log err
+                      usersCollection = globals.db.collection("users")
+                      usersCollection.find({id: userId}).toArray((err, results) ->
+                        if err then console.log err
+                        if results[0]
+                          playlists = results[0].playlists
+                          playlists.push(playlistId)
+                          usersCollection = globals.db.collection("users")
+                          usersCollection.update({id: userId},{$set: {playlists: playlists}}, (err, result) ->
+                            if err then console.log err
+                            res.send(JSON.stringify({added: true, message: "OKAY"}))
+                          )
+                      )
+                    )
+                )
+              )
+            else
+              res.end(JSON.stringify({added: false, error: "Video not found"}))
+        )
     )
   else
     res.end(JSON.stringify({added: false, error: "Authentication Error"}))
@@ -636,8 +761,8 @@ router.get("/deleteSongFromPlaylist/:songId/:playlistId", (request, res) ->
   songQueueCollection = globals.db.collection("songQueue")
   playlistId = request.params.playlistId
   songId = new ObjectID(request.params.songId)
-  if req.user
-    userId = req.user.id.toString()
+  if request.user
+    userId = request.user.id.toString()
     playlistCollection.find({id: playlistId, creator: userId}).toArray((err, results) ->
       if err then console.log err
       if results[0]
