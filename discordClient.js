@@ -355,6 +355,7 @@ var DiscordClient = function (options){
         self.internals.voice.allowPlay = false;
         self.internals.voice.pause = false;
         self.internals.voice.pauseData = null;
+        self.emit("voiceReady");
         break;
       case 5: //user speaking - irrelevant atm
 

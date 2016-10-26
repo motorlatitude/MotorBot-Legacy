@@ -770,7 +770,7 @@ router.get("/addSongToQueue/:songId/:playlistId", (request, res) ->
       songQueueCollection.insert(song, (err, results) ->
         if err then console.log err
         res.end(JSON.stringify({success: true, message: "OKAY"}))
-        if !globals.isPlayling
+        if !globals.isPlaying
           globals.songComplete(true)
       )
     else

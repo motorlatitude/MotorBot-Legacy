@@ -115,10 +115,24 @@ globals.dc.on("ready", (msg) ->
   console.log(time+msg.user.username+"#"+msg.user.discriminator+" has connected to the gateway server and is at your command")
   commands = new Commands()
   createDBConnection(initPlaylist)
-  if globals.connectedChannel
-    console.log "Attempt to reconnect to voice channel: "+globals.connectedChannel
-    guild_id = "130734377066954752"
-    globals.dc.joinVoice(connectedChannel, guild_id)
+  fs.readFile("/var/www/motorbot/cleanup.json", 'utf8', (err, data) ->
+    if err
+      console.log err
+    else
+      data = JSON.parse(data)
+      if data.connectedChannel
+        console.log "Attempt to reconnect to voice channel: "+globals.connectedChannel
+        guild_id = "130734377066954752"
+        globals.connectedChannel = data.connectedChannel
+        globals.connectedChannelName = data.connectedChannelName
+        globals.wss.broadcast(JSON.stringify({type: 'voiceUpdate', status: 'join', channel: data.connectedChannelName}))
+        globals.dc.joinVoice(data.connectedChannel, guild_id)
+        if data.isPlaying
+          globals.dc.on("voiceReady", () ->
+            console.log("voice is ready")
+            globals.songComplete(true)
+          )
+  )
 )
 
 globals.dc.on("message", (msg,channel_id,user_id,raw_data) ->
@@ -171,7 +185,7 @@ streamNewTrack = (results) ->
         globals.wss.broadcast(JSON.stringify({type: 'playUpdate', status: 'play'}))
         globals.wss.broadcast(JSON.stringify({type: 'trackUpdate', song: song}))
         globals.dc.setStatus(title)
-        globals.isPlayling = true
+        globals.isPlaying = true
         console.log("Now Playing: "+title)
       )
   
@@ -281,3 +295,31 @@ getParameterByName = (name, url) ->
   if (!results[2])
     return ''
   return decodeURIComponent(results[2].replace(/\+/g, " "))
+
+process.stdin.resume()
+
+globals.updateCleanup = () ->
+  cleanupJSON = {
+    connectedChannel: globals.connectedChannel,
+    connectedChannelName: globals.connectedChannelName,
+    isPlaying: globals.isPlaying
+  }
+  fs.writeFileSync("/var/www/motorbot/cleanup.json", JSON.stringify(cleanupJSON), "utf8")
+
+exitHandler = (options, err) ->
+  if options.cleanup
+    cleanupJSON = {
+      connectedChannel: globals.connectedChannel,
+      connectedChannelName: globals.connectedChannelName,
+      isPlaying: globals.isPlaying
+    }
+    fs.writeFileSync("/var/www/motorbot/cleanup.json", JSON.stringify(cleanupJSON), "utf8")
+    console.log('cleanup')
+  if err then console.log(err.stack)
+  if options.exit then process.exit()
+
+process.on('exit', exitHandler.bind(null,{cleanup:true}))
+
+process.on('SIGINT', exitHandler.bind(null, {exit:true}))
+
+process.on('uncaughtException', exitHandler.bind(null, {exit:true}))
