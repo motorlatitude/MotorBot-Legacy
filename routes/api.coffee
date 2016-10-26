@@ -710,25 +710,34 @@ router.get("/playSongFromPlaylistWithSort/:songId/:playlistId/:playlistSort/:pla
           songsToInsert = []
           inserting = false
           songPlaying = {}
+          k = 0
           for song in results
             if song._id.toString() == songId
               song.status = "added"
               song.songId = song._id.toString()
               song.playlistId = playlistId
               songPlaying = song
+              song.randId = -1
+              song.sortId = k
               inserting = true
             if inserting
               song.status = "added"
               song.songId = song._id.toString()
               song._id = undefined
               song.playlistId = playlistId
+              if !song.randId
+                song.randId = Math.random()*results.length
+              song.sortId = k
               songsToInsert.push(song)
             else
               song.status = "played"
               song.songId = song._id.toString()
               song._id = undefined
               song.playlistId = playlistId
+              song.randId = Math.random()*results.length
+              song.sortId = k
               songsToInsert.push(song)
+            k++
           songQueueCollection.drop()
           songQueueCollection.insert(songsToInsert, (err, results) ->
             if err
@@ -775,10 +784,16 @@ router.get("/getCurrentChannel", (request, res) ->
 
 router.get("/getSongQueue", (request, res) ->
   songQueueCollection = globals.db.collection("songQueue")
-  songQueueCollection.find({}).toArray((err, results) ->
-    if err then console.log err
-    res.end(JSON.stringify(results))
-  )
+  if globals.randomPlayback
+    songQueueCollection.find({}).sort({randId: 1}).toArray((err, results) ->
+      if err then console.log err
+      res.end(JSON.stringify(results))
+    )
+  else
+    songQueueCollection.find({}).toArray((err, results) ->
+      if err then console.log err
+      res.end(JSON.stringify(results))
+    )
 )
 ###
 router.get("/tempURL1", (request, res) ->

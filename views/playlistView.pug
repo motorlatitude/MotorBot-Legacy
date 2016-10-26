@@ -2,7 +2,7 @@
     .bg(style="")
     .playlistType PLAYLIST
     .playlistName
-    .playlistStats Created By: <span class="user"></span> &bull; <span class="songTotal">0</span> Songs &bull; <span class="songTotalPlaytime">0 hr 0 mins</span>
+    .playlistStats Created By: <span class="user"></span> &bull; <span class="songTotal">0</span> Songs, <span class="songTotalPlaytime">0 hr 0 mins</span>
     .playlistOptions
         .playPlaylistButton <i class="fa fa-play" aria-hidden="true"></i> &nbsp; &nbsp;PLAY
         -var isFollowingPlaylist = false
@@ -13,7 +13,7 @@
             .followPlaylistButton FOLLOWING
         else
             .followPlaylistButton FOLLOW
-        .playlistExtraOptions <i class="fa fa-ellipsis-h" aria-hidden="true"></i>
+        .playlistExtraOptions#playlistMore <i class="fa fa-ellipsis-h" aria-hidden="true"></i>
     .artwork(style="background: rgba(20, 20, 23, 1.00);")
 ul#playlist
     li.titleRow

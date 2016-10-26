@@ -223,8 +223,7 @@ html
     font-size 18px
     text-align center
     border-radius 50%
-    //cursor pointer
-    opacity 0.2
+    cursor pointer
     &.active
       color rgba(0, 179, 237, 1)
   & .repeat
@@ -289,7 +288,7 @@ html
       cursor pointer
       color #eee
       &:hover
-        background rgba(62, 152, 246, 1.00)
+        background rgba(200,200,200,0.1)
       &[disabled='true']
         color rgba(255,255,255,0.2)
         cursor default
@@ -354,7 +353,7 @@ html
     width 1128px
     font-size 15px
     font-weight 500
-    color rgba(200,200,200,0.8)
+    color rgba(220,220,220,0.8)
     & span.user
       color #fff
       cursor pointer
@@ -389,9 +388,12 @@ html
       margin-left 20px
     & .playlistExtraOptions
       background rgba(0,0,0,0.4)
-      border: 1px solid rgba(200,200,200,1.0)
+      border 1px solid rgba(255,255,255,0.6)
       padding 6px 9px
       margin-left 20px
+      opacity 1
+      &:hover
+        border 1px solid rgba(255,255,255,1)
   & .artwork
     position absolute
     top 56px
@@ -440,16 +442,16 @@ html
         color rgba(0, 170, 234, 1.00)
         margin-left 10px
         opacity 1
+      &>.trackRow>div
+        cursor pointer
+      &>.trackRow>div:hover
+        color #fff
+        opacity 1
     &:nth-child(2)
       margin-top 167px
     & .trackRow
       max-width 1128px
       margin-left calc(50% - 564px)
-      & div
-        cursor pointer
-      & div:hover
-        color #fff
-        opacity 1
       & .item
         display inline-block
         width 45px

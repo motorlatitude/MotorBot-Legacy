@@ -174,9 +174,19 @@ html(lang="en")
                         else if(data.type == "randomUpdate"){
                             if (data.status) {
                                 $(".random").addClass("active");
+                                if ($("#nextSongsList").length) {
+                                    $("#nextSongsList > li:not(.titleRow)").sort(function dec_sort(a, b) {
+                                        return ($(b).attr("data-randId")) > ($(a).attr("data-randId")) ? 1 : -1;
+                                    }).appendTo('#nextSongsList');
+                                }
                             }
                             else{
                                 $(".random").removeClass("active");
+                                if ($("#nextSongsList").length) {
+                                    $("#nextSongsList > li:not(.titleRow)").sort(function dec_sort(a, b) {
+                                        return ($(b).attr("data-sortId")) > ($(a).attr("data-sortId")) ? 1 : -1;
+                                    }).appendTo('#nextSongsList');
+                                }
                             }
                         }
                         else{
@@ -311,7 +321,7 @@ html(lang="en")
                                         var duration = convertTimestamp(item.duration)
                                         if(item.status == "added") {
                                             m++
-                                            $("#nextSongsList").append("<li id='" + item._id + "' data-songId='" + item.songId + "' data-playlistId='" + item.playlistId + "'><div class='trackRow'><div class='title'>" + item.title + "</div><div class='artist'>" + item.artist + "</div><div class='album'>" + item.album + "</div><div class='time'>" + duration + "</div></div></li>");
+                                            $("#nextSongsList").append("<li id='" + item._id + "' data-songId='" + item.songId + "' data-playlistId='" + item.playlistId + "' data-sortId='"+item.sortId+"' data-randId='"+item.randId+"'><div class='trackRow'><div class='title'>" + item.title + "</div><div class='artist'>" + item.artist + "</div><div class='album'>" + item.album + "</div><div class='time'>" + duration + "</div></div></li>");
                                         }
                                         else if (item.status == "playing") {
                                             x++
@@ -347,8 +357,11 @@ html(lang="en")
             }
             $(document).ready(function(){
                 document.oncontextmenu = function(){return false;};
-                $(document).click(function(){
-                    $(".contextMenu").css("display","none")
+                $(document).click(function(e){
+                    console.log(e.target);
+                    if(e.target.className != "playlistExtraOptions" && e.target.className != "fa fa-ellipsis-h"){
+                        $(".contextMenu").css("display", "none");
+                    }
                 });
                 setUpWebSocketConnection();
                 $(".errorList ul li").each(function(index){
@@ -422,8 +435,8 @@ html(lang="en")
                     self.on('contextmenu', function(e){
                         $(".contextMenu").css("display","none")
                         if( e.button == 2 ) {
-                            CurX = (window.Event) ? e.pageX : event.clientX + (document.documentElement.scrollLeft ? document.documentElement.scrollLeft : document.body.scrollLeft);
-                            CurY = (window.Event) ? e.pageY : event.clientY + (document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop);
+                            CurX = (window.Event) ? e.pageX : e.clientX + (document.documentElement.scrollLeft ? document.documentElement.scrollLeft : document.body.scrollLeft);
+                            CurY = (window.Event) ? e.pageY : e.clientY + (document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop);
                             $(".contextMenu").html("<ul></ul>");
                             $(".contextMenu").css("display","block").css("top",CurY+"px").css("left",CurX+"px");
                             if($(this).attr("id")){
@@ -651,6 +664,11 @@ html(lang="en")
                     url: '/api/getPlaylist/'+playlistID,
                     dataType: 'json',
                     success: function(d){
+                        if(d.artwork){
+                            $(".header .bg").attr("style", "background: url('" + d.artwork + "') no-repeat center; background-size: cover;");
+                            $(".header .artwork").attr("style", "background: url('" + d.artwork + "') no-repeat center; background-size: cover;");
+                            loadedPlaylistArtwork = true;
+                        }
                         $.each(d.songs, function(i, item){
                             var data = d.songs[i];
                             var trackNo = i + 1;
@@ -692,6 +710,18 @@ html(lang="en")
                                 return ($(b).find("."+playlistSort).attr("data-sortIndex")) > ($(a).find("."+playlistSort).attr("data-sortIndex")) ? 1 : -1;
                             }).appendTo('#playlist');
                         }
+                        $("#playlistMore").click(function(e){
+                            CurX = (window.Event) ? e.pageX : e.clientX + (document.documentElement.scrollLeft ? document.documentElement.scrollLeft : document.body.scrollLeft);
+                            CurY = (window.Event) ? e.pageY : e.clientY + (document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop);
+                            $(".contextMenu").html("<ul></ul>");
+                            $(".contextMenu").css("display", "block").css("top", CurY + "px").css("left", CurX + "px");
+                            if("#{user.id}" == d.creator.toString()){
+                                $(".contextMenu ul").append("<li>Copy Playlist Link</li><li>Copy Playlist ID</li><li class='sep'></li><li>Collaborative Playlist</li><li>Make Private</li><li class='sep'></li><li>Edit Details</li><li style='color: red;'>Delete</li>");
+                            }
+                            else{
+                                $(".contextMenu ul").append("<li>Copy Playlist Link</li><li>Copy Playlist ID</li><li class='sep'></li><li disabled='true'>Collaborative Playlist</li><li>Unfollow/Follow</li>");
+                            }
+                        });
                         updateDblClicks();
                         loadPlaying();
                         loadRandom();
@@ -830,13 +860,13 @@ html(lang="en")
             }
 
             function randomMusic(){
-                /*$.ajax({
+                $.ajax({
                     url: '/api/toggleRandomPlayback',
                     dataType: 'json',
                     success: function (d) {
 
                     }
-                });*/
+                });
             }
 
             function repeatMusic() {
