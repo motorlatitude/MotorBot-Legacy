@@ -748,18 +748,34 @@ html
     position relative
     .date
       font-size 11px
-      color #aaa
+      color #eee
       position absolute
       top 13px
       left 0
+    .commit
+      font-size 11px
+      position absolute
+      top 39px
+      left 0
+      color #aaa
+      font-family Consolas, "Liberation Mono", Menlo, Courier, monospace
+    .author
+      display none
+      font-size 11px
+      position absolute
+      bottom 13px
+      left 0
+      color rgba(0, 160, 231, 1.00)
     .container
       margin-left 80px
       width calc(100% - 80px)
+      min-height 75px
       border-bottom 1px solid rgba(255,255,255,0.1)
       & .type
         display inline-block
         line-height 20px
-        width 50px
+        padding 0 6px
+        min-width 30px
         background rgba(0,0,0,0.1)
         color #fff
         font-size 11px
@@ -777,6 +793,16 @@ html
           background rgba(255,255,255, 0.6)
         &.improvement
           background rgba(243, 184, 49, 1.00)
+        &.depreciated
+          background rgba(217, 69, 66, 1.00)
+      &>ul
+        list-style none
+        margin 0
+        padding 0
+        &>li
+          width 100%
+          margin-left 4px
+          margin-top 4px
       &>p
         font-size 13px
         color #ddd
@@ -788,6 +814,7 @@ html
           &:hover
             text-decoration underline
       &>p:last-child
+        display none
         font-size 12px
         color rgba(255,255,255,0.5)
         font-family Consolas, "Liberation Mono", Menlo, Courier, monospace
@@ -795,6 +822,7 @@ html
         font-size 16px
         color #fff
         font-weight 600
+        padding-bottom 10px
         font-family -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"
 
 

@@ -304,7 +304,7 @@ html(lang="en")
                                 success: function(data){
                                     console.log(data);
                                     $.each(data, function (i, item) {
-                                        $("#commitHistory").append("<li><div class='date'>"+item.commit.author.date.replace(/T/gmi,"<br/>").replace(/Z/gmi,"")+"</div><div class='container'>"+marked(item.commit.message.replace(/<(.*?)>$/gmi,"&lt;$1&gt;").replace(/FIX/g,"<div class='type fix'>FIX</div>").replace(/NEW/g,"<div class='type new'>NEW</div>").replace(/TODO/g,"<div class='type todo'>TODO</div>").replace(/CODE\sIMPROVEMENT/g,"<div class='type code'>CODE</div>").replace(/IMPROVEMENT/g,"<div class='type improvement'>IMPROVEMENT</div>"))+"</div></li>");
+                                        $("#commitHistory").append("<li><div class='date'>"+item.commit.author.date.replace(/T/gmi,"<br/>").replace(/Z/gmi,"")+"</div><div class='commit'>"+item.sha.substr(0,7)+"</div><div class='author'>"+item.author.login+"</div><div class='container'>"+marked(item.commit.message.replace(/<(.*?)>$/gmi,"&lt;$1&gt;").replace(/FIX/g,"<div class='type fix'>FIX</div>").replace(/NEW/g,"<div class='type new'>NEW</div>").replace(/TODO/g,"<div class='type todo'>TODO</div>").replace(/CODE\sIMPROVEMENT/g,"<div class='type code'>CODE</div>").replace(/IMPROVEMENT/g,"<div class='type improvement'>IMPROVEMENT</div>").replace(/DEPRECIATED/g,"<div class='type depreciated'>DEPRECIATED</div>"))+"</div></li>");
                                     });
                                 },
                                 error: function(err){

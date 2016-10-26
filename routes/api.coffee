@@ -6,38 +6,6 @@ req = require('request')
 async = require('async')
 uid = require('rand-token').uid;
 
-router.get("/playSong/:trackId", (req, res) ->
-  console.log("PlaySong Page Loaded")
-  trackId = req.params.trackId
-  if !trackId
-    return res.end(JSON.stringify({success: false, error: "No trackId supplied"}))
-  else
-    console.log trackId
-    trackId = new ObjectID(trackId)
-    playlistCollection = globals.db.collection("playlist")
-    playlistCollection.update({status: 'added'},{$set: {status: 'played'}}, {multi: true}, (err, result) ->
-      if err
-        globals.raven.captureException(err,{level: 'error', tags:[{instigator: 'mongo'}]})
-      playlistCollection.find({}).sort({timestamp: 1}).toArray((err, results) ->
-        foundTrack = false
-        for r in results
-          if r._id.toString() == trackId.toString() || foundTrack
-            track = r.title
-            artist = r.artist
-            albumArt = r.albumArt
-            trackId = r._id.toString()
-            trackDuration = r.duration
-            playlistCollection.update({timestamp: {$gte: r.timestamp}},{$set: {status: 'added'}}, {multi: true}, (err, result) ->
-              if err then console.log err
-              globals.dc.stopStream()
-              globals.songDone(true)
-              globals.wss.broadcast(JSON.stringify({type: 'trackUpdate', track: track, artist: artist, albumArt: albumArt, trackId: trackId, trackDuration: trackDuration}))
-              return res.end(JSON.stringify({success: true}))
-            )
-      )
-    )
-)
-
 router.get("/stopSong", (req, res) ->
   globals.dc.stopStream()
   globals.songComplete(false)
@@ -600,30 +568,6 @@ router.get("/toggleRandomPlayback", (req, res) ->
     res.send(JSON.stringify({status: 200, message: "OKAY"}))
 )
 
-router.get("/deleteSong/:trackId", (req, res) ->
-  trackId = req.params.trackId
-  playlistCollection = globals.db.collection("playlist")
-  playlistCollection.deleteOne({_id: new ObjectID(trackId)}, (err, results) ->
-    if err
-      globals.raven.captureException(err,{level: 'error', tags:[{instigator: 'mongo'}]})
-      res.end(JSON.stringify({success: false, error: "Database Error"}))
-    globals.wss.broadcast(JSON.stringify({type: 'trackDelete', trackId: trackId}))
-    res.end(JSON.stringify({success: true}))
-  )
-)
-
-router.get("/playing", (request,res) ->
-  playlistCollection = globals.db.collection("playlist")
-  playlistCollection.find({status:'playing'}).sort({timestamp: 1}).toArray((err, results) ->
-    if err
-      globals.raven.captureException(err,{level: 'error', tags:[{instigator: 'mongo'}]})
-    if results[0]
-      res.end(JSON.stringify(results[0]))
-    else
-      res.end(JSON.stringify({}))
-  )
-)
-
 router.get("/getPlaying", (request,res) ->
   songQueueCollection = globals.db.collection("songQueue")
   songQueueCollection.find({status:'playing'}).toArray((err, results) ->
@@ -632,15 +576,6 @@ router.get("/getPlaying", (request,res) ->
       res.end(JSON.stringify(results[0]))
     else
       res.end(JSON.stringify({}))
-  )
-)
-
-router.get("/playlist", (request, res) ->
-  playlistCollection = globals.db.collection("playlist")
-  playlistCollection.find({}).sort({timestamp: 1}).toArray((err, results) ->
-    if err
-      globals.raven.captureException(err,{level: 'error', tags:[{instigator: 'mongo'}]})
-    res.end(JSON.stringify(results))
   )
 )
 
