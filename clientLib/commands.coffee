@@ -91,7 +91,7 @@ class Commands
     else if msg.match(/^!sb\spog/)
       if globals.dc.internals.voice.ready
         globals.dc.stopStream()
-        globals.songDone(false)
+        globals.songComplete(false)
         setTimeout(() ->
           globals.dc.playStream('/var/www/motorbot/soundboard/play of the game.mp3',{volume: 3.0})
         ,1000)
@@ -100,7 +100,7 @@ class Commands
     else if msg.match(/^!sb\swonder/)
       if globals.dc.internals.voice.ready
         globals.dc.stopStream()
-        globals.songDone(false)
+        globals.songComplete(false)
         setTimeout(() ->
           globals.dc.playStream('/var/www/motorbot/soundboard/wonder.mp3',{volume: 3.0})
         ,1000)
@@ -109,7 +109,7 @@ class Commands
     else if msg.match(/^!sb\skled/)
       if globals.dc.internals.voice.ready
         globals.dc.stopStream()
-        globals.songDone(false)
+        globals.songComplete(false)
         setTimeout(() ->
           globals.dc.playStream('/var/www/motorbot/soundboard/kled.mp3',{volume: 2.0})
         ,1000)
@@ -118,7 +118,7 @@ class Commands
     else if msg.match(/^!sb\s1/)
       if globals.dc.internals.voice.ready
         globals.dc.stopStream()
-        globals.songDone(false)
+        globals.songComplete(false)
         setTimeout(() ->
           globals.dc.playStream('/var/www/motorbot/soundboard/1.mp3',{volume: 3.0})
         ,1000)
@@ -127,7 +127,7 @@ class Commands
     else if msg.match(/^!sb\s2/)
       if globals.dc.internals.voice.ready
         globals.dc.stopStream()
-        globals.songDone(false)
+        globals.songComplete(false)
         setTimeout(() ->
           globals.dc.playStream('/var/www/motorbot/soundboard/2.mp3',{volume: 3.0})
         ,1000)
@@ -136,7 +136,7 @@ class Commands
     else if msg.match(/^!sb\s3/)
       if globals.dc.internals.voice.ready
         globals.dc.stopStream()
-        globals.songDone()
+        globals.songComplete()
         setTimeout(() ->
           globals.dc.playStream('/var/www/motorbot/soundboard/3.mp3',{volume: 3.0})
         ,1000)
@@ -145,7 +145,7 @@ class Commands
     else if msg.match(/^!sb\sgp/)
       if globals.dc.internals.voice.ready
         globals.dc.stopStream()
-        globals.songDone(false)
+        globals.songComplete(false)
         setTimeout(() ->
           globals.dc.playStream('/var/www/motorbot/soundboard/gp.mp3',{volume: 3.0})
         ,1000)
@@ -154,16 +154,28 @@ class Commands
     else if msg.match(/^!sb\sj3/)
       if globals.dc.internals.voice.ready
         globals.dc.stopStream()
-        globals.songDone()
+        globals.songComplete()
         setTimeout(() ->
           globals.dc.playStream('/var/www/motorbot/soundboard/justice 3.mp3',{volume: 3.0})
+        ,1000)
+      else
+        globals.dc.sendMessage("169555395860234240","Hmmmmm, I think you might want to join a Voice Channel first :wink:")
+    else if msg.match(/^!sb\sstop/)
+      console.log "sb stop"
+      if globals.dc.internals.voice.ready
+        console.log "sb stop"
+        globals.dc.stopStream()
+        globals.songComplete()
+        setTimeout(() ->
+          console.log "sb stop"
+          globals.dc.playStream('/var/www/motorbot/soundboard/stop the payload.mp3',{volume: 4.0})
         ,1000)
       else
         globals.dc.sendMessage("169555395860234240","Hmmmmm, I think you might want to join a Voice Channel first :wink:")
     else if msg.match(/^!sb\ssb/)
       if globals.dc.internals.voice.ready
         globals.dc.stopStream()
-        globals.songDone(false)
+        globals.songComplete(false)
         setTimeout(() ->
           globals.dc.playStream('/var/www/motorbot/soundboard/speed boost.mp3',{volume: 3.0})
         ,1000)
@@ -172,7 +184,7 @@ class Commands
     else if msg.match(/^!sb\swsr/)
       if globals.dc.internals.voice.ready
         globals.dc.stopStream()
-        globals.songDone()
+        globals.songComplete()
         setTimeout(() ->
           globals.dc.playStream('/var/www/motorbot/soundboard/wsr.mp3',{volume: 1.0})
         ,1000)
@@ -181,7 +193,7 @@ class Commands
     else if msg.match(/^!sb\saffirmative/)
       if globals.dc.internals.voice.ready
         globals.dc.stopStream()
-        globals.songDone(false)
+        globals.songComplete(false)
         setTimeout(() ->
           globals.dc.playStream('/var/www/motorbot/soundboard/affirmative.mp3',{volume: 3.0})
         ,1000)

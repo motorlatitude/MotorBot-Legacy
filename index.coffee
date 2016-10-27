@@ -213,7 +213,7 @@ goThroughSongQueue = () ->
         )
   )
 
-globals.songComplete = (goToNext) ->
+globals.songComplete = (goToNext = false) ->
   if globals.dc.internals.voice.ready && !globals.dc.internals.voice.pause
     console.log("Song Complete")
     globals.isPlayling = false

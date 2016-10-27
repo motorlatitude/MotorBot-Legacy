@@ -593,9 +593,14 @@ router.get("/getPlaylist/:playlistId", (request, res) ->
             songsCollection = globals.db.collection("songs")
             songsCollection.find({_id: {$in: playlist.songs}}).toArray((err, results) ->
               if err then console.log err
-              playlist.songs = []
+              finalSongs = []
+              songList = {}
               if results[0]
-                playlist.songs = results
+                for song in results
+                  songList[song._id.toString()] = song
+                for song in playlist.songs
+                  finalSongs.push(songList[song.toString()])
+                playlist.songs = finalSongs
                 res.end(JSON.stringify(playlist))
               else
                 res.end(JSON.stringify({success: false, message: "Songs not found for this playlist?"}))

@@ -441,7 +441,12 @@ html(lang="en")
                             CurX = (window.Event) ? e.pageX : e.clientX + (document.documentElement.scrollLeft ? document.documentElement.scrollLeft : document.body.scrollLeft);
                             CurY = (window.Event) ? e.pageY : e.clientY + (document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop);
                             $(".contextMenu").html("<ul></ul>");
-                            $(".contextMenu").css("display","block").css("top",CurY+"px").css("left",CurX+"px");
+                            if(CurY+200 > $(document).height()) {
+                                $(".contextMenu").css("display", "block").css("top", (CurY - 190) + "px").css("left", CurX + "px");
+                            }
+                            else{
+                                $(".contextMenu").css("display", "block").css("top", CurY + "px").css("left", CurX + "px");
+                            }
                             if($(this).attr("id")){
                                 if($("#playlist").attr("data-playlistCreator") == "#{user.id}"){
                                     $(".contextMenu ul").append("<li onclick=\"addSongToQueue('"+$(this).attr("data-songId")+"','"+$(this).attr("data-playlistId")+"')\">Add to Queue</li><li class='sep'></li><li disabled='true'>Add to Library</li><li onclick=\"addToPlaylist('"+$(this).attr("data-songId")+"')\">Add to Playlist</li><li class='sep'></li><li onclick=\"deleteSongFromPlaylist('"+$(this).attr("data-songId")+"','"+$(this).attr("data-playlistId")+"')\" style='color: rgba(242, 52, 51, 1.00);'>Remove This From Playlist</li>");
