@@ -23,7 +23,7 @@ function addExtraButton(){
             console.error("[Motorbot] Error Occurred Sending Video to motorbot: You're not authenticated :(");
           }
           else {
-            $("#motorbotDropDown").css("top",($("#watch7-container").offset().top+145)+"px");
+            $("#motorbotDropDown").css("top",($("#watch7-container").offset().top+145)+"px").css("left", ($("#action-panel-overflow-button-motorbot").offset().left+10)+"px");
             dropDownMenu.css("display", "block");
             dropDownMenu.html("<div class='loader'></div>");
             var videoId = getParameterByName("v", window.location.href);

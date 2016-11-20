@@ -240,7 +240,7 @@ html(lang="en")
                                      $("#playlist").find(".titleRow").css("position","fixed").css("top","108px");
                                      $(".artwork").css("top","8px").css("left","calc(50% + 504px)").css("width","56px").css("height","56px");
                                      $(".playlistType").css("display","none");
-                                     $(".playlistName").css("top","22px").css("font-size","25px");
+                                     $(".playlistName").css("top","26px").css("font-size","25px");
                                      $(".playlistOptions").css("top","21px").css("left","calc(50% + 104px)").css("text-align","right");
                                  }
                                  else {
@@ -304,7 +304,7 @@ html(lang="en")
                                 success: function(data){
                                     console.log(data);
                                     $.each(data, function (i, item) {
-                                        $("#commitHistory").append("<li><div class='date'>"+item.commit.author.date.replace(/T/gmi,"<br/>").replace(/Z/gmi,"")+"</div><div class='commit'>"+item.sha.substr(0,7)+"</div><div class='author'>"+item.author.login+"</div><div class='container'>"+marked(item.commit.message.replace(/<(.*?)>$/gmi,"&lt;$1&gt;").replace(/FIX/g,"<div class='type fix'>FIX</div>").replace(/NEW/g,"<div class='type new'>NEW</div>").replace(/TODO/g,"<div class='type todo'>TODO</div>").replace(/CODE\sIMPROVEMENT/g,"<div class='type code'>CODE</div>").replace(/IMPROVEMENT/g,"<div class='type improvement'>IMPROVEMENT</div>").replace(/DEPRECIATED/g,"<div class='type depreciated'>DEPRECIATED</div>"))+"</div></li>");
+                                        $("#commitHistory").append("<li><div class='date'>"+item.commit.author.date.replace(/T/gmi,"<br/>").replace(/Z/gmi,"")+"</div><div class='commit'>"+item.sha.substr(0,7)+"</div><div class='author'>"+item.author.login+"</div><div class='container'>"+marked(item.commit.message.replace(/<(.*?)>$/gmi,"&lt;$1&gt;").replace(/FIX/g,"<div class='type fix'>FIX</div>").replace(/NEW/g,"<div class='type new'>NEW</div>").replace(/TODO/g,"<div class='type todo'>TODO</div>").replace(/CODE\sIMPROVEMENT/g,"<div class='type code'>CODE</div>").replace(/CODE/g,"<div class='type code'>CODE</div>").replace(/IMPROVEMENT/g,"<div class='type improvement'>IMPROVEMENT</div>").replace(/DEPRECIATED/g,"<div class='type depreciated'>DEPRECIATED</div>"))+"</div></li>");
                                     });
                                 },
                                 error: function(err){
@@ -684,20 +684,25 @@ html(lang="en")
                         }
                         $("#playlist").attr("data-playlistCreator", d.creator);
                         $.each(d.songs, function(i, item){
-                            var data = d.songs[i];
-                            var trackNo = i + 1;
-                            var formattedTimestamp = convertTimestamp(data.duration);
-                            var songDuration = convertTimestampToSeconds(data.duration)
-                            totalDuration += songDuration
-                            var added = millisecondsToStr(data.timestamp);
-                            var userId = data.userId || "";
-                            if(data.albumArt != "" && !loadedPlaylistArtwork){
-                                console.log("Using Artwork for track: "+i);
-                                $(".header .bg").attr("style","background: url('"+data.albumArt+"') no-repeat center; background-size: cover;");
-                                $(".header .artwork").attr("style","background: url('"+data.albumArt+"') no-repeat center; background-size: cover;");
-                                loadedPlaylistArtwork = true;
+                            if(item != null) {
+                                var data = d.songs[i];
+                                var trackNo = i + 1;
+                                var formattedTimestamp = convertTimestamp(data.duration);
+                                var songDuration = convertTimestampToSeconds(data.duration)
+                                totalDuration += songDuration
+                                var added = millisecondsToStr(data.timestamp);
+                                var userId = data.userId || "";
+                                if (data.albumArt != "" && !loadedPlaylistArtwork) {
+                                    console.log("Using Artwork for track: " + i);
+                                    $(".header .bg").attr("style", "background: url('" + data.albumArt + "') no-repeat center; background-size: cover;");
+                                    $(".header .artwork").attr("style", "background: url('" + data.albumArt + "') no-repeat center; background-size: cover;");
+                                    loadedPlaylistArtwork = true;
+                                }
+                                $("#playlist").append("<li id='" + data._id + "' data-songId='" + data._id + "' data-playlistId='" + playlistID + "'><div class='trackRow'><div class='item' data-trackNo='" + trackNo + "'>" + trackNo + "</div><div class='title' data-sortIndex='" + data.title.toUpperCase() + "'>" + data.title + "</div><div class='artist' data-sortIndex='" + data.artist.toUpperCase() + "'>" + data.artist + "</div><div class='album' data-sortIndex='" + data.album.toUpperCase() + "'>" + data.album + "</div><div class='timestamp' data-sortIndex='" + data.timestamp + "'>" + added + "</div><div class='time'>" + formattedTimestamp + "</div></div></li>");
                             }
-                            $("#playlist").append("<li id='" + data._id + "' data-songId='" + data._id + "' data-playlistId='" + playlistID + "'><div class='trackRow'><div class='item' data-trackNo='" + trackNo + "'>" + trackNo + "</div><div class='title' data-sortIndex='"+data.title.toUpperCase()+"'>" + data.title + "</div><div class='artist' data-sortIndex='"+data.artist.toUpperCase()+"'>" + data.artist + "</div><div class='album' data-sortIndex='"+data.album.toUpperCase()+"'>" + data.album + "</div><div class='timestamp' data-sortIndex='"+data.timestamp+"'>" + added + "</div><div class='time'>" + formattedTimestamp + "</div></div></li>");
+                            else{
+                                console.log(i)
+                            }
                         });
                         $(".contentView").css("display","block");
                         $(".loader").css("display","none");

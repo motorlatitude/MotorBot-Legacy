@@ -6,41 +6,45 @@ req = require('request')
 async = require('async')
 uid = require('rand-token').uid;
 
+music = require('./api_routes/music')
+
+router.get("/music")
+
 router.get("/stopSong", (req, res) ->
   globals.dc.stopStream()
   globals.songComplete(false)
   globals.wss.broadcast(JSON.stringify({type: 'playUpdate', status: 'stop'}))
-  res.end(JSON.stringify({success: true}))
+  res.end(JSON.stringify({status: 200, message: "OKAY"}))
 )
 
 router.get("/pauseSong", (req, res) ->
   globals.dc.pauseStream()
   globals.wss.broadcast(JSON.stringify({type: 'playUpdate', status: 'pause'}))
-  res.end(JSON.stringify({success: true}))
+  res.end(JSON.stringify({status: 200, message: "OKAY"}))
 )
 
 router.get("/resumeSong", (req, res) ->
   globals.dc.resumeStream()
   globals.wss.broadcast(JSON.stringify({type: 'playUpdate', status: 'play'}))
-  res.end(JSON.stringify({success: true}))
+  res.end(JSON.stringify({status: 200, message: "OKAY"}))
 )
 
 router.get("/playSong", (req, res) ->
   globals.songComplete(true)
   globals.wss.broadcast(JSON.stringify({type: 'playUpdate', status: 'play'}))
-  res.end(JSON.stringify({success: true}))
+  res.end(JSON.stringify({status: 200, message: "OKAY"}))
 )
 
 router.get("/prevSong", (req, res) ->
   songQueueCollection = globals.db.collection("songQueue")
   #TODO
-  res.end(JSON.stringify({success: true}))
+  res.end(JSON.stringify({status: 500, message: "ENDPOINT_UNAVAILABLE"}))
 )
 
 router.get("/skipSong", (req, res) ->
   globals.dc.stopStream()
   globals.songComplete(true)
-  res.end(JSON.stringify({success: true}))
+  res.end(JSON.stringify({status: 200, message: "OKAY"}))
 )
 
 router.get("/newPlaylist/:playlistName", (req, res) ->
@@ -73,7 +77,8 @@ router.get("/newPlaylist/:playlistName", (req, res) ->
       )
     )
   else
-    res.send(JSON.stringify({status: 403, message: "Unauthorised"}))
+    res.set({"code":401, "status": "Unauthorized"}) #set HTTP Headers
+    res.send(JSON.stringify({status: 401, message: "Unauthorised"}))
 )
 
 router.get("/getPlaylists", (req, res) ->
@@ -891,6 +896,16 @@ router.get("/deletePlaylist/:playlistId", (req, res) ->
     res.send(JSON.stringify({"status": 403,"message":"Unauthorized"}))
 )
 
+router.get("/search/:searchTerm", (req, res) ->
+  songsCollection = globals.db.collection("songs")
+  searchTerm = req.params.searchTerm || ""
+  searchTerm = searchTerm.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&")
+  console.log searchTerm
+  songsCollection.find({$or:[{title: {$regex: searchTerm, $options: 'gmi'}},{album: {$regex: searchTerm, $options: 'gmi'}},{artist: {$regex: searchTerm, $options: 'gmi'}}]}).toArray((err, results) ->
+    res.send(JSON.stringify(results))
+  )
+)
+
 ###
 router.get("/tempURL1", (request, res) ->
   songsCollection = globals.db.collection("songs")
@@ -904,6 +919,34 @@ router.get("/tempURL1", (request, res) ->
       if err then console.log err
       console.log("Done Transfer")
     )
+  )
+)###
+###
+router.get("/tempURL2", (req, res) ->
+  duplicates = []
+  globals.db.collection('songs').aggregate([
+    { $match: {
+      videoId: { $ne: ''},
+      title: { $ne: ''}
+    }},
+    { $group: {
+      _id: { videoId: "$videoId", title: "$title"},
+      count: { $sum: 1},
+      dups: { $push: "$_id"},
+
+    }},
+    { $match: {
+      count: { $gt: 1}
+    }}
+  ]).toArray((err, results) ->
+    results.forEach((doc) ->
+      doc.dups.shift()
+      doc.dups.forEach((dupId) ->
+        duplicates.push(dupId)
+      )
+    )
+    res.send(JSON.stringify(duplicates))
+    globals.db.collection('songs').remove({_id:{$in:duplicates}})
   )
 )###
 

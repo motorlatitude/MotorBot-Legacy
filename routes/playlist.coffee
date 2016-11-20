@@ -45,7 +45,10 @@ passport.use(new DiscordStrategy({
     usersCollection.find({id: profile.id}).toArray((err, results) ->
       if err then console.log err
       if results[0]
-        return cb(err, profile)
+        usersCollection.update({id: profile.id}, {$set:{avatar: profile.avatar, username: profile.username, guilds: profile.guilds}}, (err, result) ->
+          if err then console.log err
+          return cb(err, profile)
+        )
       else
         userObj = {
           id: profile.id,
@@ -55,10 +58,10 @@ passport.use(new DiscordStrategy({
           guilds: profile.guilds,
           playlists: ["YFX7clE6pCquMNnsHtxlzgJiHXIixFxk"]
         }
-      usersCollection.insertOne(userObj, (err, result) ->
-        if err then console.log err
-        return cb(err, profile)
-      )
+        usersCollection.insertOne(userObj, (err, result) ->
+          if err then console.log err
+          return cb(err, profile)
+        )
     )
 ))
 
