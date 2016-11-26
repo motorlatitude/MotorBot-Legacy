@@ -97,6 +97,15 @@ class Commands
         ,1000)
       else
         globals.dc.sendMessage("169555395860234240","Hmmmmm, I think you might want to join a Voice Channel first :wink:")
+    else if msg.match(/^!sb\sdiddly/)
+      if globals.dc.internals.voice.ready
+        globals.dc.stopStream()
+        globals.songComplete(false)
+        setTimeout(() ->
+          globals.dc.playStream('/var/www/motorbot/soundboard/DootDiddly.mp3',{volume: 3.0})
+        ,1000)
+      else
+        globals.dc.sendMessage("169555395860234240","Hmmmmm, I think you might want to join a Voice Channel first :wink:")
     else if msg.match(/^!sb\swonder/)
       if globals.dc.internals.voice.ready
         globals.dc.stopStream()

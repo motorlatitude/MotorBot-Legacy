@@ -7,6 +7,7 @@ fs = require 'fs'
 Opus = require 'node-opus'
 UDPClient = require './udpClient'
 playStream = require './playStream.coffee'
+VoicePacket = require './voicePacket.coffee'
 
 class VoiceConnection
 
@@ -18,6 +19,9 @@ class VoiceConnection
     utils.debug("New Voice Connection Started")
     @sequence = 0
     @timestamp = 0
+    @pings = []
+    @totalPings = 0
+    @avgPing = 0
 
   connect: (params) ->
     @token = params.token
@@ -27,6 +31,9 @@ class VoiceConnection
     @session_id = @discordClient.internals.session_id
     @vws = null
     @vhb = null
+    @packageList = []
+    @streamPacketList = []
+    @users = {}
     utils.debug("Generating new voice WebSocket connection")
     @vws = new ws("wss://"+@endpoint.split(":")[0])
     self = @
@@ -89,7 +96,7 @@ class VoiceConnection
       "endpoint": @endpoint.split(":")[0]
     }
     #start UDP Connection
-    @udpClient = new UDPClient()
+    @udpClient = new UDPClient(@)
     @udpClient.init(conn)
 
     @udpClient.on('ready', (localIP, localPort) ->
@@ -105,14 +112,19 @@ class VoiceConnection
         }
       }
       self.vws.send(JSON.stringify(selectProtocolPayload))
+      self.packageData(new Date().getTime(),1)
+      self.send(new Date().getTime(),1)
     )
 
   handleSpeaking: (msg) ->
-    #user speaking on the server, ignore atm
+    @users[msg.d.user_id] = {ssrc: msg.d.ssrc} #for receiving voice data
 
   handleHeartbeat: (msg, guild_id) ->
     ping = new Date().getTime() - @gatewayPing
-    utils.debug("Voice Heartbeat Sent ("+ping+"ms)")
+    @pings.push(ping)
+    @totalPings+=ping
+    @avgPing = @totalPings/@pings.length
+    utils.debug("Voice Heartbeat Sent ("+ping+"ms - average: "+(Math.round(@avgPing*100)/100)+"ms)")
 
   handleSession: (msg) ->
     @secretKey = msg.d.secret_key
@@ -129,6 +141,40 @@ class VoiceConnection
     }
     @vws.send(JSON.stringify(speakingPackage))
 
+  packageData: (startTime, cnt) ->
+    channels = 2 #just assume it's 2 for now
+    self = @
+    streamPacket = @streamPacketList.shift()
+    if streamPacket
+      streamBuff=streamPacket
+      @sequence = if (@sequence + 1) < 65535 then @sequence += 1 else @sequence = 0
+      @timestamp = if (@timestamp + 960) < 4294967295 then @timestamp += 960 else @timestamp = 0
+      # TODO volume transformation
+      encoded = @opusEncoder.encode(streamBuff, 1920)
+      audioPacket = new VoicePacket(encoded, @)
+      @packageList.push(audioPacket)
+      nextTime = startTime + (cnt+1) * 20
+      return setTimeout(() ->
+        self.packageData(startTime, cnt + 1)
+      , 20 + (nextTime - new Date().getTime()));
+    else
+      return setTimeout(() ->
+        self.packageData(startTime, cnt)
+      , 200);
+
+  send: (startTime, cnt) ->
+    self = @
+    packet = @packageList.shift()
+    if packet
+      @udpClient.send(packet, 0, packet.length, @port, @endpoint.split(":")[0], (err, bytes) ->
+        if err
+          utils.debug("Error Sending Voice Packet: "+err.toString(),"error")
+      )
+    nextTime = startTime + (cnt+1) * 20
+    return setTimeout(() ->
+      self.send(startTime, cnt + 1)
+    , 20 + (nextTime - new Date().getTime()))
+
   ###
   # PUBLIC METHODS
   ###
@@ -138,7 +184,7 @@ class VoiceConnection
     return ps
 
   playFromFile: (file) ->
-    ps = new playStream(file, @, @discordClient)
+    ps = new playStream(fs.createReadStream(file), @, @discordClient)
     return ps
 
 module.exports = VoiceConnection

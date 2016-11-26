@@ -2,7 +2,7 @@ nacl = require('tweetnacl')
 
 class VoicePacket
 
-  constructor: (data, playStream, voiceConnection) ->
+  constructor: (data, voiceConnection) ->
     mac = if voiceConnection.secretKey then 16 else 0
     packageLength = data.length + 12 + mac
 

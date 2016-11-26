@@ -1,9 +1,9 @@
 {EventEmitter} = require('events')
 u = require '../utils.coffee'
+fs = require 'fs'
 utils = new u()
 VoicePacket = require './voicePacket.coffee'
 childProc = require 'child_process'
-#ffmpeg = require 'fluent-ffmpeg'
 
 class playStream extends EventEmitter
   
@@ -17,33 +17,20 @@ class playStream extends EventEmitter
     utils.debug("Setting up new stream")
     @ffmpegDone = false
     @emptyPacket = false
-    @outputStream = null;
+    @outputStream = null
+    @streamFinished = false
     self = @
-    if typeof(stream) == "string"
-      @enc = childProc.spawn('ffmpeg', [
-        '-hide_banner',
-        '-i', stream,
-        '-f', 's16le',
-        '-ar', '48000',
-        '-ss', 0,
-        '-ac', 2,
-        'pipe:1'
-      ]).on('error', (e) ->
-        utils.debug("FFMPEG encoding error: "+e.toString(),"error")
-      )
-    else
-      @enc = childProc.spawn('ffmpeg', [
-        '-hide_banner',
-        '-i', '-',
-        '-f', 's16le',
-        '-ar', '48000',
-        '-ss', 0,
-        '-ac', 2,
-        'pipe:1'
-      ]).on('error', (e) ->
-        utils.debug("FFMPEG encoding error: "+e.toString(),"error")
-      )
-      stream.pipe(@enc.stdin)
+    @enc = childProc.spawn('ffmpeg', [
+      '-i', 'pipe:0',
+      '-f', 's16le',
+      '-ar', '48000',
+      '-ss', '0',
+      '-ac', '2',
+      'pipe:1'
+    ]).on('error', (e) ->
+      utils.debug("FFMPEG encoding error: "+e.toString(),"error")
+    )
+    stream.pipe(@enc.stdin)
 
     @enc.on('error', (err) ->
       utils.debug("Error Occurred: "+err.toString(),"error")
@@ -63,15 +50,16 @@ class playStream extends EventEmitter
       self.enc.stdout.emit("end")
       self.ffmpegDone = true
     )
-    ###
+
     @enc.stderr.on('data', (d) ->
-      console.log 'data: '+d
+      #console.log 'data: '+d
     )
-    ###
+
     @enc.stdout.once('readable', () ->
       utils.debug("Storing Voice Packets")
       self.packageList = []
       self.opusEncoder = self.voiceConnection.opusEncoder
+      self.emptyPackets = 0
       self.packageData(self.enc.stdout, new Date().getTime(), 1)
       self.stopSend = false
       self.emit("ready")
@@ -82,21 +70,12 @@ class playStream extends EventEmitter
     self = @
     if stream
       streamBuff=stream.read(1920*channels)
-      if stream.destroyed
-        return
-      self.voiceConnection.sequence = if (self.voiceConnection.sequence + 1) < 65535 then self.voiceConnection.sequence += 1 else self.voiceConnection.sequence = 0
-      self.voiceConnection.timestamp = if (self.voiceConnection.timestamp + 960) < 4294967295 then self.voiceConnection.timestamp += 960 else self.voiceConnection.timestamp = 0
-
       if streamBuff && streamBuff.length != 1920 * channels
         newBuffer = new Buffer(1920 * channels).fill(0)
         streamBuff.copy(newBuffer)
         streamBuff = newBuffer
-
       if streamBuff
-        # TODO volume transformation
-        encoded = @opusEncoder.encode(streamBuff, 1920)
-        audioPacket = new VoicePacket(encoded, @, @voiceConnection)
-        @packageList.push(audioPacket)
+        @packageList.push(streamBuff)
         nextTime = startTime + (cnt+1) * 20
         return setTimeout(() ->
           self.packageData(stream, startTime, cnt + 1)
@@ -106,36 +85,29 @@ class playStream extends EventEmitter
         self.packageData(stream, startTime, cnt)
       , 200);
 
-  send: (startTime, cnt) ->
+  sendToVoiceConnection: (startTime, cnt) ->
     self = @
     if !@stopSend
       packet = @packageList.shift()
-      if @ffmpegDone && @packageList.length < 1
-        utils.debug "Stream Done :("
-        @stopSend = true
-        self.emit("streamDone")
-      if !packet
-        packet = new Buffer([0xF8, 0xFF, 0xFE]) #5 frames of silence
-        utils.debug("Sending Empty Packet","debug")
-      @voiceConnection.udpClient.send(packet, 0, packet.length, @voiceConnection.port, @voiceConnection.endpoint.split(":")[0], (err, bytes) ->
-        if err
-          utils.debug("Error Sending Voice Packet: "+err.toString(),"error")
-      )
-      nextTime = startTime + (cnt+1) * 15
+      if packet
+        @voiceConnection.streamPacketList.push(packet)
+      else if @ffmpegDone && !@streamFinished
+        @streamFinished = true
+        @sendEmptyBuffer()
+        @emit("streamDone")
+      nextTime = startTime + (cnt+1) * 20
       return setTimeout(() ->
-        self.send(startTime, cnt + 1)
-      , 15 + (nextTime - new Date().getTime()))
+        self.sendToVoiceConnection(startTime, cnt + 1)
+      , 20 + (nextTime - new Date().getTime()));
     else
-      packet = new Buffer([0xF8, 0xFF, 0xFE]) #5 frames of silence
-      @voiceConnection.udpClient.send(packet, 0, packet.length, @voiceConnection.port, @voiceConnection.endpoint.split(":")[0], (err, bytes) ->
-        if err
-          utils.debug("Error Sending Voice Packet: "+err.toString(),"error")
-        else
-          self.voiceConnection.setSpeaking(false)
-          utils.debug("Sending Empty Packet","debug")
-          self.emit("paused")
-      )
+      @sendEmptyBuffer()
+      @emit("paused")
 
+  sendEmptyBuffer: () ->
+    streamBuff = new Buffer(1920).fill(0)
+    encoded = @opusEncoder.encode(streamBuff, 1920)
+    audioPacket = new VoicePacket(encoded, @, @voiceConnection)
+    @voiceConnection.packageList.push(audioPacket)
 
   stopSending: () ->
     @stopSend = true
@@ -151,16 +123,19 @@ class playStream extends EventEmitter
 
   play: () ->
     #start sending voice data and turn speaking on for bot
-    utils.debug("Playing Stream")
-    @stopSend = false
-    @voiceConnection.setSpeaking(true)
     self = @
-    self.send(new Date().getTime(), 1)
+    utils.debug("Playing Stream")
+    self.stopSend = false
+    self.voiceConnection.setSpeaking(true)
+    @sendEmptyBuffer()
+    #self.packageData(@enc.stdout, new Date().getTime(), 1)
+    self.sendToVoiceConnection(new Date().getTime(), 1)
 
   stop: () ->
     #stop sending voice data and turn speaking off for bot
     utils.debug("Stopping Stream")
     @emit("streamDone")
+    @sendEmptyBuffer()
     self = @
     try
       @stopSending()
@@ -180,4 +155,5 @@ class playStream extends EventEmitter
   setVolume: (streamObj) ->
 
   getVolume: (streamObj) ->
+
 module.exports = playStream
