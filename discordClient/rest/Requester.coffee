@@ -1,5 +1,5 @@
 Constants = require './../constants.coffee'
-keys = require '../../keys.json'
+keys = require './../../keys.json'
 req = require 'request'
 
 class Requester
