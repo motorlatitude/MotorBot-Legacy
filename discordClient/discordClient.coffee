@@ -1,8 +1,10 @@
 EventEmitter = require('events').EventEmitter
+Constants = require './constants.coffee'
 req = require 'request'
 pjson = require '../package.json'
 u = require('./utils.coffee')
 utils = new u()
+DiscordManager = require './rest/DiscordManager'
 
 clientConnection = require './client/clientConnection.coffee'
 
@@ -10,11 +12,12 @@ class DiscordClient extends EventEmitter
 
   constructor: (@options) ->
     if !@options.token then throw new Error("No Token Provided")
+    @rest = new DiscordManager()
 
   getGateway: () ->
     self = @
     utils.debug("Retrieving Discord Gateway Server")
-    req.get({url: "https://discordapp.com/api/gateway", json: true, time: true}, (err, res, data) ->
+    req.get({url: Constants.api.host+"/gateway", json: true, time: true}, (err, res, data) ->
       if res.statusCode != 200 || err
         utils.debug("Error Occurred Obtaining Gateway Server: "+res.statusCode+" "+res.statusMessage,"error")
         return @emit("disconnect")
@@ -37,6 +40,7 @@ class DiscordClient extends EventEmitter
     utils.debug("Starting MotorBot "+pjson.version,"info")
     @internals = {}
     @internals.servers = {}
+    @internals.channels = {}
     @internals.voice = {}
     @internals.sequence = 0
     @getGateway()

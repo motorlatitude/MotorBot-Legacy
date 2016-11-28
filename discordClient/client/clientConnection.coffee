@@ -11,10 +11,13 @@ class ClientConnection
     @gatewayHeartbeat = null
     @discordClient.gatewayWS = null
     @dispatcher = new d(@discordClient, @)
-
+    @discordClient.internals.pings = []
+    @discordClient.internals.totalPings = 0
+    @discordClient.internals.avgPing = 0
 
   connect: (gateway) ->
     self = @
+    @discordClient.internals.gateway = gateway
     utils.debug("Creating Gateway Connection")
     @discordClient.gatewayWS = new ws(gateway+"/?v=6") #use version 6, cause you can do that :o
 
@@ -54,13 +57,16 @@ class ClientConnection
     @discordClient.gatewayWS.send(JSON.stringify(idpackage))
 
   helloPackage: (data) ->
-    utils.debug("Hello Payload Recieved")
+    utils.debug("Hello Payload Received")
     @HEARTBEAT_INTERVAL = data.d.heartbeat_interval
     @sendReadyPayload()
 
   heartbeatACK: (data) ->
     ping = new Date().getTime() - @discordClient.internals.gatewayPing
-    utils.debug("Sent Heartbeat with sequence: "+@discordClient.internals.sequence+" ("+ping+"ms)")
+    @discordClient.internals.pings.push(ping)
+    @discordClient.internals.totalPings+=ping
+    @discordClient.internals.avgPing = @discordClient.internals.totalPings/@discordClient.internals.pings.length
+    utils.debug("Sent Heartbeat with sequence: "+@discordClient.internals.sequence+" ("+ping+"ms - average: "+((Math.round(@discordClient.internals.avgPing*100))/100)+"ms)")
 
   gatewayMessage: (data, flags) ->
     msg = if flags.binary then JSON.parse(zlib.inflateSync(data).toString()) else JSON.parse(data)

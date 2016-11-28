@@ -35,7 +35,6 @@ class UDPClient extends EventEmitter
 
   handleQueue: () ->
     self = @
-    #console.log self.userPacketQueue
     if self.userPacketQueue
       async.forEach(Object.keys(self.voiceConnection.users), (key, next) ->
         if self.userPacketQueue[key]
@@ -78,18 +77,13 @@ class UDPClient extends EventEmitter
 
   handleUDPMessage: (msg, rinfo) ->
     if @connected
-      ssrc = msg.readUInt32BE(8).toString(10)
+      #Voice Receiving Code Block, disable for now to avoid storage overload
+      ###ssrc = msg.readUInt32BE(8).toString(10)
       sequence = msg.readUIntBE(2,2)
       timestamp = msg.readUIntBE(4,4)
       for id, user of @voiceConnection.users
-        #console.log "id: "+id
-        #console.log "user.ssrc:"+user.ssrc
-        #console.log(user.ssrc + "==" + ssrc)
         if parseInt(user.ssrc) == parseInt(ssrc)
-          #console.log "ssrc: "+ssrc
           msg.copy(@nonce, 0, 0, 12)
-          #console.log "slice: "+msg.slice(12)
-          #console.log "secretKey: "+@voiceConnection.secretKey
           data = nacl.secretbox.open(new Uint8Array(msg.slice(12)), new Uint8Array(@nonce), new Uint8Array(@voiceConnection.secretKey));
           data = new Buffer(data)
           output = @opusEncoder.decode(data)
@@ -97,13 +91,11 @@ class UDPClient extends EventEmitter
             @userPacketQueue[id].push({sequence: sequence, timestamp: timestamp, data: output})
           else
             @userPacketQueue[id] = []
-            @userPacketQueue[id].push({sequence: sequence, timestamp: timestamp, data: output})
+            @userPacketQueue[id].push({sequence: sequence, timestamp: timestamp, data: output})###
     else
       @connected = true
       utils.debug("UDP Package Received From: "+rinfo.address+":"+rinfo.port)
-      utils.debug(msg)
       buffArr = JSON.parse(JSON.stringify(msg)).data
-
       localIP = ""
       localPort = msg.readUIntLE(msg.length-2,2).toString(10)
       i = 0

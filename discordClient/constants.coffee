@@ -1,5 +1,9 @@
 Constants = Constants || {}
 
+Constants.api = {
+  host: "https://discordapp.com/api"
+}
+
 Constants.gateway = {
   PacketCodes: {
 

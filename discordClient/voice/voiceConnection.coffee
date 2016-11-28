@@ -19,9 +19,6 @@ class VoiceConnection
     utils.debug("New Voice Connection Started")
     @sequence = 0
     @timestamp = 0
-    @pings = []
-    @totalPings = 0
-    @avgPing = 0
 
   connect: (params) ->
     @token = params.token
@@ -34,6 +31,9 @@ class VoiceConnection
     @packageList = []
     @streamPacketList = []
     @users = {}
+    @pings = []
+    @totalPings = 0
+    @avgPing = 0
     utils.debug("Generating new voice WebSocket connection")
     @vws = new ws("wss://"+@endpoint.split(":")[0])
     self = @
@@ -44,7 +44,7 @@ class VoiceConnection
     @vws.on('message', (msg, flags) -> self.voiceGatewayMessage(msg, flags))
 
   voiceGatewayOpen: (guild_id) ->
-    utils.debug("Voice gateway server is open")
+    utils.debug("Connected to Voice Gateway Server: "+@endpoint, "info")
     #send identity package
     idpackage = {
       "op": 0
@@ -72,6 +72,7 @@ class VoiceConnection
       when Constants.voice.PacketCodes.HEARTBEAT then @handleHeartbeat(msg)
       when Constants.voice.PacketCodes.SPEAKING then @handleSpeaking(msg)
       when Constants.voice.PacketCodes.SESSION_DESC then @handleSession(msg)
+      when 8 then utils.debug("Got Heartbeat Interval","info")
       else
         utils.debug("Unhandled Voice OP: "+msg.op,"warn")
 
