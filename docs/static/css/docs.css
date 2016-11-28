@@ -1,0 +1,14 @@
+body{
+    margin: 0;
+    padding: 0;
+    background: #fff;
+}
+
+.header{
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+    background: rgba(76, 82, 100, 1.00);
+}
