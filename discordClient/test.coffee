@@ -17,13 +17,13 @@ dc.on("message", (msg) ->
     channelName = msg.content.replace(/^\!v\sjoin\s/,"")
     joined = false
     if channelName
-      for channel in dc.internals.servers[msg.guild_id].channels
+      for channel in dc.guilds[msg.guild_id].channels
         if channel.name == channelName && channel.type == 2
           channel.join()
           joined = true
           break
     if !joined
-      for channel in dc.internals.servers[msg.guild_id].channels
+      for channel in dc.guilds[msg.guild_id].channels
         if channel.type == 2
           channel.join()
           break
@@ -37,7 +37,7 @@ dc.on("message", (msg) ->
         console.log("Error Occurred Loading Youtube Video")
       )
       yStream[msg.guild_id].on("info", (info, format) ->
-        musicStream[msg.guild_id] = dc.internals.servers[msg.guild_id].voice.playFromStream(yStream[msg.guild_id])
+        musicStream[msg.guild_id] = dc.guilds[msg.guild_id].voice.playFromStream(yStream[msg.guild_id])
         musicStream[msg.guild_id].on('ready', () ->
           musicStream[msg.guild_id].play()
         )
@@ -60,7 +60,7 @@ dc.on("message", (msg) ->
     musicStream[msg.guild_id].pause()
   else if msg.content == "!sb"
     server = msg.guild_id
-    soundboard[msg.guild_id] = dc.internals.servers[server].voice.playFromFile("../soundboard/DootDiddly.mp3")
+    soundboard[msg.guild_id] = dc.guilds[server].voice.playFromFile("../soundboard/DootDiddly.mp3")
     soundboard[msg.guild_id].on('ready', () ->
       if musicStream[msg.guild_id]
         musicStream[msg.guild_id].pause()
@@ -80,7 +80,7 @@ dc.on("message", (msg) ->
     msg.channel.sendMessage(content)
   else if msg.content == "!dev voice status"
     server = msg.guild_id
-    content = "Motorbot is connected to your voice server on **"+dc.internals.servers[server].voice.endpoint+"** with an average ping of **"+Math.round(dc.internals.servers[server].voice.avgPing*100)/100+"ms**. The last ping was **"+dc.internals.servers[server].voice.pings[dc.internals.servers[server].voice.pings.length-1]+"ms**."
+    content = "Motorbot is connected to your voice server on **"+dc.guilds[server].voice.endpoint+"** with an average ping of **"+Math.round(dc.guilds[server].voice.avgPing*100)/100+"ms**. The last ping was **"+dc.guilds[server].voice.pings[dc.guilds[server].voice.pings.length-1]+"ms**."
     msg.channel.sendMessage(content)
   else if msg.content == "!react"
     msg.channel.sendMessage("Reacting!")

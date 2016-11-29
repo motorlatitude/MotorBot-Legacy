@@ -40,7 +40,7 @@ class Dispatcher
       self.discordClient.internals.gatewayPing = new Date().getTime()
       self.discordClient.gatewayWS.send(JSON.stringify(hbPackage))
     ,@clientConnection.HEARTBEAT_INTERVAL)
-    @discordClient.internals.connected = true
+    @connected = true
     @discordClient.emit("ready", data.d)
     #console.log(util.inspect(data, false, null))
 
@@ -48,28 +48,28 @@ class Dispatcher
     for i, channel of data.d.channels
       channel.guild_id = data.d.id
       if channel.type == 2
-        @discordClient.internals.channels[channel.id] = new VoiceChannel(@discordClient, channel)
+        @discordClient.channels[channel.id] = new VoiceChannel(@discordClient, channel)
         data.d.channels[i] = new VoiceChannel(@discordClient, channel)
       else
-        @discordClient.internals.channels[channel.id] = new TextChannel(@discordClient, channel)
+        @discordClient.channels[channel.id] = new TextChannel(@discordClient, channel)
         data.d.channels[i] = new TextChannel(@discordClient, channel)
-    @discordClient.internals.servers[data.d.id] = data.d
-    @discordClient.internals.servers[data.d.id].voice = {}
-    thisServer = @discordClient.internals.servers[data.d.id]
+    @discordClient.guilds[data.d.id] = data.d
+    @discordClient.guilds[data.d.id].voice = {}
+    thisServer = @discordClient.guilds[data.d.id]
     #console.log thisServer.channels
     utils.debug("Joined Guild: "+thisServer.name+" ("+thisServer.presences.length+" online / "+(parseInt(thisServer.member_count)-thisServer.presences.length)+" offline)","info")
 
   handleMessageCreate: (data) ->
     #console.log data.d
     msg = data.d
-    if @discordClient.internals.channels[data.d.channel_id]
+    if @discordClient.channels[data.d.channel_id]
       @discordClient.emit("message",new Message(@discordClient, msg))
     else
       utils.debug("Message Create Event Occurred in unknown channel","warn")
 
   handleVoiceConnection: (data) -> #bot has connected to voice channel
     utils.debug("Joined Voice Channel","info")
-    @discordClient.internals.servers[data.d.guild_id].voice = new voiceConnection(@discordClient)
-    @discordClient.internals.servers[data.d.guild_id].voice.connect(data.d)
+    @discordClient.guilds[data.d.guild_id].voice = new voiceConnection(@discordClient)
+    @discordClient.guilds[data.d.guild_id].voice.connect(data.d)
 
 module.exports = Dispatcher

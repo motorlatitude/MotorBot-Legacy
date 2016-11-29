@@ -1,0 +1,95 @@
+<div class="title">
+    client
+    <a href="#references/client-">
+        <i class="fa fa-anchor anchor" aria-hidden="true"></i>
+    </a>
+    <div class="type">extends EventEmitter</div>
+</div>
+<p>
+    Object you create at the beginning of your bot.
+</p>
+<h2 data-header="Constructor">Constructor <a href="#references/client-constructor"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></h2>
+<p>
+    Create new client object, where "TOKEN" should be replaced with your API Token, supplied by discord.
+</p>
+<div class="code" data-codeBlockId="1">
+    <pre class="javascript" data-codeBlock="1-Javascript"><code class="javascript">
+new DiscordClient({token: "TOKEN"});
+    </code></pre>
+</div>
+<br>
+<h2 data-header="Properties">Properties <a href="#references/client-properties"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></h2>
+<p>
+    A list of all available properties.
+</p>
+<table>
+    <thead>
+        <tr>
+            <td>Property</td>
+            <td>Type</td>
+            <td>Description</td>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>guilds</td>
+            <td>Array</td>
+            <td>Comma separated array containing Guild objects</td>
+        </tr>
+        <tr>
+            <td>channels</td>
+            <td>Array</td>
+            <td>Comma separated array containing TextChannel/VoiceChannel objects</td>
+        </tr>
+        <tr>
+            <td>connected</td>
+            <td>Bool</td>
+            <td>Contains the state of the current gateway connection, true when connected.</td>
+        </tr>
+    </tbody>
+</table>
+<br>
+<h2 data-header="Methods">Methods <a href="#references/client-methods"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></h2>
+<p>
+    A list of all available methods.
+</p>
+<table>
+    <thead>
+    <tr>
+        <td>Method</td>
+        <td>Description</td>
+    </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><pre><span class="hljs-built_in">connect</span>:()</pre></td>
+            <td>Establishes connection to discord gateway server.<br><span style="font-family: monospace;">ready</span> event fired once connected</td>
+        </tr>
+    </tbody>
+</table>
+<br>
+<h2 data-header="Events">Events <a href="#references/client-events"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></h2>
+<p>
+    A list of all events that can be fired by this object.
+</p>
+<table>
+    <thead>
+    <tr>
+        <td style="width: 100px;">Event</td>
+        <td>Parameters</td>
+        <td>Description</td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td><pre>ready</pre></td>
+        <td><pre>null</pre></td>
+        <td>Fired once connection to discord's gateway server has been successfully established and heartbeat is being sent.</td>
+    </tr>
+    <tr>
+        <td><pre>message</pre></td>
+        <td><pre>Message()</pre></td>
+        <td>Fired when a message was sent to one of the available channels, returns a Message object.</td>
+    </tr>
+    </tbody>
+</table>

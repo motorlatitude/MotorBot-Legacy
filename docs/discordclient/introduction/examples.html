@@ -1,0 +1,110 @@
+<div class="title">Usage Examples <a href="#introduction/examples-"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></div>
+<p></p>
+<h2 data-header="Ping Pong">Ping Pong! <a href="#introduction/examples-pingpong"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></h2>
+<p>
+    This example simply send a message containing "pong" when a user types "ping" into the channel.
+</p>
+<div class="code" data-codeBlockId="1">
+    <div class="langs">
+        <ul class="langSelector">
+            <li class="active" data-linked="1-Javascript">Javascript</li>
+            <li data-linked="1-Coffeescript">CoffeeScript</li>
+        </ul>
+    </div>
+    <pre class="javascript" data-codeBlock="1-Javascript"><code class="javascript">
+var DiscordClient = require('DiscordClient');
+
+var client = new DiscordClient({token: "TOKEN"});
+
+client.on("ready",function(){
+    console.log("Ready");
+});
+
+client.on("message",function(message){
+    if(message.content == "ping"){
+        message.reply("pong");
+    }
+});
+
+client.connect();
+    </code></pre>
+    <pre class="javascript" data-codeBlock="1-Coffeescript" style="display: none;"><code class="coffeescript">
+DiscordClient = require 'DiscordClient'
+
+client = new DiscordClient({token: "TOKEN"});
+
+client.on("ready", () ->
+    console.log "Ready"
+)
+
+client.on("message",(message) ->
+    if message.content == "ping"
+        message.reply("pong");
+)
+
+client.connect()
+    </code></pre>
+</div>
+<br>
+<br>
+<h2 data-header="Voice Channels">Voice Channels <a href="#introduction/examples-voicechannels"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></h2>
+<p>
+    This example is to show you the basic functionality of how to join/leave voice channels.
+</p>
+<div class="code" data-codeBlockId="2">
+    <div class="langs">
+        <ul class="langSelector">
+            <li class="active" data-linked="2-Javascript">Javascript</li>
+            <li data-linked="2-Coffeescript">CoffeeScript</li>
+        </ul>
+    </div>
+    <pre class="javascript" data-codeBlock="2-Javascript"><code class="javascript">
+var DiscordClient = require('DiscordClient');
+
+var client = new DiscordClient({token: "TOKEN"});
+
+client.on("ready",function(){
+    console.log("Ready");
+});
+
+client.on("message",function(message){
+    if(message.content == "!voice join"){
+        //loop through all available channels
+        for(var i=0;i&lt;client.internals.servers[msg.guild_id].channels.length;i++){
+            var channel = client.internals.servers[msg.guild_id].channels[i];
+            if(channel.type == 2){
+                channel.join(); //Join the first available voice channel
+                break;
+            }
+        }
+    }
+    else if(message.content == "!voice leave"){
+        client.leaveVoiceChannel(msg.guild_id);
+    }
+});
+
+client.connect();
+    </code></pre>
+    <pre class="javascript" data-codeBlock="2-Coffeescript" style="display: none;"><code class="coffeescript">
+DiscordClient = require 'DiscordClient'
+
+client = new DiscordClient({token: "TOKEN"});
+
+client.on("ready", () ->
+    console.log "Ready"
+)
+
+client.on("message",(message) ->
+    if message.content == "!voice join"
+        #loop through all available channels
+        for channel in client.internals.servers[msg.guild_id].channels
+            if channel.type == 2
+              channel.join() #Join the first available voice channel
+              break
+    else if message.content == "!voice leave"
+        client.leaveVoiceChannel(msg.guild_id)
+)
+
+client.connect()
+    </code></pre>
+</div>

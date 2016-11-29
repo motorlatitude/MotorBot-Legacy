@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Docs</title>
+        <link type="text/css" rel="stylesheet" href="../../static/font-awesome-4.6.3/css/font-awesome.min.css"/>
+        <link type="text/css" rel="stylesheet" href="../static/css/docs.css"/>
+        <link type="text/css" rel="stylesheet" href="../static/css/code.css"/>
+        <script src="../../static/jquery-3.1.0.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.8.0/highlight.min.js"></script>
+        <script type="text/javascript">
+            function moveToAnchor(hash){
+                if(hash != "" && hash != undefined) {
+                    if($("a[href='" + hash + "']").length) {
+                        window.history.pushState(null,"Documentation", hash);
+                        var st = $("a[href='" + hash + "']").offset().top;
+                        st = st - 50;
+                        $("html, body").animate({scrollTop: st}, 200);
+                    }
+                }
+            }
+
+            function loadView(view){
+                var nav = $("#nav");
+                nav.find(">li>ul").remove();
+                nav.find("li.active").removeClass("active");
+                nav.find("li[data-item='"+view+"']").addClass("active");
+                $.ajax({
+                    url: view+".html",
+                    dataType: "html",
+                    success: function(data){
+                        $(".content").html(data);
+                        $(".content .code pre").each(function(i, block){
+                            hljs.highlightBlock(block);
+                        });
+                        $("#nav>li[data-item='"+view+"']").append("<ul></ul>");
+                        $(".content h2").each(function(index){
+                            var anchor = $(this).find('a').attr('href');
+                            $("#nav>li[data-item='"+view+"']>ul").append("<li onclick=\"moveToAnchor('"+anchor+"')\">"+$(this).attr("data-header")+"</li>");
+                        });
+                        $(".langSelector li").each(function(index){
+                           $(this).click(function(e){
+                               console.log("Clicked");
+                               $(this).parent().find(".active").removeClass("active");
+                               $(this).addClass("active");
+                               var codeBlock = $(this).attr("data-linked");
+                               var codeBlockId = codeBlock.split("-")[0];
+                               var thisCodeBlock = $(".code[data-codeBlockId='"+codeBlockId+"']");
+                               thisCodeBlock.find("pre").css("display","none");
+                               thisCodeBlock.find("pre[data-codeBlock='"+codeBlock+"']").css("display","block");
+                           });
+                        });
+                        var hash = window.location.hash.substr(1);
+                        if(hash != "" && hash != undefined) {
+                            if($("a[href='#" + hash + "']").length) {
+                                var st = $("a[href='#" + hash + "']").offset().top;
+                                st = st - 50;
+                                $("html, body").animate({scrollTop: st}, 200);
+                            }
+                        }
+                    }
+                })
+            }
+
+            $(document).ready(function(){
+               $("#nav").find("li").each(function(index){
+                   $(this).click(function(e){
+                       if(!$(this).hasClass("active")) {
+                           var view = $(this).attr("data-item")
+                           window.history.pushState(null,"Documentation", "#"+view);
+                           loadView(view);
+                       }
+                   });
+               });
+               var hash = window.location.hash.substr(1);
+               if(hash != "" && hash != undefined){
+                   var view = hash.split("-")[0];
+                   loadView(view);
+               }
+               else {
+                   loadView("introduction/overview");
+               }
+            });
+        </script>
+    </head>
+    <body>
+        <div class="header"></div>
+        <div class="bodyWrapper">
+            <div class="sidebar">
+                <ul id="nav">
+                    <li class="title">INTRODUCTION</li>
+                    <li class="navItem active" data-item="introduction/overview">Overview</li>
+                    <li class="navItem" data-item="introduction/changelog">Changelog</li>
+                    <li class="navItem" data-item="introduction/setup">Setup</li>
+                    <li class="navItem" data-item="introduction/examples">Examples</li>
+                    <li class="title">REFERENCE</li>
+                    <li class="navItem" data-item="references/client">client</li>
+                    <li class="navItem" data-item="references/Message">Message</li>
+                    <li class="navItem" data-item="references/TextChannel">TextChannel</li>
+                    <li class="navItem" data-item="references/VoiceChannel">VoiceChannel</li>
+                    <li class="navItem"></li>
+                    <li class="navItem"></li>
+                </ul>
+            </div>
+            <div class="content">
+
+            </div>
+        </div>
+    </body>
+</html>

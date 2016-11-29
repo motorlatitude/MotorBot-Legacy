@@ -30,7 +30,7 @@ class DiscordClient extends EventEmitter
     self = @
     @internals.gateway = gateway
     @internals.token = @options.token
-    @internals.connected = false
+    @connected = false
 
     cc = new clientConnection(@)
     cc.connect(gateway) #connect to discord gateway server
@@ -39,34 +39,11 @@ class DiscordClient extends EventEmitter
   connect: () ->
     utils.debug("Starting MotorBot "+pjson.version,"info")
     @internals = {}
-    @internals.servers = {}
-    @internals.channels = {}
     @internals.voice = {}
     @internals.sequence = 0
+    @channels = {}
+    @guilds = {}
     @getGateway()
-  
-  joinVoiceChannel: (channel_id) ->
-    #get server for channel_id
-    channelId = null
-    guildId = null
-    for serverId, server of @internals.servers
-      for channel in server.channels
-        if channel.id == channel_id && channel.type = 2
-          channelId = channel.id
-          guildId = serverId
-          break
-    if channelId == null || guildId == null
-      return utils.debug("Channel wasn't found or of incorrect type", "warn")
-    joinVoicePackage = {
-      "op": 4,
-      "d": {
-        "guild_id": guildId,
-        "channel_id": channelId,
-        "self_mute": false,
-        "self_deaf": false
-      }
-    }
-    @gatewayWS.send(JSON.stringify(joinVoicePackage))
   
   leaveVoiceChannel: (server) ->
     leaveVoicePackage = {

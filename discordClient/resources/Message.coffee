@@ -6,7 +6,7 @@ class Message
   constructor: (@client, message) ->
     @id = message.id
     @channel_id = message.channel_id
-    @channel = @client.internals.channels[@channel_id]
+    @channel = @client.channels[@channel_id]
     @guild_id = @channel.guild_id
     @author = message.author
     @content = message.content
@@ -16,7 +16,7 @@ class Message
     @mention_everyone = message.mention_everyone
     @mentions = message.mentions
     @mention_roles = message.mention_roles
-    @attachements = message.attachements
+    @attachments = message.attachments
     @embeds = message.embeds
     @reactions = message.reactions
     @nonce = message.nonce
