@@ -1,0 +1,156 @@
+<div class="title">
+    VoiceChannel
+    <a href="#references/VoiceChannel-" title="VoiceChannel">
+        <i class="fa fa-anchor anchor" aria-hidden="true"></i>
+    </a>
+    <div class="type">Object</div>
+</div>
+<p>
+    A Discord Voice Channel of a guild.
+</p>
+<div class="contentsBox">
+    <div class="contentTitle">CONTENTS</div>
+    <ul id="contentsList">
+
+    </ul>
+</div>
+<h2 data-header="Properties">Properties <a href="#references/VoiceChannel-properties" title="Properties"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></h2>
+<p>
+    A list of all available properties.
+</p>
+<table>
+    <thead>
+        <tr>
+            <td>Property</td>
+            <td>Type</td>
+            <td>Description</td>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>id</td>
+            <td>String</td>
+            <td>ID of channel</td>
+        </tr>
+        <tr>
+            <td>guild_id</td>
+            <td>String</td>
+            <td>The guild id of the guild in which the channel exists</td>
+        </tr>
+        <tr>
+            <td>name</td>
+            <td>String</td>
+            <td>The channels name</td>
+        </tr>
+        <tr>
+            <td>type</td>
+            <td>Number</td>
+            <td>Channel type, is it a voice or text channel. <span style="font-family: monospace;">1</span> for a text channel, <span style="font-family: monospace;">2</span> for a voice channel</td>
+        </tr>
+        <tr>
+            <td>position</td>
+            <td>Number</td>
+            <td>Sorting position of the channel</td>
+        </tr>
+        <tr>
+            <td>is_private</td>
+            <td>Bool</td>
+            <td>Is the channel private, i.e. is it a PM or guild channel</td>
+        </tr>
+        <tr>
+            <td>permission_overwrites</td>
+            <td>Array</td>
+            <td>A comma separated array of overwrite objects</td>
+        </tr>
+        <tr>
+            <td>bitrate</td>
+            <td>Number</td>
+            <td>Bitrate of channel</td>
+        </tr>
+        <tr>
+            <td>user_limit</td>
+            <td>Number</td>
+            <td>The maximum number of users that can join this channel</td>
+        </tr>
+    </tbody>
+</table>
+<br>
+<h2 data-header="Methods">Methods <a href="#references/TextChannel-methods" title="Methods"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></h2>
+<p>
+    A list of all available methods.
+</p>
+<div class="notification note">
+    <div class="bar"></div>
+    <p><b>Note</b></p>
+    <p>Currently not all of these methods are integrated into the library, only the <span style="font-family: monospace;">join(), leave()</span> methods are available. The additional methods will be added in the near future.</p>
+</div>
+<ul class="methodList">
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">join</span>(Bool: <span class="hljs-built_in">mute</span>, Bool: <span class="hljs-built_in">deaf</span>) <a href="#references/VoiceChannel-methods-join" title="method-join"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Send a message in the text channel.</div>
+        <table class="parameters">
+            <thead>
+            <tr>
+                <td>Parameter</td>
+                <td>Type</td>
+                <td>Optional</td>
+                <td>Default</td>
+                <td>Description</td>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td><pre>mute</pre></td>
+                <td>Bool</td>
+                <td><i class="fa fa-check" aria-hidden="true"></i></td>
+                <td><pre>false</pre></td>
+                <td>Mute on join</td>
+            </tr>
+            <tr>
+                <td><pre>deaf</pre></td>
+                <td>Bool</td>
+                <td><i class="fa fa-check" aria-hidden="true"></i></td>
+                <td><pre>false</pre></td>
+                <td>Deafen on join</td>
+            </tr>
+            </tbody>
+        </table>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">leave</span>() <a href="#references/VoiceChannel-methods-leave" title="method-leave"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Leave the voice channel</div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">modify</span>(Object: <span class="hljs-built_in">options</span>) <a href="#references/VoiceChannel-methods-modify" title="method-modify"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Modify available options of the text channel such as topic & name.</div>
+        <table class="parameters">
+            <thead>
+            <tr>
+                <td>Parameter</td>
+                <td>Type</td>
+                <td>Optional</td>
+                <td>Default</td>
+                <td>Description</td>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td><pre>options</pre></td>
+                <td>Object</td>
+                <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                <td><pre>{}</pre></td>
+                <td>Modify defined channel properties</td>
+            </tr>
+            </tbody>
+        </table>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">delete</span>() <a href="#references/VoiceChannel-methods-delete" title="method-delete"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="notification err">
+            <div class="bar"></div>
+            <p><b>Warning</b></p>
+            <p>This action is permanent, use with caution.</p>
+        </div>
+        <div class="description">Delete the text channel</div>
+    </li>
+</ul>

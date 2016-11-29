@@ -25,15 +25,17 @@ body{
 }
 
 .bodyWrapper{
-    width: 1280px;
     margin-left: calc(50% - 640px);
+    padding-bottom: 10px;
+    overflow: auto;
 }
 
 .sidebar{
     margin-top: 55px;
     float: left;
-    width: 280px;
-    min-height: 1000px;
+    max-width: 280px;
+    width: 20%;
+    min-height: 700px;
 }
 
 .sidebar ul{
@@ -91,7 +93,8 @@ body{
 .content{
     margin-top: 80px;
     float: left;
-    width: calc(100% - 300px);
+    width: calc(80% - 10px);
+    max-width: 1000px;
     min-height: 300px;
     background: #fff;
     border-radius: 3px;
@@ -101,12 +104,13 @@ body{
     overflow: hidden;
 }
 
+
 .content .title{
     width: 100%;
     line-height: 100px;
     padding: 0 30px;
     font-size: 20px;
-    font-family: "Roboto", sans-serif;;
+    font-family: "Roboto", sans-serif;
     font-weight: 500;
     color: rgba(56, 61, 71, 1.00);
     border-bottom: 1px solid rgba(236, 240, 243, 1.00);
@@ -130,6 +134,51 @@ body{
 
 .content .title:hover .anchor{
     display: inline-block;
+}
+
+.content .contentsBox{
+    margin: 15px 30px;
+    padding: 10px 20px;
+    width: 250px;
+    font-family: "Roboto", sans-serif;
+    border: 1px solid rgba(236, 240, 243, 1.00);
+    border-radius: 3px;
+}
+
+.content .contentsBox .contentTitle{
+    line-height: 30px;
+    color: rgba(171, 178, 191, 1.00);
+    font-weight: bold;
+    font-size: 13px;
+    text-transform: uppercase;
+}
+
+.content .contentsBox #contentsList{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.content .contentsBox #contentsList li{
+    width: 100%;
+    line-height: 22px;
+    font-size: 13px;
+    color: rgba(50, 138, 230, 1.00);
+    cursor: pointer;
+}
+
+.content .contentsBox #contentsList li div:hover{
+    color: rgba(38, 95, 166, 1.00);
+}
+
+.content .contentsBox #contentsList li ul{
+    list-style: none;
+    margin: 5px 10px;
+    padding: 0;
+}
+
+.content .contentsBox #contentsList li ul li:hover{
+    color: rgba(38, 95, 166, 1.00);
 }
 
 .content .options{
@@ -194,6 +243,21 @@ body{
     color: #4C555A;
 }
 
+.content p>code{
+    background: rgba(70,70,90,0.1);
+    padding: 3px 5px;
+    border-radius: 3px;
+}
+
+.content .link{
+    cursor: pointer;
+    color:  rgba(0, 170, 234, 1.00);
+}
+
+.content .link:hover{
+    text-decoration: underline;
+}
+
 .content .code{
     margin: 15px 30px;
     background: rgba(39, 42, 48, 1.00);
@@ -254,6 +318,7 @@ body{
     width: calc(100% - 60px);
     height: auto;
     border-spacing: 0;
+    font-size: 13px;
 }
 
 .content table thead tr{
@@ -272,21 +337,114 @@ body{
     line-height: 40px;
     height: 40px;
     color: rgba(171, 178, 191, 1.00);
+    font-weight: bold;
     text-transform: uppercase;
     padding-left: 10px;
 }
 
 .content table tbody tr td{
-    line-height: 40px;
+    line-height: 20px;
     height: 40px;
     color: #4C555A;
-    padding: 0px 10px;
+    padding: 10px 10px;
     border-right: 1px solid rgba(233, 238, 241, 1.00);
     border-bottom: 1px solid rgba(233, 238, 241, 1.00);
 }
 
+.content table tbody>tr>td>code{
+    background: rgba(70,70,90,0.1);
+    padding: 3px 5px;
+    border-radius: 3px;
+}
+
 .content table tbody tr td:first-child{
     border-left: 1px solid rgba(233, 238, 241, 1.00);
+}
+
+.content table tbody tr:last-child td:first-child{
+    border-bottom-left-radius: 3px;
+}
+
+.content table tbody tr:last-child td:last-child{
+    border-bottom-right-radius: 3px;
+}
+
+.content ul.methodList{
+    list-style: none;
+    margin: 15px 30px;
+    width: 100%;
+    height: auto;
+    padding: 0;
+}
+
+.content ul.methodList li{
+    width: 100%;
+    height: auto;
+    min-height: 70px;
+    padding: 5px;
+}
+
+.content ul.methodList li .method{
+    font-size: 15px;
+    height: auto;
+    width: calc(100% - 120px);
+    color: rgba(34, 36, 43, 0.8);
+}
+
+.content ul.methodList li .method .anchor{
+    display: none;
+    font-size: 13px;
+    color: rgba(0, 170, 234, 1.00);
+}
+
+.content ul.methodList li .method:hover .anchor{
+    display: inline-block;
+}
+
+.content ul.methodList li .method pre{
+    white-space: normal;
+}
+
+.content ul.methodList li .description{
+    margin-left: 65px;
+    height: auto;
+    font-family: "Lato", sans-serif;
+    font-size: 14px;
+    color: #4C555A;
+    width: calc(100% - 120px);
+}
+
+.content ul.methodList li .description>code{
+    background: rgba(70,70,90,0.1);
+    padding: 3px 5px;
+    border-radius: 3px;
+}
+
+.content ul.methodList li .parameters{
+    margin-left: 65px;
+    height: auto;
+    width: calc(100% - 120px);
+}
+
+.content ul.methodList li .parameters tbody tr td:first-child{
+    width: 15%;
+}
+
+.content ul.methodList li .parameters tbody tr td:nth-child(2){
+    width: 10%;
+}
+
+.content ul.methodList li .parameters tbody tr td:nth-child(3){
+    text-align: center;
+    width: 10%;
+}
+
+.content ul.methodList li .parameters tbody tr td:nth-child(4){
+    width: 10%;
+}
+
+.content ul.methodList li .parameters tbody tr td:last-child{
+    width: 55%;
 }
 
 .content .notification{
@@ -302,8 +460,20 @@ body{
     overflow: hidden;
 }
 
+.content ul.methodList li .notification{
+    margin-left: 65px;
+    height: auto;
+    width: calc(100% - 120px);
+}
+
 .content .notification>p{
     margin: 0 10px;
+}
+
+.content .notification>p>code{
+    background: rgba(70,70,90,0.1);
+    padding: 3px 5px;
+    border-radius: 3px;
 }
 
 .content .notification .bar{
@@ -329,4 +499,221 @@ body{
 
 .content .notification.note .bar{
     background: rgba(226, 226, 226, 1.00);
+}
+
+.content .notification.err{
+    background: rgba(255, 63, 40, 0.2)
+}
+
+.content .notification.err .bar{
+    background: rgba(255, 63, 40, 1.00);
+}
+
+.footer{
+    margin-top: 20px;
+    width: 100%;
+    min-width: 1280px;
+    height: 180px;
+    background: #fff;
+    border-top: 1px solid rgba(216, 222, 227, 1.00);
+    box-shadow: 0 -1px 3px rgba(116, 122, 127, 0.1);
+    z-index: 10;
+}
+
+/*Mobile Small*/
+@media (min-width: 0) {
+    .bodyWrapper{
+        margin-left: 0;
+        width: 100%;
+        padding-bottom: 0;
+        min-width: 100px;
+    }
+    .content{
+        margin-top: 45px;
+        box-shadow: transparent;
+        width: 100%;
+        border-radius: 0;
+    }
+    .content ul.methodList li .description{
+        margin-left: 0;
+        width: calc(100% - 60px);
+    }
+    .content ul.methodList li .parameters{
+        margin-left: 0;
+        width: calc(100% - 60px);
+    }
+    .content ul.methodList li .notification{
+        margin-left: 0;
+        width: calc(100% - 60px);
+    }
+    .sidebar{
+        display: none;
+    }
+    .header,
+    .footer{
+        width: 100%;
+        min-width: 100px;
+    }
+    .footer{
+        margin-top: 0;
+    }
+}
+/*Mobile Large*/
+@media (min-width: 540px) {
+    .bodyWrapper{
+        margin-left: 0;
+        width: 100%;
+        padding-bottom: 0;
+        min-width: 100px;
+    }
+    .content{
+        margin-top: 45px;
+        box-shadow: transparent;
+        width: 100%;
+        border-radius: 0;
+    }
+    .content ul.methodList li .description{
+        margin-left: 65px;
+        width: calc(100% - 120px);
+    }
+    .content ul.methodList li .parameters{
+        margin-left: 65px;
+        width: calc(100% - 120px);
+    }
+    .content ul.methodList li .notification{
+        margin-left: 65px;
+        width: calc(100% - 120px);
+    }
+    .sidebar{
+        display: none;
+    }
+    .header,
+    .footer{
+        width: 100%;
+        min-width: 100px;
+    }
+    .footer{
+        margin-top: 0;
+    }
+}
+/*Tablet*/
+@media (min-width: 786px) {
+    .bodyWrapper{
+        margin-left: 0;
+        width: 100%;
+        min-width: 786px;
+        padding-bottom: 10px;
+    }
+    .content{
+        margin-top: 80px;
+        width: calc(100% - 225px);
+        max-width: 1000px;
+        border-radius: 3px;
+    }
+    .content ul.methodList li .description{
+        margin-left: 65px;
+        width: calc(100% - 120px);
+    }
+    .content ul.methodList li .parameters{
+        margin-left: 65px;
+        width: calc(100% - 120px);
+    }
+    .content ul.methodList li .notification{
+        margin-left: 65px;
+        width: calc(100% - 120px);
+    }
+    .sidebar{
+        display: block;
+        max-width: 280px;
+        width: 215px;
+    }
+    .header,
+    .footer{
+        min-width: 786px;
+        width: 100%;
+    }
+    .footer{
+        margin-top: 20px;
+    }
+}
+/*Laptop*/
+@media (min-width: 1024px) {
+    .bodyWrapper{
+        margin-left: 0;
+        width: 100%;
+        min-width: 1024px;
+        padding-bottom: 10px;
+    }
+    .content{
+        margin-top: 80px;
+        width: calc(100% - 225px);
+        max-width: 1000px;
+        border-radius: 3px;
+    }
+    .content ul.methodList li .description{
+        margin-left: 65px;
+        width: calc(100% - 120px);
+    }
+    .content ul.methodList li .parameters{
+        margin-left: 65px;
+        width: calc(100% - 120px);
+    }
+    .content ul.methodList li .notification{
+        margin-left: 65px;
+        width: calc(100% - 120px);
+    }
+    .sidebar{
+        display: block;
+        max-width: 280px;
+        width: 215px;
+    }
+    .header,
+    .footer{
+        min-width: 1024px;
+        width: 100%;
+    }
+    .footer{
+        margin-top: 20px;
+    }
+}
+
+/*Deskop*/
+@media (min-width: 1280px) {
+    .bodyWrapper{
+        margin-left: calc(50% - 640px);
+        width: 1280px;
+        min-width: 1280px;
+        padding-bottom: 10px;
+    }
+    .content{
+        margin-top: 80px;
+        width: calc(80% - 10px);
+        max-width: 1000px;
+        border-radius: 3px;
+    }
+    .content ul.methodList li .description{
+        margin-left: 65px;
+        width: calc(100% - 120px);
+    }
+    .content ul.methodList li .parameters{
+        margin-left: 65px;
+        width: calc(100% - 120px);
+    }
+    .content ul.methodList li .notification{
+        margin-left: 65px;
+        width: calc(100% - 120px);
+    }
+    .sidebar{
+        display: block;
+        max-width: 280px;
+        width: 20%;
+    }
+    .header,
+    .footer{
+        min-width: 1280px;
+        width: 100%;
+    }
+    .footer{
+        margin-top: 20px;
+    }
 }

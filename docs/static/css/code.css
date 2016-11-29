@@ -4,19 +4,19 @@
 }
 
 .hljs-built_in{
-    color: rgba(33, 169, 241, 1.00) !important;
+    color: rgba(63, 150, 230, 1.00) !important;
 }
 
 .hljs-string{
-    color: rgba(80, 220, 186, 1.00)
+    color: rgba(80, 220, 186, 1.00);
 }
 
 .hljs-attr{
-    color: rgba(132, 90, 233, 1.00)
+    color: rgba(132, 90, 233, 1.00);
 }
 
 .hljs-params{
-    color: rgba(247, 167, 0, 1.00)
+    color: rgba(247, 167, 0, 1.00);
 }
 
 .hljs-comment{

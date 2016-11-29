@@ -1,15 +1,20 @@
 <div class="title">
     Message
-    <a href="#references/Message-">
+    <a href="#references/Message-" title="Message">
         <i class="fa fa-anchor anchor" aria-hidden="true"></i>
     </a>
     <div class="type">Object</div>
 </div>
 <p>
-    A Discord Message from a Channel.
+    A Discord Message from a Channel, it will usually be available when the <code>message</code> event is fired by the <span class="link" onclick="loadView('references/client'); window.history.pushState(null,'Documentation', '#references/client');">client</span>, all properties can then be read as well as the following methods can be called.
 </p>
-<br>
-<h2 data-header="Properties">Properties <a href="#references/Message-properties"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></h2>
+<div class="contentsBox">
+    <div class="contentTitle">CONTENTS</div>
+    <ul id="contentsList">
+
+    </ul>
+</div>
+<h2 data-header="Properties">Properties <a href="#references/Message-properties" title="Properties"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></h2>
 <p>
     A list of all available properties.
 </p>
@@ -50,7 +55,7 @@
     <tr>
         <td>content</td>
         <td>String</td>
-        <td>The message content i.e. what the message said</td>
+        <td>The message's contents i.e. what the message said</td>
     </tr>
     <tr>
         <td>timestamp</td>
@@ -98,7 +103,7 @@
         <td>A comma separated array containing Reaction objects, for each reaction attached on a message</td>
     </tr>
     <tr>
-        <td>none</td>
+        <td>nonce</td>
         <td>String</td>
         <td>Used for validating a message was sent</td>
     </tr>
@@ -115,54 +120,138 @@
     </tbody>
 </table>
 <br>
-<h2 data-header="Methods">Methods <a href="#references/Message-methods"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></h2>
+<h2 data-header="Methods">Methods <a href="#references/Message-methods" title="Methods"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></h2>
 <p>
     A list of all available methods.
 </p>
 <div class="notification note">
     <div class="bar"></div>
     <p><b>Note</b></p>
-    <p>Currently not all of these methods are integrated into the library, only the <span style="font-family: monospace;">addReaction</span> method is available. The additional methods will be added in the near future.</p>
+    <p>Currently not all of these methods are integrated into the library, only the <code>addReaction</code> method is available. The additional methods will be added in the near future.</p>
 </div>
-<table>
-    <thead>
-    <tr>
-        <td>Method</td>
-        <td>Description</td>
-    </tr>
-    </thead>
-    <tbody>
-    <tr>
-        <td><pre><span class="hljs-built_in">addReaction</span>:(<span class="hljs-params">emoji</span>)</pre></td>
-        <td>Allows the addition of a reaction with a defined emoji to the message</td>
-    </tr>
-    <tr>
-        <td><pre><span class="hljs-built_in">deleteReaction</span>:(<span class="hljs-params">emoji</span>)</pre></td>
-        <td>Allows the deletion of a reaction with a defined emoji from the message</td>
-    </tr>
-    <tr>
-        <td><pre><span class="hljs-built_in">deleteUsersReaction</span>:(<span class="hljs-params">emoji</span>, <span class="hljs-params">userId</span>)</pre></td>
-        <td>Allows the deletion of a reaction with a defined emoji added by a user with userId</td>
-    </tr>
-    <tr>
-        <td><pre><span class="hljs-built_in">deleteAllReactions</span>:()</pre></td>
-        <td>Removes all reactions from the message</td>
-    </tr>
-    <tr>
-        <td><pre><span class="hljs-built_in">edit</span>:(<span class="hljs-params">content</span>)</pre></td>
-        <td>Edit the message, the new message is supplied via content</td>
-    </tr>
-    <tr>
-        <td><pre><span class="hljs-built_in">delete</span>:()</pre></td>
-        <td>Deletes the message permanently</td>
-    </tr>
-    <tr>
-        <td><pre><span class="hljs-built_in">pin</span>:()</pre></td>
-        <td>Pins message to channel</td>
-    </tr>
-    <tr>
-        <td><pre><span class="hljs-built_in">deletePin</span>:()</pre></td>
-        <td>Deletes the pinned message in a channel</td>
-    </tr>
-    </tbody>
-</table>
+<ul class="methodList">
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">addReaction</span>(String: <span class="hljs-built_in">emoji</span>) <a href="#references/Message-methods-addreaction" title="method-addReaction"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Allows the addition of a reaction with a defined emoji to the message</div>
+        <table class="parameters">
+            <thead>
+                <tr>
+                    <td>Parameter</td>
+                    <td>Type</td>
+                    <td>Optional</td>
+                    <td>Default</td>
+                    <td>Description</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><pre>emoji</pre></td>
+                    <td>String</td>
+                    <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                    <td><pre>undefined</pre></td>
+                    <td>Name of the emoji</td>
+                </tr>
+            </tbody>
+        </table>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">deleteReaction</span>(String: <span class="hljs-built_in">emoji</span>) <a href="#references/Message-methods-deletereaction" title="method-deleteReaction"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Allows the deletion of a reaction with a defined emoji from the message</div>
+        <table class="parameters">
+            <thead>
+            <tr>
+                <td>Parameter</td>
+                <td>Type</td>
+                <td>Optional</td>
+                <td>Default</td>
+                <td>Description</td>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td><pre>emoji</pre></td>
+                <td>String</td>
+                <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                <td><pre>undefined</pre></td>
+                <td>Name of the emoji</td>
+            </tr>
+            </tbody>
+        </table>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">deleteUsersReaction</span>(String: <span class="hljs-built_in">emoji</span>, String: <span class="hljs-built_in">user_id</span>) <a href="#references/Message-methods-deleteuserreaction" title="method-deleteUserReaction"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Allows the deletion of a reaction with a defined emoji added by a user with <code>user_id</code></div>
+        <table class="parameters">
+            <thead>
+                <tr>
+                    <td>Parameter</td>
+                    <td>Type</td>
+                    <td>Optional</td>
+                    <td>Default</td>
+                    <td>Description</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><pre>emoji</pre></td>
+                    <td>String</td>
+                    <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                    <td><pre>undefined</pre></td>
+                    <td>Name of the emoji</td>
+                </tr>
+                <tr>
+                    <td><pre>user_id</pre></td>
+                    <td>String</td>
+                    <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                    <td><pre>undefined</pre></td>
+                    <td>User Id of the user that added the reaction to the message</td>
+                </tr>
+            </tbody>
+        </table>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">deleteAllReactions</span>() <a href="#references/Message-methods-deleteallreactions" title="method-deleteAllReactions"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Removes all reactions from the message</div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">edit</span>(String: <span class="hljs-built_in">content</span>) <a href="#references/Message-methods-edit" title="method-edit"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Edit the message, the new message is supplied via content</div>
+        <table class="parameters">
+            <thead>
+            <tr>
+                <td>Parameter</td>
+                <td>Type</td>
+                <td>Optional</td>
+                <td>Default</td>
+                <td>Description</td>
+            </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><pre>content</pre></td>
+                    <td>String</td>
+                    <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                    <td><pre>undefined</pre></td>
+                    <td>Contents of edited message</td>
+                </tr>
+            </tbody>
+        </table>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">delete</span>() <a href="#references/Message-methods-delete" title="method-delete"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="notification err">
+            <div class="bar"></div>
+            <p><b>Warning</b></p>
+            <p>This action is permanent, use with caution.</p>
+        </div>
+        <div class="description">Deletes the message permanently</div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">pin</span>() <a href="#references/Message-methods-pin" title="method-pin"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Pins message to channel</div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">deletePin</span>() <a href="#references/Message-methods-deletepin" title="method-deletePin"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Deletes the pinned message in a channel</div>
+    </li>
+</ul>

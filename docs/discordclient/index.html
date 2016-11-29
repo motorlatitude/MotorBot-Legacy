@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Docs</title>
         <link type="text/css" rel="stylesheet" href="../static/css/font-awesome-4.6.3/css/font-awesome.min.css"/>
         <link type="text/css" rel="stylesheet" href="../static/css/docs.css"/>
@@ -13,7 +14,7 @@
                     if($("a[href='" + hash + "']").length) {
                         window.history.pushState(null,"Documentation", hash);
                         var st = $("a[href='" + hash + "']").offset().top;
-                        st = st - 50;
+                        st = st - 60;
                         $("html, body").animate({scrollTop: st}, 200);
                     }
                 }
@@ -37,6 +38,24 @@
                             var anchor = $(this).find('a').attr('href');
                             $("#nav>li[data-item='"+view+"']>ul").append("<li onclick=\"moveToAnchor('"+anchor+"')\">"+$(this).attr("data-header")+"</li>");
                         });
+                        if($("#contentsList").length){
+                            $("a[href^='#']").each(function(i){
+                                if(i>0 && $(this).attr('title')) {
+                                    var anchor = $(this).attr('href');
+                                    if (anchor.split("-")[2]) {
+                                        if ($("#contentsList").find("li[data-parent='" + anchor.split("-")[1] + "'] ul").length) {
+                                            $("#contentsList").find("li[data-parent='" + anchor.split("-")[1] + "'] ul").append("<li onclick=\"moveToAnchor('" + anchor + "')\" data-child='" + anchor.split("-")[1] + "'>" + $(this).attr("title").split("-")[1] + "</li>");
+                                        }
+                                        else if ($("#contentsList").find("li[data-parent='" + anchor.split("-")[1] + "']").length) {
+                                            $("#contentsList").find("li[data-parent='" + anchor.split("-")[1] + "']").append("<ul><li onclick=\"moveToAnchor('" + anchor + "')\" data-child='" + anchor.split("-")[1] + "'>" + $(this).attr("title").split("-")[1] + "</li></ul>");
+                                        }
+                                    }
+                                    else {
+                                        $("#contentsList").append("<li data-parent='" + $(this).attr("title").toLowerCase() + "'><div onclick=\"moveToAnchor('" + anchor + "')\">" + $(this).attr("title") + "</div></li>");
+                                    }
+                                }
+                            });
+                        }
                         $(".langSelector li").each(function(index){
                            $(this).click(function(e){
                                console.log("Clicked");
@@ -104,6 +123,9 @@
             <div class="content">
 
             </div>
+        </div>
+        <div class="footer">
+
         </div>
     </body>
 </html>

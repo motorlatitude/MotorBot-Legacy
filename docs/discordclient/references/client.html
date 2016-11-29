@@ -44,7 +44,7 @@ new DiscordClient({token: "TOKEN"});
         <tr>
             <td>connected</td>
             <td>Bool</td>
-            <td>Contains the state of the current gateway connection, true when connected.</td>
+            <td>Contains the state of the current gateway connection, <code>true</code> when connected.</td>
         </tr>
     </tbody>
 </table>
@@ -53,20 +53,12 @@ new DiscordClient({token: "TOKEN"});
 <p>
     A list of all available methods.
 </p>
-<table>
-    <thead>
-    <tr>
-        <td>Method</td>
-        <td>Description</td>
-    </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td><pre><span class="hljs-built_in">connect</span>:()</pre></td>
-            <td>Establishes connection to discord gateway server.<br><span style="font-family: monospace;">ready</span> event fired once connected</td>
-        </tr>
-    </tbody>
-</table>
+<ul class="methodList">
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">connect</span>()</pre></div>
+        <div class="description">Establishes connection to discord gateway server. <code>ready</code> event is fired once connected.</div>
+    </li>
+</ul>
 <br>
 <h2 data-header="Events">Events <a href="#references/client-events"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></h2>
 <p>
@@ -84,12 +76,12 @@ new DiscordClient({token: "TOKEN"});
     <tr>
         <td><pre>ready</pre></td>
         <td><pre>null</pre></td>
-        <td>Fired once connection to discord's gateway server has been successfully established and heartbeat is being sent.</td>
+        <td>Fired once connection to discord's gateway server has been successfully established.</td>
     </tr>
     <tr>
         <td><pre>message</pre></td>
-        <td><pre>Message()</pre></td>
-        <td>Fired when a message was sent to one of the available channels, returns a Message object.</td>
+        <td><pre><span class="link" onclick="loadView('references/Message'); window.history.pushState(null,'Documentation', '#references/Message');">Message()</span></pre></td>
+        <td>Fired when a message was sent to one of the available channels, returns a <span class="link" onclick="loadView('references/Message'); window.history.pushState(null,'Documentation', '#references/Message');">Message</span> object.</td>
     </tr>
     </tbody>
 </table>

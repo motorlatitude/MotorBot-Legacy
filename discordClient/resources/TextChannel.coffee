@@ -20,8 +20,8 @@ class TextChannel
   reply: (content, options) ->
     @sendMessage(content, options)
 
-  sendMessageWithFile: (content, file, filename, options) ->
-    @client.rest.methods().uploadFile(content, file, filename, options)
+  sendMessageWithFile: (content, filepath, filename, options) ->
+    @client.rest.methods().uploadFile(content, filepath, filename, options)
 
   modify: (options) ->
 

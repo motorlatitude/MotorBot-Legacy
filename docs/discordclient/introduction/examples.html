@@ -70,8 +70,8 @@ client.on("ready",function(){
 client.on("message",function(message){
     if(message.content == "!voice join"){
         //loop through all available channels
-        for(var i=0;i&lt;client.internals.servers[msg.guild_id].channels.length;i++){
-            var channel = client.internals.servers[msg.guild_id].channels[i];
+        for(var i=0;i&lt;client.guilds[msg.guild_id].channels.length;i++){
+            var channel = client.guilds[msg.guild_id].channels[i];
             if(channel.type == 2){
                 channel.join(); //Join the first available voice channel
                 break;
@@ -97,7 +97,7 @@ client.on("ready", () ->
 client.on("message",(message) ->
     if message.content == "!voice join"
         #loop through all available channels
-        for channel in client.internals.servers[msg.guild_id].channels
+        for channel in client.guilds[msg.guild_id].channels
             if channel.type == 2
               channel.join() #Join the first available voice channel
               break
