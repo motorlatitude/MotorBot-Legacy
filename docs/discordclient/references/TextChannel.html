@@ -6,7 +6,7 @@
     <div class="type">Object</div>
 </div>
 <p>
-    A Discord Text Channel of a guild.
+    A Discord Text Channel of a guild, or a private message channel is a channel in which text messages are sent between users.
 </p>
 <div class="contentsBox">
     <div class="contentTitle">CONTENTS</div>
@@ -88,33 +88,35 @@
     <li>
         <div class="method"><pre><span class="hljs-built_in">sendMessage</span>(String: <span class="hljs-built_in">content</span>, Object: <span class="hljs-built_in">options</span>) <a href="#references/TextChannel-methods-sendMessage" title="method-sendMessage"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
         <div class="description">Send a message in the text channel.</div>
-        <table class="parameters">
-            <thead>
-            <tr>
-                <td>Parameter</td>
-                <td>Type</td>
-                <td>Optional</td>
-                <td>Default</td>
-                <td>Description</td>
-            </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><pre>content</pre></td>
-                    <td>String</td>
-                    <td><i class="fa fa-times" aria-hidden="true"></i></td>
-                    <td><pre>undefined</pre></td>
-                    <td>Contents of message</td>
-                </tr>
-                <tr>
-                    <td><pre>options</pre></td>
-                    <td>Object</td>
-                    <td><i class="fa fa-check" aria-hidden="true"></i></td>
-                    <td><pre>{}</pre></td>
-                    <td>The options allow you to define if the message supports <span style="font-family: monospace;">tts</span> and/or define a <span style="font-family: monospace;">nonce</span> used for verifying that a message was sent</td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="parameters">
+            <table>
+                <thead>
+                    <tr>
+                        <td>Parameter</td>
+                        <td>Type</td>
+                        <td>Optional</td>
+                        <td>Default</td>
+                        <td>Description</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><pre>content</pre></td>
+                        <td>String</td>
+                        <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                        <td><pre>undefined</pre></td>
+                        <td>Contents of message</td>
+                    </tr>
+                    <tr>
+                        <td><pre>options</pre></td>
+                        <td>Object</td>
+                        <td><i class="fa fa-check" aria-hidden="true"></i></td>
+                        <td><pre>{}</pre></td>
+                        <td>The options allow you to define if the message supports <span style="font-family: monospace;">tts</span> and/or define a <span style="font-family: monospace;">nonce</span> used for verifying that a message was sent</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </li>
     <li>
         <div class="method"><pre><span class="hljs-built_in">reply</span>(String: <span class="hljs-built_in">content</span>, Object: <span class="hljs-built_in">options</span>) <a href="#references/TextChannel-methods-reply" title="method-reply"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
@@ -123,8 +125,82 @@
     <li>
         <div class="method"><pre><span class="hljs-built_in">sendMessageWithFile</span>(String: <span class="hljs-built_in">content</span>, String: <span class="hljs-built_in">filepath</span>, String: <span class="hljs-built_in">filename</span>, Object: <span class="hljs-built_in">options</span>) <a href="#references/TextChannel-methods-sendMessageWithFile" title="method-sendMessageWithFile"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
         <div class="description">Send a message with a file in the text channel.</div>
-        <table class="parameters">
-            <thead>
+        <div class="parameters">
+            <table>
+                <thead>
+                    <tr>
+                        <td>Parameter</td>
+                        <td>Type</td>
+                        <td>Optional</td>
+                        <td>Default</td>
+                        <td>Description</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><pre>content</pre></td>
+                        <td>String</td>
+                        <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                        <td><pre>undefined</pre></td>
+                        <td>Contents of message</td>
+                    </tr>
+                    <tr>
+                        <td><pre>filepath</pre></td>
+                        <td>String</td>
+                        <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                        <td><pre>undefined</pre></td>
+                        <td>The file path containing the file designated for upload</td>
+                    </tr>
+                    <tr>
+                        <td><pre>filename</pre></td>
+                        <td>String</td>
+                        <td><i class="fa fa-check" aria-hidden="true"></i></td>
+                        <td><pre>""</pre></td>
+                        <td>Filename for the uploaded file to be known as</td>
+                    </tr>
+                    <tr>
+                        <td><pre>options</pre></td>
+                        <td>Object</td>
+                        <td><i class="fa fa-check" aria-hidden="true"></i></td>
+                        <td><pre>{}</pre></td>
+                        <td>The options allow you to define if the message supports <span style="font-family: monospace;">tts</span> and/or define a <span style="font-family: monospace;">nonce</span> used for verifying that a message was sent</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">modify</span>(Object: <span class="hljs-built_in">options</span>) <a href="#references/TextChannel-methods-modify" title="method-modify"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Modify available options of the text channel such as topic & name.</div>
+        <div class="parameters">
+            <table>
+                <thead>
+                    <tr>
+                        <td>Parameter</td>
+                        <td>Type</td>
+                        <td>Optional</td>
+                        <td>Default</td>
+                        <td>Description</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><pre>options</pre></td>
+                        <td>Object</td>
+                        <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                        <td><pre>{}</pre></td>
+                        <td>Modify defined channel properties; <code>String: name</code>, <code>Number: position</code>, <code>String: topic</code></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">setChannelName</span>(String: <span class="hljs-built_in">name</span>) <a href="#references/TextChannel-methods-setchannelname" title="method-setChannelName"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Modify the name of the text channel.</div>
+        <div class="parameters">
+            <table>
+                <thead>
                 <tr>
                     <td>Parameter</td>
                     <td>Type</td>
@@ -132,123 +208,141 @@
                     <td>Default</td>
                     <td>Description</td>
                 </tr>
-            </thead>
-            <tbody>
+                </thead>
+                <tbody>
                 <tr>
-                    <td><pre>content</pre></td>
+                    <td><pre>name</pre></td>
                     <td>String</td>
                     <td><i class="fa fa-times" aria-hidden="true"></i></td>
                     <td><pre>undefined</pre></td>
-                    <td>Contents of message</td>
+                    <td>New name of channel</td>
                 </tr>
+                </tbody>
+            </table>
+        </div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">setPosition</span>(Number: <span class="hljs-built_in">position</span>) <a href="#references/TextChannel-methods-setposition" title="method-setPosition"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Modify the position of the text channel.</div>
+        <div class="parameters">
+            <table>
+                <thead>
                 <tr>
-                    <td><pre>filepath</pre></td>
+                    <td>Parameter</td>
+                    <td>Type</td>
+                    <td>Optional</td>
+                    <td>Default</td>
+                    <td>Description</td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><pre>position</pre></td>
+                    <td>Number</td>
+                    <td><i class="fa fa-check" aria-hidden="true"></i></td>
+                    <td><pre>0</pre></td>
+                    <td>New position of channel</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">setTopic</span>(String: <span class="hljs-built_in">topic</span>) <a href="#references/TextChannel-methods-settopic" title="method-setTopic"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Modify the topic of the text channel.</div>
+        <div class="parameters">
+            <table>
+                <thead>
+                <tr>
+                    <td>Parameter</td>
+                    <td>Type</td>
+                    <td>Optional</td>
+                    <td>Default</td>
+                    <td>Description</td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><pre>topic</pre></td>
                     <td>String</td>
                     <td><i class="fa fa-times" aria-hidden="true"></i></td>
                     <td><pre>undefined</pre></td>
-                    <td>The file path containing the file designated for upload</td>
+                    <td>New topic of channel</td>
                 </tr>
-                <tr>
-                    <td><pre>filename</pre></td>
-                    <td>String</td>
-                    <td><i class="fa fa-check" aria-hidden="true"></i></td>
-                    <td><pre>""</pre></td>
-                    <td>Filename for the uploaded file to be known as</td>
-                </tr>
-                <tr>
-                    <td><pre>options</pre></td>
-                    <td>Object</td>
-                    <td><i class="fa fa-check" aria-hidden="true"></i></td>
-                    <td><pre>{}</pre></td>
-                    <td>The options allow you to define if the message supports <span style="font-family: monospace;">tts</span> and/or define a <span style="font-family: monospace;">nonce</span> used for verifying that a message was sent</td>
-                </tr>
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        </div>
     </li>
     <li>
-        <div class="method"><pre><span class="hljs-built_in">modify</span>(Object: <span class="hljs-built_in">options</span>) <a href="#references/TextChannel-methods-modify" title="method-modify"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
-        <div class="description">Modify available options of the text channel such as topic & name.</div>
-        <table class="parameters">
-            <thead>
-            <tr>
-                <td>Parameter</td>
-                <td>Type</td>
-                <td>Optional</td>
-                <td>Default</td>
-                <td>Description</td>
-            </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><pre>options</pre></td>
-                    <td>Object</td>
-                    <td><i class="fa fa-times" aria-hidden="true"></i></td>
-                    <td><pre>{}</pre></td>
-                    <td>Modify defined channel properties</td>
-                </tr>
-            </tbody>
-        </table>
-    </li>
-    <li>
-        <div class="method"><pre><span class="hljs-built_in">delete</span>()</pre> <a href="#references/TextChannel-methods-delete" title="method-delete"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></div>
+        <div class="method"><pre><span class="hljs-built_in">delete</span>() <a href="#references/TextChannel-methods-delete" title="method-delete"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Delete the text channel</div>
         <div class="notification err">
             <div class="bar"></div>
             <p><b>Warning</b></p>
-            <p>This action is permanent, use with caution.</p>
+            <p>Deleting a TextChannel when part of a guild is permanent and cannot be undone. Use with caution.</p>
+            <p>If deleting a private message channel it can be opened again.</p>
         </div>
-        <div class="description">Delete the text channel</div>
     </li>
     <li>
         <div class="method"><pre><span class="hljs-built_in">getMessages</span>(Object: <span class="hljs-built_in">options</span>) <a href="#references/TextChannel-methods-getMessages" title="method-getMessages"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
         <div class="description">Get messages in the channel</div>
-        <table class="parameters">
-            <thead>
-            <tr>
-                <td>Parameter</td>
-                <td>Type</td>
-                <td>Optional</td>
-                <td>Default</td>
-                <td>Description</td>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td><pre>options</pre></td>
-                <td>Object</td>
-                <td><i class="fa fa-check" aria-hidden="true"></i></td>
-                <td><pre>{}</pre></td>
-                <td>Define which messages to retrieve</td>
-            </tr>
-            </tbody>
-        </table>
+        <div class="notification warn">
+            <div class="bar"></div>
+            <p><b>Important</b></p>
+            <p>The options, even though passed as an object, should only contain one of either; <code>String: around</code>, <code>String: before</code> or <code>String: after</code>. The <code>Number: limit</code> is exempt from this and can be used alongside any of the three options.</p>
+        </div>
+        <div class="parameters">
+            <table>
+                <thead>
+                    <tr>
+                        <td>Parameter</td>
+                        <td>Type</td>
+                        <td>Optional</td>
+                        <td>Default</td>
+                        <td>Description</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><pre>options</pre></td>
+                        <td>Object</td>
+                        <td><i class="fa fa-check" aria-hidden="true"></i></td>
+                        <td><pre>{}</pre></td>
+                        <td>Define which messages to retrieve; <code>String: around</code>, <code>String: before</code>, <code>String: after</code>, <code>Number: limit (default 50)</code></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </li>
     <li>
         <div class="method"><pre><span class="hljs-built_in">getPinnedMessages</span>() <a href="#references/TextChannel-methods-getPinnedMessages" title="method-getPinnedMessages"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
         <div class="description">Get pinned messages for text channel.</div>
     </li>
     <li>
-        <div class="method"><pre><span class="hljs-built_in">getMessage</span>(String: <span class="hljs-built_in">message_id</span>) <a href="#references/TextChannel-methods-getMessage" title="method-deleteMessage"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="method"><pre><span class="hljs-built_in">getMessage</span>(String: <span class="hljs-built_in">message_id</span>) <a href="#references/TextChannel-methods-getMessage" title="method-getMessage"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
         <div class="description">Get a specific message with message_id</div>
-        <table class="parameters">
-            <thead>
-            <tr>
-                <td>Parameter</td>
-                <td>Type</td>
-                <td>Optional</td>
-                <td>Default</td>
-                <td>Description</td>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td><pre>message_id</pre></td>
-                <td>String</td>
-                <td><i class="fa fa-times" aria-hidden="true"></i></td>
-                <td><pre>undefined</pre></td>
-                <td>id of the message to retrieve</td>
-            </tr>
-            </tbody>
-        </table>
+        <div class="parameters">
+            <table>
+                <thead>
+                    <tr>
+                        <td>Parameter</td>
+                        <td>Type</td>
+                        <td>Optional</td>
+                        <td>Default</td>
+                        <td>Description</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><pre>message_id</pre></td>
+                        <td>String</td>
+                        <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                        <td><pre>undefined</pre></td>
+                        <td>id of the message to retrieve</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </li>
     <li>
         <div class="method"><pre><span class="hljs-built_in">deleteMessage</span>(String: <span class="hljs-built_in">message_id</span>) <a href="#references/TextChannel-methods-deleteMessage" title="method-deleteMessage"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
@@ -258,26 +352,28 @@
             <p>This action is permanent, use with caution.</p>
         </div>
         <div class="description">Delete a specific message with message_id</div>
-        <table class="parameters">
-            <thead>
-            <tr>
-                <td>Parameter</td>
-                <td>Type</td>
-                <td>Optional</td>
-                <td>Default</td>
-                <td>Description</td>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td><pre>message_id</pre></td>
-                <td>String</td>
-                <td><i class="fa fa-times" aria-hidden="true"></i></td>
-                <td><pre>undefined</pre></td>
-                <td>id of the message to delete</td>
-            </tr>
-            </tbody>
-        </table>
+        <div class="parameters">
+            <table>
+                <thead>
+                    <tr>
+                        <td>Parameter</td>
+                        <td>Type</td>
+                        <td>Optional</td>
+                        <td>Default</td>
+                        <td>Description</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><pre>message_id</pre></td>
+                        <td>String</td>
+                        <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                        <td><pre>undefined</pre></td>
+                        <td>id of the message to delete</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </li>
     <li>
         <div class="method"><pre><span class="hljs-built_in">deleteMessages</span>(Array: <span class="hljs-built_in">message_ids</span>) <a href="#references/TextChannel-methods-deleteMessages" title="method-deleteMessages"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
@@ -287,25 +383,27 @@
             <p>This action is permanent, use with caution.</p>
         </div>
         <div class="description">Permanently bulk delete a list of messages.</div>
-        <table class="parameters">
-            <thead>
-            <tr>
-                <td>Parameter</td>
-                <td>Type</td>
-                <td>Optional</td>
-                <td>Default</td>
-                <td>Description</td>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td><pre>message_ids</pre></td>
-                <td>Array</td>
-                <td><i class="fa fa-times" aria-hidden="true"></i></td>
-                <td><pre>[]</pre></td>
-                <td>comma separated list of strings containing the message ids which to delete</td>
-            </tr>
-            </tbody>
-        </table>
+        <div class="parameters">
+            <table>
+                <thead>
+                    <tr>
+                        <td>Parameter</td>
+                        <td>Type</td>
+                        <td>Optional</td>
+                        <td>Default</td>
+                        <td>Description</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><pre>message_ids</pre></td>
+                        <td>Array</td>
+                        <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                        <td><pre>[]</pre></td>
+                        <td>comma separated list of strings containing the message ids which to delete</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </li>
 </ul>

@@ -27,17 +27,24 @@ class Message
     @client.rest.methods().createReaction(emoji, @channel_id, @id)
 
   deleteReaction: (emoji) ->
+    @client.rest.methods().deleteReaction(emoji, @channel_id, @id)
 
   deleteUsersReaction: (emoji, userId) ->
+    @client.rest.methods().deleteUsersReaction(emoji, userId, @id, @channel_id)
 
   deleteAllReactions: () -> #CAUTION
+    @client.rest.methods().deleteAllReactions(@channel_id, @id)
 
   edit: (content) ->
+    @client.rest.methods().editMessage(content, @channel_id, @id)
 
   delete: () -> #CAUTION
+    @client.rest.methods().deleteMessage(@channel_id, @id)
 
   pin: () ->
+    @client.rest.methods().pinMessage(@channel_id, @id)
 
   deletePin: () -> #CAUTION
+    @client.rest.methods().deletePinnedMessage(@channel_id, @id)
 
 module.exports = Message

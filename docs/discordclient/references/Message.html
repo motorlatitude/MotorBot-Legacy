@@ -124,90 +124,120 @@
 <p>
     A list of all available methods.
 </p>
-<div class="notification note">
-    <div class="bar"></div>
-    <p><b>Note</b></p>
-    <p>Currently not all of these methods are integrated into the library, only the <code>addReaction</code> method is available. The additional methods will be added in the near future.</p>
-</div>
 <ul class="methodList">
     <li>
         <div class="method"><pre><span class="hljs-built_in">addReaction</span>(String: <span class="hljs-built_in">emoji</span>) <a href="#references/Message-methods-addreaction" title="method-addReaction"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
         <div class="description">Allows the addition of a reaction with a defined emoji to the message</div>
-        <table class="parameters">
-            <thead>
-                <tr>
-                    <td>Parameter</td>
-                    <td>Type</td>
-                    <td>Optional</td>
-                    <td>Default</td>
-                    <td>Description</td>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><pre>emoji</pre></td>
-                    <td>String</td>
-                    <td><i class="fa fa-times" aria-hidden="true"></i></td>
-                    <td><pre>undefined</pre></td>
-                    <td>Name of the emoji</td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="parameters">
+            <table>
+                <thead>
+                    <tr>
+                        <td>Parameter</td>
+                        <td>Type</td>
+                        <td>Optional</td>
+                        <td>Default</td>
+                        <td>Description</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><pre>emoji</pre></td>
+                        <td>String</td>
+                        <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                        <td><pre>undefined</pre></td>
+                        <td>Name of the emoji</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="examples">
+            <h3>Example</h3>
+            <div class="code" data-codeBlockId="1">
+                <div class="langs">
+                    <ul class="langSelector">
+                        <li class="active" data-linked="1-Javascript">Javascript</li>
+                        <li data-linked="1-Coffeescript">CoffeeScript</li>
+                    </ul>
+                </div>
+                <pre class="javascript" data-codeBlock="1-Javascript"><code class="javascript">
+var DiscordClient = require('DiscordClient');
+var client = new DiscordClient({token: "TOKEN"});
+
+client.on("message",function(message){
+    message.addReaction("%F0%9F%91%BB");
+});
+client.connect();
+                </code></pre>
+                <pre class="coffeescript" data-codeBlock="1-Coffeescript" style="display: none;"><code class="coffeescript">
+DiscordClient = require 'DiscordClient'
+client = new DiscordClient({token: "TOKEN"});
+
+client.on("message",(message) ->
+    message.addReaction "%F0%9F%91%BB";
+)
+client.connect()
+                </code></pre>
+            </div>
+        </div>
     </li>
     <li>
         <div class="method"><pre><span class="hljs-built_in">deleteReaction</span>(String: <span class="hljs-built_in">emoji</span>) <a href="#references/Message-methods-deletereaction" title="method-deleteReaction"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
         <div class="description">Allows the deletion of a reaction with a defined emoji from the message</div>
-        <table class="parameters">
-            <thead>
-            <tr>
-                <td>Parameter</td>
-                <td>Type</td>
-                <td>Optional</td>
-                <td>Default</td>
-                <td>Description</td>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td><pre>emoji</pre></td>
-                <td>String</td>
-                <td><i class="fa fa-times" aria-hidden="true"></i></td>
-                <td><pre>undefined</pre></td>
-                <td>Name of the emoji</td>
-            </tr>
-            </tbody>
-        </table>
+        <div class="parameters">
+            <table>
+                <thead>
+                    <tr>
+                        <td>Parameter</td>
+                        <td>Type</td>
+                        <td>Optional</td>
+                        <td>Default</td>
+                        <td>Description</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><pre>emoji</pre></td>
+                        <td>String</td>
+                        <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                        <td><pre>undefined</pre></td>
+                        <td>Name of the emoji</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </li>
     <li>
         <div class="method"><pre><span class="hljs-built_in">deleteUsersReaction</span>(String: <span class="hljs-built_in">emoji</span>, String: <span class="hljs-built_in">user_id</span>) <a href="#references/Message-methods-deleteuserreaction" title="method-deleteUserReaction"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
         <div class="description">Allows the deletion of a reaction with a defined emoji added by a user with <code>user_id</code></div>
-        <table class="parameters">
-            <thead>
-                <tr>
-                    <td>Parameter</td>
-                    <td>Type</td>
-                    <td>Optional</td>
-                    <td>Default</td>
-                    <td>Description</td>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><pre>emoji</pre></td>
-                    <td>String</td>
-                    <td><i class="fa fa-times" aria-hidden="true"></i></td>
-                    <td><pre>undefined</pre></td>
-                    <td>Name of the emoji</td>
-                </tr>
-                <tr>
-                    <td><pre>user_id</pre></td>
-                    <td>String</td>
-                    <td><i class="fa fa-times" aria-hidden="true"></i></td>
-                    <td><pre>undefined</pre></td>
-                    <td>User Id of the user that added the reaction to the message</td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="parameters">
+            <table>
+                <thead>
+                    <tr>
+                        <td>Parameter</td>
+                        <td>Type</td>
+                        <td>Optional</td>
+                        <td>Default</td>
+                        <td>Description</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><pre>emoji</pre></td>
+                        <td>String</td>
+                        <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                        <td><pre>undefined</pre></td>
+                        <td>Name of the emoji</td>
+                    </tr>
+                    <tr>
+                        <td><pre>user_id</pre></td>
+                        <td>String</td>
+                        <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                        <td><pre>undefined</pre></td>
+                        <td>User Id of the user that added the reaction to the message</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </li>
     <li>
         <div class="method"><pre><span class="hljs-built_in">deleteAllReactions</span>() <a href="#references/Message-methods-deleteallreactions" title="method-deleteAllReactions"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
@@ -216,26 +246,28 @@
     <li>
         <div class="method"><pre><span class="hljs-built_in">edit</span>(String: <span class="hljs-built_in">content</span>) <a href="#references/Message-methods-edit" title="method-edit"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
         <div class="description">Edit the message, the new message is supplied via content</div>
-        <table class="parameters">
-            <thead>
-            <tr>
-                <td>Parameter</td>
-                <td>Type</td>
-                <td>Optional</td>
-                <td>Default</td>
-                <td>Description</td>
-            </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><pre>content</pre></td>
-                    <td>String</td>
-                    <td><i class="fa fa-times" aria-hidden="true"></i></td>
-                    <td><pre>undefined</pre></td>
-                    <td>Contents of edited message</td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="parameters">
+            <table>
+                <thead>
+                    <tr>
+                        <td>Parameter</td>
+                        <td>Type</td>
+                        <td>Optional</td>
+                        <td>Default</td>
+                        <td>Description</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><pre>content</pre></td>
+                        <td>String</td>
+                        <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                        <td><pre>undefined</pre></td>
+                        <td>Contents of edited message</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </li>
     <li>
         <div class="method"><pre><span class="hljs-built_in">delete</span>() <a href="#references/Message-methods-delete" title="method-delete"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>

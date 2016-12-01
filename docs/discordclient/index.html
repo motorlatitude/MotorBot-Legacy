@@ -22,6 +22,8 @@
 
             function loadView(view){
                 var nav = $("#nav");
+                $(".mobileDropDownMenuContent").css("display","none");
+                $(".mobileDropDownMenu").html('<i class="fa fa-bars" aria-hidden="true"></i>');
                 nav.find(">li>ul").remove();
                 nav.find("li.active").removeClass("active");
                 nav.find("li[data-item='"+view+"']").addClass("active");
@@ -84,12 +86,29 @@
                $("#nav").find("li").each(function(index){
                    $(this).click(function(e){
                        if(!$(this).hasClass("active")) {
-                           var view = $(this).attr("data-item")
+                           var view = $(this).attr("data-item");
                            window.history.pushState(null,"Documentation", "#"+view);
                            loadView(view);
                        }
                    });
                });
+                $("#mobileNav").find("li").each(function(index){
+                    $(this).on("touchend",function(e){
+                        var view = $(this).attr("data-item");
+                        window.history.pushState(null,"Documentation", "#"+view);
+                        loadView(view);
+                    });
+                });
+                $(".mobileDropDownMenu").on("touchend",function(){
+                    if($(".mobileDropDownMenu").html() == '<i class="fa fa-bars" aria-hidden="true"></i>'){
+                        $(".mobileDropDownMenu").html('<i class="fa fa-times" aria-hidden="true"></i>');
+                        $(".mobileDropDownMenuContent").css("display","block");
+                    }
+                    else{
+                        $(".mobileDropDownMenu").html('<i class="fa fa-bars" aria-hidden="true"></i>');
+                        $(".mobileDropDownMenuContent").css("display","none");
+                    }
+                });
                var hash = window.location.hash.substr(1);
                if(hash != "" && hash != undefined){
                    var view = hash.split("-")[0];
@@ -102,7 +121,29 @@
         </script>
     </head>
     <body>
-        <div class="header"></div>
+        <div class="header">
+            <div class="mobileDropDownMenu"><i class="fa fa-bars" aria-hidden="true"></i></div>
+            <div class="desktopHeaderWrapper">
+                <div class="desktopDropDownMenu">
+                    <div class="lib">DiscordClient Library</div>
+                    <div class="version">v0.1.0</div>
+                </div>
+            </div>
+        </div>
+        <div class="mobileDropDownMenuContent">
+            <ul id="mobileNav">
+                <li class="title">INTRODUCTION</li>
+                <li class="navItem active" data-item="introduction/overview">Overview</li>
+                <li class="navItem" data-item="introduction/changelog">Changelog</li>
+                <li class="navItem" data-item="introduction/setup">Setup</li>
+                <li class="navItem" data-item="introduction/examples">Examples</li>
+                <li class="title">REFERENCES</li>
+                <li class="navItem" data-item="references/client">client</li>
+                <li class="navItem" data-item="references/Message">Message</li>
+                <li class="navItem" data-item="references/TextChannel">TextChannel</li>
+                <li class="navItem" data-item="references/VoiceChannel">VoiceChannel</li>
+            </ul>
+        </div>
         <div class="bodyWrapper">
             <div class="sidebar">
                 <ul id="nav">
@@ -111,7 +152,7 @@
                     <li class="navItem" data-item="introduction/changelog">Changelog</li>
                     <li class="navItem" data-item="introduction/setup">Setup</li>
                     <li class="navItem" data-item="introduction/examples">Examples</li>
-                    <li class="title">REFERENCE</li>
+                    <li class="title">REFERENCES</li>
                     <li class="navItem" data-item="references/client">client</li>
                     <li class="navItem" data-item="references/Message">Message</li>
                     <li class="navItem" data-item="references/TextChannel">TextChannel</li>

@@ -24,8 +24,19 @@ class TextChannel
     @client.rest.methods().uploadFile(content, filepath, filename, options)
 
   modify: (options) ->
+    @client.rest.methods().modifyTextChannel(@id, options)
+
+  setChannelName: (name) ->
+    @client.rest.methods().modifyTextChannel(@id, {name: name})
+
+  setPosition: (pos) ->
+    @client.rest.methods().modifyTextChannel(@id, {position: pos})
+
+  setTopic: (topic) ->
+    @client.rest.methods().modifyTextChannel(@id, {topic: topic})
 
   delete: () -> #CAUTION
+    @client.rest.methods().deleteChannel(@id)
 
   getMessages: (options) ->
 

@@ -85,8 +85,7 @@ dc.on("message", (msg) ->
   else if msg.content == "!react"
     msg.channel.sendMessage("Reacting!")
   else if msg.content == "Reacting!" && msg.author.id == "169554882674556930"
-    console.log "Reacting"
-    msg.addReaction("ghost")
+    msg.addReaction("%F0%9F%91%BB")
 )
 
 dc.connect()

@@ -24,6 +24,87 @@ body{
     z-index: 10;
 }
 
+.header .desktopHeaderWrapper{
+    width: 1280px;
+    height: 55px;
+    margin-left: calc(50% - 640px);
+}
+
+.header .desktopHeaderWrapper .desktopDropDownMenu{
+    max-width: 280px;
+    width: 20%;
+    height: 55px;
+    padding: 11px 15px;
+    border-left: 1px solid rgba(216, 222, 227, 1.00);
+    border-right: 1px solid rgba(216, 222, 227, 1.00);
+}
+
+.header .desktopHeaderWrapper .desktopDropDownMenu .lib{
+    font-size: 15px;
+    font-weight: bold;
+    font-family: "Roboto", sans-serif;
+    color: rgba(52, 53, 55, 1.00);
+}
+
+.header .desktopHeaderWrapper .desktopDropDownMenu .version{
+    font-size: 13px;
+    font-family: "Roboto", sans-serif;
+    color: rgba(94, 104, 116, 0.7);
+}
+
+.header .mobileDropDownMenu{
+    display: none;
+    margin-left: 15px;
+    line-height: 55px;
+    color: #333;
+    width: 50px;
+    font-size: 22px;
+}
+
+.mobileDropDownMenuContent{
+    display: none;
+    position: fixed;
+    top: 55px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: #fff;
+    z-index: 9;
+}
+
+.mobileDropDownMenuContent ul{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.mobileDropDownMenuContent ul li{
+    padding: 0 15px;
+    width: 100%;
+    line-height: 45px;
+    font-size: 13px;
+    font-family: "Roboto", sans-serif;
+    color: rgba(94, 104, 116, 1.00);
+    border-bottom: 1px solid rgba(236, 240, 243, 1.00);
+    cursor: pointer;
+}
+
+.mobileDropDownMenuContent ul li.navItem{
+    padding: 0 25px;
+    width: 100%;
+}
+
+.mobileDropDownMenuContent ul li.title{
+    padding: 0 15px;
+    width: 100%;
+    text-transform: uppercase;
+    font-weight: bold;
+    color: rgba(145, 154, 165, 1.00);
+    cursor: default;
+}
+
 .bodyWrapper{
     margin-left: calc(50% - 640px);
     padding-bottom: 10px;
@@ -319,6 +400,8 @@ body{
     height: auto;
     border-spacing: 0;
     font-size: 13px;
+    overflow-x: auto;
+    overflow-y: hidden;
 }
 
 .content table thead tr{
@@ -377,7 +460,7 @@ body{
     padding: 0;
 }
 
-.content ul.methodList li{
+.content ul.methodList>li{
     width: 100%;
     height: auto;
     min-height: 70px;
@@ -414,6 +497,19 @@ body{
     width: calc(100% - 120px);
 }
 
+.content ul.methodList li .examples{
+    margin-left: 65px;
+    height: auto;
+    font-family: "Lato", sans-serif;
+    font-size: 14px;
+    color: #4C555A;
+    width: calc(100% - 120px);
+}
+
+.content ul.methodList li .examples .code{
+    margin: 0;
+}
+
 .content ul.methodList li .description>code{
     background: rgba(70,70,90,0.1);
     padding: 3px 5px;
@@ -424,26 +520,34 @@ body{
     margin-left: 65px;
     height: auto;
     width: calc(100% - 120px);
+    overflow-x: auto;
+    overflow-y: hidden;
 }
 
-.content ul.methodList li .parameters tbody tr td:first-child{
+.content ul.methodList li .parameters table{
+    margin: 10px 0;
+    min-width: 540px;
+    width: 100%;
+}
+
+.content ul.methodList li .parameters table tbody tr td:first-child{
     width: 15%;
 }
 
-.content ul.methodList li .parameters tbody tr td:nth-child(2){
+.content ul.methodList li .parameters table tbody tr td:nth-child(2){
     width: 10%;
 }
 
-.content ul.methodList li .parameters tbody tr td:nth-child(3){
+.content ul.methodList li .parameters table tbody tr td:nth-child(3){
     text-align: center;
     width: 10%;
 }
 
-.content ul.methodList li .parameters tbody tr td:nth-child(4){
+.content ul.methodList li .parameters table tbody tr td:nth-child(4){
     width: 10%;
 }
 
-.content ul.methodList li .parameters tbody tr td:last-child{
+.content ul.methodList li .parameters table tbody tr td:last-child{
     width: 55%;
 }
 
@@ -546,6 +650,13 @@ body{
         margin-left: 0;
         width: calc(100% - 60px);
     }
+    .content ul.methodList li .examples{
+        margin-left: 0;
+        width: calc(100% - 60px);
+    }
+    .header .mobileDropDownMenu{
+        display: block;
+    }
     .sidebar{
         display: none;
     }
@@ -584,6 +695,13 @@ body{
         margin-left: 65px;
         width: calc(100% - 120px);
     }
+    .content ul.methodList li .examples{
+        margin-left: 65px;
+        width: calc(100% - 120px);
+    }
+    .header .mobileDropDownMenu{
+        display: none;
+    }
     .sidebar{
         display: none;
     }
@@ -621,6 +739,13 @@ body{
     .content ul.methodList li .notification{
         margin-left: 65px;
         width: calc(100% - 120px);
+    }
+    .content ul.methodList li .examples{
+        margin-left: 65px;
+        width: calc(100% - 120px);
+    }
+    .header .mobileDropDownMenu{
+        display: none;
     }
     .sidebar{
         display: block;
@@ -662,6 +787,13 @@ body{
         margin-left: 65px;
         width: calc(100% - 120px);
     }
+    .content ul.methodList li .examples{
+        margin-left: 65px;
+        width: calc(100% - 120px);
+    }
+    .header .mobileDropDownMenu{
+        display: none;
+    }
     .sidebar{
         display: block;
         max-width: 280px;
@@ -699,9 +831,16 @@ body{
         margin-left: 65px;
         width: calc(100% - 120px);
     }
+    .content ul.methodList li .examples{
+        margin-left: 65px;
+        width: calc(100% - 120px);
+    }
     .content ul.methodList li .notification{
         margin-left: 65px;
         width: calc(100% - 120px);
+    }
+    .header .mobileDropDownMenu{
+        display: none;
     }
     .sidebar{
         display: block;

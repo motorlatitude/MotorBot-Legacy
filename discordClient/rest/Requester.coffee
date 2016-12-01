@@ -16,6 +16,7 @@ class Requester
       },
       form: data
     }, (err, httpResponse, body) ->
+      console.log body
     )
 
   sendUploadRequest: (method,endpoint, data, file, filename) ->
