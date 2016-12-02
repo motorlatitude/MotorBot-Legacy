@@ -28,6 +28,11 @@
     </thead>
     <tbody>
         <tr>
+            <td>client</td>
+            <td>Object</td>
+            <td>client object that was initially created</td>
+        </tr>
+        <tr>
             <td>id</td>
             <td>String</td>
             <td>ID of channel</td>
@@ -45,7 +50,7 @@
         <tr>
             <td>type</td>
             <td>Number</td>
-            <td>Channel type, is it a voice or text channel. <span style="font-family: monospace;">1</span> for a text channel, <span style="font-family: monospace;">2</span> for a voice channel</td>
+            <td>Channel type, is it a voice or text channel. <code>1</code> for a text channel, <code>2</code> for a voice channel</td>
         </tr>
         <tr>
             <td>position</td>
@@ -79,11 +84,6 @@
 <p>
     A list of all available methods.
 </p>
-<div class="notification note">
-    <div class="bar"></div>
-    <p><b>Note</b></p>
-    <p>Currently not all of these methods are integrated into the library, only the <span style="font-family: monospace;">sendMessage(content, options), reply(content, options), sendMessageWithFile(content, file, filename, options)</span> methods are available. The additional methods will be added in the near future.</p>
-</div>
 <ul class="methodList">
     <li>
         <div class="method"><pre><span class="hljs-built_in">sendMessage</span>(String: <span class="hljs-built_in">content</span>, Object: <span class="hljs-built_in">options</span>) <a href="#references/TextChannel-methods-sendMessage" title="method-sendMessage"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
@@ -112,7 +112,7 @@
                         <td>Object</td>
                         <td><i class="fa fa-check" aria-hidden="true"></i></td>
                         <td><pre>{}</pre></td>
-                        <td>The options allow you to define if the message supports <span style="font-family: monospace;">tts</span> and/or define a <span style="font-family: monospace;">nonce</span> used for verifying that a message was sent</td>
+                        <td>The options allow you to define if the message supports <code>tts</code> and/or define a <code>nonce</code> used for verifying that a message was sent</td>
                     </tr>
                 </tbody>
             </table>
@@ -140,8 +140,8 @@
                     <tr>
                         <td><pre>content</pre></td>
                         <td>String</td>
-                        <td><i class="fa fa-times" aria-hidden="true"></i></td>
-                        <td><pre>undefined</pre></td>
+                        <td><i class="fa fa-check" aria-hidden="true"></i></td>
+                        <td><pre>""</pre></td>
                         <td>Contents of message</td>
                     </tr>
                     <tr>
@@ -163,7 +163,7 @@
                         <td>Object</td>
                         <td><i class="fa fa-check" aria-hidden="true"></i></td>
                         <td><pre>{}</pre></td>
-                        <td>The options allow you to define if the message supports <span style="font-family: monospace;">tts</span> and/or define a <span style="font-family: monospace;">nonce</span> used for verifying that a message was sent</td>
+                        <td>The options allow you to define if the message supports <code>tts</code> and/or define a <code>nonce</code> used for verifying that a message was sent</td>
                     </tr>
                 </tbody>
             </table>
@@ -265,8 +265,8 @@
                 <tr>
                     <td><pre>topic</pre></td>
                     <td>String</td>
-                    <td><i class="fa fa-times" aria-hidden="true"></i></td>
-                    <td><pre>undefined</pre></td>
+                    <td><i class="fa fa-check" aria-hidden="true"></i></td>
+                    <td><pre>""</pre></td>
                     <td>New topic of channel</td>
                 </tr>
                 </tbody>
@@ -289,7 +289,7 @@
         <div class="notification warn">
             <div class="bar"></div>
             <p><b>Important</b></p>
-            <p>The options, even though passed as an object, should only contain one of either; <code>String: around</code>, <code>String: before</code> or <code>String: after</code>. The <code>Number: limit</code> is exempt from this and can be used alongside any of the three options.</p>
+            <p>The options, even though passed as an object, should only contain one of either; <code>around</code>, <code>before</code> or <code>after</code>. The <code>limit</code> is exempt from this and can be used alongside any of the three options.</p>
         </div>
         <div class="parameters">
             <table>
@@ -307,16 +307,149 @@
                         <td><pre>options</pre></td>
                         <td>Object</td>
                         <td><i class="fa fa-check" aria-hidden="true"></i></td>
-                        <td><pre>{}</pre></td>
-                        <td>Define which messages to retrieve; <code>String: around</code>, <code>String: before</code>, <code>String: after</code>, <code>Number: limit (default 50)</code></td>
+                        <td><pre>undefined</pre></td>
+                        <td>Define which messages to retrieve relative to another message with a <code>message_id</code> which can be passed to either; <code>String: around</code>, <code>String: before</code>, <code>String: after</code>. <br>An additional parameter exists to limit results: <code>Number: limit (default 50)</code><br>If no parameter is sent, the last 50 messages of a channel are returned.</td>
                     </tr>
                 </tbody>
             </table>
+        </div>
+        <div class="returns">
+            <h3>Returns</h3>
+            <p>
+                Will return a promise containing <code>messages</code> (which is an array of <span class="link" onclick="loadView('references/Message'); window.history.pushState(null,'Documentation', '#references/Message');"><code>Message</code></span> objects as shown below) and <code>httpResponse</code>.
+            </p>
+            <h4>then() Promise</h4>
+            <div class="code" data-codeBlockId="1">
+                <pre class="javascript" data-codeBlock="1-Javascript"><code class="javascript">
+[{
+    client: client(),
+    id: '254292001028046848',
+    channel_id: '169555395860234240324',
+    channel: TextChannel(),
+    guild_id: '13073437706695412345',
+    author:{
+        username: 'username',
+        discriminator: '2549',
+        id: 'user_id',
+        avatar: 'avatar' },
+    content: 'getMessages',
+    timestamp: '2016-12-02T17:05:37.562000+00:00',
+    edited_timestamp: null,
+    tts: false,
+    mention_everyone: false,
+    mentions: [],
+    mention_roles: [],
+    attachments: [],
+    embeds: [],
+    reactions: undefined,
+    nonce: undefined,
+    pinned: false,
+    webhook_id: undefined
+}, ...
+]
+                </code></pre>
+            </div>
+            <h4>catch() Promise</h4>
+            <div class="code" data-codeBlockId="1">
+                <pre class="javascript" data-codeBlock="1-Javascript"><code class="javascript">
+{ statusCode: 400,
+  statusMessage: 'Bad Request',
+  body: '&lt;!DOCTYPE html>\n&lt;html lang=en>\n  &lt;meta charset=utf-8>\n  &lt;meta name=viewport content="initial-scale=1, minimum-scale=1, width=device-width">\n  &lt;title>Error 400 (Bad Request)!!1&lt;/title>\n  &lt;style>\n    *{margin:0;padding:0}html,code{font:15px/22px arial,sans-serif}html{background:#fff;color:#222;padding:15px}body{margin:7% auto 0;max-width:390px;min-height:180px;padding:30px 0 15px}* > body{background:url(//www.google.com/images/errors/robot.png) 100% 5px no-repeat;padding-right:205px}p{margin:11px 0 22px;overflow:hidden}ins{color:#777;text-decoration:none}a img{border:0}@media screen and (max-width:772px){body{background:none;margin-top:0;max-width:none;padding-right:0}}#logo{background:url(//www.google.com/images/branding/googlelogo/1x/googlelogo_color_150x54dp.png) no-repeat;margin-left:-5px}@media only screen and (min-resolution:192dpi){#logo{background:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) no-repeat 0% 0%/100% 100%;-moz-border-image:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) 0}}@media only screen and (-webkit-min-device-pixel-ratio:2){#logo{background:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) no-repeat;-webkit-background-size:100% 100%}}#logo{display:inline-block;height:54px;width:150px}\n  &lt;/style>\n  &lt;a href=//www.google.com/>&lt;span id=logo aria-label=Google>&lt;/span>&lt;/a>\n  &lt;p>&lt;b>400.&lt;/b> &lt;ins>That’s an error.&lt;/ins>\n  &lt;p>Your client has issued a malformed or illegal request.  &lt;ins>That’s all we know.&lt;/ins>\n' }
+                </code></pre>
+            </div>
+        </div>
+        <div class="examples">
+            <h3>Examples</h3>
+            <div class="code" data-codeBlockId="2">
+                <div class="langs">
+                    <ul class="langSelector">
+                        <li class="active" data-linked="2-Javascript">Javascript</li>
+                        <li data-linked="2-Coffeescript">CoffeeScript</li>
+                    </ul>
+                </div>
+                <pre class="javascript" data-codeBlock="2-Javascript"><code class="javascript">
+var DiscordClient = require('DiscordClient');
+var client = new DiscordClient({token: "TOKEN"});
+// retrieve the last 20 messages before an incoming message
+client.on("message",function(message){
+    message.channel.getMessages({
+        before: message.id,
+        limit: 20
+    }).then(function(result){
+        console.log(result.messages)
+    }).catch(function(err){
+        console.log(err.statusCode+" - "+err.statusMessage)
+    })
+});
+client.connect();
+                </code></pre>
+                <pre class="coffeescript" data-codeBlock="2-Coffeescript" style="display: none;"><code class="coffeescript">
+DiscordClient = require 'DiscordClient'
+client = new DiscordClient({token: "TOKEN"});
+# retrieve the last 20 messages before an incoming message
+client.on("message",(message) ->
+    message.channel.getMessages({
+        before: message.id,
+        limit: 20
+    }).then((result) ->
+        console.log result.messages
+    ).catch((err) ->
+        console.log err.statusCode+" - "+err.statusMessage
+    )
+)
+client.connect()
+                </code></pre>
+            </div>
         </div>
     </li>
     <li>
         <div class="method"><pre><span class="hljs-built_in">getPinnedMessages</span>() <a href="#references/TextChannel-methods-getPinnedMessages" title="method-getPinnedMessages"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
         <div class="description">Get pinned messages for text channel.</div>
+        <div class="returns">
+            <h3>Returns</h3>
+            <p>
+                Will return a promise containing <code>messages</code> (which is an array of <span class="link" onclick="loadView('references/Message'); window.history.pushState(null,'Documentation', '#references/Message');"><code>Message</code></span> objects as shown below) and <code>httpResponse</code>.
+            </p>
+            <h4>then() Promise</h4>
+            <div class="code" data-codeBlockId="1">
+                <pre class="javascript" data-codeBlock="1-Javascript"><code class="javascript">
+[{
+    client: client(),
+    id: '254292001028046848',
+    channel_id: '169555395860234240324',
+    channel: TextChannel(),
+    guild_id: '13073437706695412345',
+    author:{
+        username: 'username',
+        discriminator: '2549',
+        id: 'user_id',
+        avatar: 'avatar' },
+    content: 'getPinnedMessages',
+    timestamp: '2016-12-02T17:05:37.562000+00:00',
+    edited_timestamp: null,
+    tts: false,
+    mention_everyone: false,
+    mentions: [],
+    mention_roles: [],
+    attachments: [],
+    embeds: [],
+    reactions: undefined,
+    nonce: undefined,
+    pinned: true,
+    webhook_id: undefined
+}, ...
+]
+                </code></pre>
+            </div>
+            <h4>catch() Promise</h4>
+            <div class="code" data-codeBlockId="1">
+                <pre class="javascript" data-codeBlock="1-Javascript"><code class="javascript">
+{ statusCode: 400,
+  statusMessage: 'Bad Request',
+  body: '&lt;!DOCTYPE html>\n&lt;html lang=en>\n  &lt;meta charset=utf-8>\n  &lt;meta name=viewport content="initial-scale=1, minimum-scale=1, width=device-width">\n  &lt;title>Error 400 (Bad Request)!!1&lt;/title>\n  &lt;style>\n    *{margin:0;padding:0}html,code{font:15px/22px arial,sans-serif}html{background:#fff;color:#222;padding:15px}body{margin:7% auto 0;max-width:390px;min-height:180px;padding:30px 0 15px}* > body{background:url(//www.google.com/images/errors/robot.png) 100% 5px no-repeat;padding-right:205px}p{margin:11px 0 22px;overflow:hidden}ins{color:#777;text-decoration:none}a img{border:0}@media screen and (max-width:772px){body{background:none;margin-top:0;max-width:none;padding-right:0}}#logo{background:url(//www.google.com/images/branding/googlelogo/1x/googlelogo_color_150x54dp.png) no-repeat;margin-left:-5px}@media only screen and (min-resolution:192dpi){#logo{background:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) no-repeat 0% 0%/100% 100%;-moz-border-image:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) 0}}@media only screen and (-webkit-min-device-pixel-ratio:2){#logo{background:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) no-repeat;-webkit-background-size:100% 100%}}#logo{display:inline-block;height:54px;width:150px}\n  &lt;/style>\n  &lt;a href=//www.google.com/>&lt;span id=logo aria-label=Google>&lt;/span>&lt;/a>\n  &lt;p>&lt;b>400.&lt;/b> &lt;ins>That’s an error.&lt;/ins>\n  &lt;p>Your client has issued a malformed or illegal request.  &lt;ins>That’s all we know.&lt;/ins>\n' }
+                </code></pre>
+            </div>
+        </div>
     </li>
     <li>
         <div class="method"><pre><span class="hljs-built_in">getMessage</span>(String: <span class="hljs-built_in">message_id</span>) <a href="#references/TextChannel-methods-getMessage" title="method-getMessage"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
@@ -343,13 +476,57 @@
                 </tbody>
             </table>
         </div>
+        <div class="returns">
+            <h3>Returns</h3>
+            <p>
+                Will return a promise containing <code>message</code> (which is a <span class="link" onclick="loadView('references/Message'); window.history.pushState(null,'Documentation', '#references/Message');"><code>Message</code></span> object as shown below) and <code>httpResponse</code>.
+            </p>
+            <h4>then() Promise</h4>
+            <div class="code" data-codeBlockId="1">
+                <pre class="javascript" data-codeBlock="1-Javascript"><code class="javascript">
+{
+    client: client(),
+    id: '254292001028046848',
+    channel_id: '169555395860234240324',
+    channel: TextChannel(),
+    guild_id: '13073437706695412345',
+    author:{
+        username: 'username',
+        discriminator: '2549',
+        id: 'user_id',
+        avatar: 'avatar' },
+    content: 'getPinnedMessages',
+    timestamp: '2016-12-02T17:05:37.562000+00:00',
+    edited_timestamp: null,
+    tts: false,
+    mention_everyone: false,
+    mentions: [],
+    mention_roles: [],
+    attachments: [],
+    embeds: [],
+    reactions: undefined,
+    nonce: undefined,
+    pinned: false,
+    webhook_id: undefined
+}
+                </code></pre>
+            </div>
+            <h4>catch() Promise</h4>
+            <div class="code" data-codeBlockId="1">
+                <pre class="javascript" data-codeBlock="1-Javascript"><code class="javascript">
+{ statusCode: 400,
+  statusMessage: 'Bad Request',
+  body: '&lt;!DOCTYPE html>\n&lt;html lang=en>\n  &lt;meta charset=utf-8>\n  &lt;meta name=viewport content="initial-scale=1, minimum-scale=1, width=device-width">\n  &lt;title>Error 400 (Bad Request)!!1&lt;/title>\n  &lt;style>\n    *{margin:0;padding:0}html,code{font:15px/22px arial,sans-serif}html{background:#fff;color:#222;padding:15px}body{margin:7% auto 0;max-width:390px;min-height:180px;padding:30px 0 15px}* > body{background:url(//www.google.com/images/errors/robot.png) 100% 5px no-repeat;padding-right:205px}p{margin:11px 0 22px;overflow:hidden}ins{color:#777;text-decoration:none}a img{border:0}@media screen and (max-width:772px){body{background:none;margin-top:0;max-width:none;padding-right:0}}#logo{background:url(//www.google.com/images/branding/googlelogo/1x/googlelogo_color_150x54dp.png) no-repeat;margin-left:-5px}@media only screen and (min-resolution:192dpi){#logo{background:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) no-repeat 0% 0%/100% 100%;-moz-border-image:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) 0}}@media only screen and (-webkit-min-device-pixel-ratio:2){#logo{background:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) no-repeat;-webkit-background-size:100% 100%}}#logo{display:inline-block;height:54px;width:150px}\n  &lt;/style>\n  &lt;a href=//www.google.com/>&lt;span id=logo aria-label=Google>&lt;/span>&lt;/a>\n  &lt;p>&lt;b>400.&lt;/b> &lt;ins>That’s an error.&lt;/ins>\n  &lt;p>Your client has issued a malformed or illegal request.  &lt;ins>That’s all we know.&lt;/ins>\n' }
+                </code></pre>
+            </div>
+        </div>
     </li>
     <li>
         <div class="method"><pre><span class="hljs-built_in">deleteMessage</span>(String: <span class="hljs-built_in">message_id</span>) <a href="#references/TextChannel-methods-deleteMessage" title="method-deleteMessage"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
         <div class="notification err">
             <div class="bar"></div>
             <p><b>Warning</b></p>
-            <p>This action is permanent, use with caution.</p>
+            <p>Deleting a message is permanent and cannot be undone. Use with caution!</p>
         </div>
         <div class="description">Delete a specific message with message_id</div>
         <div class="parameters">
@@ -380,7 +557,12 @@
         <div class="notification err">
             <div class="bar"></div>
             <p><b>Warning</b></p>
-            <p>This action is permanent, use with caution.</p>
+            <p>Bulk deleting messages is permanent and cannot be undone. Use with extreme caution!</p>
+        </div>
+        <div class="notification note">
+            <div class="bar"></div>
+            <p><b>Note</b></p>
+            <p>You must pass between 2 - 100 message ids when using this method</p>
         </div>
         <div class="description">Permanently bulk delete a list of messages.</div>
         <div class="parameters">
@@ -405,5 +587,244 @@
                 </tbody>
             </table>
         </div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">setRAWPermissions</span>(String: <span class="hljs-built_in">overwrite_id</span>, Number: <span class="hljs-built_in">allow</span>, Number: <span class="hljs-built_in">deny</span>, String: <span class="hljs-built_in">type</span>) <a href="#references/TextChannel-methods-setRawPermissions" title="method-setRawPermissions"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Set the permissions for the channel, using bitwise integer values for allowed and disallowed permissions</div>
+        <div class="parameters">
+            <table>
+                <thead>
+                    <tr>
+                        <td>Parameter</td>
+                        <td>Type</td>
+                        <td>Optional</td>
+                        <td>Default</td>
+                        <td>Description</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><pre>overwrite_id</pre></td>
+                        <td>String</td>
+                        <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                        <td><pre>undefined</pre></td>
+                        <td>The <code>overwrite_id</code> is the the <code>user_id</code> for type <code>member</code> or is the <code>role_id</code> for type <code>role</code></td>
+                    </tr>
+                    <tr>
+                        <td><pre>allow</pre></td>
+                        <td>Number</td>
+                        <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                        <td><pre>0</pre></td>
+                        <td>The bitwise value for the allowed permissions</td>
+                    </tr>
+                    <tr>
+                        <td><pre>deny</pre></td>
+                        <td>Number</td>
+                        <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                        <td><pre>0</pre></td>
+                        <td>The bitwise value for the disallowed permissions</td>
+                    </tr>
+                    <tr>
+                        <td><pre>type</pre></td>
+                        <td>String</td>
+                        <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                        <td><pre>undefined</pre></td>
+                        <td>The type of permission, either <code>member</code> for a user specific permission overwrite or <code>role</code> for a role specific permission overwrite</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">setPermissions</span>(String: <span class="hljs-built_in">overwrite_id</span>, Array: <span class="hljs-built_in">allow</span>, Array: <span class="hljs-built_in">deny</span>, String: <span class="hljs-built_in">type</span>) <a href="#references/TextChannel-methods-setPermissions" title="method-setPermissions"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Set the permissions for the channel, using string permission values from the <span class="link" onclick="loadView('constants/permissions'); window.history.pushState(null,'Documentation', '#constants/permissions');">permission constants</span> for allowed and disallowed permissions</div>
+        <div class="parameters">
+            <table>
+                <thead>
+                    <tr>
+                        <td>Parameter</td>
+                        <td>Type</td>
+                        <td>Optional</td>
+                        <td>Default</td>
+                        <td>Description</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><pre>overwrite_id</pre></td>
+                        <td>String</td>
+                        <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                        <td><pre>undefined</pre></td>
+                        <td>The <code>overwrite_id</code> is the the <code>user_id</code> for type <code>member</code> or is the <code>role_id</code> for type <code>role</code></td>
+                    </tr>
+                    <tr>
+                        <td><pre>allow</pre></td>
+                        <td>Array</td>
+                        <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                        <td><pre>[]</pre></td>
+                        <td>Comma separated list containing the string value for the allowed permissions, e.g. <code>"CREATE_INSTANT_INVITE"</code></td>
+                    </tr>
+                    <tr>
+                        <td><pre>deny</pre></td>
+                        <td>Array</td>
+                        <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                        <td><pre>[]</pre></td>
+                        <td>Comma separated list containing the string value for the disallowed permissions, e.g. <code>"KICK_MEMBERS"</code></td>
+                    </tr>
+                    <tr>
+                        <td><pre>type</pre></td>
+                        <td>String</td>
+                        <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                        <td><pre>undefined</pre></td>
+                        <td>The type of permission, either <code>member</code> for a user specific permission overwrite or <code>role</code> for a role specific permission overwrite</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">deletePermissions</span>(String: <span class="hljs-built_in">overwrite_id</span>) <a href="#references/TextChannel-methods-deletePermissions" title="method-deletePermissions"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Delete the overwrite permissions for a specific text channel, identified by its <code>overwrite_id</code></div>
+        <div class="parameters">
+            <table>
+                <thead>
+                    <tr>
+                        <td>Parameter</td>
+                        <td>Type</td>
+                        <td>Optional</td>
+                        <td>Default</td>
+                        <td>Description</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><pre>overwrite_id</pre></td>
+                        <td>String</td>
+                        <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                        <td><pre>undefined</pre></td>
+                        <td>The <code>overwrite_id</code> is the the <code>user_id</code> for type <code>member</code> or is the <code>role_id</code> for type <code>role</code></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">getInvites</span>() <a href="#references/TextChannel-methods-getinvites" title="method-getInvites"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Returns a list of invite objects including invite metadata for the channel.</div>
+        <div class="returns">
+            <h3>Returns</h3>
+            <p>
+                Will return a promise containing an array of <code>invite</code> objects and <code>httpResponse</code>.
+            </p>
+            <h4>then() Promise</h4>
+            <div class="code" data-codeBlockId="1">
+                <pre class="javascript" data-codeBlock="1-Javascript"><code class="javascript">
+[{
+    max_age: 1800,
+    code: 'JUzgt',
+    guild: {
+        Guild()
+    },
+    created_at: '2016-12-02T21:47:07.364000+00:00',
+    temporary: false,
+    uses: 0,
+    max_uses: 5,
+    inviter:{
+        User()
+    },
+    channel: {
+        TextChannel()
+    }
+}, ...]
+                </code></pre>
+            </div>
+            <h4>catch() Promise</h4>
+            <div class="code" data-codeBlockId="1">
+                <pre class="javascript" data-codeBlock="1-Javascript"><code class="javascript">
+{ statusCode: 400,
+  statusMessage: 'Bad Request',
+  body: '&lt;!DOCTYPE html>\n&lt;html lang=en>\n  &lt;meta charset=utf-8>\n  &lt;meta name=viewport content="initial-scale=1, minimum-scale=1, width=device-width">\n  &lt;title>Error 400 (Bad Request)!!1&lt;/title>\n  &lt;style>\n    *{margin:0;padding:0}html,code{font:15px/22px arial,sans-serif}html{background:#fff;color:#222;padding:15px}body{margin:7% auto 0;max-width:390px;min-height:180px;padding:30px 0 15px}* > body{background:url(//www.google.com/images/errors/robot.png) 100% 5px no-repeat;padding-right:205px}p{margin:11px 0 22px;overflow:hidden}ins{color:#777;text-decoration:none}a img{border:0}@media screen and (max-width:772px){body{background:none;margin-top:0;max-width:none;padding-right:0}}#logo{background:url(//www.google.com/images/branding/googlelogo/1x/googlelogo_color_150x54dp.png) no-repeat;margin-left:-5px}@media only screen and (min-resolution:192dpi){#logo{background:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) no-repeat 0% 0%/100% 100%;-moz-border-image:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) 0}}@media only screen and (-webkit-min-device-pixel-ratio:2){#logo{background:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) no-repeat;-webkit-background-size:100% 100%}}#logo{display:inline-block;height:54px;width:150px}\n  &lt;/style>\n  &lt;a href=//www.google.com/>&lt;span id=logo aria-label=Google>&lt;/span>&lt;/a>\n  &lt;p>&lt;b>400.&lt;/b> &lt;ins>That’s an error.&lt;/ins>\n  &lt;p>Your client has issued a malformed or illegal request.  &lt;ins>That’s all we know.&lt;/ins>\n' }
+                </code></pre>
+            </div>
+        </div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">createInvite</span>(Number: <span class="hljs-built_in">max_age</span>, Number: <span class="hljs-built_in">max_uses</span>, Bool: <span class="hljs-built_in">temporary</span>, Bool: <span class="hljs-built_in">unique</span>) <a href="#references/TextChannel-methods-createInvite" title="method-createInvites"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Create an invite object for the channel.</div>
+        <div class="parameters">
+            <table>
+                <thead>
+                <tr>
+                    <td>Parameter</td>
+                    <td>Type</td>
+                    <td>Optional</td>
+                    <td>Default</td>
+                    <td>Description</td>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><pre>max_age</pre></td>
+                        <td>Number</td>
+                        <td><i class="fa fa-check" aria-hidden="true"></i></td>
+                        <td><pre>86400</pre></td>
+                        <td>Duration of invite in seconds before expiry, or 0 for never</td>
+                    </tr>
+                    <tr>
+                        <td><pre>max_uses</pre></td>
+                        <td>Number</td>
+                        <td><i class="fa fa-check" aria-hidden="true"></i></td>
+                        <td><pre>0</pre></td>
+                        <td>Max number of uses or 0 for unlimited</td>
+                    </tr>
+                    <tr>
+                        <td><pre>temporary</pre></td>
+                        <td>Bool</td>
+                        <td><i class="fa fa-check" aria-hidden="true"></i></td>
+                        <td><pre>false</pre></td>
+                        <td>Whether this invite only grants temporary membership</td>
+                    </tr>
+                    <tr>
+                        <td><pre>unique</pre></td>
+                        <td>Bool</td>
+                        <td><i class="fa fa-check" aria-hidden="true"></i></td>
+                        <td><pre>false</pre></td>
+                        <td>If true, don't try to reuse a similar invite (useful for creating many unique one time use invites)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="returns">
+            <h3>Returns</h3>
+            <p>
+                Will return a promise containing an <code>invite</code> object and <code>httpResponse</code>.
+            </p>
+            <h4>then() Promise</h4>
+            <div class="code" data-codeBlockId="1">
+                <pre class="javascript" data-codeBlock="1-Javascript"><code class="javascript">
+[{
+    code: 'JUzgt',
+    guild: {
+        Guild()
+    },
+    channel: {
+        TextChannel()
+    }
+}, ...]
+                </code></pre>
+            </div>
+            <h4>catch() Promise</h4>
+            <div class="code" data-codeBlockId="1">
+                <pre class="javascript" data-codeBlock="1-Javascript"><code class="javascript">
+{ statusCode: 400,
+  statusMessage: 'Bad Request',
+  body: '&lt;!DOCTYPE html>\n&lt;html lang=en>\n  &lt;meta charset=utf-8>\n  &lt;meta name=viewport content="initial-scale=1, minimum-scale=1, width=device-width">\n  &lt;title>Error 400 (Bad Request)!!1&lt;/title>\n  &lt;style>\n    *{margin:0;padding:0}html,code{font:15px/22px arial,sans-serif}html{background:#fff;color:#222;padding:15px}body{margin:7% auto 0;max-width:390px;min-height:180px;padding:30px 0 15px}* > body{background:url(//www.google.com/images/errors/robot.png) 100% 5px no-repeat;padding-right:205px}p{margin:11px 0 22px;overflow:hidden}ins{color:#777;text-decoration:none}a img{border:0}@media screen and (max-width:772px){body{background:none;margin-top:0;max-width:none;padding-right:0}}#logo{background:url(//www.google.com/images/branding/googlelogo/1x/googlelogo_color_150x54dp.png) no-repeat;margin-left:-5px}@media only screen and (min-resolution:192dpi){#logo{background:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) no-repeat 0% 0%/100% 100%;-moz-border-image:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) 0}}@media only screen and (-webkit-min-device-pixel-ratio:2){#logo{background:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) no-repeat;-webkit-background-size:100% 100%}}#logo{display:inline-block;height:54px;width:150px}\n  &lt;/style>\n  &lt;a href=//www.google.com/>&lt;span id=logo aria-label=Google>&lt;/span>&lt;/a>\n  &lt;p>&lt;b>400.&lt;/b> &lt;ins>That’s an error.&lt;/ins>\n  &lt;p>Your client has issued a malformed or illegal request.  &lt;ins>That’s all we know.&lt;/ins>\n' }
+                </code></pre>
+            </div>
+        </div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">triggerTyping</span>() <a href="#references/TextChannel-methods-triggerTyping" title="method-triggerTyping"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Starts the typing animation, can be used to indicate that the bot is processing information.</div>
     </li>
 </ul>

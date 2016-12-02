@@ -86,6 +86,21 @@ dc.on("message", (msg) ->
     msg.channel.sendMessage("Reacting!")
   else if msg.content == "Reacting!" && msg.author.id == "169554882674556930"
     msg.addReaction("%F0%9F%91%BB")
+  else if msg.content == "getMessages"
+    console.log "Getting Messages"
+    msg.channel.getMessages().then((response) ->
+      console.log response.messages[0]
+    ).catch((err) ->
+      console.log err.statusMessage
+    )
+  else if msg.content == "getInvites"
+    msg.channel.getInvites().then((response) ->
+      console.log response.invite
+    ).catch((err) ->
+      console.log err.statusMessage
+    )
+  else if msg.content == "triggerTyping"
+    msg.channel.triggerTyping()
 )
 
 dc.connect()

@@ -12,7 +12,7 @@ class DiscordClient extends EventEmitter
 
   constructor: (@options) ->
     if !@options.token then throw new Error("No Token Provided")
-    @rest = new DiscordManager()
+    @rest = new DiscordManager(@)
 
   getGateway: () ->
     self = @

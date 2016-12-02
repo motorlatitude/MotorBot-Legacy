@@ -19,6 +19,14 @@
     color: rgba(247, 167, 0, 1.00);
 }
 
+.hljs-literal{
+    color: rgba(254, 238, 94, 1.00);
+}
+
+.hljs-number{
+    color: rgba(18, 202, 238, 1.00);
+}
+
 .hljs-comment{
     color: #777;
 }

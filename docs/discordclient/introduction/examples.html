@@ -28,7 +28,7 @@ client.on("message",function(message){
 
 client.connect();
     </code></pre>
-    <pre class="javascript" data-codeBlock="1-Coffeescript" style="display: none;"><code class="coffeescript">
+    <pre class="coffeescript" data-codeBlock="1-Coffeescript" style="display: none;"><code class="coffeescript">
 DiscordClient = require 'DiscordClient'
 
 client = new DiscordClient({token: "TOKEN"});
@@ -69,11 +69,11 @@ client.on("ready",function(){
 
 client.on("message",function(message){
     if(message.content == "!voice join"){
-        //loop through all available channels
+        // loop through all available channels
         for(var i=0;i&lt;client.guilds[msg.guild_id].channels.length;i++){
             var channel = client.guilds[msg.guild_id].channels[i];
             if(channel.type == 2){
-                channel.join(); //Join the first available voice channel
+                channel.join(); // Join the first available voice channel
                 break;
             }
         }
@@ -85,7 +85,7 @@ client.on("message",function(message){
 
 client.connect();
     </code></pre>
-    <pre class="javascript" data-codeBlock="2-Coffeescript" style="display: none;"><code class="coffeescript">
+    <pre class="coffeescript" data-codeBlock="2-Coffeescript" style="display: none;"><code class="coffeescript">
 DiscordClient = require 'DiscordClient'
 
 client = new DiscordClient({token: "TOKEN"});
@@ -96,10 +96,10 @@ client.on("ready", () ->
 
 client.on("message",(message) ->
     if message.content == "!voice join"
-        #loop through all available channels
+        # loop through all available channels
         for channel in client.guilds[msg.guild_id].channels
             if channel.type == 2
-              channel.join() #Join the first available voice channel
+              channel.join() # Join the first available voice channel
               break
     else if message.content == "!voice leave"
         client.leaveVoiceChannel(msg.guild_id)

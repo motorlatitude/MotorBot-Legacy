@@ -33,13 +33,20 @@ body{
 .header .desktopHeaderWrapper .desktopDropDownMenu{
     max-width: 280px;
     width: 20%;
-    height: 55px;
+    height: 54px;
     padding: 11px 15px;
     border-left: 1px solid rgba(216, 222, 227, 1.00);
     border-right: 1px solid rgba(216, 222, 227, 1.00);
+    position: relative;
+    top: 0;
+    right: 0;
+    cursor: pointer;
 }
 
 .header .desktopHeaderWrapper .desktopDropDownMenu .lib{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     font-size: 15px;
     font-weight: bold;
     font-family: "Roboto", sans-serif;
@@ -50,6 +57,59 @@ body{
     font-size: 13px;
     font-family: "Roboto", sans-serif;
     color: rgba(94, 104, 116, 0.7);
+}
+
+.header .desktopHeaderWrapper .desktopDropDownMenu .libDropDownArrow{
+    position: absolute;
+    top: 20px;
+    right: 10px;
+    font-size: 15px;
+    color: rgba(52, 53, 55, 0.8);
+}
+
+.header .desktopHeaderWrapper .desktopDropDownMenu .libDropDownMenu{
+     display: none;
+    position: absolute;
+    top: 54px;
+    right: -1px;
+    width: calc(100% + 2px);
+    height: auto;
+    border: 1px solid rgba(216, 222, 227, 1.00);
+    background: #fff;
+    z-index: 11;
+}
+
+.header .desktopHeaderWrapper .desktopDropDownMenu .libDropDownMenu ul{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.header .desktopHeaderWrapper .desktopDropDownMenu .libDropDownMenu ul li{
+    padding: 0 15px;
+    width: 100%;
+    line-height: 45px;
+    font-size: 13px;
+    font-family: "Roboto", sans-serif;
+    color: rgba(94, 104, 116, 1.00);
+    border-bottom: 1px solid rgba(236, 240, 243, 1.00);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+}
+
+.header .desktopHeaderWrapper .desktopDropDownMenu .libDropDownMenu ul li:last-child{
+    border-bottom: 0 solid transparent;
+}
+
+.header .desktopHeaderWrapper .desktopDropDownMenu .libDropDownMenu ul li span{
+    color: rgba(94, 104, 116, 0.6);
+    float: right;
+}
+
+.header .desktopHeaderWrapper .desktopDropDownMenu .libDropDownMenu ul li:hover{
+    background: #f6f6f9;
 }
 
 .header .mobileDropDownMenu{
@@ -109,9 +169,13 @@ body{
     margin-left: calc(50% - 640px);
     padding-bottom: 10px;
     overflow: auto;
+    position: relative;
+    top: 0;
 }
 
 .sidebar{
+    position: fixed;
+    transform: translateX(0);
     margin-top: 55px;
     float: left;
     max-width: 280px;
@@ -173,6 +237,7 @@ body{
 
 .content{
     margin-top: 80px;
+    margin-left: 20%;
     float: left;
     width: calc(80% - 10px);
     max-width: 1000px;
@@ -184,7 +249,6 @@ body{
     box-shadow: 0 0 8px rgba(116, 122, 127, 0.2);
     overflow: hidden;
 }
-
 
 .content .title{
     width: 100%;
@@ -436,8 +500,8 @@ body{
 
 .content table tbody>tr>td>code{
     background: rgba(70,70,90,0.1);
-    padding: 3px 5px;
-    border-radius: 3px;
+    padding: 2px 5px;
+    border-radius: 2px;
 }
 
 .content table tbody tr td:first-child{
@@ -511,6 +575,29 @@ body{
 }
 
 .content ul.methodList li .description>code{
+    background: rgba(70,70,90,0.1);
+    padding: 3px 5px;
+    border-radius: 3px;
+}
+
+.content ul.methodList li .returns{
+    margin-left: 65px;
+    height: auto;
+    font-family: "Lato", sans-serif;
+    font-size: 14px;
+    color: #4C555A;
+    width: calc(100% - 120px);
+}
+
+.content ul.methodList li .returns>p{
+    margin: 15px 0;
+}
+
+.content ul.methodList li .returns .code{
+    margin: 0;
+}
+
+.content ul.methodList li .returns>code{
     background: rgba(70,70,90,0.1);
     padding: 3px 5px;
     border-radius: 3px;
@@ -634,6 +721,7 @@ body{
     }
     .content{
         margin-top: 45px;
+        margin-left: 0;
         box-shadow: transparent;
         width: 100%;
         border-radius: 0;
@@ -654,10 +742,22 @@ body{
         margin-left: 0;
         width: calc(100% - 60px);
     }
+    .content ul.methodList li .returns{
+        margin-left: 0;
+        width: calc(100% - 60px);
+    }
     .header .mobileDropDownMenu{
         display: block;
     }
+    .header .desktopHeaderWrapper{
+        width: 100%;
+        height: 55px;
+        margin-left: 0;
+    }
     .sidebar{
+        display: none;
+    }
+    .desktopDropDownMenu{
         display: none;
     }
     .header,
@@ -679,6 +779,7 @@ body{
     }
     .content{
         margin-top: 45px;
+        margin-left: 0;
         box-shadow: transparent;
         width: 100%;
         border-radius: 0;
@@ -699,10 +800,22 @@ body{
         margin-left: 65px;
         width: calc(100% - 120px);
     }
+    .content ul.methodList li .returns{
+        margin-left: 65px;
+        width: calc(100% - 120px);
+    }
     .header .mobileDropDownMenu{
-        display: none;
+        display: block;
+    }
+    .header .desktopHeaderWrapper{
+        width: 100%;
+        height: 55px;
+        margin-left: 0;
     }
     .sidebar{
+        display: none;
+    }
+    .desktopDropDownMenu{
         display: none;
     }
     .header,
@@ -724,6 +837,7 @@ body{
     }
     .content{
         margin-top: 80px;
+        margin-left: 20%;
         width: calc(100% - 225px);
         max-width: 1000px;
         border-radius: 3px;
@@ -744,13 +858,26 @@ body{
         margin-left: 65px;
         width: calc(100% - 120px);
     }
+    .content ul.methodList li .returns{
+        margin-left: 65px;
+        width: calc(100% - 120px);
+    }
     .header .mobileDropDownMenu{
         display: none;
+    }
+    .header .desktopHeaderWrapper{
+        width: 100%;
+        min-width: 785px;
+        height: 55px;
+        margin-left: 0;
     }
     .sidebar{
         display: block;
         max-width: 280px;
         width: 215px;
+    }
+    .desktopDropDownMenu{
+        display: block;
     }
     .header,
     .footer{
@@ -771,6 +898,7 @@ body{
     }
     .content{
         margin-top: 80px;
+        margin-left: 20%;
         width: calc(100% - 225px);
         max-width: 1000px;
         border-radius: 3px;
@@ -791,13 +919,26 @@ body{
         margin-left: 65px;
         width: calc(100% - 120px);
     }
+    .content ul.methodList li .returns{
+        margin-left: 65px;
+        width: calc(100% - 120px);
+    }
     .header .mobileDropDownMenu{
         display: none;
+    }
+    .header .desktopHeaderWrapper{
+        width: 100%;
+        min-width: 1024px;
+        height: 55px;
+        margin-left: 0;
     }
     .sidebar{
         display: block;
         max-width: 280px;
         width: 215px;
+    }
+    .desktopDropDownMenu{
+        display: block;
     }
     .header,
     .footer{
@@ -819,6 +960,7 @@ body{
     }
     .content{
         margin-top: 80px;
+        margin-left: 20%;
         width: calc(80% - 10px);
         max-width: 1000px;
         border-radius: 3px;
@@ -835,6 +977,10 @@ body{
         margin-left: 65px;
         width: calc(100% - 120px);
     }
+    .content ul.methodList li .returns{
+        margin-left: 65px;
+        width: calc(100% - 120px);
+    }
     .content ul.methodList li .notification{
         margin-left: 65px;
         width: calc(100% - 120px);
@@ -842,10 +988,18 @@ body{
     .header .mobileDropDownMenu{
         display: none;
     }
+    .header .desktopHeaderWrapper{
+        width: 1280px;
+        height: 55px;
+        margin-left: calc(50% - 640px);
+    }
     .sidebar{
         display: block;
         max-width: 280px;
         width: 20%;
+    }
+    .desktopDropDownMenu{
+        display: block;
     }
     .header,
     .footer{

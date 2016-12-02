@@ -5,10 +5,10 @@ Requester = require './Requester'
 
 class DiscordManager
 
-  constructor: () ->
+  constructor: (@client) ->
     @requester = new Requester()
 
   methods: () ->
-    return new DiscordMethods(@requester)
+    return new DiscordMethods(@client, @requester)
 
 module.exports = DiscordManager
