@@ -1,0 +1,536 @@
+<div class="title">
+    DirectMessageChannel
+    <a href="#references/DirectMessageChannel-" title="DirectMessageChannel">
+        <i class="fa fa-anchor anchor" aria-hidden="true"></i>
+    </a>
+    <div class="type">Object</div>
+</div>
+<p>
+    A Discord Direct Message Channel, which is normally a private text based channel used by users to private message either other. The Direct Message Channel object is similar to the TextChannel object with a few adjustments.
+</p>
+<div class="contentsBox">
+    <div class="contentTitle">CONTENTS</div>
+    <ul id="contentsList">
+
+    </ul>
+</div>
+<h2 data-header="Properties">Properties <a href="#references/DirectMessageChannel-properties" title="Properties"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></h2>
+<p>
+    A list of all available properties.
+</p>
+<table>
+    <thead>
+    <tr>
+        <td>Property</td>
+        <td>Type</td>
+        <td>Description</td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>client</td>
+        <td>Object</td>
+        <td>client object that was initially created</td>
+    </tr>
+    <tr>
+        <td>id</td>
+        <td>String</td>
+        <td>ID of channel</td>
+    </tr>
+    <tr>
+        <td>type</td>
+        <td>Number</td>
+        <td>Channel type, will usually be <code>1</code> for DM. <code>3</code> for group DM.</td>
+    </tr>
+    <tr>
+        <td>is_private</td>
+        <td>Bool</td>
+        <td>Is the channel private, this should normally be <code>true</code> for DM Channels</td>
+    </tr>
+    <tr>
+        <td>last_message_id</td>
+        <td>String</td>
+        <td>ID of the last message that was posted to this channel.</td>
+    </tr>
+    <tr>
+        <td>recipient</td>
+        <td>Object</td>
+        <td>User object containing of the DM recipient</td>
+    </tr>
+    </tbody>
+</table>
+<br>
+<h2 data-header="Methods">Methods <a href="#references/DirectMessageChannel-methods" title="Methods"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></h2>
+<p>
+    A list of all available methods.
+</p>
+<ul class="methodList">
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">sendMessage</span>(String: <span class="hljs-built_in">content</span>, Object: <span class="hljs-built_in">options</span>) <a href="#references/DirectMessageChannel-methods-sendMessage" title="method-sendMessage"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Send a message in the channel.</div>
+        <div class="parameters">
+            <table>
+                <thead>
+                <tr>
+                    <td>Parameter</td>
+                    <td>Type</td>
+                    <td>Optional</td>
+                    <td>Default</td>
+                    <td>Description</td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><pre>content</pre></td>
+                    <td>String</td>
+                    <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                    <td><pre>undefined</pre></td>
+                    <td>Contents of message</td>
+                </tr>
+                <tr>
+                    <td><pre>options</pre></td>
+                    <td>Object</td>
+                    <td><i class="fa fa-check" aria-hidden="true"></i></td>
+                    <td><pre>{}</pre></td>
+                    <td>The options allow you to define if the message supports <code>tts</code> and/or define a <code>nonce</code> used for verifying that a message was sent</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">reply</span>(String: <span class="hljs-built_in">content</span>, Object: <span class="hljs-built_in">options</span>) <a href="#references/DirectMessageChannel-methods-reply" title="method-reply"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">An alternative to the sendMessage() method.</div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">sendMessageWithFile</span>(String: <span class="hljs-built_in">content</span>, String: <span class="hljs-built_in">filepath</span>, String: <span class="hljs-built_in">filename</span>, Object: <span class="hljs-built_in">options</span>) <a href="#references/DirectMessageChannel-methods-sendMessageWithFile" title="method-sendMessageWithFile"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Send a message with a file in the text channel.</div>
+        <div class="parameters">
+            <table>
+                <thead>
+                <tr>
+                    <td>Parameter</td>
+                    <td>Type</td>
+                    <td>Optional</td>
+                    <td>Default</td>
+                    <td>Description</td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><pre>content</pre></td>
+                    <td>String</td>
+                    <td><i class="fa fa-check" aria-hidden="true"></i></td>
+                    <td><pre>""</pre></td>
+                    <td>Contents of message</td>
+                </tr>
+                <tr>
+                    <td><pre>filepath</pre></td>
+                    <td>String</td>
+                    <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                    <td><pre>undefined</pre></td>
+                    <td>The file path containing the file designated for upload</td>
+                </tr>
+                <tr>
+                    <td><pre>filename</pre></td>
+                    <td>String</td>
+                    <td><i class="fa fa-check" aria-hidden="true"></i></td>
+                    <td><pre>""</pre></td>
+                    <td>Filename for the uploaded file to be known as</td>
+                </tr>
+                <tr>
+                    <td><pre>options</pre></td>
+                    <td>Object</td>
+                    <td><i class="fa fa-check" aria-hidden="true"></i></td>
+                    <td><pre>{}</pre></td>
+                    <td>The options allow you to define if the message supports <code>tts</code> and/or define a <code>nonce</code> used for verifying that a message was sent</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">close</span>() <a href="#references/DirectMessageChannel-methods-close" title="method-close"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Close the DM Channel</div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">getMessages</span>(Object: <span class="hljs-built_in">options</span>) <a href="#references/DirectMessageChannel-methods-getMessages" title="method-getMessages"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Get messages in the channel</div>
+        <div class="notification warn">
+            <div class="bar"></div>
+            <p><b>Important</b></p>
+            <p>The options, even though passed as an object, should only contain one of either; <code>around</code>, <code>before</code> or <code>after</code>. The <code>limit</code> is exempt from this and can be used alongside any of the three options.</p>
+        </div>
+        <div class="parameters">
+            <table>
+                <thead>
+                <tr>
+                    <td>Parameter</td>
+                    <td>Type</td>
+                    <td>Optional</td>
+                    <td>Default</td>
+                    <td>Description</td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><pre>options</pre></td>
+                    <td>Object</td>
+                    <td><i class="fa fa-check" aria-hidden="true"></i></td>
+                    <td><pre>undefined</pre></td>
+                    <td>Define which messages to retrieve relative to another message with a <code>message_id</code> which can be passed to either; <code>String: around</code>, <code>String: before</code>, <code>String: after</code>. <br>An additional parameter exists to limit results: <code>Number: limit (default 50)</code><br>If no parameter is sent, the last 50 messages of a channel are returned.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="returns">
+            <h3>Returns</h3>
+            <p>
+                Will return a promise containing <code>messages</code> (which is an array of <span class="link" onclick="loadView('references/Message'); window.history.pushState(null,'Documentation', '#references/Message');"><code>Message</code></span> objects as shown below).
+            </p>
+            <h4>then() Promise</h4>
+            <div class="code" data-codeBlockId="1">
+                <pre class="javascript" data-codeBlock="1-Javascript"><code class="javascript">
+[{
+    client: client(),
+    id: '254292001028046848',
+    channel_id: '169555395860234240324',
+    channel: DirectMessageChannel(),
+    guild_id: '13073437706695412345',
+    author:{
+        username: 'username',
+        discriminator: '2549',
+        id: 'user_id',
+        avatar: 'avatar' },
+    content: 'getMessages',
+    timestamp: '2016-12-02T17:05:37.562000+00:00',
+    edited_timestamp: null,
+    tts: false,
+    mention_everyone: false,
+    mentions: [],
+    mention_roles: [],
+    attachments: [],
+    embeds: [],
+    reactions: undefined,
+    nonce: undefined,
+    pinned: false,
+    webhook_id: undefined
+}, ...
+]
+                </code></pre>
+            </div>
+            <h4>catch() Promise</h4>
+            <div class="code" data-codeBlockId="1">
+                <pre class="javascript" data-codeBlock="1-Javascript"><code class="javascript">
+{ statusCode: 400,
+  statusMessage: 'Bad Request',
+  body: '&lt;!DOCTYPE html>\n&lt;html lang=en>\n  &lt;meta charset=utf-8>\n  &lt;meta name=viewport content="initial-scale=1, minimum-scale=1, width=device-width">\n  &lt;title>Error 400 (Bad Request)!!1&lt;/title>\n  &lt;style>\n    *{margin:0;padding:0}html,code{font:15px/22px arial,sans-serif}html{background:#fff;color:#222;padding:15px}body{margin:7% auto 0;max-width:390px;min-height:180px;padding:30px 0 15px}* > body{background:url(//www.google.com/images/errors/robot.png) 100% 5px no-repeat;padding-right:205px}p{margin:11px 0 22px;overflow:hidden}ins{color:#777;text-decoration:none}a img{border:0}@media screen and (max-width:772px){body{background:none;margin-top:0;max-width:none;padding-right:0}}#logo{background:url(//www.google.com/images/branding/googlelogo/1x/googlelogo_color_150x54dp.png) no-repeat;margin-left:-5px}@media only screen and (min-resolution:192dpi){#logo{background:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) no-repeat 0% 0%/100% 100%;-moz-border-image:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) 0}}@media only screen and (-webkit-min-device-pixel-ratio:2){#logo{background:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) no-repeat;-webkit-background-size:100% 100%}}#logo{display:inline-block;height:54px;width:150px}\n  &lt;/style>\n  &lt;a href=//www.google.com/>&lt;span id=logo aria-label=Google>&lt;/span>&lt;/a>\n  &lt;p>&lt;b>400.&lt;/b> &lt;ins>That’s an error.&lt;/ins>\n  &lt;p>Your client has issued a malformed or illegal request.  &lt;ins>That’s all we know.&lt;/ins>\n' }
+                </code></pre>
+            </div>
+        </div>
+        <div class="examples">
+            <h3>Examples</h3>
+            <div class="code" data-codeBlockId="2">
+                <div class="langs">
+                    <ul class="langSelector">
+                        <li class="active" data-linked="2-Javascript">Javascript</li>
+                        <li data-linked="2-Coffeescript">CoffeeScript</li>
+                    </ul>
+                </div>
+                <pre class="javascript" data-codeBlock="2-Javascript"><code class="javascript">
+var DiscordClient = require('DiscordClient');
+var client = new DiscordClient({token: "TOKEN"});
+// retrieve the last 20 messages before an incoming message
+client.on("message",function(message){
+    message.channel.getMessages({
+        before: message.id,
+        limit: 20
+    }).then(function(messages){
+        console.log(messages)
+    }).catch(function(err){
+        console.log(err.statusCode+" - "+err.statusMessage)
+    })
+});
+client.connect();
+                </code></pre>
+                <pre class="coffeescript" data-codeBlock="2-Coffeescript" style="display: none;"><code class="coffeescript">
+DiscordClient = require 'DiscordClient'
+client = new DiscordClient({token: "TOKEN"});
+# retrieve the last 20 messages before an incoming message
+client.on("message",(message) ->
+    message.channel.getMessages({
+        before: message.id,
+        limit: 20
+    }).then((messages) ->
+        console.log messages
+    ).catch((err) ->
+        console.log err.statusCode+" - "+err.statusMessage
+    )
+)
+client.connect()
+                </code></pre>
+            </div>
+        </div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">getPinnedMessages</span>() <a href="#references/DirectMessageChannel-methods-getPinnedMessages" title="method-getPinnedMessages"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Get pinned messages for text channel.</div>
+        <div class="returns">
+            <h3>Returns</h3>
+            <p>
+                Will return a promise containing <code>messages</code> (which is an array of <span class="link" onclick="loadView('references/Message'); window.history.pushState(null,'Documentation', '#references/Message');"><code>Message</code></span> objects as shown below).
+            </p>
+            <h4>then() Promise</h4>
+            <div class="code" data-codeBlockId="1">
+                <pre class="javascript" data-codeBlock="1-Javascript"><code class="javascript">
+[{
+    client: client(),
+    id: '254292001028046848',
+    channel_id: '169555395860234240324',
+    channel: DirectMessageChannel(),
+    guild_id: '13073437706695412345',
+    author:{
+        username: 'username',
+        discriminator: '2549',
+        id: 'user_id',
+        avatar: 'avatar' },
+    content: 'getPinnedMessages',
+    timestamp: '2016-12-02T17:05:37.562000+00:00',
+    edited_timestamp: null,
+    tts: false,
+    mention_everyone: false,
+    mentions: [],
+    mention_roles: [],
+    attachments: [],
+    embeds: [],
+    reactions: undefined,
+    nonce: undefined,
+    pinned: true,
+    webhook_id: undefined
+}, ...
+]
+                </code></pre>
+            </div>
+            <h4>catch() Promise</h4>
+            <div class="code" data-codeBlockId="1">
+                <pre class="javascript" data-codeBlock="1-Javascript"><code class="javascript">
+{ statusCode: 400,
+  statusMessage: 'Bad Request',
+  body: '&lt;!DOCTYPE html>\n&lt;html lang=en>\n  &lt;meta charset=utf-8>\n  &lt;meta name=viewport content="initial-scale=1, minimum-scale=1, width=device-width">\n  &lt;title>Error 400 (Bad Request)!!1&lt;/title>\n  &lt;style>\n    *{margin:0;padding:0}html,code{font:15px/22px arial,sans-serif}html{background:#fff;color:#222;padding:15px}body{margin:7% auto 0;max-width:390px;min-height:180px;padding:30px 0 15px}* > body{background:url(//www.google.com/images/errors/robot.png) 100% 5px no-repeat;padding-right:205px}p{margin:11px 0 22px;overflow:hidden}ins{color:#777;text-decoration:none}a img{border:0}@media screen and (max-width:772px){body{background:none;margin-top:0;max-width:none;padding-right:0}}#logo{background:url(//www.google.com/images/branding/googlelogo/1x/googlelogo_color_150x54dp.png) no-repeat;margin-left:-5px}@media only screen and (min-resolution:192dpi){#logo{background:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) no-repeat 0% 0%/100% 100%;-moz-border-image:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) 0}}@media only screen and (-webkit-min-device-pixel-ratio:2){#logo{background:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) no-repeat;-webkit-background-size:100% 100%}}#logo{display:inline-block;height:54px;width:150px}\n  &lt;/style>\n  &lt;a href=//www.google.com/>&lt;span id=logo aria-label=Google>&lt;/span>&lt;/a>\n  &lt;p>&lt;b>400.&lt;/b> &lt;ins>That’s an error.&lt;/ins>\n  &lt;p>Your client has issued a malformed or illegal request.  &lt;ins>That’s all we know.&lt;/ins>\n' }
+                </code></pre>
+            </div>
+        </div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">getMessage</span>(String: <span class="hljs-built_in">message_id</span>) <a href="#references/DirectMessageChannel-methods-getMessage" title="method-getMessage"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Get a specific message with message_id</div>
+        <div class="parameters">
+            <table>
+                <thead>
+                <tr>
+                    <td>Parameter</td>
+                    <td>Type</td>
+                    <td>Optional</td>
+                    <td>Default</td>
+                    <td>Description</td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><pre>message_id</pre></td>
+                    <td>String</td>
+                    <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                    <td><pre>undefined</pre></td>
+                    <td>id of the message to retrieve</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="returns">
+            <h3>Returns</h3>
+            <p>
+                Will return a promise containing <code>message</code> (which is a <span class="link" onclick="loadView('references/Message'); window.history.pushState(null,'Documentation', '#references/Message');"><code>Message</code></span> object as shown below).
+            </p>
+            <h4>then() Promise</h4>
+            <div class="code" data-codeBlockId="1">
+                <pre class="javascript" data-codeBlock="1-Javascript"><code class="javascript">
+{
+    client: client(),
+    id: '254292001028046848',
+    channel_id: '169555395860234240324',
+    channel: DirectMessageChannel(),
+    guild_id: '13073437706695412345',
+    author:{
+        username: 'username',
+        discriminator: '2549',
+        id: 'user_id',
+        avatar: 'avatar' },
+    content: 'getPinnedMessages',
+    timestamp: '2016-12-02T17:05:37.562000+00:00',
+    edited_timestamp: null,
+    tts: false,
+    mention_everyone: false,
+    mentions: [],
+    mention_roles: [],
+    attachments: [],
+    embeds: [],
+    reactions: undefined,
+    nonce: undefined,
+    pinned: false,
+    webhook_id: undefined
+}
+                </code></pre>
+            </div>
+            <h4>catch() Promise</h4>
+            <div class="code" data-codeBlockId="1">
+                <pre class="javascript" data-codeBlock="1-Javascript"><code class="javascript">
+{ statusCode: 400,
+  statusMessage: 'Bad Request',
+  body: '&lt;!DOCTYPE html>\n&lt;html lang=en>\n  &lt;meta charset=utf-8>\n  &lt;meta name=viewport content="initial-scale=1, minimum-scale=1, width=device-width">\n  &lt;title>Error 400 (Bad Request)!!1&lt;/title>\n  &lt;style>\n    *{margin:0;padding:0}html,code{font:15px/22px arial,sans-serif}html{background:#fff;color:#222;padding:15px}body{margin:7% auto 0;max-width:390px;min-height:180px;padding:30px 0 15px}* > body{background:url(//www.google.com/images/errors/robot.png) 100% 5px no-repeat;padding-right:205px}p{margin:11px 0 22px;overflow:hidden}ins{color:#777;text-decoration:none}a img{border:0}@media screen and (max-width:772px){body{background:none;margin-top:0;max-width:none;padding-right:0}}#logo{background:url(//www.google.com/images/branding/googlelogo/1x/googlelogo_color_150x54dp.png) no-repeat;margin-left:-5px}@media only screen and (min-resolution:192dpi){#logo{background:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) no-repeat 0% 0%/100% 100%;-moz-border-image:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) 0}}@media only screen and (-webkit-min-device-pixel-ratio:2){#logo{background:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) no-repeat;-webkit-background-size:100% 100%}}#logo{display:inline-block;height:54px;width:150px}\n  &lt;/style>\n  &lt;a href=//www.google.com/>&lt;span id=logo aria-label=Google>&lt;/span>&lt;/a>\n  &lt;p>&lt;b>400.&lt;/b> &lt;ins>That’s an error.&lt;/ins>\n  &lt;p>Your client has issued a malformed or illegal request.  &lt;ins>That’s all we know.&lt;/ins>\n' }
+                </code></pre>
+            </div>
+        </div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">deleteMessage</span>(String: <span class="hljs-built_in">message_id</span>) <a href="#references/DirectMessageChannel-methods-deleteMessage" title="method-deleteMessage"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="notification err">
+            <div class="bar"></div>
+            <p><b>Warning</b></p>
+            <p>Deleting a message is permanent and cannot be undone. Use with caution!</p>
+        </div>
+        <div class="description">Delete a specific message with message_id</div>
+        <div class="parameters">
+            <table>
+                <thead>
+                <tr>
+                    <td>Parameter</td>
+                    <td>Type</td>
+                    <td>Optional</td>
+                    <td>Default</td>
+                    <td>Description</td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><pre>message_id</pre></td>
+                    <td>String</td>
+                    <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                    <td><pre>undefined</pre></td>
+                    <td>id of the message to delete</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">deleteMessages</span>(Array: <span class="hljs-built_in">message_ids</span>) <a href="#references/DirectMessageChannel-methods-deleteMessages" title="method-deleteMessages"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="notification err">
+            <div class="bar"></div>
+            <p><b>Warning</b></p>
+            <p>Bulk deleting messages is permanent and cannot be undone. Use with extreme caution!</p>
+        </div>
+        <div class="notification note">
+            <div class="bar"></div>
+            <p><b>Note</b></p>
+            <p>You must pass between 2 - 100 message ids when using this method</p>
+        </div>
+        <div class="description">Permanently bulk delete a list of messages.</div>
+        <div class="parameters">
+            <table>
+                <thead>
+                <tr>
+                    <td>Parameter</td>
+                    <td>Type</td>
+                    <td>Optional</td>
+                    <td>Default</td>
+                    <td>Description</td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><pre>message_ids</pre></td>
+                    <td>Array</td>
+                    <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                    <td><pre>[]</pre></td>
+                    <td>comma separated list of strings containing the message ids which to delete</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">triggerTyping</span>() <a href="#references/DirectMessageChannel-methods-triggerTyping" title="method-triggerTyping"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Starts the typing animation, can be used to indicate that the bot is processing information.</div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">addRecipient</span>(String: <span class="hljs-built_in">access_token</span>, String: <span class="hljs-built_in">user_id</span>, String: <span class="hljs-built_in">nick</span>) <a href="#references/DirectMessageChannel-methods-addRecipient" title="method-addRecipient"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="notification warn">
+            <div class="bar"></div>
+            <p><b>Important</b></p>
+            <p>This endpoint is only available for whitelisted bots. If you believe you have a legitimate use case for automating group dm creation, please contact us at support@discordapp.com and we'll look into whitelisting you.</p>
+        </div>
+        <div class="description">Allows the addition of another user to the direct message channel to create a group direct message.</div>
+        <div class="parameters">
+            <table>
+                <thead>
+                <tr>
+                    <td>Parameter</td>
+                    <td>Type</td>
+                    <td>Optional</td>
+                    <td>Default</td>
+                    <td>Description</td>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><pre>access_token</pre></td>
+                        <td>String</td>
+                        <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                        <td><pre>undefined</pre></td>
+                        <td>Access token of a user that has granted your app the gdm.join scope</td>
+                    </tr>
+                    <tr>
+                        <td><pre>user_id</pre></td>
+                        <td>String</td>
+                        <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                        <td><pre>undefined</pre></td>
+                        <td>The <code>user_id</code> of the user to be added to the channel</td>
+                    </tr>
+                    <tr>
+                        <td><pre>nick</pre></td>
+                        <td>String</td>
+                        <td><i class="fa fa-check" aria-hidden="true"></i></td>
+                        <td><pre>""</pre></td>
+                        <td>A cool nickname for the user being added</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">removeRecipient</span>(String: <span class="hljs-built_in">user_id</span>) <a href="#references/DirectMessageChannel-methods-removeRecipient" title="method-removeRecipient"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Remove a recipient from the group DM</div>
+        <div class="parameters">
+            <table>
+                <thead>
+                    <tr>
+                        <td>Parameter</td>
+                        <td>Type</td>
+                        <td>Optional</td>
+                        <td>Default</td>
+                        <td>Description</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><pre>user_id</pre></td>
+                        <td>String</td>
+                        <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                        <td><pre>undefined</pre></td>
+                        <td>The <code>user_id</code> of the user to be added to the channel</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </li>
+</ul>

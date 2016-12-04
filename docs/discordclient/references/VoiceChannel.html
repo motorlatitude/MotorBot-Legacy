@@ -45,7 +45,7 @@
         <tr>
             <td>type</td>
             <td>Number</td>
-            <td>Channel type, is it a voice or text channel. <span style="font-family: monospace;">1</span> for a text channel, <span style="font-family: monospace;">2</span> for a voice channel</td>
+            <td>Channel type, is it a voice or text channel. <code>0</code> for a text channel, <code>2</code> for a voice channel</td>
         </tr>
         <tr>
             <td>position</td>
@@ -79,11 +79,6 @@
 <p>
     A list of all available methods.
 </p>
-<div class="notification note">
-    <div class="bar"></div>
-    <p><b>Note</b></p>
-    <p>Currently not all of these methods are integrated into the library, only the <span style="font-family: monospace;">join(), leave()</span> methods are available. The additional methods will be added in the near future.</p>
-</div>
 <ul class="methodList">
     <li>
         <div class="method"><pre><span class="hljs-built_in">join</span>(Bool: <span class="hljs-built_in">mute</span>, Bool: <span class="hljs-built_in">deaf</span>) <a href="#references/VoiceChannel-methods-join" title="method-join"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
@@ -117,6 +112,24 @@
                 </tbody>
             </table>
         </div>
+        <div class="returns">
+            <h3>Returns</h3>
+            <p>
+                Will return a promise containing a <code>voiceConnection</code> object.
+            </p>
+            <h4>then() Promise</h4>
+            <div class="code" data-codeBlockId="1">
+                <pre class="javascript" data-codeBlock="1-Javascript"><code class="javascript">
+voiceConnection()
+                </code></pre>
+            </div>
+            <h4>catch() Promise</h4>
+            <div class="code" data-codeBlockId="1">
+                <pre class="javascript" data-codeBlock="1-Javascript"><code class="javascript">
+undefined
+                </code></pre>
+            </div>
+        </div>
     </li>
     <li>
         <div class="method"><pre><span class="hljs-built_in">leave</span>() <a href="#references/VoiceChannel-methods-leave" title="method-leave"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
@@ -124,7 +137,7 @@
     </li>
     <li>
         <div class="method"><pre><span class="hljs-built_in">modify</span>(Object: <span class="hljs-built_in">options</span>) <a href="#references/VoiceChannel-methods-modify" title="method-modify"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
-        <div class="description">Modify available options of the text channel such as topic & name.</div>
+        <div class="description">Modify available options of the voice channel such as name & bitrate.</div>
         <div class="parameters">
             <table>
                 <thead>
@@ -142,7 +155,111 @@
                     <td>Object</td>
                     <td><i class="fa fa-times" aria-hidden="true"></i></td>
                     <td><pre>{}</pre></td>
-                    <td>Modify defined channel properties</td>
+                    <td>Modify defined channel properties; <code>String: name</code>, <code>Number: position</code>, <code>Number: bitrate</code> & <code>Number: user_limit</code></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">setChannelName</span>(String: <span class="hljs-built_in">name</span>) <a href="#references/VoiceChannel-methods-setchannelname" title="method-setChannelName"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Modify the name of the voice channel.</div>
+        <div class="parameters">
+            <table>
+                <thead>
+                <tr>
+                    <td>Parameter</td>
+                    <td>Type</td>
+                    <td>Optional</td>
+                    <td>Default</td>
+                    <td>Description</td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><pre>name</pre></td>
+                    <td>String</td>
+                    <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                    <td><pre>undefined</pre></td>
+                    <td>New name of channel</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">setPosition</span>(Number: <span class="hljs-built_in">position</span>) <a href="#references/VoiceChannel-methods-setposition" title="method-setPosition"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Modify the position of the voice channel.</div>
+        <div class="parameters">
+            <table>
+                <thead>
+                <tr>
+                    <td>Parameter</td>
+                    <td>Type</td>
+                    <td>Optional</td>
+                    <td>Default</td>
+                    <td>Description</td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><pre>position</pre></td>
+                    <td>Number</td>
+                    <td><i class="fa fa-check" aria-hidden="true"></i></td>
+                    <td><pre>0</pre></td>
+                    <td>New position of channel</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">setBitrate</span>(Number: <span class="hljs-built_in">bitrate</span>) <a href="#references/VoiceChannel-methods-setBitrate" title="method-setBitrate"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Modify the voice channel's bitrate.</div>
+        <div class="parameters">
+            <table>
+                <thead>
+                <tr>
+                    <td>Parameter</td>
+                    <td>Type</td>
+                    <td>Optional</td>
+                    <td>Default</td>
+                    <td>Description</td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><pre>bitrate</pre></td>
+                    <td>Number</td>
+                    <td><i class="fa fa-check" aria-hidden="true"></i></td>
+                    <td><pre>64000</pre></td>
+                    <td>New bitrate of the voice channel. Can be any value from 8000 to 96000 (128000 for VIP servers)</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">setUserLimit</span>(Number: <span class="hljs-built_in">user_limit</span>) <a href="#references/VoiceChannel-methods-setUserLimit" title="method-setUserLimit"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Set how many people can be in the voice channel at any one time.</div>
+        <div class="parameters">
+            <table>
+                <thead>
+                <tr>
+                    <td>Parameter</td>
+                    <td>Type</td>
+                    <td>Optional</td>
+                    <td>Default</td>
+                    <td>Description</td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><pre>user_limit</pre></td>
+                    <td>Number</td>
+                    <td><i class="fa fa-check" aria-hidden="true"></i></td>
+                    <td><pre>0</pre></td>
+                    <td>New user_limit of the voice channel, <code>0</code> for no limit</td>
                 </tr>
                 </tbody>
             </table>
@@ -150,11 +267,246 @@
     </li>
     <li>
         <div class="method"><pre><span class="hljs-built_in">delete</span>() <a href="#references/VoiceChannel-methods-delete" title="method-delete"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Delete the voice channel</div>
         <div class="notification err">
             <div class="bar"></div>
             <p><b>Warning</b></p>
-            <p>This action is permanent, use with caution.</p>
+            <p>Deleting a VoiceChannel when part of a guild is permanent and cannot be undone. Use with caution.</p>
         </div>
-        <div class="description">Delete the text channel</div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">setRAWPermissions</span>(String: <span class="hljs-built_in">overwrite_id</span>, Number: <span class="hljs-built_in">allow</span>, Number: <span class="hljs-built_in">deny</span>, String: <span class="hljs-built_in">type</span>) <a href="#references/VoiceChannel-methods-setRawPermissions" title="method-setRawPermissions"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Set the permissions for the channel, using bitwise integer values for allowed and disallowed permissions</div>
+        <div class="parameters">
+            <table>
+                <thead>
+                <tr>
+                    <td>Parameter</td>
+                    <td>Type</td>
+                    <td>Optional</td>
+                    <td>Default</td>
+                    <td>Description</td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><pre>overwrite_id</pre></td>
+                    <td>String</td>
+                    <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                    <td><pre>undefined</pre></td>
+                    <td>The <code>overwrite_id</code> is the the <code>user_id</code> for type <code>member</code> or is the <code>role_id</code> for type <code>role</code></td>
+                </tr>
+                <tr>
+                    <td><pre>allow</pre></td>
+                    <td>Number</td>
+                    <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                    <td><pre>0</pre></td>
+                    <td>The bitwise value for the allowed permissions</td>
+                </tr>
+                <tr>
+                    <td><pre>deny</pre></td>
+                    <td>Number</td>
+                    <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                    <td><pre>0</pre></td>
+                    <td>The bitwise value for the disallowed permissions</td>
+                </tr>
+                <tr>
+                    <td><pre>type</pre></td>
+                    <td>String</td>
+                    <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                    <td><pre>undefined</pre></td>
+                    <td>The type of permission, either <code>member</code> for a user specific permission overwrite or <code>role</code> for a role specific permission overwrite</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">setPermissions</span>(String: <span class="hljs-built_in">overwrite_id</span>, Array: <span class="hljs-built_in">allow</span>, Array: <span class="hljs-built_in">deny</span>, String: <span class="hljs-built_in">type</span>) <a href="#references/VoiceChannel-methods-setPermissions" title="method-setPermissions"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Set the permissions for the channel, using string permission values from the <span class="link" onclick="loadView('constants/permissions'); window.history.pushState(null,'Documentation', '#constants/permissions');">permission constants</span> for allowed and disallowed permissions</div>
+        <div class="parameters">
+            <table>
+                <thead>
+                <tr>
+                    <td>Parameter</td>
+                    <td>Type</td>
+                    <td>Optional</td>
+                    <td>Default</td>
+                    <td>Description</td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><pre>overwrite_id</pre></td>
+                    <td>String</td>
+                    <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                    <td><pre>undefined</pre></td>
+                    <td>The <code>overwrite_id</code> is the the <code>user_id</code> for type <code>member</code> or is the <code>role_id</code> for type <code>role</code></td>
+                </tr>
+                <tr>
+                    <td><pre>allow</pre></td>
+                    <td>Array</td>
+                    <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                    <td><pre>[]</pre></td>
+                    <td>Comma separated list containing the string value for the allowed permissions, e.g. <code>"CREATE_INSTANT_INVITE"</code></td>
+                </tr>
+                <tr>
+                    <td><pre>deny</pre></td>
+                    <td>Array</td>
+                    <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                    <td><pre>[]</pre></td>
+                    <td>Comma separated list containing the string value for the disallowed permissions, e.g. <code>"KICK_MEMBERS"</code></td>
+                </tr>
+                <tr>
+                    <td><pre>type</pre></td>
+                    <td>String</td>
+                    <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                    <td><pre>undefined</pre></td>
+                    <td>The type of permission, either <code>member</code> for a user specific permission overwrite or <code>role</code> for a role specific permission overwrite</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">deletePermissions</span>(String: <span class="hljs-built_in">overwrite_id</span>) <a href="#references/VoiceChannel-methods-deletePermissions" title="method-deletePermissions"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Delete the overwrite permissions for a specific voice channel, identified by its <code>overwrite_id</code></div>
+        <div class="parameters">
+            <table>
+                <thead>
+                <tr>
+                    <td>Parameter</td>
+                    <td>Type</td>
+                    <td>Optional</td>
+                    <td>Default</td>
+                    <td>Description</td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><pre>overwrite_id</pre></td>
+                    <td>String</td>
+                    <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                    <td><pre>undefined</pre></td>
+                    <td>The <code>overwrite_id</code> is the the <code>user_id</code> for type <code>member</code> or is the <code>role_id</code> for type <code>role</code></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">getInvites</span>() <a href="#references/VoiceChannel-methods-getinvites" title="method-getInvites"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Returns a list of invite objects including invite metadata for the channel.</div>
+        <div class="returns">
+            <h3>Returns</h3>
+            <p>
+                Will return a promise containing an array of <code>invite</code> objects.
+            </p>
+            <h4>then() Promise</h4>
+            <div class="code" data-codeBlockId="1">
+                <pre class="javascript" data-codeBlock="1-Javascript"><code class="javascript">
+[{
+    max_age: 1800,
+    code: 'JUzgt',
+    guild: {
+        Guild()
+    },
+    created_at: '2016-12-02T21:47:07.364000+00:00',
+    temporary: false,
+    uses: 0,
+    max_uses: 5,
+    inviter:{
+        User()
+    },
+    channel: {
+        VoiceChannel()
+    }
+}, ...]
+                </code></pre>
+            </div>
+            <h4>catch() Promise</h4>
+            <div class="code" data-codeBlockId="1">
+                <pre class="javascript" data-codeBlock="1-Javascript"><code class="javascript">
+{ statusCode: 400,
+  statusMessage: 'Bad Request',
+  body: '&lt;!DOCTYPE html>\n&lt;html lang=en>\n  &lt;meta charset=utf-8>\n  &lt;meta name=viewport content="initial-scale=1, minimum-scale=1, width=device-width">\n  &lt;title>Error 400 (Bad Request)!!1&lt;/title>\n  &lt;style>\n    *{margin:0;padding:0}html,code{font:15px/22px arial,sans-serif}html{background:#fff;color:#222;padding:15px}body{margin:7% auto 0;max-width:390px;min-height:180px;padding:30px 0 15px}* > body{background:url(//www.google.com/images/errors/robot.png) 100% 5px no-repeat;padding-right:205px}p{margin:11px 0 22px;overflow:hidden}ins{color:#777;text-decoration:none}a img{border:0}@media screen and (max-width:772px){body{background:none;margin-top:0;max-width:none;padding-right:0}}#logo{background:url(//www.google.com/images/branding/googlelogo/1x/googlelogo_color_150x54dp.png) no-repeat;margin-left:-5px}@media only screen and (min-resolution:192dpi){#logo{background:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) no-repeat 0% 0%/100% 100%;-moz-border-image:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) 0}}@media only screen and (-webkit-min-device-pixel-ratio:2){#logo{background:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) no-repeat;-webkit-background-size:100% 100%}}#logo{display:inline-block;height:54px;width:150px}\n  &lt;/style>\n  &lt;a href=//www.google.com/>&lt;span id=logo aria-label=Google>&lt;/span>&lt;/a>\n  &lt;p>&lt;b>400.&lt;/b> &lt;ins>That’s an error.&lt;/ins>\n  &lt;p>Your client has issued a malformed or illegal request.  &lt;ins>That’s all we know.&lt;/ins>\n' }
+                </code></pre>
+            </div>
+        </div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">createInvite</span>(Number: <span class="hljs-built_in">max_age</span>, Number: <span class="hljs-built_in">max_uses</span>, Bool: <span class="hljs-built_in">temporary</span>, Bool: <span class="hljs-built_in">unique</span>) <a href="#references/VoiceChannel-methods-createInvite" title="method-createInvites"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Create an invite object for the channel.</div>
+        <div class="parameters">
+            <table>
+                <thead>
+                <tr>
+                    <td>Parameter</td>
+                    <td>Type</td>
+                    <td>Optional</td>
+                    <td>Default</td>
+                    <td>Description</td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><pre>max_age</pre></td>
+                    <td>Number</td>
+                    <td><i class="fa fa-check" aria-hidden="true"></i></td>
+                    <td><pre>86400</pre></td>
+                    <td>Duration of invite in seconds before expiry, or 0 for never</td>
+                </tr>
+                <tr>
+                    <td><pre>max_uses</pre></td>
+                    <td>Number</td>
+                    <td><i class="fa fa-check" aria-hidden="true"></i></td>
+                    <td><pre>0</pre></td>
+                    <td>Max number of uses or 0 for unlimited</td>
+                </tr>
+                <tr>
+                    <td><pre>temporary</pre></td>
+                    <td>Bool</td>
+                    <td><i class="fa fa-check" aria-hidden="true"></i></td>
+                    <td><pre>false</pre></td>
+                    <td>Whether this invite only grants temporary membership</td>
+                </tr>
+                <tr>
+                    <td><pre>unique</pre></td>
+                    <td>Bool</td>
+                    <td><i class="fa fa-check" aria-hidden="true"></i></td>
+                    <td><pre>false</pre></td>
+                    <td>If true, don't try to reuse a similar invite (useful for creating many unique one time use invites)</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="returns">
+            <h3>Returns</h3>
+            <p>
+                Will return a promise containing an <code>invite</code> object.
+            </p>
+            <h4>then() Promise</h4>
+            <div class="code" data-codeBlockId="1">
+                <pre class="javascript" data-codeBlock="1-Javascript"><code class="javascript">
+{
+    code: 'JUzgt',
+    guild: {
+        Guild()
+    },
+    channel: {
+        VoiceChannel()
+    }
+}
+                </code></pre>
+            </div>
+            <h4>catch() Promise</h4>
+            <div class="code" data-codeBlockId="1">
+                <pre class="javascript" data-codeBlock="1-Javascript"><code class="javascript">
+{ statusCode: 400,
+  statusMessage: 'Bad Request',
+  body: '&lt;!DOCTYPE html>\n&lt;html lang=en>\n  &lt;meta charset=utf-8>\n  &lt;meta name=viewport content="initial-scale=1, minimum-scale=1, width=device-width">\n  &lt;title>Error 400 (Bad Request)!!1&lt;/title>\n  &lt;style>\n    *{margin:0;padding:0}html,code{font:15px/22px arial,sans-serif}html{background:#fff;color:#222;padding:15px}body{margin:7% auto 0;max-width:390px;min-height:180px;padding:30px 0 15px}* > body{background:url(//www.google.com/images/errors/robot.png) 100% 5px no-repeat;padding-right:205px}p{margin:11px 0 22px;overflow:hidden}ins{color:#777;text-decoration:none}a img{border:0}@media screen and (max-width:772px){body{background:none;margin-top:0;max-width:none;padding-right:0}}#logo{background:url(//www.google.com/images/branding/googlelogo/1x/googlelogo_color_150x54dp.png) no-repeat;margin-left:-5px}@media only screen and (min-resolution:192dpi){#logo{background:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) no-repeat 0% 0%/100% 100%;-moz-border-image:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) 0}}@media only screen and (-webkit-min-device-pixel-ratio:2){#logo{background:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) no-repeat;-webkit-background-size:100% 100%}}#logo{display:inline-block;height:54px;width:150px}\n  &lt;/style>\n  &lt;a href=//www.google.com/>&lt;span id=logo aria-label=Google>&lt;/span>&lt;/a>\n  &lt;p>&lt;b>400.&lt;/b> &lt;ins>That’s an error.&lt;/ins>\n  &lt;p>Your client has issued a malformed or illegal request.  &lt;ins>That’s all we know.&lt;/ins>\n' }
+                </code></pre>
+            </div>
+        </div>
     </li>
 </ul>

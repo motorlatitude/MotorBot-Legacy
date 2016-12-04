@@ -6,7 +6,7 @@ zlib = require 'zlib'
 fs = require 'fs'
 Opus = require 'node-opus'
 UDPClient = require './udpClient'
-playStream = require './playStream.coffee'
+audioPlayer = require './audioPlayer.coffee'
 VoicePacket = require './voicePacket.coffee'
 
 class VoiceConnection
@@ -176,16 +176,12 @@ class VoiceConnection
       self.send(startTime, cnt + 1)
     , 20 + (nextTime - new Date().getTime()))
 
-  ###
-  # PUBLIC METHODS
-  ###
-
   playFromStream: (stream) ->
-    ps = new playStream(stream, @, @discordClient)
+    ps = new audioPlayer(stream, @, @discordClient)
     return ps
 
   playFromFile: (file) ->
-    ps = new playStream(fs.createReadStream(file), @, @discordClient)
+    ps = new audioPlayer(fs.createReadStream(file), @, @discordClient)
     return ps
 
 module.exports = VoiceConnection

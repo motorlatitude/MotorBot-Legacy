@@ -50,7 +50,7 @@
         <tr>
             <td>type</td>
             <td>Number</td>
-            <td>Channel type, is it a voice or text channel. <code>1</code> for a text channel, <code>2</code> for a voice channel</td>
+            <td>Channel type, is it a voice or text channel. <code>0</code> for a text channel, <code>2</code> for a voice channel</td>
         </tr>
         <tr>
             <td>position</td>
@@ -316,7 +316,7 @@
         <div class="returns">
             <h3>Returns</h3>
             <p>
-                Will return a promise containing <code>messages</code> (which is an array of <span class="link" onclick="loadView('references/Message'); window.history.pushState(null,'Documentation', '#references/Message');"><code>Message</code></span> objects as shown below) and <code>httpResponse</code>.
+                Will return a promise containing <code>messages</code> (which is an array of <span class="link" onclick="loadView('references/Message'); window.history.pushState(null,'Documentation', '#references/Message');"><code>Message</code></span> objects as shown below).
             </p>
             <h4>then() Promise</h4>
             <div class="code" data-codeBlockId="1">
@@ -375,8 +375,8 @@ client.on("message",function(message){
     message.channel.getMessages({
         before: message.id,
         limit: 20
-    }).then(function(result){
-        console.log(result.messages)
+    }).then(function(messages){
+        console.log(messages)
     }).catch(function(err){
         console.log(err.statusCode+" - "+err.statusMessage)
     })
@@ -391,8 +391,8 @@ client.on("message",(message) ->
     message.channel.getMessages({
         before: message.id,
         limit: 20
-    }).then((result) ->
-        console.log result.messages
+    }).then((messages) ->
+        console.log messages
     ).catch((err) ->
         console.log err.statusCode+" - "+err.statusMessage
     )
@@ -408,7 +408,7 @@ client.connect()
         <div class="returns">
             <h3>Returns</h3>
             <p>
-                Will return a promise containing <code>messages</code> (which is an array of <span class="link" onclick="loadView('references/Message'); window.history.pushState(null,'Documentation', '#references/Message');"><code>Message</code></span> objects as shown below) and <code>httpResponse</code>.
+                Will return a promise containing <code>messages</code> (which is an array of <span class="link" onclick="loadView('references/Message'); window.history.pushState(null,'Documentation', '#references/Message');"><code>Message</code></span> objects as shown below).
             </p>
             <h4>then() Promise</h4>
             <div class="code" data-codeBlockId="1">
@@ -479,7 +479,7 @@ client.connect()
         <div class="returns">
             <h3>Returns</h3>
             <p>
-                Will return a promise containing <code>message</code> (which is a <span class="link" onclick="loadView('references/Message'); window.history.pushState(null,'Documentation', '#references/Message');"><code>Message</code></span> object as shown below) and <code>httpResponse</code>.
+                Will return a promise containing <code>message</code> (which is a <span class="link" onclick="loadView('references/Message'); window.history.pushState(null,'Documentation', '#references/Message');"><code>Message</code></span> object as shown below).
             </p>
             <h4>then() Promise</h4>
             <div class="code" data-codeBlockId="1">
@@ -714,7 +714,7 @@ client.connect()
         <div class="returns">
             <h3>Returns</h3>
             <p>
-                Will return a promise containing an array of <code>invite</code> objects and <code>httpResponse</code>.
+                Will return a promise containing an array of <code>invite</code> objects.
             </p>
             <h4>then() Promise</h4>
             <div class="code" data-codeBlockId="1">
@@ -797,12 +797,12 @@ client.connect()
         <div class="returns">
             <h3>Returns</h3>
             <p>
-                Will return a promise containing an <code>invite</code> object and <code>httpResponse</code>.
+                Will return a promise containing an <code>invite</code> object.
             </p>
             <h4>then() Promise</h4>
             <div class="code" data-codeBlockId="1">
                 <pre class="javascript" data-codeBlock="1-Javascript"><code class="javascript">
-[{
+{
     code: 'JUzgt',
     guild: {
         Guild()
@@ -810,7 +810,7 @@ client.connect()
     channel: {
         TextChannel()
     }
-}, ...]
+}
                 </code></pre>
             </div>
             <h4>catch() Promise</h4>

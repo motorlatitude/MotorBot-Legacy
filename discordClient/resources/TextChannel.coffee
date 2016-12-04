@@ -45,6 +45,7 @@ class TextChannel
   setChannelName: (name) ->
     if !name then new Error("Expected type String for parameter name, got: "+typeof name)
     if name == "" then new Error("No value given for String: name")
+    name = name.replace(/\s/gmi,"").toLowerCase()
     @client.rest.methods().modifyTextChannel(@id, {name: name})
 
   setPosition: (pos) ->

@@ -1,6 +1,8 @@
 u = require('../utils.coffee')
 utils = new u()
 Message = require '../resources/Message'
+TextChannel = require '../resources/TextChannel'
+VoiceChannel = require '../resources/VoiceChannel'
 
 class DiscordMethods
 
@@ -68,10 +70,10 @@ class DiscordMethods
     self = @
     new Promise((resolve, reject) ->
       self.requester.sendRequest("GET", "/channels/"+channel_id+"/messages", options).then((response) ->
-            returnMessages = []
-            for msg in response.body
-              returnMessages.push(new Message(self.client, msg))
-            resolve({messages: returnMessages, httpResponse: response.httpResponse})
+        returnMessages = []
+        for msg in response.body
+          returnMessages.push(new Message(self.client, msg))
+        resolve(returnMessages)
       ).catch((err) ->
         reject(err)
       )
@@ -84,7 +86,7 @@ class DiscordMethods
           returnMessages = []
           for msg in response.body
             returnMessages.push(new Message(self.client, msg))
-          resolve({messages: returnMessages, httpResponse: response.httpResponse})
+          resolve(returnMessages)
       ).catch((err) ->
         reject(err)
       )
@@ -94,7 +96,7 @@ class DiscordMethods
     self = @
     return new Promise((resolve, reject) ->
       self.requester.sendRequest("GET", "/channels/"+channel_id+"/messages/"+message_id, options).then((response) ->
-        resolve({message: new Message(self.client, response.body), httpResponse: response.httpResponse})
+        resolve(new Message(self.client, response.body))
       ).catch((err) ->
         reject(err)
       )
@@ -110,7 +112,10 @@ class DiscordMethods
     self = @
     return new Promise((resolve, reject) ->
       self.requester.sendRequest("GET","/channels/"+channel_id+"/invites").then((response) ->
-        resolve({invite: response.body, httpResponse: response.httpResponse})
+        invites = response.body
+        for invite in invites
+          invite.channel = self.client.channels[invite.channel.id]
+        resolve(response.body)
       ).catch((err) ->
         reject(err)
       )
@@ -119,12 +124,20 @@ class DiscordMethods
     self = @
     return new Promise((resolve, reject) ->
       self.requester.sendRequest("POST","/channels/"+channel_id+"/invites",{max_age: max_age, max_uses: max_uses, temporary: temporary, unique: unique}).then((response) ->
-        resolve({invite: response.body, httpResponse: response.httpResponse})
+        invite = response.body
+        invite.channel = self.client.channels[invite.channel.id]
+        resolve(response.body)
       ).catch((err) ->
         reject(err)
       )
     )
   triggerTypingIndicator:(channel_id) ->
     @requester.sendRequest("POST","/channels/"+channel_id+"/typing")
+
+  addRecipient: (channel_id, user_id, options) ->
+    @requester.sendRequest("PUT","/channels/"+channel_id+"/recipients/"+user_id,options)
+
+  removeRecipient: (channel_id, user_id) ->
+    @requester.sendRequest("DELETE","/channels/"+channel_id+"/recipients/"+user_id)
 
 module.exports = DiscordMethods

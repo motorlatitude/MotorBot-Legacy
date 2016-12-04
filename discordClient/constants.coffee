@@ -34,6 +34,13 @@ Constants.permissions = {
   "MANAGE_EMOJIS":          0x40000000
 }
 
+Constants.channelTypes = {
+  text: 0
+  DirectMessage: 1
+  voice: 2
+  groupDirectMessage: 3
+}
+
 Constants.gateway = {
   PacketCodes: {
 

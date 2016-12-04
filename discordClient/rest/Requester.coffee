@@ -9,14 +9,6 @@ class Requester
   constructor: () ->
     @host = Constants.api.host
 
-  dataOrCallback: (data) ->
-    if typeof data == "object"
-      return {data: data, cb:cb}
-    else if typeof data == "function"
-      return {data: {}, cb:cb}
-    else
-      return {data: {}, cb: undefined}
-
   sendRequest: (method, endpoint, data) ->
     self = @
     return new Promise((resolve, reject) ->

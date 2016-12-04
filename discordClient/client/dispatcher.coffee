@@ -1,9 +1,12 @@
 u = require('../utils.coffee')
 utils = new u()
 util = require 'util'
-voiceConnection = require '../voice/voiceConnection'
+Constants = require '../constants'
+voiceHandler = require '../voice/voiceHandler'
 TextChannel = require '../resources/TextChannel'
 VoiceChannel = require '../resources/VoiceChannel'
+VoiceConnection = require '../resources/VoiceConnection'
+DirectMessageChannel = require '../resources/DirectMessageChannel'
 Message = require '../resources/Message'
 
 ###
@@ -41,18 +44,22 @@ class Dispatcher
       self.discordClient.gatewayWS.send(JSON.stringify(hbPackage))
     ,@clientConnection.HEARTBEAT_INTERVAL)
     @connected = true
+    for dm in data.d.private_channels
+      @discordClient.channels[dm.id] = new DirectMessageChannel(@discordClient, dm)
     @discordClient.emit("ready", data.d)
     #console.log(util.inspect(data, false, null))
 
   handleGuildCreate: (data) -> #fired when bot lazy loads available guilds and joins a new guild
     for i, channel of data.d.channels
       channel.guild_id = data.d.id
-      if channel.type == 2
+      if channel.type == Constants.channelTypes.voice
         @discordClient.channels[channel.id] = new VoiceChannel(@discordClient, channel)
         data.d.channels[i] = new VoiceChannel(@discordClient, channel)
-      else
+      else if channel.type == Constants.channelTypes.text
         @discordClient.channels[channel.id] = new TextChannel(@discordClient, channel)
         data.d.channels[i] = new TextChannel(@discordClient, channel)
+      else
+        utils.debug("Unknown channel type: "+channel.type,"warn")
     @discordClient.guilds[data.d.id] = data.d
     @discordClient.guilds[data.d.id].voice = {}
     thisServer = @discordClient.guilds[data.d.id]
@@ -69,7 +76,8 @@ class Dispatcher
 
   handleVoiceConnection: (data) -> #bot has connected to voice channel
     utils.debug("Joined Voice Channel","info")
-    @discordClient.guilds[data.d.guild_id].voice = new voiceConnection(@discordClient)
+    @discordClient.guilds[data.d.guild_id].voice = new voiceHandler(@discordClient)
     @discordClient.guilds[data.d.guild_id].voice.connect(data.d)
+    @discordClient.emit("VOICE_STATE_UPDATE",new VoiceConnection(@discordClient, @discordClient.guilds[data.d.guild_id].voice))
 
 module.exports = Dispatcher
