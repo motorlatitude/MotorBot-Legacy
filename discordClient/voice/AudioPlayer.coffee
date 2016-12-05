@@ -16,8 +16,6 @@ class playStream extends EventEmitter
     #setup stream
     utils.debug("Setting up new stream")
     @ffmpegDone = false
-    @emptyPacket = false
-    @outputStream = null
     @streamFinished = false
     self = @
     @enc = childProc.spawn('ffmpeg', [
@@ -59,7 +57,6 @@ class playStream extends EventEmitter
       utils.debug("Storing Voice Packets")
       self.packageList = []
       self.opusEncoder = self.voiceConnection.opusEncoder
-      self.emptyPackets = 0
       self.packageData(self.enc.stdout, new Date().getTime(), 1)
       self.stopSend = false
       self.emit("ready")

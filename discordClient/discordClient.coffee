@@ -43,6 +43,7 @@ class DiscordClient extends EventEmitter
     @internals.sequence = 0
     @channels = {}
     @guilds = {}
+    @voiceHandlers = {}
     @getGateway()
   
   leaveVoiceChannel: (server) ->

@@ -33,13 +33,18 @@ new DiscordClient({token: "TOKEN"});
     <tbody>
         <tr>
             <td>guilds</td>
-            <td>Array</td>
-            <td>Comma separated array containing Guild objects</td>
+            <td>Object</td>
+            <td>A dictionary containing guild objects with the <code>guild_id</code> being their key</td>
         </tr>
         <tr>
             <td>channels</td>
-            <td>Array</td>
-            <td>Comma separated array containing TextChannel, VoiceChannel & DirectMessageChannel objects</td>
+            <td>Object</td>
+            <td>A dictionary containing TextChannel, VoiceChannel & DirectMessageChannel objects with the <code>channel_id</code> being their key</td>
+        </tr>
+        <tr>
+            <td>voiceHandlers</td>
+            <td>Object</td>
+            <td>A dictionary containing voiceHandler objects with the <code>guild_id</code> being their key</td>
         </tr>
         <tr>
             <td>connected</td>

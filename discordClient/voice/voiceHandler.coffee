@@ -6,7 +6,7 @@ zlib = require 'zlib'
 fs = require 'fs'
 Opus = require 'node-opus'
 UDPClient = require './udpClient'
-audioPlayer = require './audioPlayer.coffee'
+audioPlayer = require './AudioPlayer.coffee'
 VoicePacket = require './voicePacket.coffee'
 
 class VoiceConnection
@@ -26,14 +26,17 @@ class VoiceConnection
     @endpoint = params.endpoint
     @user_id = @discordClient.internals.user_id
     @session_id = @discordClient.internals.session_id
+    @localPort = undefined
     @vws = null
     @vhb = null
     @packageList = []
     @streamPacketList = []
+    @connectTime = new Date().getTime()
     @users = {}
     @pings = []
     @totalPings = 0
     @avgPing = 0
+    @bytesTransmitted = 0
     utils.debug("Generating new voice WebSocket connection")
     @vws = new ws("wss://"+@endpoint.split(":")[0])
     self = @
@@ -101,6 +104,7 @@ class VoiceConnection
     @udpClient.init(conn)
 
     @udpClient.on('ready', (localIP, localPort) ->
+      self.localPort = localPort
       selectProtocolPayload = {
         "op": 1
         "d":{
@@ -167,6 +171,7 @@ class VoiceConnection
     self = @
     packet = @packageList.shift()
     if packet
+      self.bytesTransmitted += packet.length
       @udpClient.send(packet, 0, packet.length, @port, @endpoint.split(":")[0], (err, bytes) ->
         if err
           utils.debug("Error Sending Voice Packet: "+err.toString(),"error")

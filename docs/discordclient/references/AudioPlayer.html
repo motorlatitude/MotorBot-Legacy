@@ -1,0 +1,132 @@
+<div class="title">
+    AudioPlayer
+    <a href="#references/AudioPlayer-" title="AudioPlayer">
+        <i class="fa fa-anchor anchor" aria-hidden="true"></i>
+    </a>
+    <div class="type">extends EventEmitter</div>
+</div>
+<p>
+    Object that gets created on playing audio in a voice channel using <code>playFromStream()</code> or <code>playFromFile()</code> methods.
+</p>
+<div class="code" data-codeBlockId="1">
+    <div class="langs">
+        <ul class="langSelector">
+            <li class="active" data-linked="1-Javascript">Javascript</li>
+            <li data-linked="1-Coffeescript">CoffeeScript</li>
+        </ul>
+    </div>
+    <pre class="javascript" data-codeBlock="1-Javascript"><code class="javascript">
+channel.join().then(function(VoiceConnection){
+    VoiceConnection.playFromFile("./file/path/to/audio.mp3").then(function(AudioPlayer){
+       console.log(AudioPlayer)
+    });
+});
+                </code></pre>
+    <pre class="coffeescript" data-codeBlock="1-Coffeescript" style="display: none;"><code class="coffeescript">
+channel.join().then((VoiceConnection) ->
+    VoiceConnection.playFromFile("./file/path/to/audio.mp3").then((AudioPlayer)->
+       console.log AudioPlayer
+    )
+)
+    </code></pre>
+</div>
+<div class="notification warn">
+    <div class="bar"></div>
+    <p><b>Important</b></p>
+    <p>
+        This object is still work in progress. Please standby!
+    </p>
+</div>
+<div class="contentsBox">
+    <div class="contentTitle">CONTENTS</div>
+    <ul id="contentsList">
+
+    </ul>
+</div>
+<br>
+<h2 data-header="Properties">Properties <a href="#references/AudioPlayer-properties" title="Properties"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></h2>
+<p>
+    A list of all available properties.
+</p>
+<table>
+    <thead>
+    <tr>
+        <td>Property</td>
+        <td>Type</td>
+        <td>Description</td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>glob_stream</td>
+        <td>Stream</td>
+        <td>The stream passed to the AudioPlayer</td>
+    </tr>
+    <tr>
+        <td>ffmpegDone</td>
+        <td>Bool</td>
+        <td>Is encoding finished for the audio stream</td>
+    </tr>
+    <tr>
+        <td>streamFinished</td>
+        <td>Bool</td>
+        <td>Has the audio finished, returns <code>streamDone</code> event</td>
+    </tr>
+    <tr>
+        <td>packageList</td>
+        <td>Array</td>
+        <td>Comma separated list of audio chunks</td>
+    </tr>
+    <tr>
+        <td>stopSend</td>
+        <td>Bool</td>
+        <td>Stop sending audio packets to the voiceHandler</td>
+    </tr>
+    </tbody>
+</table>
+<br>
+<h2 data-header="Methods">Methods <a href="#references/AudioPlayer-methods" title="Methods"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></h2>
+<p>
+    A list of all available methods.
+</p>
+<ul class="methodList">
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">pause</span>() <a href="#references/AudioPlayer-methods-pause" title="methods-pause"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Pause the current stream. This keeps the audio chunks loaded and ready to be resumed once <code>play()</code> is called.</div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">play</span>() <a href="#references/AudioPlayer-methods-play" title="methods-play"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Play/resume the current stream.</div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">stop</span>() <a href="#references/AudioPlayer-methods-stop" title="methods-stop"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Stop the current stream. This deletes the stream and all loaded audio chunks, the stream <b>cannot</b> be resumed.</div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">setVolume</span>() <a href="#references/AudioPlayer-methods-setVolume" title="methods-setVolume"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Set current audio volume</div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">getVolume</span>() <a href="#references/AudioPlayer-methods-getVolume" title="methods-getVolume"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Get current audio volume</div>
+    </li>
+</ul>
+<br>
+<h2 data-header="Events">Events <a href="#references/AudioPlayer-events" title="Events"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></h2>
+<p>
+    A list of all events that can be fired by this object.
+</p>
+<ul class="methodList">
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">ready</span> <a href="#references/AudioPlayer-events-ready" title="events-ready"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Called once the AudioPlayer is ready to play the stream.</div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">pause</span> <a href="#references/AudioPlayer-events-pause" title="events-pause"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Called once the AudioPlayer has successfully paused the stream.</div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-built_in">streamDone</span> <a href="#references/AudioPlayer-events-streamDone" title="events-streamDone"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Called once the current stream has finished i.e. when the song has finished.</div>
+    </li>
+</ul>

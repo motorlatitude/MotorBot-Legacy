@@ -1,6 +1,7 @@
 DiscordClient = require './discordClient.coffee'
 youtubeStream = require 'ytdl-core'
 keys = require '../keys.json'
+Table = require('cli-table')
 
 dc = new DiscordClient({token: keys.token})
 
@@ -8,10 +9,37 @@ dc.on("ready", (msg) ->
   #console.log "discordClient is ready and sending HB"
 )
 
+songList = ["https://www.youtube.com/watch?v=cyBEQD6065s","https://www.youtube.com/watch?v=gb2ZEzqHH2g","https://www.youtube.com/watch?v=P48RCKp6iVU"]
+
 musicPlayers = {}
 soundboard = {}
 yStream = {}
 voiceConnections = {}
+
+playNextTrack = (guild_id) ->
+  requestUrl = songList.shift()
+  if requestUrl
+    yStream[guild_id] = youtubeStream(requestUrl,{quality: 'lowest', filter: 'audioonly'})
+    yStream[guild_id].on("error", (e) ->
+      console.log("Error Occurred Loading Youtube Video")
+    )
+    yStream[guild_id].on("info", (info, format) ->
+      voiceConnections[guild_id].playFromStream(yStream[guild_id]).then((audioPlayer) ->
+        musicPlayers[guild_id] = audioPlayer
+        musicPlayers[guild_id].on('ready', () ->
+          musicPlayers[guild_id].play()
+        )
+        musicPlayers[guild_id].on("paused", () ->
+          if soundboard[guild_id]
+            soundboard[guild_id].play()
+        )
+        musicPlayers[guild_id].pause()
+        musicPlayers[guild_id].on("streamDone", () ->
+          musicPlayers[guild_id] = undefined
+          playNextTrack(guild_id)
+        )
+      )
+    )
 
 dc.on("message", (msg) ->
   if msg.content.match(/^\!v\sjoin/)
@@ -35,29 +63,8 @@ dc.on("message", (msg) ->
   else if msg.content == "!v leave"
     dc.leaveVoiceChannel(msg.guild_id)
   else if msg.content == "!v play"
-    if !musicStream[msg.guild_id]
-      requestUrl = 'https://www.youtube.com/watch?v=4emYaDbaJ8w'
-      yStream[msg.guild_id] = youtubeStream(requestUrl,{quality: 'lowest', filter: 'audioonly'})
-      yStream[msg.guild_id].on("error", (e) ->
-        console.log("Error Occurred Loading Youtube Video")
-      )
-      yStream[msg.guild_id].on("info", (info, format) ->
-        voiceConnections[msg.guild_id].playFromStream(yStream[msg.guild_id]).then((audioPlayer) ->
-          musicPlayers[msg.guild_id] = audioPlayer
-        )
-        musicPlayers[msg.guild_id].on('ready', () ->
-          musicPlayers[msg.guild_id].play()
-        )
-        musicPlayers[msg.guild_id].on("paused", () ->
-          if soundboard[msg.guild_id]
-            soundboard[msg.guild_id].play()
-        )
-        musicPlayers[msg.guild_id].pause()
-        musicPlayers[msg.guild_id].on("streamDone", () ->
-          #console.log "stream Done"
-          musicPlayers[msg.guild_id] = undefined
-        )
-      )
+    if !musicPlayers[msg.guild_id]
+      playNextTrack(msg.guild_id)
     else
       musicPlayers[msg.guild_id].play()
   else if msg.content == "!v stop"
@@ -66,30 +73,76 @@ dc.on("message", (msg) ->
   else if msg.content == "!v pause"
     musicPlayers[msg.guild_id].pause()
   else if msg.content == "!sb"
-    voiceConnections[msg.guild_id].playFromFile("../soundboard/DootDiddly.mp3").then((audioPlayer) ->
-      soundboard[msg.guild_id] = audioPlayer
-    )
-    soundboard[msg.guild_id].on('ready', () ->
-      if musicPlayers[msg.guild_id]
-        musicPlayers[msg.guild_id].pause()
-      else
-        soundboard[msg.guild_id].play()
-    )
-    soundboard[msg.guild_id].on('streamDone', () ->
-      #soundboard = null
-      if musicPlayers[msg.guild_id]
-        musicPlayers[msg.guild_id].play()
-    )
+    if !soundboard[msg.guild_id]
+      voiceConnections[msg.guild_id].playFromFile("../soundboard/DootDiddly.mp3").then((audioPlayer) ->
+        soundboard[msg.guild_id] = audioPlayer
+        soundboard[msg.guild_id].on('ready', () ->
+          if musicPlayers[msg.guild_id]
+            musicPlayers[msg.guild_id].pause()
+          else
+            soundboard[msg.guild_id].play()
+        )
+        soundboard[msg.guild_id].on('streamDone', () ->
+          soundboard[msg.guild_id] = undefined
+          if musicPlayers[msg.guild_id]
+            musicPlayers[msg.guild_id].play()
+        )
+      )
   else if msg.content == "!ping"
     msg.channel.sendMessage("pong!")
   else if msg.content == "!dev client status"
     server = msg.guild_id
     content = "Motorbot is connected to your gateway server on **"+dc.internals.gateway+"** with an average ping of **"+Math.round(dc.internals.avgPing*100)/100+"ms**. The last ping was **"+dc.internals.pings[dc.internals.pings.length-1]+"ms**."
     msg.channel.sendMessage(content)
-  else if msg.content == "!dev voice status"
+  else if msg.content.match(/^\!dev voice status/)
+    additionalParams = msg.content.replace(/^\!dev voice status\s/gmi,"")
     server = msg.guild_id
-    content = "Motorbot is connected to your voice server on **"+dc.guilds[server].voice.endpoint+"** with an average ping of **"+Math.round(dc.guilds[server].voice.avgPing*100)/100+"ms**. The last ping was **"+dc.guilds[server].voice.pings[dc.guilds[server].voice.pings.length-1]+"ms**."
-    msg.channel.sendMessage(content)
+    if dc.voiceHandlers[server]
+      bytes = dc.voiceHandlers[server].bytesTransmitted
+      units = "Bytes"
+      if bytes > 1024
+        bytes = (Math.round((bytes/1024)*100)/100)
+        units = "KB"
+        if bytes > 1024
+          bytes = (Math.round((bytes/1024)*100)/100)
+          units = "MB"
+          if bytes > 1024
+            bytes = (Math.round((bytes/1024)*100)/100)
+            units = "GB"
+      content = "Motorbot is connected to your voice server on **"+dc.voiceHandlers[server].endpoint+"** with an average ping of **"+Math.round(dc.voiceHandlers[server].avgPing*100)/100+"ms**. The last ping was **"+dc.voiceHandlers[server].pings[dc.voiceHandlers[server].pings.length-1]+"ms**.\n"
+      if additionalParams == "detailed"
+        table = new Table({
+          #head: ["Parameter","Value"]
+          style: {'padding-left':1, 'padding-right':1, head:[], border:[]}
+        })
+        avgPing = (Math.round(dc.voiceHandlers[server].avgPing*100)/100)
+        connectedTime = (Math.round(((new Date().getTime() - dc.voiceHandlers[server].connectTime)/1000)*10)/10)
+        table.push(["Endpoint",dc.voiceHandlers[server].endpoint])
+        table.push(["Local Port",dc.voiceHandlers[server].localPort])
+        table.push(["Average Ping",avgPing+"ms"])
+        table.push(["Last Ping",dc.voiceHandlers[server].pings[dc.voiceHandlers[server].pings.length-1]+"ms"])
+        table.push(["Heartbeats Sent",dc.voiceHandlers[server].pings.length])
+        table.push(["Bytes Transmitted",bytes+" "+units])
+        table.push(["Sequence",dc.voiceHandlers[server].sequence])
+        table.push(["Timestamp",dc.voiceHandlers[server].timestamp])
+        table.push(["Source ID (ssrc)",dc.voiceHandlers[server].ssrc])
+        table.push(["mode","xsalsa20_poly1305"])
+        table.push(["User ID",dc.voiceHandlers[server].user_id])
+        table.push(["Session",dc.voiceHandlers[server].session_id])
+        table.push(["Token",dc.voiceHandlers[server].token])
+        table.push(["Connected",connectedTime+"s"])
+        content = "```markdown\n"+table.toString()+"\n```"
+        if !dc.voiceHandlers[server].pings[0]
+          content += "\n```diff\n- Status: Unknown - Too soon to tell\n```"
+        else if avgPing >= 35
+          content += "\n```diff\n- Status: Poor - Pings a bit high, switch servers?\n```"
+        else if connectedTime >= 172800
+          content += "\n```diff\n- Status: Sweating - Been working for at least 48 hours straight\n```"
+        else
+          content += "\n```diff\n+ Status: Awesome\n```"
+      msg.channel.sendMessage(content)
+    else
+      msg.channel.sendMessage("```diff\n- Not Currently in voice channel\n```")
   else if msg.content == "!react"
     msg.channel.sendMessage("Reacting!")
   else if msg.content == "Reacting!" && msg.author.id == "169554882674556930"
@@ -118,6 +171,9 @@ dc.on("message", (msg) ->
   else if msg.content.match(/^setChannelName\s/gmi)
     name = msg.content.replace(/^setChannelName\s/gmi,"")
     msg.channel.setChannelName(name)
+  else if msg.content.match(/^setUserLimit\s/gmi)
+    user_limit = parseInt(msg.content.replace(/^setUserLimit\s/gmi,""))
+    dc.channels["194904787924418561"].setUserLimit(user_limit)
 )
 
 dc.connect()

@@ -13,6 +13,9 @@ class VoiceConnection
     )
 
   playFromFile: (file) ->
-    return @voiceHandler.playFromFile(file)
+    self = @
+    return new Promise((resolve, reject) ->
+      resolve(self.voiceHandler.playFromFile(file))
+    )
 
 module.exports = VoiceConnection

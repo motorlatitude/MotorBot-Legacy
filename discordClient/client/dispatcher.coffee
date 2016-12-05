@@ -76,8 +76,8 @@ class Dispatcher
 
   handleVoiceConnection: (data) -> #bot has connected to voice channel
     utils.debug("Joined Voice Channel","info")
-    @discordClient.guilds[data.d.guild_id].voice = new voiceHandler(@discordClient)
-    @discordClient.guilds[data.d.guild_id].voice.connect(data.d)
-    @discordClient.emit("VOICE_STATE_UPDATE",new VoiceConnection(@discordClient, @discordClient.guilds[data.d.guild_id].voice))
+    @discordClient.voiceHandlers[data.d.guild_id] = new voiceHandler(@discordClient)
+    @discordClient.voiceHandlers[data.d.guild_id].connect(data.d)
+    @discordClient.emit("VOICE_STATE_UPDATE",new VoiceConnection(@discordClient, @discordClient.voiceHandlers[data.d.guild_id]))
 
 module.exports = Dispatcher
