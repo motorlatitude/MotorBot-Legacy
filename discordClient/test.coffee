@@ -9,7 +9,7 @@ dc.on("ready", (msg) ->
   #console.log "discordClient is ready and sending HB"
 )
 
-songList = ["https://www.youtube.com/watch?v=cyBEQD6065s","https://www.youtube.com/watch?v=gb2ZEzqHH2g","https://www.youtube.com/watch?v=P48RCKp6iVU"]
+songList = ["https://www.youtube.com/watch?v=CkQGvs-SYbk","https://www.youtube.com/watch?v=p7_qZSYAxoQ","https://www.youtube.com/watch?v=vmF64VaquYQ","https://www.youtube.com/watch?v=cyBEQD6065s","https://www.youtube.com/watch?v=gb2ZEzqHH2g","https://www.youtube.com/watch?v=P48RCKp6iVU"]
 
 musicPlayers = {}
 soundboard = {}
@@ -33,7 +33,7 @@ playNextTrack = (guild_id) ->
           if soundboard[guild_id]
             soundboard[guild_id].play()
         )
-        musicPlayers[guild_id].pause()
+        #musicPlayers[guild_id].pause()
         musicPlayers[guild_id].on("streamDone", () ->
           musicPlayers[guild_id] = undefined
           playNextTrack(guild_id)
@@ -67,6 +67,11 @@ dc.on("message", (msg) ->
       playNextTrack(msg.guild_id)
     else
       musicPlayers[msg.guild_id].play()
+  else if msg.content == "!v play force"
+    yStream[msg.guild_id].end()
+    musicPlayers[msg.guild_id].stop()
+    musicPlayers[msg.guild_id] = undefined
+    playNextTrack(msg.guild_id)
   else if msg.content == "!v stop"
     yStream[msg.guild_id].end()
     musicPlayers[msg.guild_id].stop()

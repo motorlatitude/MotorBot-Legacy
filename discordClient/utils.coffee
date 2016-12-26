@@ -6,7 +6,7 @@ class Utils
     if level == "info"
       level = "\x1b[34m[INFO ]\x1b[0m"
     else if level == "error"
-      level = "[ERROR]"
+      level = "\x1b[31m[ERROR]\x1b[0m"
     else if level == "warn"
       level = "\x1b[5m\x1b[33m[WARN ]\x1b[0m"
     else if level == "debug"

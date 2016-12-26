@@ -254,8 +254,11 @@ html(lang="en")
                              });
                         }
                         else if(view == "playlists"){
+                            $(".contentView").scroll(function(){});
                             $.ajax({
-                                url: "/api/getPlaylists",
+                                method: "GET",
+                                //url: "/api/getPlaylists", //old endpoint
+                                url: "/api/user/playlists",
                                 dataType: 'json',
                                 success: function(data){
                                     $.each(data, function (i, item) {
@@ -316,7 +319,7 @@ html(lang="en")
                             $(".contentView").css("display", "none");
                             $(".loader").css("display", "block");
                             $.ajax({
-                                url: "/api/getSongQueue",
+                                url: "/api/queue",
                                 dataType: "json",
                                 success: function (data) {
                                     var k = 0, x = 0, m=0;
@@ -420,7 +423,8 @@ html(lang="en")
                             stopMusic();
                         }
                         $.ajax({
-                            url: '/api/playSongFromPlaylistWithSort/'+self.attr('data-songId')+'/'+self.attr('data-playlistId')+'/'+playlistSort+'/'+playlistSortDir,
+                            //url: '/api/playSongFromPlaylistWithSort/'+self.attr('data-songId')+'/'+self.attr('data-playlistId')+'/'+playlistSort+'/'+playlistSortDir, //old endpoint
+                            url: '/api/music/play/song?id='+self.attr('data-songId')+'&playlist_id='+self.attr('data-playlistId')+'&sort='+playlistSort+'&sort_dir='+playlistSortDir,
                             dataType: 'json',
                             success: function(d){
                                 console.log(d);
@@ -674,7 +678,9 @@ html(lang="en")
                 loadedPlaylistArtwork = false
                 var totalDuration = 0;
                 $.ajax({
-                    url: '/api/getPlaylist/'+playlistID,
+                    method: "GET",
+                    //url: '/api/getPlaylist/'+playlistID, //old endpoint
+                    url: "/api/playlist/by-id/"+playlistID,
                     dataType: 'json',
                     success: function(d){
                         if(d.artwork){
@@ -778,7 +784,7 @@ html(lang="en")
 
             function loadPlaying(){
                 $.ajax({
-                    url: '/api/getPlaying',
+                    url: '/api/music/playing',
                     dataType: 'json',
                     success: function(data){
                         if(data._id){
@@ -814,7 +820,7 @@ html(lang="en")
 
             function playMusic(){
                 $.ajax({
-                    url: '/api/playSong',
+                    url: '/api/music/play',
                     dataType: 'json',
                     success: function(d){
                         //setTimeout(function(){window.location.reload()},2000);
@@ -827,7 +833,7 @@ html(lang="en")
 
             function stopMusic(){
                 $.ajax({
-                    url: '/api/stopSong',
+                    url: '/api/music/stop',
                     dataType: 'json',
                     success: function(d){
                         //setTimeout(function(){window.location.reload()},2000);
@@ -840,7 +846,7 @@ html(lang="en")
 
             function prevMusic(){
                 $.ajax({
-                    url: '/api/prevSong',
+                    url: '/api/music/prev',
                     dataType: 'json',
                     success: function(d){
                         //setTimeout(function(){window.location.reload()},2000);
@@ -853,7 +859,7 @@ html(lang="en")
 
             function skipMusic(){
                 $.ajax({
-                    url: '/api/skipSong',
+                    url: '/api/music/skip',
                     dataType: 'json',
                     success: function(d){
                         //setTimeout(function(){window.location.reload()},2000);
@@ -866,7 +872,7 @@ html(lang="en")
 
             function pauseMusic() {
                 $.ajax({
-                    url: '/api/pauseSong',
+                    url: '/api/music/pause',
                     dataType: 'json',
                     success: function (d) {
                         musicPaused = true;
@@ -880,7 +886,7 @@ html(lang="en")
 
             function resumeMusic() {
                 $.ajax({
-                    url: '/api/resumeSong',
+                    url: '/api/music/play',
                     dataType: 'json',
                     success: function (d) {
                         //setTimeout(function(){window.location.reload()},2000);

@@ -5,20 +5,21 @@ utils = new u()
 VoicePacket = require './voicePacket.coffee'
 childProc = require 'child_process'
 
-class playStream extends EventEmitter
+class AudioPlayer extends EventEmitter
   
   ###
   # PRIVATE METHODS
   ###
   
   constructor: (stream, @voiceConnection, @discordClient) ->
+    utils.debug("New AudioPlayer constructed")
     @glob_stream = stream
     #setup stream
-    utils.debug("Setting up new stream")
     @ffmpegDone = false
     @streamFinished = false
+    @streamBuffErrorCount = 0
     self = @
-    @enc = childProc.spawn('ffmpeg', [
+    self.enc = childProc.spawn('ffmpeg', [
       '-i', 'pipe:0',
       '-f', 's16le',
       '-ar', '48000',
@@ -28,32 +29,32 @@ class playStream extends EventEmitter
     ]).on('error', (e) ->
       utils.debug("FFMPEG encoding error: "+e.toString(),"error")
     )
-    stream.pipe(@enc.stdin)
+    stream.pipe(self.enc.stdin)
 
-    @enc.on('error', (err) ->
+    self.enc.on('error', (err) ->
       utils.debug("Error Occurred: "+err.toString(),"error")
     )
 
-    @enc.stdout.on('error', (err) ->
+    self.enc.stdout.on('error', (err) ->
       utils.debug("Error Occurred: "+err.toString(),"error")
     )
 
-    @enc.stdout.once('end', () ->
+    self.enc.stdout.once('end', () ->
       utils.debug("Stdout END")
       self.enc.kill()
     )
 
-    @enc.once('close', (code, signal) ->
-      utils.debug("Enc CLOSE")
+    self.enc.once('close', (code, signal) ->
+      utils.debug "FFMPEG Stream Closed"
       self.enc.stdout.emit("end")
       self.ffmpegDone = true
     )
 
-    @enc.stderr.on('data', (d) ->
+    self.enc.stderr.on('data', (d) ->
       #console.log 'data: '+d
     )
 
-    @enc.stdout.once('readable', () ->
+    self.enc.stdout.once('readable', () ->
       utils.debug("Storing Voice Packets")
       self.packageList = []
       self.opusEncoder = self.voiceConnection.opusEncoder
@@ -61,12 +62,25 @@ class playStream extends EventEmitter
       self.stopSend = false
       self.emit("ready")
     )
+    stream.on('close', () ->
+      utils.debug("User Stream Closed","warn")
+    )
+    stream.on('error', (err) ->
+      utils.debug("User Stream Error","error")
+      console.log err
+    )
+    stream.on('end', () ->
+      utils.debug "User Stream Ended"
+    )
 
   packageData: (stream, startTime, cnt) ->
     channels = 2 #just assume it's 2 for now
     self = @
     if stream
       streamBuff=stream.read(1920*channels)
+      ###if !streamBuff
+        newBuffer = new Buffer(1920 * channels).fill(0)
+        streamBuff = newBuffer###
       if streamBuff && streamBuff.length != 1920 * channels
         newBuffer = new Buffer(1920 * channels).fill(0)
         streamBuff.copy(newBuffer)
@@ -77,6 +91,12 @@ class playStream extends EventEmitter
         return setTimeout(() ->
           self.packageData(stream, startTime, cnt + 1)
         , 20 + (nextTime - new Date().getTime()));
+      else
+        if @streamBuffErrorCount < 6
+          @streamBuffErrorCount++
+          return setTimeout(() ->
+            self.packageData(stream, startTime, cnt)
+          , 200);
     else
       return setTimeout(() ->
         self.packageData(stream, startTime, cnt)
@@ -92,11 +112,13 @@ class playStream extends EventEmitter
         @streamFinished = true
         @sendEmptyBuffer()
         @emit("streamDone")
+        self.destroy()
       nextTime = startTime + (cnt+1) * 20
       return setTimeout(() ->
         self.sendToVoiceConnection(startTime, cnt + 1)
       , 20 + (nextTime - new Date().getTime()));
     else
+      utils.debug("Stream Paused via stopSend")
       @sendEmptyBuffer()
       @emit("paused")
 
@@ -134,6 +156,7 @@ class playStream extends EventEmitter
     @emit("streamDone")
     @sendEmptyBuffer()
     self = @
+    self.destroy()
     try
       @stopSending()
       @glob_stream.end()
@@ -153,4 +176,4 @@ class playStream extends EventEmitter
 
   getVolume: (streamObj) ->
 
-module.exports = playStream
+module.exports = AudioPlayer
