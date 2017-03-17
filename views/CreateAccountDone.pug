@@ -1,0 +1,33 @@
+doctype html
+html(lang="en")
+    head
+        title Motorbot Playlist
+        meta(name="viewport",content="width=1128px, initial-scale=1")
+        link(type='image/png',rel='icon',href='https://mb.lolstat.net/motorbotIcon.png')
+        link(href="https://fonts.googleapis.com/css?family=Open+Sans|Ubuntu",rel="stylesheet")
+        link(href='/css/register.css',rel='stylesheet')
+        link(href='/font-awesome-4.6.3/css/font-awesome.min.css',rel='stylesheet')
+        script if (typeof module === 'object') {window.module = module; module = undefined; }
+        script(src='/js/jquery-3.1.0.min.js')
+        script if (window.module) module = window.module;
+        script.
+            $(document).ready(function(){
+               setTimeout(function(){
+                   window.location.href="https://mb.lolstat.net";
+               }, 5000);
+            });
+    body
+        .sidebar
+            .bg
+        .steps
+            .step
+                .stepNumber 1
+                .info Authenticate With Discord
+            .step
+                .stepNumber 2
+                .info Create Your New Account
+            .step
+                .stepNumber.active 3
+                .info Enjoy
+                .details
+                    p And you're done, this page will reload in 5 seconds

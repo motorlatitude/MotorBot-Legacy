@@ -24,8 +24,9 @@ class Dispatcher
       when 'TYPING_START' then utils.debug("<@"+data.d.user_id+"> is typing")
       when 'PRESENCE_UPDATE' then @discordClient.emit("status",data.d.user.id,data.d.status,data.d.game,data.d)
       when 'CHANNEL_UPDATE' then utils.debug("CHANNEL_UPDATE event caught")
-      when 'VOICE_STATE_UPDATE' then utils.debug("VOICE_STATE_UPDATE event caught")
+      when 'VOICE_STATE_UPDATE' then @handleVoiceStateUpdate(data)
       when 'VOICE_SERVER_UPDATE' then @handleVoiceConnection(data)
+      when 'RESUMED' then @handleResume(data)
       else
         utils.debug("Unhandled Dispatch t: "+data.t, "warn")
 
@@ -34,18 +35,9 @@ class Dispatcher
     @discordClient.internals.session_id = data.d.session_id
     @discordClient.internals.user_id = data.d.user.id
     self = @
-    # Setup gateway heartbeat
-    @clientConnection.gatewayHeartbeat = setInterval(() ->
-      hbPackage = {
-        "op": 1
-        "d": self.discordClient.internals.sequence
-      }
-      self.discordClient.internals.gatewayPing = new Date().getTime()
-      self.discordClient.gatewayWS.send(JSON.stringify(hbPackage))
-    ,@clientConnection.HEARTBEAT_INTERVAL)
     @connected = true
     for dm in data.d.private_channels
-      @discordClient.channels[dm.id] = new DirectMessageChannel(@discordClient, dm)
+      @discordClient.channels[dm.id] = new DirectMessageChannel(@discordClient, dm) #TODO might have changed, so might have to use extra endpoint call
     @discordClient.emit("ready", data.d)
     #console.log(util.inspect(data, false, null))
 
@@ -74,10 +66,29 @@ class Dispatcher
     else
       utils.debug("Message Create Event Occurred in unknown channel","warn")
 
+  handleVoiceStateUpdate: (data) ->
+    utils.debug("VOICE_STATE_UPDATE event caught")
+    console.log data
+    if data.d
+      if data.d.user_id == '169554882674556930' #TODO make it work for other ids, probably gonna have to do an API call
+        if data.d.channel_id
+          data.d.channel = @discordClient.channels[data.d.channel_id]
+          if @discordClient.voiceConnections[data.d.guild_id]
+            @discordClient.voiceConnections[data.d.guild_id].channel_id = data.d.channel_id
+            @discordClient.voiceConnections[data.d.guild_id].channel_name = data.d.channel.name
+        @discordClient.emit("voiceChannelUpdate", data.d)
+
   handleVoiceConnection: (data) -> #bot has connected to voice channel
     utils.debug("Joined Voice Channel","info")
     @discordClient.voiceHandlers[data.d.guild_id] = new voiceHandler(@discordClient)
     @discordClient.voiceHandlers[data.d.guild_id].connect(data.d)
     @discordClient.emit("VOICE_STATE_UPDATE",new VoiceConnection(@discordClient, @discordClient.voiceHandlers[data.d.guild_id]))
+
+  handleResume: (data) ->
+    console.log data
+    utils.debug("Connection Resumed","info")
+    @discordClient.internals.resuming = false
+    @discordClient.internals.connection_retry_count = 0
+    @connected = true
 
 module.exports = Dispatcher

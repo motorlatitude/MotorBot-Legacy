@@ -29,7 +29,7 @@ class TextChannel
     if !content then new Error("Expected type String for parameter content, got: "+typeof content)
     if !filepath then new Error("Expected type String for parameter filepath, got: "+typeof content)
     if filepath == "" then new Error("No value given for String: filepath")
-    @client.rest.methods().uploadFile(content, filepath, filename, options)
+    @client.rest.methods().uploadFile(content, @id, filepath, filename, options)
 
   modify: (options) ->
     if !options then new Error("Expected type Object for parameter options, got: "+typeof options)

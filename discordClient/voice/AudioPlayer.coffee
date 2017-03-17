@@ -18,6 +18,7 @@ class AudioPlayer extends EventEmitter
     @ffmpegDone = false
     @streamFinished = false
     @streamBuffErrorCount = 0
+    @seekCnt = 0
     self = @
     self.enc = childProc.spawn('ffmpeg', [
       '-i', 'pipe:0',
@@ -78,19 +79,16 @@ class AudioPlayer extends EventEmitter
     self = @
     if stream
       streamBuff=stream.read(1920*channels)
-      ###if !streamBuff
-        newBuffer = new Buffer(1920 * channels).fill(0)
-        streamBuff = newBuffer###
       if streamBuff && streamBuff.length != 1920 * channels
         newBuffer = new Buffer(1920 * channels).fill(0)
         streamBuff.copy(newBuffer)
         streamBuff = newBuffer
       if streamBuff
         @packageList.push(streamBuff)
-        nextTime = startTime + (cnt+1) * 20
+        nextTime = startTime + (cnt+1) * 10
         return setTimeout(() ->
           self.packageData(stream, startTime, cnt + 1)
-        , 20 + (nextTime - new Date().getTime()));
+        , 10 + (nextTime - new Date().getTime()));
       else
         if @streamBuffErrorCount < 6
           @streamBuffErrorCount++
@@ -105,15 +103,19 @@ class AudioPlayer extends EventEmitter
   sendToVoiceConnection: (startTime, cnt) ->
     self = @
     if !@stopSend
+      @voiceConnection.buffer_size = new Date(self.packageList.length*20).toISOString().substr(11, 8)
       packet = @packageList.shift()
       if packet
         @voiceConnection.streamPacketList.push(packet)
+        @emit("streamTime",self.seekCnt*20)
       else if @ffmpegDone && !@streamFinished
         @streamFinished = true
         @sendEmptyBuffer()
+        utils.debug("Stream Done in sendToVoiceConnection")
         @emit("streamDone")
         self.destroy()
       nextTime = startTime + (cnt+1) * 20
+      self.seekCnt++
       return setTimeout(() ->
         self.sendToVoiceConnection(startTime, cnt + 1)
       , 20 + (nextTime - new Date().getTime()));
@@ -124,9 +126,10 @@ class AudioPlayer extends EventEmitter
 
   sendEmptyBuffer: () ->
     streamBuff = new Buffer(1920).fill(0)
-    encoded = @opusEncoder.encode(streamBuff, 1920)
-    audioPacket = new VoicePacket(encoded, @, @voiceConnection)
-    @voiceConnection.packageList.push(audioPacket)
+    #encoded = @opusEncoder.encode(streamBuff, 1920)
+    #audioPacket = new VoicePacket(encoded, @, @voiceConnection)
+    #@voiceConnection.packageList.push(audioPacket)
+    @packageList.push(streamBuff)
 
   stopSending: () ->
     @stopSend = true
@@ -153,27 +156,32 @@ class AudioPlayer extends EventEmitter
   stop: () ->
     #stop sending voice data and turn speaking off for bot
     utils.debug("Stopping Stream")
-    @emit("streamDone")
     @sendEmptyBuffer()
+    @voiceConnection.setSpeaking(false)
     self = @
-    self.destroy()
+    self.stopSending()
     try
-      @stopSending()
-      @glob_stream.end()
-      @glob_stream.destroy()
-      @enc.kill("SIGSTOP")
+      self.glob_stream.end()
+      self.glob_stream.destroy()
+      self.enc.kill("SIGSTOP")
       setTimeout(() ->
         #completely kill the process after delay
         self.enc.kill()
+        self.emit("streamDone")
+        self.destroy()
       ,1000)
     catch err
+      self.emit("streamDone")
+      self.destroy()
       utils.debug("Error stopping sending of voice packets: "+err.toString(),"error")
 
   destroy: () ->
     delete @
 
-  setVolume: (streamObj) ->
+  setVolume: (volume) ->
+    @voiceConnection.volume = volume
 
-  getVolume: (streamObj) ->
+  getVolume: () ->
+    return @voiceConnection.volume
 
 module.exports = AudioPlayer

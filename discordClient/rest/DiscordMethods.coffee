@@ -19,6 +19,8 @@ class DiscordMethods
         data.tts = options.tts.toString()
       if options.nonce
         data.nonce = options.nonce.toString()
+      if options.embed
+        data.embed = options.embed
     @requester.sendRequest("POST", "/channels/"+channel_id+"/messages", data)
 
   createReaction: (emoji, channel_id, message_id) ->
@@ -48,7 +50,7 @@ class DiscordMethods
   deletePinnedMessage: (channel_id, message_id) ->
     @requester.sendRequest("DELETE", "/channels/"+channel_id+"/pins/"+message_id)
 
-  uploadFile: (content, file, filename, options) ->
+  uploadFile: (content, channel_id, file, filename, options) ->
     data = {content: content, tts: "false"}
     if options
       if options.tts

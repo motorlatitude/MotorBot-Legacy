@@ -2,7 +2,7 @@
     .bg(style="")
     .playlistType PLAYLIST
     .playlistName
-    .playlistStats Created By: <span class="user"></span> &bull; <span class="songTotal">0</span> Songs, <span class="songTotalPlaytime">0 hr 0 mins</span>
+    .playlistStats Created By: <span class="user"></span> &bull; <span class="songTotal">0</span> Songs, <span class="songTotalPlaytime">0 hr 0 mins</span> &bull; <span class="followCount"></span>
     .playlistOptions
         .playPlaylistButton <i class="fa fa-play" aria-hidden="true"></i> &nbsp; &nbsp;PLAY
         -var isFollowingPlaylist = false
@@ -18,7 +18,7 @@
 ul#playlist
     li.titleRow
         .trackRow
-            .item
+            .item &nbsp;
             .title SONG
             .artist ARTIST
             .album ALBUM

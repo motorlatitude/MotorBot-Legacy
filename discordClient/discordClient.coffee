@@ -44,7 +44,22 @@ class DiscordClient extends EventEmitter
     @channels = {}
     @guilds = {}
     @voiceHandlers = {}
+    @voiceConnections = {}
     @getGateway()
+
+  setStatus: (status) ->
+    dataMsg = {
+      "op": 3,
+      "d" :{
+        "idle_since": null,
+        "game": {
+          "name": status
+        }
+      }
+    }
+    if @gatewayWS.readyState == @gatewayWS.OPEN
+      @gatewayWS.send(JSON.stringify(dataMsg))
+      utils.debug("Status Succesfully Set to \""+status+"\"","info")
   
   leaveVoiceChannel: (server) ->
     leaveVoicePackage = {

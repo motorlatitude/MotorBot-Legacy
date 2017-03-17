@@ -23,6 +23,7 @@ class UDPClient extends EventEmitter
   init: (@conn) ->
     #create initial collection
     @udpClient = dgram.createSocket('udp4')
+    @udpClient.bind(48805)
     udpInitPacket = Buffer.alloc(70)
     udpInitPacket.writeUInt16BE(parseInt(@conn.ssrc), 0, 4)
     @udpClient.send(udpInitPacket, 0, udpInitPacket.length, parseInt(@conn.port), @conn.endpoint, (err, bytes) ->
@@ -32,6 +33,7 @@ class UDPClient extends EventEmitter
     )
     self = @
     @udpClient.on('message', (msg, rinfo) -> self.handleUDPMessage(msg, rinfo))
+
 
   handleQueue: () ->
     self = @

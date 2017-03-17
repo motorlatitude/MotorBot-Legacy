@@ -1,29 +1,32 @@
-.playlistQueueContainer
-    .playlistTitle Current Song
-    ul.songList#currentSong
-        li.titleRow
-            .trackRow
-                .title SONG
-                .artist ARTIST
-                .album ALBUM
-                .time <i class="fa fa-clock-o" aria-hidden="true"></i>
+.contentWrapper
+    .contentTitle Current Song
+    br
+    br
+    #currentSong
+        .artwork
+        .title
+        .album_name Nothing Currently Playing
+        .artist_name
+        .length
 
-.playlistQueueContainer
+.playlistQueueContainer(style="margin-top: 350px;")
     .playlistTitle Queued Songs
     .clearQueueButton.button.blue <i class="fa fa-trash" aria-hidden="true"></i> &nbsp; Clear
     ul.songList#queueList
         li.titleRow
             .trackRow
+                .item
                 .title SONG
                 .artist ARTIST
                 .album ALBUM
                 .time <i class="fa fa-clock-o" aria-hidden="true"></i>
 
-.playlistQueueContainer
+.playlistQueueContainer(style="margin-top: 350px;")
     .playlistTitle Next Songs
     ul.songList#nextSongsList
         li.titleRow
             .trackRow
+                .item
                 .title SONG
                 .artist ARTIST
                 .album ALBUM

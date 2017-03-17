@@ -1,0 +1,26 @@
+.subTitleBar(style="display: block;")
+    .subWrapper
+        ul.subnav
+            li(onclick='loadView("account","undefined")') MY ACCOUNT
+            li.active CONNECTIONS
+
+.contentWrapper
+    br
+    br
+    br
+    .contentTitle Connections
+    p Services you can connect to your account;
+    ul.connections
+        li(onclick='window.location.href="https://mb.lolstat.net/api/spotify/"') <img src="/spotify_icon.png">
+    br
+    br
+    br
+    br
+    p Current services you have authorised MotorBot Music to have access to;
+    ul.connected
+        if user.connections
+            each connection, key in user.connections
+                li
+                    .title <img src="/#{key}_icon.png"> &nbsp; #{key}
+                        span.user &nbsp;- #{connection.username}
+                    input.disconnect.blue(type="button",value="Disconnect")

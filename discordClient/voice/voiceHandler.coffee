@@ -32,11 +32,13 @@ class VoiceConnection
     @packageList = []
     @streamPacketList = []
     @connectTime = new Date().getTime()
+    @volume = 0.5
     @users = {}
     @pings = []
     @totalPings = 0
     @avgPing = 0
     @bytesTransmitted = 0
+    @buffer_size = 0
     utils.debug("Generating new voice WebSocket connection")
     @vws = new ws("wss://"+@endpoint.split(":")[0])
     self = @
@@ -154,7 +156,20 @@ class VoiceConnection
       streamBuff=streamPacket
       @sequence = if (@sequence + 1) < 65535 then @sequence += 1 else @sequence = 0
       @timestamp = if (@timestamp + 960) < 4294967295 then @timestamp += 960 else @timestamp = 0
-      # TODO volume transformation
+      out = new Buffer(streamBuff.length);
+      multiplier =  Math.pow(self.volume, 1.660964);
+      i = 0
+      while i < streamBuff.length
+        if i >= streamBuff.length - 1
+          break
+        uint = Math.floor(multiplier * streamBuff.readInt16LE(i))
+        # Ensure value stays within 16bit
+        uint = Math.min(32767, uint)
+        uint = Math.max(-32767, uint)
+        # Write 2 new bytes into other buffer;
+        out.writeInt16LE(uint, i)
+        i += 2
+      streamBuff = out;
       encoded = @opusEncoder.encode(streamBuff, 1920)
       audioPacket = new VoicePacket(encoded, @)
       @packageList.push(audioPacket)
@@ -178,7 +193,7 @@ class VoiceConnection
       )
     nextTime = startTime + (cnt+1) * 20
     return setTimeout(() ->
-      self.send(startTime, cnt + 1)
+      self.send(startTime, (cnt + 1))
     , 20 + (nextTime - new Date().getTime()))
 
   playFromStream: (stream) ->

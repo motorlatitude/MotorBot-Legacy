@@ -1,0 +1,16 @@
+.subTitleBar(style="display: block;")
+    .subWrapper
+        ul.subnav
+            li.active MY ACCOUNT
+            li(onclick='loadView("connections","undefined")') CONNECTIONS
+
+.contentWrapper
+    br
+    br
+    br
+    .contentTitle My Account
+    p Username: #{user.username}##{user.discriminator}
+    br
+    br
+    .contentTitle Raw Account Data
+    pre #{JSON.stringify(user, null, "\t")}

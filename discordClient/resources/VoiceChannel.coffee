@@ -28,6 +28,9 @@ class VoiceChannel
     return new Promise((resolve, reject) ->
       self.client.gatewayWS.send(JSON.stringify(joinVoicePackage))
       self.client.on("VOICE_STATE_UPDATE", (voiceConnection) ->
+        voiceConnection.channel_id = self.id
+        voiceConnection.channel_name = self.name
+        self.client.voiceConnections[self.guild_id] = voiceConnection
         resolve(voiceConnection)
       )
     )
