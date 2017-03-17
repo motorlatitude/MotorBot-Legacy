@@ -394,6 +394,16 @@ body{
     border-radius: 3px;
 }
 
+.content p a{
+    cursor: pointer;
+    color:  rgba(0, 170, 234, 1.00);
+    text-decoration: none;
+}
+
+.content p a:hover{
+    text-decoration: underline;
+}
+
 .content .link{
     cursor: pointer;
     color:  rgba(0, 170, 234, 1.00);
@@ -591,6 +601,7 @@ body{
 
 .content ul.methodList li .returns>p{
     margin: 15px 0;
+    font-size: 13px;
 }
 
 .content ul.methodList li .returns .code{
@@ -609,6 +620,11 @@ body{
     width: calc(100% - 120px);
     overflow-x: auto;
     overflow-y: hidden;
+}
+
+.content ul.methodList li .parameters>p{
+    margin: 15px 0;
+    font-size: 13px;
 }
 
 .content ul.methodList li .parameters table{

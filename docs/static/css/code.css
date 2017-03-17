@@ -30,3 +30,17 @@
 .hljs-comment{
     color: #777;
 }
+
+.hljs-http{
+    color: rgba(247, 167, 0, 1.00);
+    font-weight: bold;
+}
+
+.hljs-endpoint-path{
+    color: #777;
+}
+
+.hljs-endpoint-path-parameter{
+    color: rgba(63, 150, 230, 1.00) !important;
+    font-weight: bold;
+}

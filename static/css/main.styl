@@ -1,11 +1,13 @@
 *
   -webkit-font-smoothing antialiased
 
+$active_color = #00b6ff
+
 body
 html
   margin 0
   padding 0
-  background rgba(19, 22, 26, 1.00)
+  background #1f1f26
   color #fff
   font-family 'Ubuntu', 'Open Sans', sans-serif
   font-size 13px
@@ -13,38 +15,18 @@ html
   min-width 1128px
   overflow hidden
 
-.electronBar
+.titlebar
   position fixed
-  top 0
-  left 0
-  right 0
-  height 34px
-  background rgba(33, 40, 48, 0.8)
-  border-bottom 1px solid rgba(255,255,255,0.2)
-  box-shadow inset 0 -1px 0 rgba(30,30,30,0.1)
-  -webkit-app-region: drag;
-
-.titleBar
-  position fixed
-  z-index 120
   top 0
   left 0
   right 0
   height 60px
-  width 100%
-  min-width 1128px
-  background rgba(37, 45, 55, 1.00)
-  box-shadow 0 2px 10px rgba(0,0,0,0.2)
-  & .siteIcon
-    position absolute
-    top 5px
-    left 5px
-    line-height 50px
-    & img
-      width 64px
+  background #131619
+  z-index 100
+  -webkit-app-region drag
   & .search
     float left
-    margin-left 100px
+    margin-left 30px
     padding 0
     width 270px
     background transparent
@@ -60,7 +42,7 @@ html
   & .searchIcon
     position absolute
     top 23px
-    left 80px
+    left 10px
     font-size 14px
     color rgba(255,255,255,0.2)
   & .nav
@@ -90,7 +72,7 @@ html
   & .version
     position absolute
     bottom -45px
-    left 13px
+    right 13px
     text-align right
     line-height 40px
     color rgba(255,255,255,0.4)
@@ -275,468 +257,6 @@ html
         &:last-child
           border-bottom 0 solid transparent
 
-.subTitleBar
-  display none
-  position absolute
-  top 60px
-  left 0
-  right 0
-  width 100%
-  height 50px
-  background rgba(33, 40, 49, 0.8)
-  min-width 1128px
-  z-index 1
-  & .subWrapper
-    position absolute
-    top 0
-    left calc(50% - 564px)
-    width 1128px
-    height 50px
-    & .subnav
-      float left
-      list-style none
-      margin 0
-      padding 0
-      & li
-        float left
-        margin-top 0
-        line-height 50px
-        padding 0 25px
-        cursor pointer
-        font-size 12px
-        font-weight 500
-        text-transform uppercase
-        color rgba(132, 137, 143, 1.00)
-        &:hover
-          color #fff
-        &.active
-          box-shadow inset 0 -3px 0 rgba(0, 179, 237, 1.00)
-          color #fff
-
-.playerBar
-  position fixed
-  z-index 120
-  bottom 0
-  left 0
-  right 0
-  width 100%
-  min-width 1128px
-  height 60px
-  background rgba(37, 45, 55, 1.00)
-  .controls
-    position absolute
-    top 12px
-    left 15px
-    font-size 20px
-    & .prev
-      float left
-      margin-top 5px
-      line-height 30px
-      padding-bottom 2px
-      width 32px
-      text-align center
-      border-radius 50%
-    & .skip
-      float left
-      margin-left 7px
-      margin-top 5px
-      line-height 30px
-      padding-bottom 2px
-      width 32px
-      text-align center
-      border-radius 50%
-    & .playStopButton
-      float left
-      margin-left 10px
-      line-height 38px
-      padding-bottom 2px
-      width 38px
-      font-size 24px
-      text-align center
-      border-radius 50%
-      cursor pointer
-  & .activeArtwork
-    position absolute
-    top 5px
-    left 150px
-    height 50px
-    width 50px
-    border-radius 3px
-    background-color rgba(255,255,255,0.1)
-  & .duration
-    color rgba(255,255,255,0.6)
-    position absolute
-    top 24px
-    left 425px
-    text-align right
-    width 60px
-    font-size 13px
-  & .songDuration
-    color rgba(255,255,255,0.6)
-    position absolute
-    top 24px
-    right 82px
-    with 60px
-    text-align left
-    width 60px
-    font-size 13px
-  & .activeTrack
-    position absolute
-    top 14px
-    font-size 14px
-    font-weight 600
-    left 210px
-    color #fff
-    width 220px
-    overflow hidden
-    white-space nowrap
-    text-overflow ellipsis
-  & .activeArtist
-    position absolute
-    top 34px
-    font-size 12px
-    left 210px
-    width 200px
-    overflow hidden
-    white-space nowrap
-    text-overflow ellipsis
-    font-weight 500
-    color rgba(255,255,255,0.8)
-  & .timelineWrapper
-    float right
-    width calc(100% - 640px)
-    margin 30px 150px
-    height 5px
-    background rgba(255,255,255,0.1)
-    border-radius 30px
-    overflow hidden
-    & .timeline
-      width 0%
-      height 5px
-      border-radius 30px
-      background linear-gradient(to right, rgba(0,179,237,0.8) 0%, rgba(109, 82, 239, 1.00) 100%)
-      //border 1px solid rgba(0, 179, 237, 1.00)
-      box-shadow inset 0 1px 0 rgba(19, 22, 25, 1.00)
-  & .random
-    position absolute
-    right 10px
-    top 13px
-    line-height 38px
-    padding-bottom 2px
-    width 38px
-    font-size 18px
-    text-align center
-    border-radius 50%
-    cursor pointer
-    &.active
-      color rgba(0, 179, 237, 1)
-  & .repeat
-    position absolute
-    right 50px
-    top 13px
-    line-height 38px
-    padding-bottom 2px
-    width 38px
-    font-size 18px
-    text-align center
-    border-radius 50%
-    //cursor pointer
-    opacity 0.2
-    &.active
-      color rgba(0, 179, 237, 1)
-
-.bodyWrapper
-  position absolute
-  top 0
-  left 0
-  right 0
-  bottom 0
-  overflow hidden
-  height auto
-  width 100%
-  min-width 1128px
-
-.contentView
-  width 100%
-  min-width 1128px
-  height auto
-  position absolute
-  top 0
-  right 0
-  bottom 60px
-  overflow auto
-
-.contextMenu
-  display none
-  margin 0
-  padding 10px 0
-  position absolute
-  top 0
-  left 0
-  z-index 1000
-  width 210px
-  height auto
-  max-height 333px
-  background rgba(27, 29, 32, 1.00)
-  box-shadow 0 0 5px rgba(0,0,0,0.3)
-  border-radius 4px
-  overflow hidden
-  & ul
-    list-style none
-    margin 0
-    padding 0
-    width 100%
-    & li
-      width calc(100% - 30px)
-      padding 10px 15px
-      cursor pointer
-      color #eee
-      &:hover
-        background rgba(200,200,200,0.1)
-      &[disabled='true']
-        color rgba(255,255,255,0.2)
-        cursor default
-        &:hover
-          background transparent
-      &.sep
-        width 100%
-        height 1px
-        padding 0
-        margin 9px 0
-        background rgba(43, 45, 47, 0.8)
-
-.header
-  width 100%
-  min-width 1128px
-  height 250px
-  background rgba(27, 27, 32, 1.00)
-  color #fff
-  font-size 26px
-  font-family Helvetica Neue, Helvetica, Arial, sans-serif
-  font-weight 400
-  position absolute
-  top 50px
-  left 0
-  overflow hidden
-  z-index 9
-  & .bg
-    width 50%
-    height 100%
-    position absolute
-    top 0
-    right 0
-    bottom 0
-    &:after
-      content ''
-      position absolute
-      width 100%
-      height 100%
-      background linear-gradient(to left, rgba(27, 27, 32, 0.4) 0%, rgba(27, 27, 32, 1.00) 100%)
-  & .playlistType
-    position absolute
-    left calc(50% - 564px)
-    top 45px
-    width 1128px
-    font-size 16px
-    font-weight 400
-    color rgba(200,200,200,0.8)
-  & .playlistName
-    position absolute
-    left calc(50% - 564px)
-    top 70px
-    width 800px
-    font-size 38px
-    color #fff
-    white-space nowrap
-    overflow hidden
-    text-overflow ellipsis
-  & .playlistStats
-    position absolute
-    left calc(50% - 564px)
-    top 120px
-    width 1128px
-    font-size 15px
-    font-weight 500
-    color rgba(220,220,220,0.8)
-    & span.user
-      color #fff
-      cursor pointer
-      &:hover
-        text-decoration underline
-  & .playing
-    position absolute
-    top 20px
-    left 50px
-  & .playlistOptions
-    position absolute
-    top 160px
-    left calc(50% - 564px)
-    width 370px
-    & .playPlaylistButton, .followPlaylistButton, .playlistExtraOptions
-      display inline-block
-      border-radius 50px
-      padding 6px 30px
-      font-family Helvetica Neue, Helvetica, Arial, sans-serif
-      font-weight 500
-      font-size 13px
-      border: 1px solid rgba(0, 179, 237, 1.00)
-      color #fff
-      background rgba(0, 179, 237, 1.00)
-      cursor pointer
-      opacity 0.9
-      &:hover
-        opacity 1
-    & .followPlaylistButton
-      background rgba(0,0,0,0.4)
-      border: 1px solid rgba(200,200,200,1.0)
-      margin-left 20px
-      &:hover
-        border 1px solid rgba(0, 179, 237, 1.00)
-      &.following
-        border: 1px solid rgba(0, 179, 237, 1.00)
-        &:hover
-          border: 1px solid rgba(200,200,200,1.0)
-    & .playlistExtraOptions
-      background rgba(0,0,0,0.4)
-      border 1px solid rgba(255,255,255,0.6)
-      padding 6px 9px
-      margin-left 20px
-      opacity 1
-      &:hover
-        border 1px solid rgba(255,255,255,1)
-  & .artwork
-    display none
-    position absolute
-    top 56px
-    left calc(50% + 389px)
-    width 175px
-    height 175px
-    box-shadow 0 0 6px rgba(0,0,0,0.4)
-
-#playlist,
-.songList
-  list-style none
-  margin 0
-  margin-top 135px
-  padding 0
-  width 100%
-  min-width 1128px
-  height 100%
-  & li
-    float left
-    width calc(100% - 20px)
-    min-width 1128ox
-    padding 0 10px
-    cursor pointer
-    //background rgba(34, 34, 41, 1.00)
-    font-size 12px
-    //border-bottom 1px solid rgba(36, 36, 36, 1.00)
-    background transparent
-    &:nth-child(2n)
-      background rgba(23, 27, 34, 0.7)
-    &.titleRow
-      font-size 12px
-      font-weight bold
-      text-transform uppercase
-      color rgba(132, 137, 143, 1.00)
-      position absolute
-      top 272px
-      left 0
-      width calc(100% - 20px)
-      right 20px
-      background rgba(33, 40, 49, 1.00)
-      cursor default
-      z-index 10
-      box-shadow 0 -2px 10px rgba(0,0,0,0.2)
-      & .sortDir
-        color rgba(0, 170, 234, 1.00)
-        margin-left 10px
-        opacity 1
-      &>.trackRow>div
-        cursor pointer
-      &>.trackRow>div:hover
-        color #fff
-        opacity 1
-        background rgba(30, 36, 43, 1)
-    &:nth-child(2)
-      margin-top 167px
-    & .trackRow
-      max-width 1128px
-      margin-left calc(50% - 564px)
-      & .item
-        display inline-block
-        width 35px
-        text-align right
-        vertical-align top
-        line-height 30px
-        padding-right 30px
-        position relative
-        top 0
-        right 0
-        & .play
-          position absolute
-          top 8px
-          right 3px
-          font-size 14px
-          color rgba(3, 164, 216, 1.00)
-      & .title
-        display inline-block
-        vertical-align top
-        line-height 30px
-        width 332px
-        white-space nowrap
-        overflow hidden
-        text-overflow ellipsis
-        padding-right 10px
-        padding-left 10px
-      & .artist
-        display inline-block
-        width 240px
-        white-space nowrap
-        overflow hidden
-        text-overflow ellipsis
-        padding-right 10px
-        padding-left 10px
-        vertical-align top
-        line-height 30px
-      & .album
-        display inline-block
-        width 240px
-        white-space nowrap
-        overflow hidden
-        text-overflow ellipsis
-        padding-right 10px
-        padding-left 10px
-        vertical-align top
-        line-height 30px
-      & .timestamp
-        display inline-block
-        width 90px
-        padding-left 10px
-        white-space nowrap
-        overflow hidden
-        text-overflow ellipsis
-        color rgba(255,255,255,0.6)
-        vertical-align top
-        line-height 30px
-      & .time
-        display inline-block
-        width 70px
-        padding-left 10px
-        padding-right 10px
-        text-align right
-        white-space nowrap
-        overflow hidden
-        text-overflow ellipsis
-        color rgba(255,255,255,0.6)
-        vertical-align top
-        line-height 30px
-    &.active
-      background rgba(3, 164, 216, 1.00)
-      color #fff
-      & .trackRow .item .play
-        color #fff
-
 .errorList
   position fixed
   top 60px
@@ -796,277 +316,308 @@ html
 #socketClose
   display none
 
-.contentWrapper
+.flexContainer
   position absolute
-  top 80px
-  left calc(50% - 564px)
-  min-width 1128px
-  width 1128px
-  height auto
-  & .contentTitle
-    display inline-block
-    color #fff
-    font-size 30px
-    font-weight bold
-  & .developerValues
-    width 100%
-    height auto
-    padding 10px
-    background rgba(62, 152, 246, 0.2)
-    border-radius 3px
-  & .connections
-    list-style none
-    margin 0
-    padding 0
-    & li
-      float left
-      margin-left 20px
-      height 50px
-      width 50px
-      border 1px solid rgba(25, 29, 33, 1.00)
-      border-radius 3px
-      cursor pointer
-      &:first-child
-        margin-left 0
-      &:hover
-        background rgba(25, 29, 33, 1.00)
-      & img
-        margin 10px
-        width 28px
-  & .connected
-    list-style none
-    margin 0
-    padding 0
-    & li
-      margin-top 20px
-      float left
-      height 150px
-      width calc(100% - 60px)
-      background rgba(33, 40, 49, 1.00)
-      border-radius 3px
-      box-shadow 0 0 12px rgba(0,0,0,0.1)
-      padding 0 30px 10px 30px
-      position relative
-      top 0
-      right 0
-      & .title
-        color #ddd
-        font-size 18px
-        width calc(100% - 40px)
-        line-height 60px
-        padding-left 40px
-        text-transform: capitalize
-        border-bottom 1px solid rgba(40, 47, 56, 1.00)
-        position relative
-        top 0
-        left 0
-        & img
-          position absolute
-          top 13px
-          left 7px
-          height 32px
-        & .user
-          text-transform: none
-          color rgba(255,255,255,0.5)
-      & .disconnect
-        position absolute
-        top 10px
-        right 30px
-        border-radius 3px
-        padding 0 20px
-        font-family Helvetica Neue, Helvetica, Arial, sans-serif
-        font-weight bold
-        font-size 14px
-        line-height 40px
-        color rgba(126, 129, 133, 1.00)
-        cursor pointer
-        opacity 0.9
-        border 0 solid transparent
-        background transparent
-        &:hover
-          background rgba(0,0,0,0.2)
-        &.blue
-          color rgba(0, 179, 237, 1.00)
-          &:hover
-            background rgba(0,0,0,0.2)
-        &:focus
-          outline none
-        &:active
-          outline none
-
-.button
-  display inline-block
-  border-radius 3px
-  padding 6px 20px
-  font-family Helvetica Neue, Helvetica, Arial, sans-serif
-  font-weight bold
-  font-size 13px
-  border: 1px solid rgba(200,200,200,1.0)
-  color #fff
-  cursor pointer
-  opacity 0.9
-  background rgba(0,0,0,0.4)
-  &.blue
-    background rgba(0, 179, 237, 1.00)
-    border: 1px solid rgba(0, 179, 237, 1.00)
-  &:hover
-    opacity 1
-    box-shadow 0 3px 8px rgba(0,0,0,0.8)
-
-.modalityOverlay
-  display none
-  position absolute
-  z-index 10000
-  top 0
+  top 60px
   left 0
   right 0
-  bottom 0
-  background rgba(20, 20, 24, 0.8)
-
-.modalFrame
-  display none
-  position absolute
-  left calc(50% - 280px)
-  top calc(50% - 115px)
-  z-index 10001
-  max-width 500px
-  min-height 50px
+  bottom 79px
+  width auto
   height auto
-  width 680px
-  background rgba(28, 32, 38, 1.00)
-  box-shadow 0 0 14px rgba(0,0,0,0.7)
-  padding 30px 30px 0 30px
-  & .modalTitle
-    font-size 16px
-    color rgba(0, 179, 237, 1.00)
-  & .modalDescription
-    font-size 14px
-    color #eee
-  & .extra
-    color #aaaaaa
-    font-size 12px
-  & input[type="text"]
-    float left
-    margin 0
-    margin-top -20px
-    padding 0
-    width 100%
-    background transparent
-    border 0 solid transparent
-    border-bottom 1px solid rgba(64, 68, 73, 1.00)
-    line-height 34px
-    font-size 14px
-    margin-top 8px
-    color rgba(255,255,255,0.8)
-    &::-webkit-input-placeholder
-      color rgba(255,255,255,0.2)
-    &:focus
-      outline none
-      border-bottom 1px solid rgba(0, 179, 237, 1.00)
-      box-shadow inset 0 -1px 0 rgba(0, 179, 237, 1.00)
-  & .modalControls
-    float left
-    width 100%
-    height 50px
-    margin-top 20px
-    padding 10px 0
-    border-top 1px solid rgba(36, 41, 47, 1.00)
-    & input[type="submit"], input[type="button"]
-      float right
-      border-radius 3px
-      padding 0 20px
-      font-family Helvetica Neue, Helvetica, Arial, sans-serif
-      font-weight bold
-      font-size 14px
-      line-height 40px
-      color rgba(126, 129, 133, 1.00)
-      cursor pointer
-      opacity 0.9
-      border 0 solid transparent
-      background transparent
-      &:hover
-        background rgba(0,0,0,0.2)
-      &.blue
-        color rgba(0, 179, 237, 1.00)
-        &:hover
-          background rgba(0,0,0,0.2)
-      &:focus
-        outline none
-      &:active
-        otuline none
-    & .modalLoader
-      display none
-      float left
-      margin-top 6px
-      width 18px
-      height 18px
-      z-index 100
-      border-radius 50%
-      box-sizing border-box
-      border solid 2px transparent
-      border-top-color rgba(0, 179, 237, 1.00)
-      border-left-color rgba(0, 179, 237, 1.00)
-      animation spinner 1.0s infinite linear
-  #addToPlaylist_confirmNewPlaylistName
-    position absolute
-    top 15px
-    right 10px
+  display -webkit-flex
+  display flex
+  -webkit-flex-direction row
+  flex-direction row
+  -webkit-flex-wrap nowrap
+  flex-wrap nowrap
+
+.sidebar
+  -webkit-flex-basis 230px
+  flex-basis 230px
+  height 100%
+  min-width 230px
+  background #131619
+  overflow-y scroll
+  overflow-x hidden
+  & .title
+    font-family 'Ubuntu', 'Open Sans', sans-serif
+    font-size 13px
     font-weight bold
-    cursor pointer
-  & .scrollWrapper
-    margin-top 50px
-    max-height 210px
-    overflow-y auto
-    overflow-x hidden
-    & .modal_playlistList
+    color #393e40
+    text-transform uppercase
+    margin-left 10px
+    margin-top 20px
+  & ul
+    list-style none
+    margin 0
+    padding 0
+    margin-top 5px
+    & li
+      width calc(100% - 40px)
+      line-height 35px
+      color #ddd
+      padding-left 20px
+      padding-right 20px
+      font-weight bold
+      font-family 'Ubuntu', 'Open Sans', sans-serif
+      cursor pointer
+      overflow hidden
+      -ms-text-overflow: ellipsis
+      text-overflow: ellipsis
+      white-space nowrap
+      &:hover
+        background rgba(150,150,150,0.1)
+      &.active
+        box-shadow inset 4px 0 0 rgba(0, 179, 237, 1.00)
+
+.contentView
+  -webkit-flex-basis 100%
+  flex-basis 100%
+  height auto
+  overflow auto
+  position relative
+  top 0
+  & .contentWrapper
+    padding 20px
+    width calc(100% - 40px)
+    height auto
+    & .contentTitle
+      display inline-block
+      color #fff
+      font-size 30px
+      font-weight bold
+    & .developerValues
+      width 100%
+      height auto
+      padding 10px
+      background rgba(62, 152, 246, 0.2)
+      border-radius 3px
+    & .connections
       list-style none
       margin 0
       padding 0
-      width 100%
-      height auto
       & li
         float left
-        width 100%
+        margin-left 20px
         height 50px
-        line-height 50px
+        width 50px
+        border 1px solid rgba(25, 29, 33, 1.00)
+        border-radius 3px
         cursor pointer
-        & .artwork
-          width 40px
-          height 40px
-          background-color rgba(0,0,0,0.2)
-          border-radius 50%
-          float left
-          margin 5px 10px
-        & .playlistName
-          color #fff
-          margin-left 60px
-          font-weight bold
+        &:first-child
+          margin-left 0
         &:hover
-          background rgba(255,255,255,0.1)
+          background rgba(25, 29, 33, 1.00)
+        & img
+          margin 10px
+          width 28px
+    & .connected
+      list-style none
+      margin 0
+      padding 0
+      & li
+        margin-top 20px
+        float left
+        height 150px
+        width calc(100% - 60px)
+        background rgba(33, 40, 49, 1.00)
+        border-radius 3px
+        box-shadow 0 0 12px rgba(0,0,0,0.1)
+        padding 0 30px 10px 30px
+        position relative
+        top 0
+        right 0
+        & .title
+          color #ddd
+          font-size 18px
+          width calc(100% - 40px)
+          line-height 60px
+          padding-left 40px
+          text-transform: capitalize
+          border-bottom 1px solid rgba(40, 47, 56, 1.00)
+          position relative
+          top 0
+          left 0
+          & img
+            position absolute
+            top 13px
+            left 7px
+            height 32px
+          & .user
+            text-transform: none
+            color rgba(255,255,255,0.5)
+        & .disconnect
+          position absolute
+          top 10px
+          right 30px
+          border-radius 3px
+          padding 0 20px
+          font-family Helvetica Neue, Helvetica, Arial, sans-serif
+          font-weight bold
+          font-size 14px
+          line-height 40px
+          color rgba(126, 129, 133, 1.00)
+          cursor pointer
+          opacity 0.9
+          border 0 solid transparent
+          background transparent
+          &:hover
+            background rgba(0,0,0,0.2)
+          &.blue
+            color rgba(0, 179, 237, 1.00)
+            &:hover
+              background rgba(0,0,0,0.2)
+          &:focus
+            outline none
+          &:active
+            outline none
 
-
-.loader
-  position absolute
-  display none
-  top 120px
-  left calc(50% + 9px)
-  width 18px
-  height 18px
-  z-index 100
-  border-radius 50%
-  box-sizing border-box
-  border solid 2px transparent
-  border-top-color rgba(0, 179, 237, 1.00)
-  border-left-color rgba(0, 179, 237, 1.00)
-  animation spinner 1.0s infinite linear
-
-@keyframes spinner
-  0%{
-    transform rotate(0deg)
-  }
-  100%{
-    transform rotate(360deg)
-  }
+.playerBar
+  position fixed
+  bottom 0
+  left 0
+  right 0
+  height 75px
+  background #191919
+  border-top 4px solid #000
+  .controls
+    position absolute
+    top 20px
+    left calc(50% - 65px)
+    font-size 20px
+    width 130px
+    & .prev
+      float left
+      margin-top 5px
+      line-height 30px
+      padding-bottom 2px
+      width 32px
+      text-align center
+      border-radius 50%
+    & .skip
+      float left
+      margin-left 7px
+      margin-top 5px
+      line-height 30px
+      padding-bottom 2px
+      width 32px
+      text-align center
+      border-radius 50%
+    & .playStopButton
+      float left
+      margin-left 10px
+      line-height 38px
+      padding-bottom 2px
+      width 38px
+      font-size 24px
+      text-align center
+      border-radius 50%
+      cursor pointer
+  & .activeArtwork
+    position absolute
+    top 6px
+    left 20px
+    height 60px
+    width 60px
+    background-color rgba(255,255,255,0.1)
+  & .duration
+    color rgba(255,255,255,0.6)
+    position absolute
+    top 0
+    line-height 75px
+    right 25px
+    text-align right
+    width 130px
+    font-size 13px
+  & .now_playing
+    position: absolute;
+    top: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    left: 90px;
+    color: #373e41;
+    width: 220px;
+    text-transform: uppercase
+  & .activeTrack
+    position: absolute;
+    top: 26px;
+    font-size: 14px;
+    font-weight: 600;
+    left: 90px;
+    color: #fff;
+    width: 220px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  & .activeArtist
+    position: absolute;
+    top: 48px;
+    font-size: 12px;
+    left: 90px;
+    width: 200px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-weight: 500;
+    color: rgba(255,255,255,0.5);
+  & .timelineWrapper
+    position absolute
+    top -4px
+    left 0
+    right 0
+    width 100%
+    height 4px
+    overflow hidden
+    & .timeline
+      width 0%
+      height 4px
+      background $active_color
+  & .bg
+    position absolute
+    top 0
+    left 0
+    right 0
+    bottom 0
+    width 100%
+    height 100%
+    opacity 0.3
+    &:after
+      content ''
+      position absolute
+      top 0
+      left 0
+      right 0
+      bottom 0
+      width 100%
+      height 100%
+      background rgba(22,22,22,0.9)
+  & .random
+    position absolute
+    right 330px
+    top 20px
+    line-height 38px
+    padding-bottom 2px
+    width 38px
+    font-size 18px
+    text-align center
+    border-radius 50%
+    cursor pointer
+    &.active
+      color rgba(0, 179, 237, 1)
+  & .repeat
+    position absolute
+    right 370px
+    top 20px
+    line-height 38px
+    padding-bottom 2px
+    width 38px
+    font-size 18px
+    text-align center
+    border-radius 50%
+    //cursor pointer
+    opacity 0.2
+    &.active
+      color rgba(0, 179, 237, 1)
 
 // HOME VIEW
 
@@ -1164,6 +715,279 @@ html
         padding-bottom 10px
         font-family -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"
 
+
+// PLAYLIST VIEW
+
+.contextMenu
+  display none
+  margin 0
+  padding 10px 0
+  position absolute
+  top 0
+  left 0
+  z-index 1000
+  width 210px
+  height auto
+  max-height 333px
+  background rgba(27, 29, 32, 1.00)
+  box-shadow 0 0 5px rgba(0,0,0,0.3)
+  border-radius 4px
+  overflow hidden
+  & ul
+    list-style none
+    margin 0
+    padding 0
+    width 100%
+    & li
+      width calc(100% - 30px)
+      padding 10px 15px
+      cursor pointer
+      color #eee
+      &:hover
+        background rgba(200,200,200,0.1)
+      &[disabled='true']
+        color rgba(255,255,255,0.2)
+        cursor default
+        &:hover
+          background transparent
+      &.sep
+        width 100%
+        height 1px
+        padding 0
+        margin 9px 0
+        background rgba(43, 45, 47, 0.8)
+
+.header
+  width 100%
+  min-width 1128px
+  height 250px
+  background #222
+  color #fff
+  font-size 26px
+  font-family Helvetica Neue, Helvetica, Arial, sans-serif
+  font-weight 400
+  position absolute
+  top 0
+  left 0
+  overflow hidden
+  z-index 9
+  & .bg
+    width 100%
+    height 100%
+    position absolute
+    top 0
+    right 0
+    bottom 0
+    &:after
+      content ''
+      position absolute
+      width 100%
+      height 100%
+      background rgba(22,22,22,0.9)
+  & .playlistType
+    position absolute
+    left calc(50% - 564px)
+    top 45px
+    width 1128px
+    font-size 16px
+    font-weight 400
+    color rgba(200,200,200,0.8)
+  & .playlistName
+    position absolute
+    left calc(50% - 564px)
+    top 70px
+    width 800px
+    font-size 38px
+    color #fff
+    white-space nowrap
+    overflow hidden
+    text-overflow ellipsis
+  & .playlistStats
+    position absolute
+    left calc(50% - 564px)
+    top 120px
+    width 1128px
+    font-size 15px
+    font-weight 500
+    color rgba(220,220,220,0.8)
+    & span.user
+      color #fff
+      cursor pointer
+      &:hover
+        text-decoration underline
+  & .playing
+    position absolute
+    top 20px
+    left 50px
+  & .playlistOptions
+    position absolute
+    top 160px
+    left calc(50% - 564px)
+    width 370px
+    & .playPlaylistButton, .followPlaylistButton, .playlistExtraOptions
+      display inline-block
+      border-radius 50px
+      padding 6px 30px
+      font-family Helvetica Neue, Helvetica, Arial, sans-serif
+      font-weight 500
+      font-size 13px
+      border: 1px solid rgba(0, 179, 237, 1.00)
+      color #fff
+      background rgba(0, 179, 237, 1.00)
+      cursor pointer
+      opacity 0.9
+      &:hover
+        opacity 1
+    & .followPlaylistButton
+      background rgba(0,0,0,0.4)
+      border: 1px solid rgba(200,200,200,1.0)
+      margin-left 20px
+      &:hover
+        border 1px solid rgba(0, 179, 237, 1.00)
+      &.following
+        border: 1px solid rgba(0, 179, 237, 1.00)
+        &:hover
+          border: 1px solid rgba(200,200,200,1.0)
+    & .playlistExtraOptions
+      background rgba(0,0,0,0.4)
+      border 1px solid rgba(255,255,255,0.6)
+      padding 6px 9px
+      margin-left 20px
+      opacity 1
+      &:hover
+        border 1px solid rgba(255,255,255,1)
+  & .artwork
+    display none
+    position absolute
+    top 56px
+    left calc(50% + 389px)
+    width 175px
+    height 175px
+    box-shadow 0 0 6px rgba(0,0,0,0.4)
+
+#playlist,
+.songList
+  list-style none
+  margin 0
+  margin-top 83px
+  padding 0
+  width 100%
+  min-width 1128px
+  height 100%
+  & li
+    float left
+    width calc(100% - 20px)
+    min-width 1128ox
+    padding 0 10px
+    cursor pointer
+    //background rgba(34, 34, 41, 1.00)
+    font-size 12px
+    //border-bottom 1px solid rgba(36, 36, 36, 1.00)
+    background transparent
+    border-bottom 1px solid #242424
+    &:nth-child(2n)
+      //background rgba(0,0,0,0.1)
+    &.titleRow
+      font-size 12px
+      font-weight bold
+      text-transform uppercase
+      color rgba(132, 137, 143, 1.00)
+      position absolute
+      top 209px
+      left 0
+      width calc(100% - 20px)
+      right 20px
+      cursor default
+      z-index 10
+      border-bottom 0 solid tranpsarent
+      & .sortDir
+        color rgba(0, 170, 234, 1.00)
+        margin-left 10px
+        opacity 1
+      &>.trackRow>div
+        cursor pointer
+      &>.trackRow>div:hover
+        color #fff
+        opacity 1
+    &:nth-child(2)
+      margin-top 167px
+    & .trackRow
+      display -webkit-flex
+      display flex
+      width 100%
+      & .item
+        display inline-block
+        width 35px
+        text-align right
+        vertical-align top
+        line-height 40px
+        padding-right 30px
+        position relative
+        top 0
+        right 0
+        & .play
+          position absolute
+          top 12px
+          right 3px
+          font-size 14px
+          color rgba(3, 164, 216, 1.00)
+      & .title
+        display inline-block
+        vertical-align top
+        line-height 40px
+        width 332px
+        white-space nowrap
+        overflow hidden
+        text-overflow ellipsis
+        padding-right 10px
+        padding-left 10px
+      & .artist
+        display inline-block
+        width 240px
+        white-space nowrap
+        overflow hidden
+        text-overflow ellipsis
+        padding-right 10px
+        padding-left 10px
+        vertical-align top
+        line-height 40px
+      & .album
+        display inline-block
+        width 240px
+        white-space nowrap
+        overflow hidden
+        text-overflow ellipsis
+        padding-right 10px
+        padding-left 10px
+        vertical-align top
+        line-height 40px
+      & .timestamp
+        display inline-block
+        width 90px
+        padding-left 10px
+        white-space nowrap
+        overflow hidden
+        text-overflow ellipsis
+        color rgba(255,255,255,0.6)
+        vertical-align top
+        line-height 40px
+      & .time
+        display inline-block
+        width 70px
+        padding-left 10px
+        padding-right 10px
+        text-align right
+        white-space nowrap
+        overflow hidden
+        text-overflow ellipsis
+        color rgba(255,255,255,0.6)
+        vertical-align top
+        line-height 40px
+    &.active
+      background #242424
+      color #fff
+      & .trackRow .item .play
+        color $active_color
 
 // PLAYLISTS VIEW
 

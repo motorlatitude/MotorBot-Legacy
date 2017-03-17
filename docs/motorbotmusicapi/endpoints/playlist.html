@@ -1,0 +1,321 @@
+<div class="title">
+    Playlist
+    <a href="#endpoints/playlist-" title="Playlist">
+        <i class="fa fa-anchor anchor" aria-hidden="true"></i>
+    </a>
+    <div class="type"></div>
+</div>
+<p>
+    The playlist endpoint is for any playlist related operations.
+</p>
+<div class="contentsBox">
+    <div class="contentTitle">CONTENTS</div>
+    <ul id="contentsList">
+
+    </ul>
+</div>
+<br>
+<h2 data-header="Security">Security Requirements <a href="#endpoints/playlist-security" title="Security"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></h2>
+<table>
+    <thead>
+    <tr>
+        <td>Type</td>
+        <td>Required</td>
+        <td>Description</td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>API Key</td>
+        <td style="text-align: center;"><i class="fa fa-check"></i></td>
+        <td>Your personal API Key assigned to your project, found under account settings</td>
+    </tr>
+    <tr>
+        <td>OAuth Access Token</td>
+        <td style="text-align: center;"><i class="fa fa-check"></i></td>
+        <td>Access Token for user account required for this endpoint, please consult the OAuth section of these docs</td>
+    </tr>
+    </tbody>
+</table>
+<br>
+<h2 data-header="Operations">Operations <a href="#endpoints/playlist-operations" title="Operations"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></h2>
+<p>
+    A list of all available operations for this endpoint.
+</p>
+<ul class="methodList">
+    <li>
+        <div class="method"><pre><span class="hljs-http">POST</span> <span class="hljs-endpoint-path">/playlist/</span> <a href="#endpoints/playlist-operations-newplaylist" title="operations-Create New Playlist"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Create a new playlist</div>
+        <div class="parameters">
+            <p>Parameter should be passed in the <code>application/json</code> format as part of the request-body.</p>
+            <table>
+                <thead>
+                <tr>
+                    <td>Parameter</td>
+                    <td>Type</td>
+                    <td>Optional</td>
+                    <td>Default</td>
+                    <td>Description</td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><pre>playlist_name</pre></td>
+                    <td>String</td>
+                    <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                    <td><pre>undefined</pre></td>
+                    <td>The new playlist's name</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="returns">
+            <h3>Returns</h3>
+            <p>
+                Will return a <code>playlist</code> object.
+            </p>
+            <div class="code" data-codeBlockId="1">
+                <pre class="json" data-codeBlock="1-JSON"><code class="json">
+{
+    "id": "YAk87OrCDJWOexfI6vM5u0QDnUiy6M1o",
+    "name": "Playlist Name",
+    "description": null,
+    "songs":[],
+    "creator": "1234567890123",
+    "create_date": 1484180121531,
+    "followers":[
+        "95164972807487488"
+    ],
+    "artwork": "",
+    "private": false,
+    "collaborative": false,
+    "creatorName":{
+        "username": "username",
+        "discriminator": "1234"
+    }
+}
+
+                </code></pre>
+            </div>
+        </div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-http">DELETE</span> <span class="hljs-endpoint-path">/playlist/<span class="hljs-endpoint-path-parameter">{playlist_id}</span></span> <a href="#endpoints/playlist-operations-deleteplaylist" title="operations-Delete Playlist"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Delete a playlist</div>
+        <div class="parameters">
+            <p>Parameter should be present in the URL.</p>
+            <table>
+                <thead>
+                <tr>
+                    <td>Parameter</td>
+                    <td>Type</td>
+                    <td>Optional</td>
+                    <td>Default</td>
+                    <td>Description</td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><pre>playlist_id</pre></td>
+                    <td>String</td>
+                    <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                    <td><pre>undefined</pre></td>
+                    <td>The ID of the playlist to be deleted</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-http">PUT</span> <span class="hljs-endpoint-path">/playlist/<span class="hljs-endpoint-path-parameter">{playlist_id}</span>/song</span> <a href="#endpoints/playlist-operations-addsongfromsource" title="operations-Add Song From Source"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Add a song from youtube or soundcloud source.</div>
+        <div class="notification warn">
+            <div class="bar"></div>
+            <p><b>Important</b></p>
+            <p>This operation currently only supports youtube as a source, soundcloud support is not yet integrated.</p>
+        </div>
+        <div class="parameters">
+            <p>Parameter should be present in the URL. They should also be present in the request body in the <code>application/json</code> format.</p>
+            <table>
+                <thead>
+                    <tr>
+                        <td>Parameter</td>
+                        <td>Type</td>
+                        <td>Optional</td>
+                        <td>Default</td>
+                        <td>Description</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><pre>playlist_id</pre></td>
+                        <td>String</td>
+                        <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                        <td><pre>undefined</pre></td>
+                        <td>The ID of the playlist to which the new song should be added (should be only present in the URL)</td>
+                    </tr>
+                    <tr>
+                        <td><pre>source</pre></td>
+                        <td>String</td>
+                        <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                        <td><pre>undefined</pre></td>
+                        <td>The source of the new song; <code>ytb</code> or <code>scd</code>, (should be only present in the request-body)</td>
+                    </tr>
+                    <tr>
+                        <td><pre>video_id</pre></td>
+                        <td>String</td>
+                        <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                        <td><pre>undefined</pre></td>
+                        <td>The video ID of the youtube video being added, (should be only present in the request-body)</td>
+                    </tr>
+                    <tr>
+                        <td><pre>song_id</pre></td>
+                        <td>String</td>
+                        <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                        <td><pre>undefined</pre></td>
+                        <td>The song ID of the soundcloud song being added, (should be only present in the request-body)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="returns">
+            <h3>Returns</h3>
+            <p>
+                Will return an object on success.
+            </p>
+            <div class="code" data-codeBlockId="1">
+                <pre class="json" data-codeBlock="1-JSON"><code class="json">
+{
+    "added": true
+}
+                </code></pre>
+            </div>
+        </div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-http">GET</span> <span class="hljs-endpoint-path">/playlist/<span class="hljs-endpoint-path-parameter">{playlist_id}</span></span> <a href="#endpoints/playlist-operations-getplaylist" title="operations-Get Playlist"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Get a playlist</div>
+        <div class="parameters">
+            <p>Parameter should be present in the URL.</p>
+            <table>
+                <thead>
+                    <tr>
+                        <td>Parameter</td>
+                        <td>Type</td>
+                        <td>Optional</td>
+                        <td>Default</td>
+                        <td>Description</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><pre>playlist_id</pre></td>
+                        <td>String</td>
+                        <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                        <td><pre>undefined</pre></td>
+                        <td>The ID of the playlist to be retrieved</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="returns">
+            <h3>Returns</h3>
+            <p>
+                Will return a <code>playlist</code> object on success.
+            </p>
+            <div class="code" data-codeBlockId="1">
+                <pre class="json" data-codeBlock="1-JSON"><code class="json">
+{
+    "id": "YAk87OrCDJWOexfI6vM5u0QDnUiy6M1o",
+    "name": "Playlist Name",
+    "description": null,
+    "songs":[
+        small_song_objects,
+        ...
+    ],
+    "creator": "1234567890123",
+    "create_date": 1484180121531,
+    "followers":[
+        "95164972807487488"
+    ],
+    "artwork": "https://i.scdn.co/image/cbaae5a0a78584e707943c56035123195639a48b",
+    "private": true,
+    "collaborative": false,
+    "creatorName":{
+        "username": "username",
+        "discriminator": "1234"
+    }
+}
+                </code></pre>
+            </div>
+        </div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-http">PATCH</span> <span class="hljs-endpoint-path">/playlist/<span class="hljs-endpoint-path-parameter">{playlist_id}</span>/song/<span class="hljs-endpoint-path-parameter">{song_id}</span></span> <a href="#endpoints/playlist-operations-addsongtoplaylist" title="operations-Add Song To Playlist"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Add a song to the playlist</div>
+        <div class="parameters">
+            <p>Parameter should be present in the URL.</p>
+            <table>
+                <thead>
+                    <tr>
+                        <td>Parameter</td>
+                        <td>Type</td>
+                        <td>Optional</td>
+                        <td>Default</td>
+                        <td>Description</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><pre>playlist_id</pre></td>
+                        <td>String</td>
+                        <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                        <td><pre>undefined</pre></td>
+                        <td>The ID of the playlist to add the new song to</td>
+                    </tr>
+                    <tr>
+                        <td><pre>song_id</pre></td>
+                        <td>String</td>
+                        <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                        <td><pre>undefined</pre></td>
+                        <td>The ID of the song to be added</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-http">DELETE</span> <span class="hljs-endpoint-path">/playlist/<span class="hljs-endpoint-path-parameter">{playlist_id}</span>/song/<span class="hljs-endpoint-path-parameter">{song_id}</span></span> <a href="#endpoints/playlist-operations-deletesongfromplaylist" title="operations-Delete Song From Playlist"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Delete song from the playlist</div>
+        <div class="parameters">
+            <p>Parameter should be present in the URL.</p>
+            <table>
+                <thead>
+                <tr>
+                    <td>Parameter</td>
+                    <td>Type</td>
+                    <td>Optional</td>
+                    <td>Default</td>
+                    <td>Description</td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><pre>playlist_id</pre></td>
+                    <td>String</td>
+                    <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                    <td><pre>undefined</pre></td>
+                    <td>The ID of the playlist to add the new song to</td>
+                </tr>
+                <tr>
+                    <td><pre>song_id</pre></td>
+                    <td>String</td>
+                    <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                    <td><pre>undefined</pre></td>
+                    <td>The ID of the song to be added</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </li>
+</ul>
