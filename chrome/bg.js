@@ -1,8 +1,8 @@
 var accessToken = null;
 
 var tokenFetcher = (function() {
-  var clientId = '169554794376200192';
-  var clientSecret = '5XyBGU-YtwVTMOQHKpbxUvmnYF4tx-At';
+  var clientId = '1a23590021f0168gz276f43d1de3d6ef';
+  var clientSecret = '2bd12fcaf92bb63d7c99b1b2398e1f3e1c2c166cb17g40152c9e07asdfg9535b';
   var redirectUri = 'https://' + chrome.runtime.id +
                     '.chromiumapp.org/provider_cb';
   var redirectRe = new RegExp(redirectUri + '[#\?](.*)');
@@ -19,9 +19,8 @@ var tokenFetcher = (function() {
       var options = {
         'interactive': interactive,
         // url:'https://graph.facebook.com/oauth/access_token?client_id=' + clientId +
-        url:'https://discordapp.com/api/oauth2/authorize?client_id=' + clientId +
-            '&response_type=token' +
-            '&scope=identify%20email%20guilds' +
+        url:'https://mb.lolstat.net/api/oauth2/authorize?client_id=' + clientId +
+            '&response_type=code' +
             '&redirect_uri=' + encodeURIComponent(redirectUri)
       }
       chrome.identity.launchWebAuthFlow(options, function(redirectUri) {
@@ -63,24 +62,25 @@ var tokenFetcher = (function() {
 
       function exchangeCodeForToken(code) {
         var xhr = new XMLHttpRequest();
-        xhr.open('GET',
+        xhr.open('POST',
                  // 'https://www.facebook.com/dialog/oauth?'+
-                 'https://discordapp.com/api/oauth2/token?' +
-                 'client_id=' + clientId +
-                 '&client_secret=' + clientSecret +
-                 '&redirect_uri=' + redirectUri +
-                 '&code=' + code);
+                 'https://mb.lolstat.net/api/oauth2/token');
+        params = 'client_id=' + clientId +
+            '&client_secret=' + clientSecret +
+            '&redirect_uri=' + redirectUri +
+            '&code=' + code +
+            '&grant_type=authorization_code';
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
         xhr.setRequestHeader('Accept', 'application/json');
         xhr.onload = function () {
           if (this.status === 200) {
-            var response = JSON.parse('"'+this.responseText+'"');
-            response = response.substring(0,response.indexOf('&'));
-            setAccessToken(response);
-            access_token = response;
+            var response = JSON.parse(this.responseText);
+            console.log(response.access_token);
+            setAccessToken(response.access_token);
+            access_token = response.access_token;
           }
         };
-        xhr.send();
+        xhr.send(params);
       }
 
       function setAccessToken(token) {
@@ -98,32 +98,19 @@ var tokenFetcher = (function() {
 
 var userInfo = {};
 
-function requestComplete(){
-  if(this.status == 200){
-    console.log(this.response);
-    var username = JSON.parse(this.response).username;
-    var userId = JSON.parse(this.response).id;
-    var discriminator = JSON.parse(this.response).discriminator;
-    var avatar = JSON.parse(this.response).avatar;
-    userInfo.username = username;
-    userInfo.id = userId;
-    userInfo.discriminator = discriminator;
-    userInfo.avatar = avatar;
+function getUserData(accessToken){
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', 'https://discordapp.com/api/users/@me/guilds');
+    xhr.open('GET', 'https://mb.lolstat.net/api/user/me?api_key=caf07b8b-366e-44ab-9bda-152a42g8d1ef');
     xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
     xhr.onload = guildRequestComplete;
     xhr.send();
-  }
-  else{
-    console.error("Error Occured Getting User Data");
-  }
 }
 
 function guildRequestComplete(){
   if(this.status == 200){
-    userInfo.guilds = JSON.parse(this.response);
+    userInfo = JSON.parse(this.response);
     userInfo.worthy = false;
+    userInfo.token = access_token;
     for(var i=0;i<userInfo.guilds.length;i++){
       if(userInfo.guilds[i].id == "130734377066954752"){
         userInfo.worthy = true;
@@ -135,7 +122,8 @@ function guildRequestComplete(){
     console.log(userInfo);
   }
   else{
-    console.error("Error Occured Getting User Guild Data");
+    console.error("Error Occurred Getting User Data");
+    console.log(this.response);
   }
 }
 
@@ -148,13 +136,7 @@ chrome.extension.onRequest.addListener(function(message,sender,sendResponse) {
       if (error) {
         console.error(error);
       } else {
-        console.log(access_token);
-        accessToken = access_token;
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', 'https://discordapp.com/api/users/@me');
-        xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
-        xhr.onload = requestComplete;
-        xhr.send();
+          getUserData(access_token);
       }
       return true;
     });
