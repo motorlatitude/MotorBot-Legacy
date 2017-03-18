@@ -129,7 +129,10 @@ class AudioPlayer extends EventEmitter
     #encoded = @opusEncoder.encode(streamBuff, 1920)
     #audioPacket = new VoicePacket(encoded, @, @voiceConnection)
     #@voiceConnection.packageList.push(audioPacket)
-    @packageList.push(streamBuff)
+    if @packageList
+      @packageList.push(streamBuff)
+    else
+      utils.debug("Couldn't send empty buffer","error")
 
   stopSending: () ->
     @stopSend = true

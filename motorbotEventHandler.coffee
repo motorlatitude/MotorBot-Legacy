@@ -4,28 +4,38 @@ apiai = require('apiai')
 apiai = apiai(keys.apiai) #AI for !talk method
 fs = require 'fs'
 req = require 'request'
+say = require('say');
 
 class motorbotEventHandler
 
   constructor: (@app, @client) ->
     @setUpEvents()
 
-  setupSoundboard: (guild_id, filepath) ->
+  setupSoundboard: (guild_id, filepath, volume = 1) ->
     self = @
     if !self.app.soundboard[guild_id]
       self.app.voiceConnections[guild_id].playFromFile(filepath).then((audioPlayer) ->
         self.app.soundboard[guild_id] = audioPlayer
-        #self.app.soundboard[msg.guild_id].setVolume(1) TODO this needs to be reset once soundboard done
+        self.app.org_volume = 0.5
         self.app.soundboard[guild_id].on('ready', () ->
           if self.app.musicPlayers[guild_id]
+            self.app.org_volume = self.app.musicPlayers[guild_id].getVolume()
             self.app.musicPlayers[guild_id].pause()
           else
+            self.app.soundboard[guild_id].setVolume(volume)
             self.app.soundboard[guild_id].play()
         )
         self.app.soundboard[guild_id].on('streamDone', () ->
+          self.app.debug("StreamDone Received")
           self.app.soundboard[guild_id] = undefined
           if self.app.musicPlayers[guild_id]
+            self.app.musicPlayers[guild_id].setVolume(self.app.org_volume)
             self.app.musicPlayers[guild_id].play()
+        )
+        self.app.musicPlayers[guild_id].on("paused", () ->
+          if self.app.soundboard[guild_id]
+            self.app.soundboard[guild_id].setVolume(volume)
+            self.app.soundboard[guild_id].play()
         )
       )
     else
@@ -63,6 +73,15 @@ class motorbotEventHandler
                   self.app.voiceConnections[msg.guild_id] = VoiceConnection
                 )
                 break
+        else if msg.content.match(/^!dev\stts\s/gmi)
+          ttsmessage = msg.content.replace(/^!dev\stts\s/gmi,"")
+          ###say.export(ttsmessage, "voice_default", 1, __dirname+"/soundboard/voice.wav", (err) ->
+            if err
+              self.app.debug("Error Occurred Generating TTS Message")
+              console.log err
+            self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/voice.wav")
+          )###
+          self.setupSoundboard(msg.guild_id, __dirname+"/"+ttsmessage+".wav")
         else if msg.content.match(/^!ban doug/gmi)
           msg.channel.sendMessage("If only I could :rolling_eyes: <@"+msg.author.id+">")
         else if msg.content.match(/^!kys/gmi) || msg.content.match(/kys/gmi)
@@ -84,31 +103,36 @@ class motorbotEventHandler
         else if msg.content.match(/\!random/)
           msg.channel.sendMessage("Random Number: "+(Math.round((Math.random()*100))))
         else if msg.content == "!sb diddly"
-          self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/DootDiddly.mp3")
+          self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/DootDiddly.mp3", 5)
         else if msg.content == "!sb pog"
-          self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/play of the game.mp3")
+          self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/play of the game.mp3", 3)
         else if msg.content == "!sb kled"
-          self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/Kled.mp3")
+          self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/Kled.mp3", 3)
         else if msg.content == "!sb wonder"
-          self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/wonder.mp3")
+          self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/wonder.mp3", 3)
         else if msg.content == "!sb 1"
-          self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/1.mp3")
+          self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/1.mp3", 3)
         else if msg.content == "!sb 2"
-          self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/2.mp3")
+          self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/2.mp3", 3)
         else if msg.content == "!sb 3"
-          self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/3.mp3")
+          self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/3.mp3", 3)
         else if msg.content == "!sb affirmative"
-          self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/affirmative.mp3")
+          self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/affirmative.mp3", 3)
         else if msg.content == "!sb gp"
-          self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/gp.mp3")
+          self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/gp.mp3", 3)
         else if msg.content == "!sb justice"
-          self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/justice 3.mp3")
+          self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/justice 3.mp3", 3)
         else if msg.content == "!sb speed boost"
-          self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/speed boost.mp3")
+          self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/speed boost.mp3", 3)
         else if msg.content == "!sb stop the payload"
-          self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/stop the payload.mp3")
+          self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/stop the payload.mp3", 3)
         else if msg.content == "!sb wsr"
-          self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/wsr.mp3")
+          self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/wsr.mp3", 2)
+        else if msg.content == "!sb happy birthday adz"
+          self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/happybirthdayadz.wav", 3)
+        else if msg.content == "!sb stop"
+          self.app.soundboard[msg.guild_id].stop()
+          self.app.soundboard[msg.guild_id] = undefined
         else if msg.content == "!ping"
           msg.channel.sendMessage("pong!")
         else if msg.content == "!dev client status"

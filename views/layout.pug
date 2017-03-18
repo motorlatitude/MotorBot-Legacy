@@ -1212,6 +1212,7 @@ html(lang="en")
             }
     body
     .titlebar
+        .motorbot MotorBot Music
         input.search(type="text",placeholder="Search Something New...")
         .searchIcon <i class="fa fa-search" aria-hidden="true"></i>
         .version
@@ -1230,9 +1231,9 @@ html(lang="en")
                     li Movie Time
                     li dev
                     li AFK
-        .bell <i class="fa fa-bell" aria-hidden="true"></i>
         .profile(onclick="$('#channelOptions').removeClass('visible'); $('#serverOptions').removeClass('visible'); $('#accountOptions').toggleClass('visible');")
             .profileArrow <i class="fa fa-chevron-down"></i>
+            .profileName #{user.username}##{user.discriminator}
             .profileIcon(style="background: url('https://discordapp.com/api/users/" + user.id + "/avatars/" + user.avatar + ".jpg') no-repeat center; background-size: cover;")
             ul.options#accountOptions
                 li(onclick='loadView("account","undefined");') Account

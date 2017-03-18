@@ -13,6 +13,7 @@ class App
   constructor: () ->
     @musicPlayers = {}
     @soundboard = {}
+    @say = {}
     @yStream = {}
     @voiceConnections = {}
     @init()
@@ -143,10 +144,6 @@ class App
             self.musicPlayers[guild_id].on("streamDone", () ->
               self.musicPlayers[guild_id] = undefined
               self.nextSong()
-            )
-            self.musicPlayers[guild_id].on("paused", () ->
-              if self.soundboard[guild_id]
-                self.soundboard[guild_id].play()
             )
           )
         )

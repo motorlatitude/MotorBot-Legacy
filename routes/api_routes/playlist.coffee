@@ -581,7 +581,7 @@ router.delete("/:playlist_id/song/:song_id", (req, res) ->
                     new_albumart = song.artwork
                     break;
                 console.log "New Album Art Set: "+new_albumart
-                playlistCollection.update({id: playlist_id},{$pull: {songs: new ObjectID(song_id)}, $set: {artwork: new_albumart}}, (err, result) ->
+                playlistCollection.update({id: playlist_id},{$pull: {songs: {id: song_id}}, $set: {artwork: new_albumart}}, (err, result) ->
                   if err then return res.status(500).send({code: 500, status: "Internal Server Error", reason: err})
                   res.status(200).send({code: 200, status: "OKAY"})
                   req.app.locals.motorbot.websocket.broadcast(JSON.stringify({type: 'trackDelete', songId: song_id, playlistId: playlist_id, newAlbumArt: new_albumart}))
@@ -592,7 +592,7 @@ router.delete("/:playlist_id/song/:song_id", (req, res) ->
                 )
               )
             else
-              playlistCollection.update({id: playlist_id},{$pull: {songs: song_id}}, (err, result) ->
+              playlistCollection.update({id: playlist_id},{$pull: {songs: {id: song_id}}}, (err, result) ->
                 if err then return res.status(500).send({code: 500, status: "Internal Server Error", reason: err})
                 res.status(200).send({code: 200, status: "OKAY"})
                 req.app.locals.motorbot.websocket.broadcast(JSON.stringify({type: 'trackDelete', songId: song_id, playlistId: playlist_id}))

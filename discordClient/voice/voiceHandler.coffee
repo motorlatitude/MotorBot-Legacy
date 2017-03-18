@@ -157,7 +157,7 @@ class VoiceConnection
       @sequence = if (@sequence + 1) < 65535 then @sequence += 1 else @sequence = 0
       @timestamp = if (@timestamp + 960) < 4294967295 then @timestamp += 960 else @timestamp = 0
       out = new Buffer(streamBuff.length);
-      multiplier =  Math.pow(self.volume, 1.660964);
+      multiplier =  Math.pow(self.volume, 1.44);
       i = 0
       while i < streamBuff.length
         if i >= streamBuff.length - 1

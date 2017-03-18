@@ -9,7 +9,7 @@ html
   padding 0
   background #1f1f26
   color #fff
-  font-family 'Ubuntu', 'Open Sans', sans-serif
+  font-family 'Open Sans', sans-serif
   font-size 13px
   font-weight 500
   min-width 1128px
@@ -21,10 +21,21 @@ html
   left 0
   right 0
   height 60px
-  background #131619
+  background #fff
   z-index 100
   -webkit-app-region drag
+  & .motorbot
+    float left
+    padding-left 10px
+    width 220px
+    height 60px
+    line-height 60px
+    color #444
+    font-size 20px
+    font-family Open Sans, sans-serif
+    font-weight bold
   & .search
+    display none
     float left
     margin-left 30px
     padding 0
@@ -34,41 +45,18 @@ html
     line-height 34px
     font-size 14px
     margin-top 15px
-    color rgba(255,255,255,0.8)
+    color #333
     &::-webkit-input-placeholder
-      color rgba(255,255,255,0.2)
+      color rgba(55,55,55,0.2)
     &:focus
       outline none
   & .searchIcon
+    display none
     position absolute
-    top 23px
-    left 10px
+    top 22px
+    right 420px
     font-size 14px
-    color rgba(255,255,255,0.2)
-  & .nav
-    float left
-    list-style none
-    margin 0
-    padding 0
-    margin-left 30px
-    & li
-      float left
-      margin-top 0
-      line-height 60px
-      padding 0 25px
-      cursor pointer
-      font-size 13px
-      font-weight 500
-      text-transform uppercase
-      color rgba(132, 137, 143, 1.00)
-      &:first-child
-        padding-left 50px
-        border-left 1px solid rgba(132, 137, 143, 0.1)
-      &:hover
-        color #fff
-      &.active
-        box-shadow inset 0 -3px 0 rgba(0, 179, 237, 1.00)
-        color #fff
+    color #333
   & .version
     position absolute
     bottom -45px
@@ -81,7 +69,7 @@ html
   & .motorbotSelection
     position absolute
     top 15px
-    right 160px
+    right 210px
     white-space nowrap
     & .serverSelection
       float left
@@ -89,8 +77,8 @@ html
       top 0
       right 0
       padding 0 10px
-      color rgba(200,200,200,0.6)
-      background rgba(19, 22, 26, 1.00)
+      color #333
+      background #eee
       border-top-left-radius 3px
       border-bottom-left-radius 3px
       width auto
@@ -107,7 +95,7 @@ html
         height: 0;
         border-top: 15px solid transparent;
         border-bottom: 15px solid transparent;
-        border-left: 15px solid rgba(19, 22, 26, 1.00);
+        border-left: 15px solid #eee;
       &:before
         content ''
         position absolute
@@ -117,11 +105,11 @@ html
         height: 0;
         border-top: 16px solid transparent;
         border-bottom: 16px solid transparent;
-        border-left: 16px solid rgba(33, 40, 49, 1.00);
+        border-left: 16px solid #fff;
       &:hover
-        background rgba(9, 12, 15, 1.00)
+        background #ddd
         &:after
-          border-left: 15px solid rgba(9, 12, 15, 1.00);
+          border-left: 15px solid  #ddd
       & .selected
         float left
         width auto
@@ -158,8 +146,8 @@ html
       position relative
       top 0
       padding 0 10px
-      color rgba(200,200,200,0.6)
-      background rgba(19, 22, 26, 1.00)
+      color #333
+      background #eee
       border-radius 3px
       width auto
       height 30px
@@ -175,7 +163,7 @@ html
         &.yellow
           color rgba(255, 197, 51, 1.00)
       &:hover
-        background rgba(9, 12, 15, 1.00)
+        background #ddd
       & .options
         display none
         position absolute
@@ -204,14 +192,6 @@ html
             background rgba(33, 40, 49, 1.00)
           &:last-child
             border-bottom 0 solid transparent
-  & .bell
-    position absolute
-    top 10px
-    right 110px
-    line-height 40px
-    color rgba(255,255,255,0.4)
-    font-size 15px
-    cursor pointer
   & .profile
     position absolute
     top 12px
@@ -221,15 +201,26 @@ html
       float right
       width 30px
       height 30px
-      border-radius 3px
-      box-shadow inset 0 0 3px rgba(0,0,0,0.3)
-      background rgba(0,0,0,0.4)
-      border 1px solid rgba(0,0,0,0.3)
+      border-radius 50%
+      background #eee
+      box-shadow inset 0 0 3px rgba(0,0,0,0.6)
+      border 2px solid #ddd
+    & .profileName
+      float right
+      padding-left 10px
+      width 100px
+      height 36px
+      line-height 36px
+      color #555
+      font-size 12px
+      font-family Open Sans, sans-serif
+      font-weight bold
+      text-align center
     & .profileArrow
       margin-left 10px
       float right
       line-height 30px
-      color rgba(132, 137, 143, 1.00)
+      color #333
     & .options
       display none
       position absolute
@@ -330,6 +321,7 @@ html
   flex-direction row
   -webkit-flex-wrap nowrap
   flex-wrap nowrap
+  background #131619
 
 .sidebar
   -webkit-flex-basis 230px
@@ -340,7 +332,7 @@ html
   overflow-y scroll
   overflow-x hidden
   & .title
-    font-family 'Ubuntu', 'Open Sans', sans-serif
+    font-family 'Open Sans', sans-serif
     font-size 13px
     font-weight bold
     color #393e40
@@ -353,18 +345,20 @@ html
     padding 0
     margin-top 5px
     & li
-      width calc(100% - 40px)
+      width calc(100% - 45px)
       line-height 35px
       color #ddd
       padding-left 20px
       padding-right 20px
       font-weight bold
-      font-family 'Ubuntu', 'Open Sans', sans-serif
+      font-family 'Open Sans', sans-serif
       cursor pointer
       overflow hidden
       -ms-text-overflow: ellipsis
       text-overflow: ellipsis
       white-space nowrap
+      border-top-right-radius 3px
+      border-bottom-right-radius 3px
       &:hover
         background rgba(150,150,150,0.1)
       &.active
@@ -452,7 +446,7 @@ html
           right 30px
           border-radius 3px
           padding 0 20px
-          font-family Helvetica Neue, Helvetica, Arial, sans-serif
+          font-family Open Sans, sans-serif
           font-weight bold
           font-size 14px
           line-height 40px
@@ -571,7 +565,7 @@ html
     & .timeline
       width 0%
       height 4px
-      background $active_color
+      background-image: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
   & .bg
     position absolute
     top 0
@@ -761,10 +755,10 @@ html
   width 100%
   min-width 1128px
   height 250px
-  background #222
   color #fff
+  background #131619
   font-size 26px
-  font-family Helvetica Neue, Helvetica, Arial, sans-serif
+  font-family Open Sans, sans-serif
   font-weight 400
   position absolute
   top 0
@@ -778,6 +772,7 @@ html
     top 0
     right 0
     bottom 0
+    display none
     &:after
       content ''
       position absolute
@@ -828,7 +823,7 @@ html
       display inline-block
       border-radius 50px
       padding 6px 30px
-      font-family Helvetica Neue, Helvetica, Arial, sans-serif
+      font-family Open Sans, sans-serif
       font-weight 500
       font-size 13px
       border: 1px solid rgba(0, 179, 237, 1.00)
@@ -857,10 +852,9 @@ html
       &:hover
         border 1px solid rgba(255,255,255,1)
   & .artwork
-    display none
     position absolute
-    top 56px
-    left calc(50% + 389px)
+    top 20px
+    left calc(50% - 800px)
     width 175px
     height 175px
     box-shadow 0 0 6px rgba(0,0,0,0.4)
@@ -871,7 +865,7 @@ html
   margin 0
   margin-top 83px
   padding 0
-  width 100%
+  width calc(100% - 5px)
   min-width 1128px
   height 100%
   & li
@@ -884,7 +878,8 @@ html
     font-size 12px
     //border-bottom 1px solid rgba(36, 36, 36, 1.00)
     background transparent
-    border-bottom 1px solid #242424
+    border-bottom 1px solid rgba(50,50,50,0.2)
+    border-radius 2px
     &:nth-child(2n)
       //background rgba(0,0,0,0.1)
     &.titleRow
@@ -896,15 +891,21 @@ html
       top 209px
       left 0
       width calc(100% - 20px)
+      height 30px
+      line-height 30px
       right 20px
       cursor default
       z-index 10
-      border-bottom 0 solid tranpsarent
+      border-bottom 1px solid rgba(50,50,50,0.6)
+      border-top 1px solid rgba(50,50,50,0.6)
+      &:hover
+        background transparent
       & .sortDir
         color rgba(0, 170, 234, 1.00)
         margin-left 10px
         opacity 1
       &>.trackRow>div
+        line-height 30px
         cursor pointer
       &>.trackRow>div:hover
         color #fff
@@ -914,10 +915,13 @@ html
     & .trackRow
       display -webkit-flex
       display flex
+      -webkit-flex-direction row
+      flex-direction row
+      -webkit-flex-wrap nowrap
+      flex-wrap nowrap
       width 100%
       & .item
-        display inline-block
-        width 35px
+        display flex
         text-align right
         vertical-align top
         line-height 40px
@@ -925,6 +929,8 @@ html
         position relative
         top 0
         right 0
+        -webkit-flex-basis 35px
+        flex-basis 35px
         & .play
           position absolute
           top 12px
@@ -932,7 +938,8 @@ html
           font-size 14px
           color rgba(3, 164, 216, 1.00)
       & .title
-        display inline-block
+        display flex
+        flex-grow 1
         vertical-align top
         line-height 40px
         width 332px
@@ -942,7 +949,8 @@ html
         padding-right 10px
         padding-left 10px
       & .artist
-        display inline-block
+        display flex
+        flex-grow 1
         width 240px
         white-space nowrap
         overflow hidden
@@ -951,8 +959,11 @@ html
         padding-left 10px
         vertical-align top
         line-height 40px
+        -webkit-flex-basis 240px
+        flex-basis 240px
       & .album
-        display inline-block
+        display flex
+        flex-grow 1
         width 240px
         white-space nowrap
         overflow hidden
@@ -961,18 +972,22 @@ html
         padding-left 10px
         vertical-align top
         line-height 40px
+        -webkit-flex-basis 240px
+        flex-basis 240px
       & .timestamp
-        display inline-block
-        width 90px
+        display flex
         padding-left 10px
         white-space nowrap
         overflow hidden
         text-overflow ellipsis
         color rgba(255,255,255,0.6)
-        vertical-align top
         line-height 40px
+        -webkit-flex-basis 120px
+        flex-basis 120px
+        & i
+          margin-top 8px
       & .time
-        display inline-block
+        display flex
         width 70px
         padding-left 10px
         padding-right 10px
@@ -983,6 +998,12 @@ html
         color rgba(255,255,255,0.6)
         vertical-align top
         line-height 40px
+        -webkit-flex-basis 70px
+        flex-basis 70px
+        & i
+          margin-top 8px
+    &:hover
+      background #202020
     &.active
       background #242424
       color #fff
@@ -1003,7 +1024,7 @@ html
   max-width 500px
   width 500px
   border 0 solid transparent
-  font-family "Helvetica Neue", Helvetica, "Lucida Grande", Arial, sans-serif
+  font-family Open Sans, sans-serif
   box-shadow none
   background transparent
   border-radius 0

@@ -61,6 +61,7 @@ class WebServer
 
     #Express Routers
     @site.use("/", require('./routes/playlistv2'))
+    #@site.use("/canary", require('./routes/playlist_canary'))
     @site.use("/loginflow", require('./routes/loginflow'))
     @site.use("/api/oauth2", require('./routes/api_routes/oauth2'))
     @site.use("/api/music", require('./routes/api_routes/music'))
