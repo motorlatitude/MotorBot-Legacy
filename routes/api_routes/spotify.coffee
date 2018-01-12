@@ -128,7 +128,7 @@ refreshAccessToken = (req, res, next) ->
             usersCollection.find({id: req.user.id}).toArray((err, result) ->
               if err then console.log err
               if result[0]
-                usersCollection.update({id: req.user.id},{$set: {"connections.spotify.access_token": body.access_token}}, (err, result) ->
+                usersCollection.update({id: req.user.id},{$set: {"connections.spotify.access_token": body.access_token, "connections.spotify.refresh_token": body.refresh_token}}, (err, result) ->
                   if err then console.log err
                   next()
                 )

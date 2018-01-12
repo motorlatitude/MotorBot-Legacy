@@ -105,7 +105,7 @@ class App
           if !err then self.debug("Playlist Play Count increased")
         )
         requestUrl = 'https://www.youtube.com/watch?v=' + videoId
-        self.yStream[guild_id] = youtubeStream(requestUrl,{quality: 'lowest', filter: 'audio'})
+        self.yStream[guild_id] = youtubeStream(requestUrl,{quality: 'highest', filter: 'audio'})
         thisystream = self.yStream[guild_id]
         thisystream.on("error", (e) ->
           console.log e

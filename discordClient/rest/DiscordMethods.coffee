@@ -142,4 +142,19 @@ class DiscordMethods
   removeRecipient: (channel_id, user_id) ->
     @requester.sendRequest("DELETE","/channels/"+channel_id+"/recipients/"+user_id)
 
+  ###
+  # GUILD
+  ###
+
+  modify_guild: (guild_id, options) ->
+    @requester.sendRequest("PATCH","/guilds/"+guild_id, options)
+    
+  deleteGuild: (guild_id) ->
+    @requester.sendRequest("DELETE","/guilds/"+guild_id)
+
+  getChannels: (guild_id) ->
+    @requester.sendRequest("GET","/guilds/"+guild_id+"/channels")
+
+
+
 module.exports = DiscordMethods

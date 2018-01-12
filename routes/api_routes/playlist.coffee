@@ -95,6 +95,55 @@ insertSongIntoQueue = (req, res, insertionObj, playlist_id) ->
       res.send({added: true})
   )
 
+refreshSpotifyAccessToken = (req, res, next) ->
+  usersCollection = req.app.locals.motorbot.database.collection("users")
+  #this will retrieve my local spotify connection authorization token and get a new token with each request
+  usersCollection.find({id: "95164972807487488"}).toArray((err, result) ->
+    if err then console.log err
+    if result[0].connections
+      if result[0].connections["spotify"]
+        if result[0].connections["spotify"].refresh_token
+          request({
+            method: "POST",
+            url: "https://accounts.spotify.com/api/token",
+            json: true
+            form: {
+              "grant_type": "refresh_token",
+              "refresh_token": result[0].connections["spotify"].refresh_token
+            },
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded"
+              "Authorization": "Basic "+new Buffer("935356234ee749df96a3ab1999e0d659:622b1a10ae054059bd2e5c260d87dabd").toString('base64')
+            }
+          }, (err, httpResponse, body) ->
+            console.log err
+            console.log body
+            if body.access_token
+              usersCollection.find({id: result[0].id}).toArray((err, result) ->
+                if err then console.log err
+                if result[0]
+                  usersCollection.update({id: result[0].id},{$set: {"connections.spotify.access_token": body.access_token}}, (err, result) ->
+                    if err then console.log err
+                    res.locals.spotify_access_token = body.access_token
+                    next()
+                  )
+                else
+                  console.log "User doesn't exist"
+                  res.locals.spotify_access_token = body.access_token
+                  next()
+              )
+            else
+              console.log "No Access Token was returned"
+              next()
+          )
+        else
+          next()
+      else
+        next()
+    else
+      next()
+  )
+
 router.post("/", (req, res) ->
   res.type("json")
   user_id = req.user_id
@@ -153,9 +202,15 @@ router.get("/songTransferToTrack/:skip/:limit", (req, res) ->
       async.eachSeries(results, (result, callback) ->
         console.log "Processing "+i+"/"+results.length
         modifiedTitle = result.title.replace(/\[((?!.*?Remix))[^\)]*\]/gmi, '').replace(/\(((?!.*?Remix))[^\)]*\)/gmi, '').replace(/\-(\s|)[0-9]*(\s|)\-/g, '').replace(/(\s|)-(\s|)/gmi," ").replace(/\sFrom\s(.*)\/(|\s)Soundtrack/gmi, "").replace(/(high\squality|\sOST|playlist|\sHD|\sHQ|\s1080p|ft\.|feat\.|ft\s|lyrics|official\svideo|\"|official|video|:|\/Soundtrack\sVersion|\/Soundtrack|\||w\/|\/)/gmi, '')
-        modifiedTitle = encodeURIComponent(modifiedTitle)
+        #modifiedTitle = encodeURIComponent(modifiedTitle)
         console.log modifiedTitle
-        request.get({url: "https://api.spotify.com/v1/search?type=track&q="+modifiedTitle+"+NOT+Karaoke", json: true}, (err, httpResponse, body) ->
+        request.get({
+            url: "https://api.spotify.com/v1/search?type=track&q=" + modifiedTitle,
+            json: true,
+            headers: {
+              "Authorization": "Bearer BQAgotImSiaQGP15ALbQdTobE9V7RHprS4mArIYDb6GerOozv7XMtoTCb4lCt5Xzvyzvfm18ZBCHBpxcNNEaUKstrQ4CMgReGxtsC7-V6na_jjWe6iaHE88UMjCdOC3ZOYSIRfD_hTU4doA"
+            }
+          }, (err, httpResponse, body) ->
           if err then return res.status(500).send({code: 500, status: "Spotify API Error", error: err})
           else
             artist = {}
@@ -284,7 +339,7 @@ router.get("/playlistTransfer", (req, res) ->
   )
 )
 
-router.put("/:playlist_id/song", (req, res) ->
+router.put("/:playlist_id/song", refreshSpotifyAccessToken, (req, res) ->
   #from source so add to Songs DB
   res.type("json")
   if req.user_id
@@ -293,6 +348,7 @@ router.put("/:playlist_id/song", (req, res) ->
     #vars
     source = req.body.source
     video_id = req.body.video_id
+    song_id = req.body.song_id
     playlist_id = req.params.playlist_id
     user_id = req.user_id
     #Collections
@@ -334,16 +390,23 @@ router.put("/:playlist_id/song", (req, res) ->
           )
         else
           #insert song from source
+          console.log("Spotify Authorization Code: "+res.locals.spotify_access_token)
           request.get({
             url: "https://www.googleapis.com/youtube/v3/videos?id="+video_id+"&key=AIzaSyAyoWcB_yzEqESeJm-W_eC5QDcOu5R1M90&part=snippet,contentDetails",
             json: true
           }, (err, httpResponse, data) ->
             if err then return res.status(500).send({code: 500, status: "Youtube API Error", error: err})
             if data.items[0]
-              modifiedTitle = data.items[0].snippet.title.replace(/\[((?!.*?Remix))[^\)]*\]/gmi, '').replace(/\(((?!.*?Remix))[^\)]*\)/gmi, '').replace(/\-(\s|)[0-9]*(\s|)\-/g, '').replace(/(\s|)-(\s|)/gmi," ").replace(/\sFrom\s(.*)\/(|\s)Soundtrack/gmi, "").replace(/(high\squality|\sOST|playlist|\sHD|\sHQ|\s1080p|\s720p|ft\.|feat\.|ft\s|lyrics|official\svideo|\"|official|video|:|\/Soundtrack\sVersion|\/Soundtrack|\||w\/|\/)/gmi, '')
+              modifiedTitle = data.items[0].snippet.title.replace(/\[((?!.*?Remix))[^\)]*\]/gmi, '').replace(/\(((?!.*?Remix))[^\)]*\)/gmi, '').replace(/\-(\s|)[0-9]*(\s|)\-/g, '').replace(/(\s|)-(\s|)/gmi," ").replace(/(\sI\s|\s:\s)/gmi, " ").replace(/\sFrom\s(.*)\/(|\s)Soundtrack/gmi, "").replace(/(high\squality|\sOST|playlist|\sHD|\sHQ|\s1080p|\s720p|ft\.|feat\.|ft\s|lyrics|official\svideo|\"|official|video|:|\/Soundtrack\sVersion|\/Soundtrack|\||w\/|\/)/gmi, '')
               modifiedTitle = encodeURIComponent(modifiedTitle)
               console.log modifiedTitle
-              request.get({url: "https://api.spotify.com/v1/search?type=track&q="+modifiedTitle+"+NOT+Karaoke", json: true}, (err, httpResponse, body) ->
+              request.get({
+                url: "https://api.spotify.com/v1/search?type=track&q=" + modifiedTitle,
+                json: true,
+                headers: {
+                  "Authorization": "Bearer "+res.locals.spotify_access_token
+                }
+              }, (err, httpResponse, body) ->
                 if err then return res.status(500).send({code: 500, status: "Spotify API Error", error: err})
                 else
                   artist = {}
@@ -446,6 +509,43 @@ router.put("/:playlist_id/song", (req, res) ->
             else
               return res.status(404).send({code: 404, status: "Youtube API Error", error: "Video Not Found"})
           )
+      )
+    else if source == "scd"
+      tracksCollection.find({soundcloud_id: video_id}).toArray((err, results) ->
+        if err then return res.status(500).send({code: 500, status: "Database Error", error: err})
+        if results[0]
+          #song already in the database
+          insertionObj = results[0]
+          insertionObj.type = "trackAdded"
+          insertionObj.playlistId = playlist_id
+          song_obj = {
+            id: insertionObj.id
+            date_added: new Date().getTime()
+            play_count: 0
+            last_played: undefined
+          }
+          playlistsCollection.find({"id":playlist_id, "creator": user_id}).toArray((err, results) ->
+            if err then return res.status(500).send({code: 500, status: "Database Error", error: err})
+            if results[0]
+              playlist = results[0]
+              if playlist.artwork == "" && insertionObj.artwork != ""
+                #update playlist artwork
+                playlistsCollection.update({"id":playlist_id,"creator":user_id},{"$push": {songs: song_obj}, "$set": {artwork: insertionObj.artwork}}, (err, result) ->
+                  if err then return res.status(500).send({code: 500, status: "Database Error", error: err})
+                  #insert into song queue if active queue
+                  insertSongIntoQueue(req, res, insertionObj, playlist_id)
+                )
+              else
+                playlistsCollection.update({"id":playlist_id,"creator":user_id},{"$push": {songs: song_obj}}, (err, result) ->
+                  if err then return res.status(500).send({code: 500, status: "Database Error", error: err})
+                  #insert into song queue if active queue
+                  insertSongIntoQueue(req, res, insertionObj, playlist_id)
+                )
+            else
+              return res.status(404).send({code: 404, status: "Playlist Not Found"})
+          )
+        else
+          #insert song from source
       )
   else
     return res.status(429).send({code: 429, status: "Unauthorized"})

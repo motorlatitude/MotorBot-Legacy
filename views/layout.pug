@@ -8,6 +8,8 @@ html(lang="en")
         //link(href='/css/playlist.css',rel='stylesheet')
         link(href='/css/main.css',rel='stylesheet')
         link(href='/font-awesome-4.6.3/css/font-awesome.min.css',rel='stylesheet')
+        link(rel="stylesheet",href="https://unpkg.com/simplebar@latest/dist/simplebar.css")
+        script(src="https://unpkg.com/simplebar@latest/dist/simplebar.js")
         script.
             electron_app = false
             if (typeof module === 'object') {window.module = module; module = undefined; electron_app = true}
@@ -23,6 +25,7 @@ html(lang="en")
             playlistSort = "timestamp";
             playlistSortDir = 1;
             loadedPlaylistArtwork = false;
+            playlistTracks = {}
 
             function sendHB(){
                 socket.send(JSON.stringify({type:"hb",data:{}}));
@@ -60,7 +63,7 @@ html(lang="en")
                                     if($("#playlist").attr("data-playlistId") == data.song.playlistId) {
                                         $(".trackPlaying").removeClass("trackPlaying");
                                         $(".play").parent().html($(".play").parent().attr('data-trackNo'));
-                                        $("#" + data.song.songId + " .item").html($("#" + data.song.songId + " .item").html()+'<i class="fa fa-pause-circle-o play" aria-hidden="true"></i>');
+                                        $("#" + data.song.songId + " .item").html($("#" + data.song.songId + " .item").html()+'<i class="fa fa-volume-up play" aria-hidden="true"></i>');
                                         $("#" + data.song.songId).addClass("trackPlaying");
                                     }
                                 }
@@ -255,26 +258,34 @@ html(lang="en")
                         $(".contentView").html(data);
                         $(".loader").css("display", "none");
                         if(view == "playlists" && param){
-                            $(".contentView").css("display","none");
+                            //$(".contentView").css("display","none");
                             $(".loader").css("display","block");
                             $("#playlist").attr("data-playlistId",param);
+                            $(".header").css("display","none");
+                            $("#playlist").css("display", "none");
                             loadPlaylist(param);
-                             $(".contentView").scroll(function () {
+                            /*$(".contentView").scroll(function () {
                                  if ($(".contentView").scrollTop() > 160) {
-                                     $(".header").css("position", "fixed").css("height","100px").css("top","60px").css("left","230px");
-                                     $("#playlist").find(".titleRow").css("position","fixed").css("top","120px").css("left","230px");
+                                     $(".header").css("position", "fixed").css("height","100px").css("width",$(document).width()-230+"px").css("top","60px").css("left","230px");
+                                     $("#playlist").find(".titleRow").css("position","fixed").css("width",$(document).width()-230+"px").css("top","120px").css("left","230px");
                                      $(".playlistType").css("display","none");
-                                     $(".playlistName").css("top","26px").css("font-size","25px");
-                                     $(".playlistOptions").css("top","21px").css("left","calc(50% + 204px)").css("text-align","right");
+                                     $(".playlistName").css("top","16px").css("left","70px").css("font-size","25px");
+                                     $(".playlistOptions").css("top","6px").css("left","calc(50% + 204px)").css("text-align","right");
+                                     $("#playlist_artwork").css("width","45px").css("height","45px").css("top","10px").css("left","10px");
                                  }
                                  else {
-                                     $(".header").css("position", "absolute").css("height","250px").css("top","0px").css("left","0px");
-                                     $("#playlist").find(".titleRow").css("position","absolute").css("top","209px").css("left","0px");
+                                     $(".header").css("position", "absolute").css("width","100%").css("height","250px").css("top","0px").css("left","0px");
+                                     $("#playlist").find(".titleRow").css("position","absolute").css("width","100%").css("top","209px").css("left","0px");
                                      $(".playlistType").css("display","block");
-                                     $(".playlistName").css("top","70px").css("font-size","38px");
-                                     $(".playlistOptions").css("top","160px").css("left","calc(50% - 564px)").css("text-align","left");
+                                     $(".playlistName").css("top","50px").css("left","220px").css("font-size","38px");
+                                     $(".playlistOptions").css("top","150px").css("left","220px").css("text-align","left");
+                                     $("#playlist_artwork").css("width", "175px").css("height", "175px").css("top", "20px").css("left", "20px");
                                  }
-                             });
+                            });*/
+                        }
+                        else if(view == "search"){
+                            $(".loader").css("display", "block");
+                            loadSearch(param);
                         }
                         else if(view == "playlists"){
                             $.ajax({
@@ -285,7 +296,7 @@ html(lang="en")
                                     xhr.setRequestHeader("Authorization", "Bearer #{user.motorbotAccessToken}");
                                 },
                                 success: function(data){
-                                    $(".contentView").off("scroll");
+                                    //$(".contentView").off("scroll");
                                     $("#subTitleBar").css("display","block");
                                     $.each(data, function (i, item) {
                                         artwork = "";
@@ -309,7 +320,7 @@ html(lang="en")
                                     xhr.setRequestHeader("Authorization", "Bearer #{user.motorbotAccessToken}");
                                 },
                                 success: function (data) {
-                                    $(".contentView").off("scroll");
+                                    //$(".contentView").off("scroll");
                                     $.each(data.spotlight, function (i, item) {
                                         artwork = "";
                                         if (item.artwork != "") {
@@ -338,8 +349,9 @@ html(lang="en")
                                 success: function(data){
                                     console.log(data);
                                     $.each(data, function (i, item) {
-                                        $("#commitHistory").append("<li><div class='date'>"+item.commit.author.date.replace(/T/gmi,"<br/>").replace(/Z/gmi,"")+"</div><div class='commit'>"+item.sha.substr(0,7)+"</div><div class='author'>"+item.author.login+"</div><div class='container'>"+marked(item.commit.message.replace(/<(.*?)>$/gmi,"&lt;$1&gt;").replace(/FIX/g,"<div class='type fix'>FIX</div>").replace(/NEW/g,"<div class='type new'>NEW</div>").replace(/TODO/g,"<div class='type todo'>TODO</div>").replace(/CODE\sIMPROVEMENT/g,"<div class='type code'>CODE</div>").replace(/CODE/g,"<div class='type code'>CODE</div>").replace(/IMPROVEMENT/g,"<div class='type improvement'>IMPROVEMENT</div>").replace(/DEPRECIATED/g,"<div class='type depreciated'>DEPRECIATED</div>"))+"</div></li>");
+                                        $("#commitHistory").append("<li><div class='date'>"+item.commit.author.date.replace(/T/gmi,"&nbsp;&bull;&nbsp;").replace(/-/gmi,"/").replace(/Z/gmi,"")+"&nbsp;&bull;&nbsp;<span class='author'>"+item.author.login+"</span></div><div class='commit'>"+item.sha.substr(0,7)+"</div><div class='container'>"+marked(item.commit.message.replace(/<(.*?)>$/gmi,"&lt;$1&gt;").replace(/FIX/g,"<div class='type fix'>FIX</div>").replace(/NEW/g,"<div class='type new'>NEW</div>").replace(/TODO/g,"<div class='type todo'>TODO</div>").replace(/CODE\sIMPROVEMENT/g,"<div class='type code'>CODE</div>").replace(/CODE/g,"<div class='type code'>CODE</div>").replace(/IMPROVEMENT/g,"<div class='type improvement'>IMPROVEMENT</div>").replace(/DEPRECIATED/g,"<div class='type depreciated'>DEPRECIATED</div>"))+"</div></li>");
                                     });
+                                    new SimpleBar($(".contentView")[0])
                                 },
                                 error: function(err){
                                     console.log(err);
@@ -347,7 +359,26 @@ html(lang="en")
                             })
                         }
                         else if (view == "account") {
-
+                            new SimpleBar($(".contentView")[0])
+                        }
+                        else if (view == "developer") {
+                            $.ajax({
+                                url: "/api/user/apps?api_key=caf07b8b-366e-44ab-9bda-623f94a9c2df",
+                                dataType: 'json',
+                                beforeSend: function (xhr) {
+                                    xhr.setRequestHeader("Authorization", "Bearer #{user.motorbotAccessToken}");
+                                },
+                                success: function (data) {
+                                    console.log(data);
+                                    $.each(data, function (i, item) {
+                                        $("#developer_apps").append("<li><div class='title'>" + item.title + "</div><br>API Key<pre>" + item.key + "</pre>Client ID<pre>" + item.id + "</pre>Secret<pre>" + item.secret + "</pre></li>");
+                                    });
+                                    new SimpleBar($(".contentView")[0])
+                                },
+                                error: function (err) {
+                                    console.log(err);
+                                }
+                            })
                         }
                         else if (view == "queue") {
                             $(".contentView").css("display", "none");
@@ -409,7 +440,7 @@ html(lang="en")
                         console.log(d);
                         $(".trackPlaying").removeClass("trackPlaying");
                         $(".play").parent().html($(".play").parent().attr('data-trackNo'))
-                        self.children('.item').html(self.children('.item').html()+'<i class="fa fa-pause-circle-o play" aria-hidden="true"></i>');
+                        self.children('.item').html(self.children('.item').html()+'<i class="fa fa-volume-up play" aria-hidden="true"></i>');
                         self.addClass('trackPlaying');
                         songDuration = 0
                     },
@@ -629,6 +660,19 @@ html(lang="en")
                 });
             });
 
+            function getInformation(song_id){
+                var song_info = playlistTracks[song_id]
+                $("#song_info").css("display","block");
+                $(".song_info_raw").html("<pre>"+JSON.stringify(song_info, null, "    ")+"</pre>");
+                $(".song_artwork").attr("style","background-image: url('"+song_info.artwork+"'); background-size: cover;");
+                $(".song_title").html(song_info.title);
+                $(".song_artist").html(song_info.artist.name);
+                $(".song_album").html(song_info.album.name);
+                $(".song_input_title").val(song_info.title);
+                $(".song_input_artist").val(song_info.artist.name);
+                $(".song_input_album").val(song_info.album.name);
+            }
+
             function updateDblClicks(){
                 $(".errorList ul li").each(function(index){
                     $(this).click(function(){
@@ -655,6 +699,8 @@ html(lang="en")
                             CurX = (window.Event) ? e.pageX : e.clientX + (document.documentElement.scrollLeft ? document.documentElement.scrollLeft : document.body.scrollLeft);
                             CurY = (window.Event) ? e.pageY : e.clientY + (document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop);
                             $(".contextMenu").html("<ul></ul>");
+                            $("#playlist").find("li:not(.titleRow).active").removeClass("active");
+                            self.addClass("active");
                             if(CurY+200 > $(document).height()) {
                                 $(".contextMenu").css("display", "block").css("top", (CurY - 190) + "px").css("left", CurX + "px");
                             }
@@ -663,10 +709,10 @@ html(lang="en")
                             }
                             if($(this).attr("id")){
                                 if($("#playlist").attr("data-playlistCreator") == "#{user.id}"){
-                                    $(".contextMenu ul").append("<li onclick=\"addSongToQueue('"+$(this).attr("data-songId")+"','"+$(this).attr("data-playlistId")+"')\">Add to Queue</li><li class='sep'></li><li disabled='true'>Add to Library</li><li onclick=\"addToPlaylist('"+$(this).attr("data-songId")+"')\">Add to Playlist</li><li class='sep'></li><li onclick=\"deleteSongFromPlaylist('"+$(this).attr("data-songId")+"','"+$(this).attr("data-playlistId")+"')\" style='color: rgba(242, 52, 51, 1.00);'>Remove This From Playlist</li>");
+                                    $(".contextMenu ul").append("<li onclick=\"addSongToQueue('"+$(this).attr("data-songId")+"','"+$(this).attr("data-playlistId")+"')\">Add to Queue</li><li class='sep'></li><li onclick=\"getInformation('"+$(this).attr("data-songId")+"')\">Song Info</li><li class='sep'></li><li disabled='true'>Add to Library</li><li onclick=\"addToPlaylist('"+$(this).attr("data-songId")+"')\">Add to Playlist</li><li class='sep'></li><li onclick=\"deleteSongFromPlaylist('"+$(this).attr("data-songId")+"','"+$(this).attr("data-playlistId")+"')\" style='color: rgba(242, 52, 51, 1.00);'>Remove This From Playlist</li>");
                                 }
                                 else{
-                                    $(".contextMenu ul").append("<li onclick=\"addSongToQueue('"+$(this).attr("data-songId")+"','"+$(this).attr("data-playlistId")+"')\">Add to Queue</li><li class='sep'></li><li disabled='true'>Add to Library</li><li onclick=\"addToPlaylist('"+$(this).attr("data-songId")+"')\">Add to Playlist</li>")
+                                    $(".contextMenu ul").append("<li onclick=\"addSongToQueue('"+$(this).attr("data-songId")+"','"+$(this).attr("data-playlistId")+"')\">Add to Queue</li><li class='sep'></li><li onclick=\"getInformation('"+$(this).attr("data-songId")+"')\">Song Info</li><li class='sep'></li><li disabled='true'>Add to Library</li><li onclick=\"addToPlaylist('"+$(this).attr("data-songId")+"')\">Add to Playlist</li>")
                                 }
                             }
                             return false;
@@ -937,9 +983,45 @@ html(lang="en")
             }
 
 
+            function loadSearch(searchTerm){
+                $(".loader").css("display", "block");
+                $.ajax({
+                    method: "GET",
+                    url: "/api/search?q="+searchTerm+"&api_key=caf07b8b-366e-44ab-9bda-623f94a9c2df",
+                    dataType: 'json',
+                    success: function (d) {
+                        $.each(d, function (i, item) {
+                            if (item != null) {
+                                var data = item;
+                                var trackNo = i + 1;
+                                var songDuration = data.duration;
+                                var formattedTimestamp = secondsToHms(data.duration)
+                                var added = millisecondsToStr(data.import_date);
+                                var user_id = d.user_id || "";
+                                artist = data.artist.name || ""
+                                album = data.album.name || ""
+                                $("#playlist").append("<li id='" + data.id + "' data-songId='" + data.id + "'><div class='trackRow'><div class='item' data-trackNo='" + trackNo + "'>" + trackNo + "</div><div class='title' data-sortIndex='" + data.title.toUpperCase() + "'>" + data.title + "</div><div class='artist' data-sortIndex='" + artist.toUpperCase() + "'>" + artist + "</div><div class='album' data-sortIndex='" + album.toUpperCase() + "'>" + album + "</div><div class='timestamp' data-sortIndex='" + data.date_added + "'>" + added + "</div><div class='time'>" + formattedTimestamp + "</div></div></li>");
+                                updateDblClicks();
+                                new SimpleBar($(".contentView")[0])
+                            }
+                            else {
+                                console.log(i)
+                            }
+                        });
+                        $("#playlist li").eq(1).css("margin-top","35px");
+                        $(".contentView").css("display", "flex");
+                        $(".loader").css("display", "none");
+                    },
+                    error: function (err) {
+                        console.log(err);
+                    }
+                });
+            }
+
             function loadPlaylist(playlistID){
                 loadedPlaylistArtwork = false
                 var totalDuration = 0;
+                $(".loader").css("display","block");
                 $.ajax({
                     method: "GET",
                     url: "/api/playlist/"+playlistID+"?api_key=caf07b8b-366e-44ab-9bda-623f94a9c2df",
@@ -957,6 +1039,7 @@ html(lang="en")
                         $.each(d.songs, function(i, item){
                             if(item != null) {
                                 var data = d.songs[i];
+                                playlistTracks[data.id] = data;
                                 var trackNo = i + 1;
                                 var songDuration = data.duration;
                                 var formattedTimestamp = secondsToHms(data.duration)
@@ -971,14 +1054,21 @@ html(lang="en")
                                 }
                                 artist = data.artist.name || ""
                                 album = data.album.name || ""
-                                $("#playlist").append("<li id='" + data.id + "' data-songId='" + data.id + "' data-playlistId='" + playlistID + "'><div class='trackRow'><div class='item' data-trackNo='" + trackNo + "'>" + trackNo + "</div><div class='title' data-sortIndex='" + data.title.toUpperCase() + "'>" + data.title + "</div><div class='artist' data-sortIndex='" + artist.toUpperCase() + "'>" + artist + "</div><div class='album' data-sortIndex='" + album.toUpperCase() + "'>" + album + "</div><div class='timestamp' data-sortIndex='" + data.date_added + "'>" + added + "</div><div class='time'>" + formattedTimestamp + "</div></div></li>");
+                                explicit = ""
+                                if(data.explicit){
+                                    explicit = "<div class='explicit'>E</div>";
+                                }
+                                $("#playlist").append("<li id='" + data.id + "' data-songId='" + data.id + "' data-playlistId='" + playlistID + "'><div class='trackRow'><div class='item' data-trackNo='" + trackNo + "'>" + trackNo + "</div><div class='title' data-sortIndex='" + data.title.toUpperCase() + "'>" + data.title + " " + explicit + "</div><div class='artist' data-sortIndex='" + artist.toUpperCase() + "'>" + artist + "</div><div class='album' data-sortIndex='" + album.toUpperCase() + "'>" + album + "</div><div class='timestamp' data-sortIndex='" + data.date_added + "'>" + added + "</div><div class='time'>" + formattedTimestamp + "</div></div></li>");
                             }
                             else{
                                 console.log(i)
                             }
                         });
-                        $(".contentView").css("display","block");
+                        $(".contentView").css("display","flex");
                         $(".loader").css("display","none");
+                        $(".header").css("display","block");
+                        $("#playlist").css("display","block");
+
                         $(".playlistName").html(d.name);
                         $(".playlistStats .user").html(d.creatorName.username+"#"+d.creatorName.discriminator);
                         if((d.followers.length - 1) == 1) {
@@ -1034,6 +1124,7 @@ html(lang="en")
                         updateDblClicks();
                         loadPlaying();
                         loadRandom();
+                        new SimpleBar($(".contentView")[0])
                     },
                     error: function(err){
                         console.log(err);
@@ -1096,7 +1187,7 @@ html(lang="en")
                                 if ($("#playlist").attr("data-playlistId") == data.playlistId) {
                                     $(".trackPlaying").removeClass("trackPlaying");
                                     $(".play").parent().html($(".play").parent().attr('data-trackNo'));
-                                    $("#" + data.songId + " .item").html($("#" + data.songId + " .item").html()+'<i class="fa fa-pause-circle-o play" aria-hidden="true"></i>');
+                                    $("#" + data.songId + " .item").html($("#" + data.songId + " .item").html()+'<i class="fa fa-volume-up play" aria-hidden="true"></i>');
                                     $("#" + data.songId).addClass("trackPlaying");
                                     $(".playPlaylistButton").html('<i class="fa fa-pause" aria-hidden="true"></i> &nbsp; &nbsp;PAUSE').click(function (event) {
                                         pauseMusic()
@@ -1212,8 +1303,9 @@ html(lang="en")
             }
     body
     .titlebar
-        .motorbot MotorBot Music
-        input.search(type="text",placeholder="Search Something New...")
+        .motorbotIcon
+            img(src="https://mb.lolstat.net/motorbotIcon_transparent.png")
+        input.search(type="text",placeholder="Search Something New...",onkeyup="loadView('search', $(this).val())")
         .searchIcon <i class="fa fa-search" aria-hidden="true"></i>
         .version
         .motorbotSelection
@@ -1233,11 +1325,11 @@ html(lang="en")
                     li AFK
         .profile(onclick="$('#channelOptions').removeClass('visible'); $('#serverOptions').removeClass('visible'); $('#accountOptions').toggleClass('visible');")
             .profileArrow <i class="fa fa-chevron-down"></i>
-            .profileName #{user.username}##{user.discriminator}
+            .profileName #{user.username}<span class="disc">##{user.discriminator}</span>
             .profileIcon(style="background: url('https://discordapp.com/api/users/" + user.id + "/avatars/" + user.avatar + ".jpg') no-repeat center; background-size: cover;")
             ul.options#accountOptions
                 li(onclick='loadView("account","undefined");') Account
-                li Developer
+                li(onclick='loadView("developer","undefined");') Developer
                 li(onclick="window.location.href='https://mb.lolstat.net/loginflow/logout'") Logout
     .errorList
         ul
@@ -1245,16 +1337,12 @@ html(lang="en")
                 .icon
                     .iconWrapper <i class="fa fa-wrench" aria-hidden="true"></i>
                 .content Playlist is under active development, some features may not work.
-            li.info
-                .icon
-                    .iconWrapper <i class="fa fa-info" aria-hidden="true"></i>
-                .content UI Changes
             li.fatal#socketClose
                 .icon
                     .iconWrapper <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
                 .content You've been disconnected from our server, please refresh the page!
     .flexContainer
-        .sidebar
+        .sidebar(data-simplebar)
             .title Main
             ul.mainNav
                 li(data-view="home").active Overview
@@ -1265,7 +1353,7 @@ html(lang="en")
                 li(data-view="library") Library
             .title Playlists
             ul.mainNav.playlistNav
-        .contentView
+        .contentView(data-simplebar)
             p Cookies
     .playerBar
         .bg(style="")
@@ -1284,107 +1372,5 @@ html(lang="en")
         .random(onclick='randomMusic()') <i class="fa fa-random" aria-hidden="true"></i>
     .contextMenu
         ul
-    //
-        .bodyWrapper
-            .titleBar
-                .siteIcon <img src="https://mb.lolstat.net/motorbotIcon_transparent.png">
-                input.search(type="text",placeholder="Search Something New...")
-                .searchIcon <i class="fa fa-search" aria-hidden="true"></i>
-                ul.nav#mainNavBar
-                    li.active(data-view="home") HOME
-                    li(data-view="browse") BROWSE
-                    li(data-view="library",style="opacity: 0.4; cursor: default;") LIBRARY
-                    li(data-view="playlists") PLAYLISTS
-                    li(data-view="queue") QUEUE
-                //--.channel <div class="status yellow"></div> Not Currently In Voice Channel
-                .version
-                .motorbotSelection
-                    .serverSelection(onclick="$('#channelOptions').removeClass('visible'); $('#accountOptions').removeClass('visible'); $('#serverOptions').toggleClass('visible');")
-                        .selected#selectedServer Kill The Jester
-                        ul.options#serverOptions
-                            li Kill The Jester
-                            li DevServer
-                    .channelSelection(onclick="$('#serverOptions').removeClass('visible'); $('#accountOptions').removeClass('visible'); $('#channelOptions').toggleClass('visible');")
-                        .selected.yellow#selectedChannel Disconnected
-                        ul.options#channelOptions
-                            li General
-                            li General 2
-                            li Ranked
-                            li Movie Time
-                            li dev
-                            li AFK
-                .bell <i class="fa fa-bell" aria-hidden="true"></i>
-                .profile(onclick="$('#channelOptions').removeClass('visible'); $('#serverOptions').removeClass('visible'); $('#accountOptions').toggleClass('visible');")
-                    .profileArrow <i class="fa fa-chevron-down"></i>
-                    .profileIcon(style="background: url('https://discordapp.com/api/users/"+user.id+"/avatars/"+user.avatar+".jpg') no-repeat center; background-size: cover;")
-                    ul.options#accountOptions
-                        li(onclick='loadView("account","undefined");') Account
-                        li Developer
-                        li(onclick="window.location.href='https://mb.lolstat.net/loginflow/logout'") Logout
-            .subTitleBar#subTitleBar
-                .subWrapper
-                    ul.subnav
-                        li.active ALL PLAYLISTS
-                        li MY PLAYLISTS
-                        li FOLLOWED
-                    .newPlaylistButton.button.blue New Playlist
-                    .importPlaylistButton.button.blue(style='margin-right: 10px;') Import Playlist
-            .errorList
-                ul
-                    li.warn
-                        .icon
-                            .iconWrapper <i class="fa fa-wrench" aria-hidden="true"></i>
-                        .content Playlist is under active development, some features may not work.
-                    li.info
-                        .icon
-                            .iconWrapper <i class="fa fa-info" aria-hidden="true"></i>
-                        .content To view your playlists select "Playlists" at the top
-                    li.fatal#socketClose
-                        .icon
-                            .iconWrapper <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
-                        .content You've been disconnected from our server, please refresh the page!
-            .contentView
-
-            .playerBar
-                .controls
-                    .prev <i class="fa fa-step-backward" onclick='prevMusic();' style='cursor: pointer;' aria-hidden="true"></i>
-                    .playStopButton <span id="playStop"><i class="fa fa-play" aria-hidden="true" onclick='playMusic();' style='cursor: pointer;'></i></span>
-                    .skip <i class="fa fa-step-forward" onclick='skipMusic();' style='cursor: pointer;' aria-hidden="true"></i>
-                .activeArtwork(style="")
-                .duration 00:00:00
-                .activeTrack Nothing Playing
-                .activeArtist
-                .timelineWrapper
-                    .timeline
-                .songDuration 00:00:00
-                .repeat(onclick='repeatMusic()') <i class="fa fa-retweet" aria-hidden="true"></i>
-                .random(onclick='randomMusic()') <i class="fa fa-random" aria-hidden="true"></i>
-            .contextMenu
-                ul
-        .modalFrame.newPlaylist
-            .modalTitle New Playlist
-            br
-            .modalDescription Create a new playlist
-            br
-            input#newPlaylistName(type="text",placeholder="New Playlist Name")
-            .modalControls
-                input.blue#newPlaylistConfirm(type="submit",value="Done")
-                input.cancel(type="button",onclick="$(this).parent().parent().css('display','none'); $('.modalityOverlay').css('display','none'); $('.contentView').css('-webkit-filter','blur(0px)')",value="Cancel")
-        .modalFrame.importPlaylist#importPlaylist(style="top: calc(50% - 200px);")
-            .modalTitle Import Playlist
-            br
-            .modalDescription Import a playlist from your Spotify account. You can link your spotify account through account > connections. <br><br><span class='extra'> You should estimate about 1 - 2 seconds per song to import, please be patient for large imports! For large imports you can close this dialogue by pressing cancel and checking back to your playlists in a few minutes.</span>
-            br
-            select#spotifyPlaylists
-            .modalControls
-                .modalLoader#importPlaylistLoader
-                input.blue#importPlaylistConfirm(type="submit",value="IMPORT")
-                input.cancel(type="button",onclick="$(this).parent().parent().css('display','none'); $('.modalityOverlay').css('display','none'); $('.contentView').css('-webkit-filter','blur(0px)')",value="Cancel")
-        .loader
-        .modalityOverlay
-        .modalFrame.addToPlaylist
-            input#addToPlaylist_newPlaylistName(type="text",placeholder="New Playlist Name")
-            #addToPlaylist_confirmNewPlaylistName <i class="fa fa-plus" aria-hidden="true"></i> &nbsp; Create New
-            .scrollWrapper
-                ul.modal_playlistList
-            .cancel(onclick="$(this).parent().css('display','none'); $('.modalityOverlay').css('display','none');") Cancel
+    .loader
+        .spinner

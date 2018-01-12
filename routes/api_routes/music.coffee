@@ -54,6 +54,7 @@ songQueueStart = new Date().getTime()
 songQueueInterval = 1000
 
 scheduleSongPlay = (fn) ->
+  #TODO check if this works...
   if typeof fn == "funtion" then playSongQueue.push(fn)
   if playSongQueue.length == 0
     #empty queue

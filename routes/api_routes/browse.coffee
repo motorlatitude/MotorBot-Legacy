@@ -140,12 +140,19 @@ importingScript = (req, res, playlist_id = undefined) ->
                     modifiedTitle = data.items[0].snippet.title.replace(/\[((?!.*?Remix))[^\)]*\]/gmi, '').replace(/\(((?!.*?Remix))[^\)]*\)/gmi, '').replace(/\-(\s|)[0-9]*(\s|)\-/g, '').replace(/(\s|)-(\s|)/gmi," ").replace(/\sFrom\s(.*)\/(|\s)Soundtrack/gmi, "").replace(/(high\squality|\sOST|playlist|\sHD|\sHQ|\s1080p|ft\.|feat\.|ft\s|lyrics|official\svideo|\"|official|video|:|\/Soundtrack\sVersion|\/Soundtrack|\||w\/|\/)/gmi, '')
                     modifiedTitle = encodeURIComponent(modifiedTitle)
                     console.log modifiedTitle
-                    request.get({url: "https://api.spotify.com/v1/search?type=track&q="+modifiedTitle+"+NOT+Karaoke", json: true}, (err, httpResponse, body) ->
+                    request.get({
+                      url: "https://api.spotify.com/v1/search?type=track&q="+modifiedTitle,
+                      json: true,
+                      headers: {
+                        "Authorization": "Bearer BQAgotImSiaQGP15ALbQdTobE9V7RHprS4mArIYDb6GerOozv7XMtoTCb4lCt5Xzvyzvfm18ZBCHBpxcNNEaUKstrQ4CMgReGxtsC7-V6na_jjWe6iaHE88UMjCdOC3ZOYSIRfD_hTU4doA"
+                      }
+                    }, (err, httpResponse, body) ->
                       if err
                         setTimeout(() ->
                           cb(res.status(500).send({code: 500, status: "Spotify API Error", error: err}))
                         ,1000)
                       else
+                        console.log body
                         artist = {}
                         album = {}
                         composer = {}

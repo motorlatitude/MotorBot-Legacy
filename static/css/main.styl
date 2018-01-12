@@ -7,7 +7,7 @@ body
 html
   margin 0
   padding 0
-  background #1f1f26
+  background #2A2D32
   color #fff
   font-family 'Open Sans', sans-serif
   font-size 13px
@@ -21,23 +21,18 @@ html
   left 0
   right 0
   height 60px
-  background #fff
+  background #191919
   z-index 100
   -webkit-app-region drag
-  & .motorbot
-    float left
-    padding-left 10px
-    width 220px
-    height 60px
-    line-height 60px
-    color #444
-    font-size 20px
-    font-family Open Sans, sans-serif
-    font-weight bold
+  & .motorbotIcon
+    position absolute
+    top 0
+    left 10px
+    & img
+      width 67px
   & .search
-    display none
     float left
-    margin-left 30px
+    margin-left 105px
     padding 0
     width 270px
     background transparent
@@ -45,16 +40,15 @@ html
     line-height 34px
     font-size 14px
     margin-top 15px
-    color #333
+    color #fff
     &::-webkit-input-placeholder
-      color rgba(55,55,55,0.2)
+      color #333
     &:focus
       outline none
   & .searchIcon
-    display none
     position absolute
     top 22px
-    right 420px
+    left 90px
     font-size 14px
     color #333
   & .version
@@ -77,8 +71,8 @@ html
       top 0
       right 0
       padding 0 10px
-      color #333
-      background #eee
+      color #fff
+      background #26272A
       border-top-left-radius 3px
       border-bottom-left-radius 3px
       width auto
@@ -95,7 +89,7 @@ html
         height: 0;
         border-top: 15px solid transparent;
         border-bottom: 15px solid transparent;
-        border-left: 15px solid #eee;
+        border-left: 15px solid #26272A;
       &:before
         content ''
         position absolute
@@ -105,11 +99,11 @@ html
         height: 0;
         border-top: 16px solid transparent;
         border-bottom: 16px solid transparent;
-        border-left: 16px solid #fff;
+        border-left: 16px solid #191919;
       &:hover
-        background #ddd
+        background #2A2D32
         &:after
-          border-left: 15px solid  #ddd
+          border-left: 15px solid #2A2D32
       & .selected
         float left
         width auto
@@ -146,8 +140,8 @@ html
       position relative
       top 0
       padding 0 10px
-      color #333
-      background #eee
+      color #fff
+      background #26272A
       border-radius 3px
       width auto
       height 30px
@@ -163,7 +157,7 @@ html
         &.yellow
           color rgba(255, 197, 51, 1.00)
       &:hover
-        background #ddd
+        background #2A2D32
       & .options
         display none
         position absolute
@@ -194,32 +188,34 @@ html
             border-bottom 0 solid transparent
   & .profile
     position absolute
-    top 12px
+    top 10px
     right 22px
     cursor pointer
     & .profileIcon
       float right
-      width 30px
-      height 30px
+      width 34px
+      height 34px
       border-radius 50%
-      background #eee
+      background #2A2D32
       box-shadow inset 0 0 3px rgba(0,0,0,0.6)
-      border 2px solid #ddd
+      border 2px solid #06A7DB
     & .profileName
       float right
       padding-left 10px
       width 100px
       height 36px
-      line-height 36px
-      color #555
+      line-height 40px
+      color #fff
       font-size 12px
       font-family Open Sans, sans-serif
       font-weight bold
       text-align center
+      & .disc
+        color #84898F
     & .profileArrow
       margin-left 10px
       float right
-      line-height 30px
+      line-height 36px
       color #333
     & .options
       display none
@@ -321,21 +317,21 @@ html
   flex-direction row
   -webkit-flex-wrap nowrap
   flex-wrap nowrap
-  background #131619
+  background #2A2D32
 
 .sidebar
   -webkit-flex-basis 230px
   flex-basis 230px
   height 100%
   min-width 230px
-  background #131619
+  background #2E3136
   overflow-y scroll
   overflow-x hidden
   & .title
     font-family 'Open Sans', sans-serif
     font-size 13px
     font-weight bold
-    color #393e40
+    color #eee
     text-transform uppercase
     margin-left 10px
     margin-top 20px
@@ -347,7 +343,7 @@ html
     & li
       width calc(100% - 45px)
       line-height 35px
-      color #ddd
+      color #aaa
       padding-left 20px
       padding-right 20px
       font-weight bold
@@ -362,7 +358,8 @@ html
       &:hover
         background rgba(150,150,150,0.1)
       &.active
-        box-shadow inset 4px 0 0 rgba(0, 179, 237, 1.00)
+        background #06A7DB
+        color #fff
 
 .contentView
   -webkit-flex-basis 100%
@@ -413,33 +410,36 @@ html
         margin-top 20px
         float left
         height 150px
-        width calc(100% - 60px)
-        background rgba(33, 40, 49, 1.00)
-        border-radius 3px
+        width calc(100% - 20px)
+        background #00B3ED
+        border-radius 4px
         box-shadow 0 0 12px rgba(0,0,0,0.1)
-        padding 0 30px 10px 30px
         position relative
         top 0
         right 0
+        overflow hidden
         & .title
+          background #1A91DA
           color #ddd
-          font-size 18px
-          width calc(100% - 40px)
-          line-height 60px
-          padding-left 40px
+          font-size 16px
+          width calc(100% - 10px)
+          padding-left 20px
           text-transform: capitalize
-          border-bottom 1px solid rgba(40, 47, 56, 1.00)
-          position relative
-          top 0
-          left 0
-          & img
-            position absolute
-            top 13px
-            left 7px
-            height 32px
-          & .user
-            text-transform: none
-            color rgba(255,255,255,0.5)
+          border-bottom 1px solid rgba(40, 47, 56, 0.1)
+          height 60px
+          & svg
+            float left
+          & .info
+            float left
+            margin-left 20px
+            & .info_title
+              color #fff
+              line-height 40px
+            & .info_username
+              margin-top -10px
+              font-size 14px
+              text-transform: none
+              color rgba(255,255,255,0.6)
         & .disconnect
           position absolute
           top 10px
@@ -450,7 +450,7 @@ html
           font-weight bold
           font-size 14px
           line-height 40px
-          color rgba(126, 129, 133, 1.00)
+          color #fff
           cursor pointer
           opacity 0.9
           border 0 solid transparent
@@ -458,7 +458,7 @@ html
           &:hover
             background rgba(0,0,0,0.2)
           &.blue
-            color rgba(0, 179, 237, 1.00)
+            color #fff
             &:hover
               background rgba(0,0,0,0.2)
           &:focus
@@ -466,14 +466,46 @@ html
           &:active
             outline none
 
+.loader
+  position absolute
+  top calc(50% - 30px)
+  left calc(50% - 30px)
+  width 60px
+  height 60px
+  display none
+  background #2E3136
+  border-radius 4px
+  z-index 10000
+  & .spinner
+    position absolute
+    top calc(50% - 9px)
+    left calc(50% - 9px)
+    width 18px
+    height 18px
+    border-radius 50%
+    box-sizing border-box
+    border solid 2px transparent
+    border-top-color rgba(0, 179, 237, 1.00)
+    border-left-color rgba(0, 179, 237, 1.00)
+    animation spinner 1.0s infinite linear
+
+@keyframes spinner
+  0%{
+    transform rotate(0deg)
+  }
+  100%{
+    transform rotate(360deg)
+  }
+
+
 .playerBar
   position fixed
   bottom 0
   left 0
   right 0
   height 75px
-  background #191919
-  border-top 4px solid #000
+  background #2F3136
+  border-top 4px solid #4A4C51
   .controls
     position absolute
     top 20px
@@ -488,6 +520,9 @@ html
       width 32px
       text-align center
       border-radius 50%
+      color rgba(255,255,255,0.4)
+      &:hover
+        color #fff
     & .skip
       float left
       margin-left 7px
@@ -497,16 +532,23 @@ html
       width 32px
       text-align center
       border-radius 50%
+      color rgba(255,255,255,0.4)
+      &:hover
+        color #fff
     & .playStopButton
       float left
       margin-left 10px
       line-height 38px
-      padding-bottom 2px
-      width 38px
-      font-size 24px
-      text-align center
+      width 24px
+      font-size 18px
       border-radius 50%
       cursor pointer
+      border 1px solid rgba(255,255,255,0.4)
+      padding-left 13px
+      color rgba(255,255,255,0.4)
+      &:hover
+        color #fff
+        border 1px solid #fff
   & .activeArtwork
     position absolute
     top 6px
@@ -553,7 +595,7 @@ html
     white-space: nowrap;
     text-overflow: ellipsis;
     font-weight: 500;
-    color: rgba(255,255,255,0.5);
+    color: #4C4E53;
   & .timelineWrapper
     position absolute
     top -4px
@@ -565,7 +607,9 @@ html
     & .timeline
       width 0%
       height 4px
-      background-image: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+      border-top-right-radius 2px
+      border-bottom-right-radius 2px
+      background #06A7DB
   & .bg
     position absolute
     top 0
@@ -621,7 +665,6 @@ html
   padding 0
   height auto
   width 100%
-  border-left 1px solid rgba(255,255,255,0.1)
   &>li
     float left
     width calc(100% - 20px)
@@ -629,37 +672,35 @@ html
     margin 5px 0
     padding 0 10px
     position relative
+    background rgba(33,33,33,0.5)
+    border-radius 3px
     .date
       font-size 11px
-      color #eee
+      color #aaa
       position absolute
-      top 13px
-      left 0
+      top 31px
+      left 9px
+      & .author
+        font-size 11px
+        color rgba(0, 160, 231, 0.6)
     .commit
       font-size 11px
       position absolute
-      top 39px
-      left 0
-      color #aaa
+      top 31px
+      right 9px
+      color #666
       font-family Consolas, "Liberation Mono", Menlo, Courier, monospace
-    .author
-      display none
-      font-size 11px
-      position absolute
-      bottom 13px
-      left 0
-      color rgba(0, 160, 231, 1.00)
     .container
-      margin-left 80px
       width calc(100% - 80px)
       min-height 75px
-      border-bottom 1px solid rgba(255,255,255,0.1)
-      padding-bottom 15px
+      padding-bottom 5px
       & .type
         display inline-block
         line-height 20px
         padding 0 6px
         min-width 30px
+        width 100px
+        text-align center
         background rgba(0,0,0,0.1)
         color #fff
         font-size 11px
@@ -668,17 +709,17 @@ html
         border-radius 3px
         margin-right 5px
         &.todo
-          background rgba(121, 97, 238, 1.00)
+          color rgba(121, 97, 238, 1.00)
         &.new
-          background rgba(0, 170, 234, 1.00)
+          color rgba(0, 170, 234, 1.00)
         &.fix
-          background rgba(95, 180, 57, 1.00)
+          color rgba(95, 180, 57, 1.00)
         &.code
-          background rgba(255,255,255, 0.6)
+          color rgba(255,255,255, 0.6)
         &.improvement
-          background rgba(243, 184, 49, 1.00)
+          color rgba(243, 184, 49, 1.00)
         &.depreciated
-          background rgba(217, 69, 66, 1.00)
+          color rgba(217, 69, 66, 1.00)
       &>ul
         list-style none
         margin 5px
@@ -756,7 +797,7 @@ html
   min-width 1128px
   height 250px
   color #fff
-  background #131619
+  background #2A2D32
   font-size 26px
   font-family Open Sans, sans-serif
   font-weight 400
@@ -767,30 +808,29 @@ html
   z-index 9
   & .bg
     width 100%
-    height 100%
+    height 210px
     position absolute
     top 0
     right 0
     bottom 0
-    display none
     &:after
       content ''
       position absolute
       width 100%
       height 100%
-      background rgba(22,22,22,0.9)
+      background rgba(42, 45, 50,0.9)
   & .playlistType
     position absolute
-    left calc(50% - 564px)
-    top 45px
-    width 1128px
+    left 220px
+    top 30px
+    width 300px
     font-size 16px
     font-weight 400
     color rgba(200,200,200,0.8)
   & .playlistName
     position absolute
-    left calc(50% - 564px)
-    top 70px
+    left 220px
+    top 50px
     width 800px
     font-size 38px
     color #fff
@@ -799,8 +839,8 @@ html
     text-overflow ellipsis
   & .playlistStats
     position absolute
-    left calc(50% - 564px)
-    top 120px
+    left 220px
+    top 110px
     width 1128px
     font-size 15px
     font-weight 500
@@ -816,19 +856,19 @@ html
     left 50px
   & .playlistOptions
     position absolute
-    top 160px
-    left calc(50% - 564px)
+    top 150px
+    left 220px
     width 370px
     & .playPlaylistButton, .followPlaylistButton, .playlistExtraOptions
       display inline-block
-      border-radius 50px
+      border-radius 2px
       padding 6px 30px
       font-family Open Sans, sans-serif
       font-weight 500
       font-size 13px
-      border: 1px solid rgba(0, 179, 237, 1.00)
       color #fff
       background rgba(0, 179, 237, 1.00)
+      border 1px solid rgba(0, 179, 237, 1.00)
       cursor pointer
       opacity 0.9
       &:hover
@@ -846,18 +886,18 @@ html
     & .playlistExtraOptions
       background rgba(0,0,0,0.4)
       border 1px solid rgba(255,255,255,0.6)
-      padding 6px 9px
+      padding 6px 10px
       margin-left 20px
       opacity 1
       &:hover
         border 1px solid rgba(255,255,255,1)
   & .artwork
     position absolute
-    top 20px
-    left calc(50% - 800px)
+    top 15px
+    left 20px
     width 175px
     height 175px
-    box-shadow 0 0 6px rgba(0,0,0,0.4)
+    border-radius 3px
 
 #playlist,
 .songList
@@ -870,15 +910,15 @@ html
   height 100%
   & li
     float left
-    width calc(100% - 20px)
+    width calc(100% - 25px)
     min-width 1128ox
     padding 0 10px
+    margin-left 5px
     cursor pointer
     //background rgba(34, 34, 41, 1.00)
     font-size 12px
     //border-bottom 1px solid rgba(36, 36, 36, 1.00)
     background transparent
-    border-bottom 1px solid rgba(50,50,50,0.2)
     border-radius 2px
     &:nth-child(2n)
       //background rgba(0,0,0,0.1)
@@ -948,6 +988,19 @@ html
         text-overflow ellipsis
         padding-right 10px
         padding-left 10px
+        position relative
+        top 0
+        & .explicit
+          position absolute
+          right 2px
+          top 12px
+          border 0.5px solid rgba(238, 62, 62, 1.00)
+          border-radius 2px
+          line-height 15px
+          padding 0 5px
+          font-size 8px
+          font-weight bold
+          color rgba(238, 62, 62, 1.00)
       & .artist
         display flex
         flex-grow 1
@@ -1002,10 +1055,10 @@ html
         flex-basis 70px
         & i
           margin-top 8px
-    &:hover
-      background #202020
+    /*&:hover
+      background #35383C*/
     &.active
-      background #242424
+      background #4F545C
       color #fff
       & .trackRow .item .play
         color $active_color
@@ -1100,6 +1153,100 @@ html
         white-space nowrap
         text-overflow ellipsis
 
+#song_info
+  position absolute
+  display none
+  top calc(50% - 400px)
+  left calc(50% - 300px)
+  width 600px
+  height 800px
+  overflow auto
+  border-radius 4px
+  box-shadow 0 0 10px rgba(0,0,0,0.4)
+  background #2E3136
+  z-index 500
+  & .song_info_header
+    position absolute
+    top 0
+    left 0
+    width 100%
+    height 140px
+    background rgba(0,0,0,0.2)
+    & .song_artwork
+      width 120px
+      height 120px
+      margin 10px
+      border-radius 4px
+      background rgba(0,0,0,0.1)
+    & .song_title
+      position absolute
+      top 32px
+      left 150px
+      color #fff
+      font-size 16px
+      font-weight bold
+    & .song_artist
+      position absolute
+      top 60px
+      left 150px
+      font-size 14px
+      color #fff
+    & .song_album
+      position absolute
+      top 84px
+      left 150px
+      font-size 14px
+      color #fff
+  & .song_info_footer
+    position absolute
+    bottom 0
+    left 0
+    width 100%
+    height 60px
+    background rgba(255,255,255,0.1)
+    z-index 800
+    & input
+      float right
+      margin-top 12px
+      margin-right 20px
+      padding 0 30px
+      background rgba(3, 164, 216, 1.00)
+      border 0 solid transparent
+      color #fff
+      font-family 'Ubuntu', 'Open Sans', sans-serif
+      font-size 13px
+      font-weight bold
+      line-height 32px
+      border-radius 3px
+      cursor pointer
+      &.cancel
+        background #4F545C
+      &:focus
+        outline none
+      &:active
+        outline none
+  & table
+    position absolute
+    top 150px
+    left 20px
+    width calc(100% - 40px)
+    & tr td:first-child
+      text-align right
+      width 120px
+      color rgba(255,255,255,0.5)
+    & tr td input
+      margin-left 5px
+      border 0 solid transparent
+      background #25272B
+      border-radius 3px
+      line-height 28px
+      color #fff
+      width calc(100% - 12px)
+      padding 0 6px
+      font-size 12px
+
+
+
 // QUEUE VIEW
 
 .playlistQueueContainer
@@ -1179,3 +1326,112 @@ html
       margin-top 20px
     & .title
       width 400px
+
+// ACCOUNT
+
+.subTitleBar
+  width calc(100% + 80px)
+  margin-left -20px
+  margin-top -20px
+  height 50px
+  background rgba(0,0,0,0.2)
+  min-width 1128px
+  z-index 1
+  & .subWrapper
+    width 1128px
+    height 50px
+    & .subnav
+      float left
+      list-style none
+      margin 0
+      padding 0
+      & li
+        float left
+        margin-top 0
+        line-height 50px
+        padding 0 25px
+        cursor pointer
+        font-size 12px
+        font-weight 500
+        text-transform uppercase
+        color rgba(132, 137, 143, 1.00)
+        &:hover
+          color #fff
+        &.active
+          box-shadow inset 0 -3px 0 rgba(0, 179, 237, 1.00)
+          color #fff
+
+.simplebar-track.horizontal
+  display none
+
+.accountBox
+  width calc(100% - 20px)
+  height 150px
+  padding 10px
+  background rgba(0,0,0,0.2)
+  border-radius 4px
+  border 1px solid rgba(0,0,0,0.6)
+  & .account_avatar
+    float left
+    margin 10px
+    width 128px
+    height 128px
+    border-radius 50%
+  & .account_label
+    margin-top 5px
+    margin-left 20px
+    float left
+    text-transform uppercase
+    color #5B5D60
+    font-size 13px
+    font-weight bold
+    display inline-table
+  & .account_value
+    margin-left 20px
+    float left
+    font-size 13px
+    color rgba(255,255,255,0.8)
+    display inline-table
+    & span
+      color rgba(255,255,255,0.5)
+
+#developer_apps
+  list-style none
+  margin 0
+  padding 0
+  & li
+    float left
+    width 470px
+    height auto
+    border-radius 4px
+    box-shadow 0 0 8px rgba(0,0,0,0.2)
+    margin-top 20px
+    margin-right 20px
+    background #2E3136
+    padding 0 10px
+    overflow hidden
+    color rgba(255,255,255,0.4)
+    text-transform uppercase
+    font-weight bold
+    font-size 11px
+    & pre
+      background rgba(0,0,0,0.2)
+      border-radius 2px
+      line-height 28px
+      padding 0 4px
+      color #fff
+      font-weight normal
+      font-family Consolas, "Lucida Console", Monaco, monospace
+      font-size 11px
+      margin-top 2px
+      text-transform none
+    & .title
+      color #fff
+      font-size 14px
+      text-transform none
+      padding 0 10px
+      margin-left -10px
+      margin-right -10px
+      width 100%
+      background rgba(0,0,0,0.3)
+      line-height 40px

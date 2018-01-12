@@ -2,8 +2,8 @@
   "manifest_version": 2,
   "name": "__MSG_extName__",
   "description": "This extension lets you add youtube videos to Motorbot",
-  "version": "1.3.1",
-  "version_name": "build 1.3.1~11022017",
+  "version": "1.4.0",
+  "version_name": "build 1.4.0~220320170100b2",
   "short_name": "MB",
   "default_locale": "en",
   "author": "Lennart Hase",
@@ -23,7 +23,8 @@
       "matches": [
         "https://www.youtube.com/*",
         "https://youtube.com/*",
-        "https://mb.lolstat.net/*"
+        "https://mb.lolstat.net/*",
+        "https://soundcloud.com/*"
       ],
       "js": [
         "jquery.min.js",
@@ -33,7 +34,8 @@
     }
   ],
   "web_accessible_resources": [
-    "icon_20x20.png"
+    "icon_20x20.png",
+    "icon.png"
   ],
   "oauth2": {
     "client_id": "169554794376200192",
@@ -49,6 +51,7 @@
     "identity",
     "https://www.youtube.com/*",
     "https://youtube.com/*",
+    "https://soundcloud.com/*",
     "https://discordapp.com/api/oauth2/*",
     "https://mb.lolstat.net/api/oauth2/*"
   ],

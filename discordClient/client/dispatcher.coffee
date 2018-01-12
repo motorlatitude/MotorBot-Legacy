@@ -70,13 +70,12 @@ class Dispatcher
     utils.debug("VOICE_STATE_UPDATE event caught")
     console.log data
     if data.d
-      if data.d.user_id == '169554882674556930' #TODO make it work for other ids, probably gonna have to do an API call
-        if data.d.channel_id
-          data.d.channel = @discordClient.channels[data.d.channel_id]
-          if @discordClient.voiceConnections[data.d.guild_id]
-            @discordClient.voiceConnections[data.d.guild_id].channel_id = data.d.channel_id
-            @discordClient.voiceConnections[data.d.guild_id].channel_name = data.d.channel.name
-        @discordClient.emit("voiceChannelUpdate", data.d)
+      if data.d.channel_id
+        data.d.channel = @discordClient.channels[data.d.channel_id]
+        if @discordClient.voiceConnections[data.d.guild_id]
+          @discordClient.voiceConnections[data.d.guild_id].channel_id = data.d.channel_id
+          @discordClient.voiceConnections[data.d.guild_id].channel_name = data.d.channel.name
+      @discordClient.emit("voiceChannelUpdate", data.d)
 
   handleVoiceConnection: (data) -> #bot has connected to voice channel
     utils.debug("Joined Voice Channel","info")

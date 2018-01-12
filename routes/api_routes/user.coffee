@@ -102,4 +102,17 @@ router.get("/playlists", (req, res) ->
     res.sendStatus(403)
 )
 
+router.get("/apps", (req, res) ->
+  if req.user_id
+    userId = req.user_id
+    apiaccessCollection = req.app.locals.motorbot.database.collection("apiaccess")
+    apiaccessCollection.find({userId: userId}).toArray((err, results) ->
+      if err then console.log err
+      res.type("json")
+      res.end(JSON.stringify(results))
+    )
+  else
+    res.sendStatus(403)
+)
+
 module.exports = router

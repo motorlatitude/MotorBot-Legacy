@@ -14,7 +14,7 @@
         else
             .followPlaylistButton(style='width: 104px; text-align: center;') FOLLOW
         .playlistExtraOptions#playlistMore <i class="fa fa-ellipsis-h" aria-hidden="true"></i>
-    .artwork(style="background: rgba(20, 20, 23, 1.00);")
+    .artwork#playlist_artwork(style="background: rgba(20, 20, 23, 1.00);")
 ul#playlist
     li.titleRow
         .trackRow
@@ -24,3 +24,29 @@ ul#playlist
             .album ALBUM
             .timestamp <i class="fa fa-calendar" aria-hidden="true"></i>
             .time <i class="fa fa-clock-o" aria-hidden="true"></i>
+#song_info
+    .song_info_header
+        .song_artwork
+        .song_title
+        .song_artist
+        .song_album
+    table
+        tr
+            td song
+            td <input type="text" class="song_input_title">
+        tr
+            td artist
+            td <input type="text" class="song_input_artist">
+        tr
+            td album
+            td <input type="text" class="song_input_album">
+        tr
+            td album artist
+            td <input type="text" class="song_input_album_artist">
+        tr
+            td composer
+            td <input type="text" class="song_input_composer">
+    .song_info_footer
+        input(type="button",value="OK",onclick="$('#song_info').css('display','none')")
+        input.cancel(type="button",value="Cancel",onclick="$('#song_info').css('display','none')")
+    .song_info_raw(style="position: absolute; top: 200px;")

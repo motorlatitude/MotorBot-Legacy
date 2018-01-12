@@ -51,15 +51,18 @@ class DiscordClient extends EventEmitter
     dataMsg = {
       "op": 3,
       "d" :{
-        "idle_since": null,
+        "since": new Date().getTime(),
         "game": {
-          "name": status
-        }
+          "name": status,
+          "type": 2
+        },
+        "status": "online",
+        "afk": false
       }
     }
     if @gatewayWS.readyState == @gatewayWS.OPEN
       @gatewayWS.send(JSON.stringify(dataMsg))
-      utils.debug("Status Succesfully Set to \""+status+"\"","info")
+      utils.debug("Status Successfully Set to \""+status+"\"","info")
   
   leaveVoiceChannel: (server) ->
     leaveVoicePackage = {

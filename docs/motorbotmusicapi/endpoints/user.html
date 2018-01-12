@@ -3,7 +3,7 @@
     <a href="#endpoints/user-" title="User">
         <i class="fa fa-anchor anchor" aria-hidden="true"></i>
     </a>
-    <div class="type"></div>
+    <div class="type">Endpoint</div>
 </div>
 <p>
 
@@ -15,7 +15,7 @@
     </ul>
 </div>
 <br>
-<h2 data-header="Security">Security Requirements <a href="#endpoints/playlist-security" title="Security"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></h2>
+<h2 data-header="Security">Security Requirements <a href="#endpoints/user-security" title="Security"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></h2>
 <table>
     <thead>
     <tr>
@@ -38,186 +38,48 @@
     </tbody>
 </table>
 <br>
-<h2 data-header="Operations">Operations <a href="#endpoints/oauth2-operations" title="Operations"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></h2>
+<h2 data-header="Operations">Operations <a href="#endpoints/user-operations" title="Operations"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></h2>
 <p>
     A list of all available operations for this endpoint.
 </p>
 <ul class="methodList">
     <li>
-        <div class="method"><pre><span class="hljs-http">GET</span> <span class="hljs-endpoint-path">/oauth2/authorize</span> <a href="#endpoints/oauth2-operations-authorize" title="operations-Authorize"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
-        <div class="description">Call to receive your authorization token</div>
-        <div class="parameters">
-            <p>Parameter should be passed as part of the url.</p>
-            <table>
-                <thead>
-                <tr>
-                    <td>Parameter</td>
-                    <td>Type</td>
-                    <td>Optional</td>
-                    <td>Default</td>
-                    <td>Description</td>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <td><pre>client_id</pre></td>
-                    <td>String</td>
-                    <td><i class="fa fa-times" aria-hidden="true"></i></td>
-                    <td><pre>undefined</pre></td>
-                    <td>Your <code>client_id</code></td>
-                </tr>
-                <tr>
-                    <td><pre>request_uri</pre></td>
-                    <td>String</td>
-                    <td><i class="fa fa-times" aria-hidden="true"></i></td>
-                    <td><pre>undefined</pre></td>
-                    <td>Callback url as set in your account settings. Used to return the client back to you and as an additional check.</td>
-                </tr>
-                <tr>
-                    <td><pre>response_type</pre></td>
-                    <td>String</td>
-                    <td><i class="fa fa-times" aria-hidden="true"></i></td>
-                    <td><pre>undefined</pre></td>
-                    <td>Should be set to <code>code</code></td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
+        <div class="method"><pre><span class="hljs-http">GET</span> <span class="hljs-endpoint-path">/user/me</span> <a href="#endpoints/user-operations-me" title="operations-Me"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Return all user information</div>
         <div class="returns">
             <h3>Returns</h3>
             <p>
-                Will return an <code>authorization_code</code> as part of the callback url which will be valid for <b>10 minutes</b> before expiring. The <code>authorization_code</code> can only be used once, a new one must be generated should you desire to re authenticate.
-            </p>
-        </div>
-    </li>
-    <li>
-        <div class="method"><pre><span class="hljs-http">POST</span> <span class="hljs-endpoint-path">/oauth2/token</span> <a href="#endpoints/oauth2-operations-token" title="operations-Token"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
-        <div class="description"><h3>Request access_token</h3>Call to receive your access_token from your <code>authorization_code</code>.</div>
-        <div class="parameters">
-            <p>Parameter should be passed as a <code>application/json</code> format as part of the request-body.</p>
-            <table>
-                <thead>
-                <tr>
-                    <td>Parameter</td>
-                    <td>Type</td>
-                    <td>Optional</td>
-                    <td>Default</td>
-                    <td>Description</td>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <td><pre>client_id</pre></td>
-                    <td>String</td>
-                    <td><i class="fa fa-times" aria-hidden="true"></i></td>
-                    <td><pre>undefined</pre></td>
-                    <td>Your <code>client_id</code></td>
-                </tr>
-                <tr>
-                    <td><pre>client_secret</pre></td>
-                    <td>String</td>
-                    <td><i class="fa fa-times" aria-hidden="true"></i></td>
-                    <td><pre>undefined</pre></td>
-                    <td>Your <code>client_secret</code></td>
-                </tr>
-                <tr>
-                    <td><pre>redirect_uri</pre></td>
-                    <td>String</td>
-                    <td><i class="fa fa-times" aria-hidden="true"></i></td>
-                    <td><pre>undefined</pre></td>
-                    <td>Callback url as set in your account settings.</td>
-                </tr>
-                <tr>
-                    <td><pre>grant_type</pre></td>
-                    <td>String</td>
-                    <td><i class="fa fa-times" aria-hidden="true"></i></td>
-                    <td><pre>undefined</pre></td>
-                    <td>Should be set to <code>authorization_code</code></td>
-                </tr>
-                <tr>
-                    <td><pre>code</pre></td>
-                    <td>String</td>
-                    <td><i class="fa fa-times" aria-hidden="true"></i></td>
-                    <td><pre>undefined</pre></td>
-                    <td><code>authorization_code</code> from the /authorize operation</td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="returns">
-            <h3>Returns</h3>
-            <p>
-                Will return an <code>access_token</code> as well as further relevant information
+                Will return a user object
             </p>
             <div class="code" data-codeBlockId="1">
                 <pre class="json" data-codeBlock="1-JSON"><code class="json">
 {
-  value: "{access_token}",
-  clientId: "{client_id}",
-  userId: "{user_id}",
-  expires: 1484336450243
-}
-
-                </code></pre>
-            </div>
-        </div>
-        <div class="description"><h3>Refresh access_token</h3>Call to receive your access_token from your <code>refresh_token</code>.</div>
-        <div class="parameters">
-            <p>Parameter should be passed as a <code>application/json</code> format as part of the request-body.</p>
-            <table>
-                <thead>
-                <tr>
-                    <td>Parameter</td>
-                    <td>Type</td>
-                    <td>Optional</td>
-                    <td>Default</td>
-                    <td>Description</td>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <td><pre>client_id</pre></td>
-                    <td>String</td>
-                    <td><i class="fa fa-times" aria-hidden="true"></i></td>
-                    <td><pre>undefined</pre></td>
-                    <td>Your <code>client_id</code></td>
-                </tr>
-                <tr>
-                    <td><pre>client_secret</pre></td>
-                    <td>String</td>
-                    <td><i class="fa fa-times" aria-hidden="true"></i></td>
-                    <td><pre>undefined</pre></td>
-                    <td>Your <code>client_secret</code></td>
-                </tr>
-                <tr>
-                    <td><pre>refresh_token</pre></td>
-                    <td>String</td>
-                    <td><i class="fa fa-times" aria-hidden="true"></i></td>
-                    <td><pre>undefined</pre></td>
-                    <td><code>refresh_token</code> returned with the original <code>access_token</code> request</td>
-                </tr>
-                <tr>
-                    <td><pre>grant_type</pre></td>
-                    <td>String</td>
-                    <td><i class="fa fa-times" aria-hidden="true"></i></td>
-                    <td><pre>undefined</pre></td>
-                    <td>Should be set to <code>refresh_token</code></td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="returns">
-            <h3>Returns</h3>
-            <p>
-                Will return an <code>access_token</code> as well as further relevant information
-            </p>
-            <div class="code" data-codeBlockId="1">
-                <pre class="json" data-codeBlock="1-JSON"><code class="json">
-{
-  value: "{access_token}",
-  clientId: "{client_id}",
-  userId: "{user_id}",
-  expires: 1484336450243
+    "_id": "5a4c2csdfsf7d128e11bd8045",
+    "id": "95164972807486899",
+    "username": "discord username",
+    "discriminator": "1111",
+    "avatar": "de1f93df5fa24c9021e8447a8106dfd9",
+    "guilds": [
+        {
+            "owner": false,
+            "permissions": 104188928,
+            "icon": "bf866fa5f96be7c868d8f199e0d63f2c",
+            "id": "41771983423143937",
+            "name": "Discord Developers"
+        },
+        ...
+    ],
+    "playlists": [
+        "playlist ID",
+        ...
+    ],
+    "accessToken": "MgefYqa5Ia5RO76kBrQpjuP7NjU9fr",
+    "refreshToken": "2EaRfDAB2z96fqULpURuW2Blo42RfL",
+    "localUsername": "username",
+    "localPassword": "67c6e16cee55f8342a90b1e8ae6dab3a5663582cbdfgdfgdfg083f9517abfe4e757f8128944f3e6010c7c9e4a1780b08eb308ed1aadf7be03a1317f658c620",
+    "localSalt": "14156cd036473958139d3a022907c232503626dfgdfgdfgc5bd816e0869e3",
+    "motorbotAccessToken": "d20c0733ced654eec80bbd3e3e2c6eb624a993cfsdf44579f4d7cd6a7e0c6abc6b94922c4a58edd3e558f4d6d786d75060a7ff74cd9b7e78904ec4d9900f558",
+    "connections": {all connected accounts e.g. spotify}
 }
 
                 </code></pre>
@@ -225,47 +87,52 @@
         </div>
     </li>
     <li>
-        <div class="method"><pre><span class="hljs-http">GET</span> <span class="hljs-endpoint-path">/oauth2/tokeninfo</span> <a href="#endpoints/oauth2-operations-tokeninfo" title="operations-TokenInfo"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
-        <div class="description">Call to receive information on your <code>access_token</code></div>
-        <div class="parameters">
-            <p>Parameter should be passed as part of the url.</p>
-            <table>
-                <thead>
-                <tr>
-                    <td>Parameter</td>
-                    <td>Type</td>
-                    <td>Optional</td>
-                    <td>Default</td>
-                    <td>Description</td>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <td><pre>token</pre></td>
-                    <td>String</td>
-                    <td><i class="fa fa-times" aria-hidden="true"></i></td>
-                    <td><pre>undefined</pre></td>
-                    <td>Your <code>access_token</code></td>
-                </tr>
-                </tbody>
-            </table>
+        <div class="method"><pre><span class="hljs-http">GET</span> <span class="hljs-endpoint-path">/user/playlists</span> <a href="#endpoints/user-operations-playlists" title="operations-Playlists"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Returns a list of all playlists followed or created by the user.</div>
+        <div class="returns">
+            <h3>Returns</h3>
+            <p>
+                Will return a list of <code>playlist</code> objects
+            </p>
+            <div class="code" data-codeBlockId="1">
+                <pre class="json" data-codeBlock="1-JSON"><code class="json">
+[
+    {
+        "_id": "589f8980436f16474bdcd786",
+        "id": "GSeVlyKvzxRXewJ6YOsce3M1pUpCrUOy",
+        "name": "Playlist Name",
+        "description": "Playlist Description",
+        "songs": [
+            {small song object}
+        ],
+        "creator": "25164971437487456",
+        "create_date": 1486850432333,
+        "followers": [
+            "95164972807487488"
+        ],
+        "artwork": "https://url/to/address",
+        "private": false,
+        "collaborative": false,
+        "creatorName": {creator name object}
+    },
+    ...
+]
+                </code></pre>
+            </div>
+        </div>
+    </li>
+    <li>
+        <div class="method"><pre><span class="hljs-http">GET</span> <span class="hljs-endpoint-path">/user/apps</span> <a href="#endpoints/user-operations-apps" title="operations-Apps"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
+        <div class="description">Returns all register developer apps from a user account.</div>
+        <div class="notification warn">
+            <div class="bar"></div>
+            <p><b>Important</b></p>
+            <p>This operation is currently not publicly available.</p>
         </div>
         <div class="returns">
             <h3>Returns</h3>
             <p>
-                Will return an <code>access_token</code> as well as further relevant information
+                Will return a lists of created apps.
             </p>
-            <div class="code" data-codeBlockId="2">
-                <pre class="json" data-codeBlock="2-JSON"><code class="json">
-{
-  value: "{access_token}",
-  clientId: "{client_id}",
-  userId: "{user_id}",
-  expires: 1484336450243,
-  valid: true
-}
-
-                </code></pre>
-            </div>
     </li>
 </ul>
