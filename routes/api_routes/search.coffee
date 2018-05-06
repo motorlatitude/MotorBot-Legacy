@@ -36,7 +36,7 @@ router.use((req, res, next) ->
 router.get("/", (req, res) ->
   res.type('json')
   tracksCollection = req.app.locals.motorbot.database.collection("tracks")
-  tracksCollection.find({$text: {$search: req.query.q}}).toArray((err, results) ->
+  tracksCollection.find({$text: {$search: req.query.q}},{score:{$meta:"textScore"}}).sort({score:{$meta:"textScore"}}).toArray((err, results) ->
     if err
       res.sendStatus(500)
     else

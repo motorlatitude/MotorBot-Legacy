@@ -82,7 +82,7 @@ class TextChannel
   getMessage: (message_id) ->
     if !message_id then new Error("Expected type String for parameter message_id, got: "+typeof message_id)
     if message_id == "" then new Error("No value given for String: message_id")
-    return @client.rest.methods().getMessage(message_id)
+    return @client.rest.methods().getMessage(@id, message_id)
 
   deleteMessage: (message_id) ->
     if !message_id then new Error("Expected type String for parameter message_id, got: "+typeof message_id)

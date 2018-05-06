@@ -349,7 +349,11 @@ html(lang="en")
                                 success: function(data){
                                     console.log(data);
                                     $.each(data, function (i, item) {
-                                        $("#commitHistory").append("<li><div class='date'>"+item.commit.author.date.replace(/T/gmi,"&nbsp;&bull;&nbsp;").replace(/-/gmi,"/").replace(/Z/gmi,"")+"&nbsp;&bull;&nbsp;<span class='author'>"+item.author.login+"</span></div><div class='commit'>"+item.sha.substr(0,7)+"</div><div class='container'>"+marked(item.commit.message.replace(/<(.*?)>$/gmi,"&lt;$1&gt;").replace(/FIX/g,"<div class='type fix'>FIX</div>").replace(/NEW/g,"<div class='type new'>NEW</div>").replace(/TODO/g,"<div class='type todo'>TODO</div>").replace(/CODE\sIMPROVEMENT/g,"<div class='type code'>CODE</div>").replace(/CODE/g,"<div class='type code'>CODE</div>").replace(/IMPROVEMENT/g,"<div class='type improvement'>IMPROVEMENT</div>").replace(/DEPRECIATED/g,"<div class='type depreciated'>DEPRECIATED</div>"))+"</div></li>");
+                                        if(item.commit){
+                                            if(item.commit.message !== ""){
+                                                $("#commitHistory").append("<li><div class='date'>"+item.commit.author.date.replace(/T/gmi,"&nbsp;&bull;&nbsp;").replace(/-/gmi,"/").replace(/Z/gmi,"")+"&nbsp;&bull;&nbsp;<span class='author'>"+item.author.login+"</span></div><div class='commit'>"+item.sha.substr(0,7)+"</div><div class='container'>"+marked(item.commit.message.replace(/<(.*?)>$/gmi,"&lt;$1&gt;").replace(/FIX/g,"<div class='type fix'>FIX</div>").replace(/NEW/g,"<div class='type new'>NEW</div>").replace(/TODO/g,"<div class='type todo'>TODO</div>").replace(/CODE\sIMPROVEMENT/g,"<div class='type code'>CODE</div>").replace(/CODE/g,"<div class='type code'>CODE</div>").replace(/IMPROVEMENT/g,"<div class='type improvement'>IMPROVEMENT</div>").replace(/DEPRECIATED/g,"<div class='type depreciated'>DEPRECIATED</div>"))+"</div></li>");
+                                            }
+                                        }
                                     });
                                     new SimpleBar($(".contentView")[0])
                                 },
@@ -1044,7 +1048,13 @@ html(lang="en")
                                 var songDuration = data.duration;
                                 var formattedTimestamp = secondsToHms(data.duration)
                                 totalDuration += songDuration
-                                var added = millisecondsToStr(data.date_added);
+                                if (data.date_added >= (new Date().getTime() - 604800000)) {
+                                    var added = millisecondsToStr(data.date_added);
+                                }
+                                else{
+                                    var a = new Date(data.date_added);
+                                    var added = (a.getDate() < 10 ? "0" + (a.getDate()) : a.getDate()) + " - " + (a.getMonth() + 1 < 10 ? "0" + (a.getMonth() + 1) : a.getMonth() + 1) + " - " + a.getFullYear();
+                                }
                                 var user_id = d.user_id || "";
                                 if (data.artwork != "" && !loadedPlaylistArtwork) {
                                     console.log("Using Artwork for track: " + i);
@@ -1326,7 +1336,7 @@ html(lang="en")
         .profile(onclick="$('#channelOptions').removeClass('visible'); $('#serverOptions').removeClass('visible'); $('#accountOptions').toggleClass('visible');")
             .profileArrow <i class="fa fa-chevron-down"></i>
             .profileName #{user.username}<span class="disc">##{user.discriminator}</span>
-            .profileIcon(style="background: url('https://discordapp.com/api/users/" + user.id + "/avatars/" + user.avatar + ".jpg') no-repeat center; background-size: cover;")
+            .profileIcon(style="background: url('https://cdn.discordapp.com/avatars/" + user.id + "/" + user.avatar + ".png?size=128') no-repeat center; background-size: cover;")
             ul.options#accountOptions
                 li(onclick='loadView("account","undefined");') Account
                 li(onclick='loadView("developer","undefined");') Developer

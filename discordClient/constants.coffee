@@ -39,6 +39,7 @@ Constants.channelTypes = {
   DirectMessage: 1
   voice: 2
   groupDirectMessage: 3
+  channelCategory: 4
 }
 
 Constants.gateway = {

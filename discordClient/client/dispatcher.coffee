@@ -21,6 +21,9 @@ class Dispatcher
       when 'READY' then @handleReady(data)
       when 'GUILD_CREATE' then @handleGuildCreate(data)
       when 'MESSAGE_CREATE' then @handleMessageCreate(data)
+      when 'MESSAGE_DELETE' then @handleMessageDelete(data)
+      when 'MESSAGE_REACTION_ADD' then @handleMessageReactionAdd(data)
+      when 'MESSAGE_REACTION_REMOVE' then @handleMessageReactionRemove(data)
       when 'TYPING_START' then utils.debug("<@"+data.d.user_id+"> is typing")
       when 'PRESENCE_UPDATE' then @discordClient.emit("status",data.d.user.id,data.d.status,data.d.game,data.d)
       when 'CHANNEL_UPDATE' then utils.debug("CHANNEL_UPDATE event caught")
@@ -39,7 +42,6 @@ class Dispatcher
     for dm in data.d.private_channels
       @discordClient.channels[dm.id] = new DirectMessageChannel(@discordClient, dm) #TODO might have changed, so might have to use extra endpoint call
     @discordClient.emit("ready", data.d)
-    #console.log(util.inspect(data, false, null))
 
   handleGuildCreate: (data) -> #fired when bot lazy loads available guilds and joins a new guild
     for i, channel of data.d.channels
@@ -50,13 +52,32 @@ class Dispatcher
       else if channel.type == Constants.channelTypes.text
         @discordClient.channels[channel.id] = new TextChannel(@discordClient, channel)
         data.d.channels[i] = new TextChannel(@discordClient, channel)
+      else if channel.type == Constants.channelTypes.channelCategory
+        utils.debug("Channel Category Registered: "+channel.name)
       else
         utils.debug("Unknown channel type: "+channel.type,"warn")
     @discordClient.guilds[data.d.id] = data.d
     @discordClient.guilds[data.d.id].voice = {}
     thisServer = @discordClient.guilds[data.d.id]
     #console.log thisServer.channels
+    @discordClient.emit("guildCreate", thisServer)
     utils.debug("Joined Guild: "+thisServer.name+" ("+thisServer.presences.length+" online / "+(parseInt(thisServer.member_count)-thisServer.presences.length)+" offline)","info")
+
+  handleMessageReactionAdd: (data) ->
+    #console.log data.d
+    msg = data.d
+    if @discordClient.channels[data.d.channel_id]
+      @discordClient.emit("reaction", "add", msg)
+    else
+      utils.debug("Message Reaction Add Event Occurred in unknown channel","warn")
+
+  handleMessageReactionRemove: (data) ->
+    #console.log data.d
+    msg = data.d
+    if @discordClient.channels[data.d.channel_id]
+      @discordClient.emit("reaction", "remove", msg)
+    else
+      utils.debug("Message Reaction Remove Event Occurred in unknown channel","warn")
 
   handleMessageCreate: (data) ->
     #console.log data.d
@@ -65,6 +86,15 @@ class Dispatcher
       @discordClient.emit("message",new Message(@discordClient, msg))
     else
       utils.debug("Message Create Event Occurred in unknown channel","warn")
+
+  handleMessageDelete: (data) ->
+    #console.log data.d
+    msg = data.d
+    channel = @discordClient.channels[data.d.channel_id]
+    if channel
+      @discordClient.emit("messageDelete", data.d.id, channel)
+    else
+      utils.debug("Message DeleteEvent Occurred in unknown channel","warn")
 
   handleVoiceStateUpdate: (data) ->
     utils.debug("VOICE_STATE_UPDATE event caught")

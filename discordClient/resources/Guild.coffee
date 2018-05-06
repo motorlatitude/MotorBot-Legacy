@@ -80,5 +80,4 @@ class Guild
     if typeof name != "String" then new Error("Expect type String for parameter name, got: "+typeof name)
     #TODO
 
-
 module.exports = Guild

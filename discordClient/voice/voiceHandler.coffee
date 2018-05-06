@@ -4,7 +4,7 @@ Constants = require './../constants.coffee'
 ws = require 'ws'
 zlib = require 'zlib'
 fs = require 'fs'
-Opus = require 'node-opus'
+Opus = require 'cjopus'
 UDPClient = require './udpClient'
 audioPlayer = require './AudioPlayer.coffee'
 VoicePacket = require './voicePacket.coffee'
@@ -161,15 +161,15 @@ class VoiceConnection
       @sequence = if (@sequence + 1) < 65535 then @sequence += 1 else @sequence = 0
       @timestamp = if (@timestamp + 960) < 4294967295 then @timestamp += 960 else @timestamp = 0
       out = new Buffer(streamBuff.length);
-      multiplier = Math.pow(self.volume, 1.5);
+      multiplier =  Math.pow(self.volume, 1.660964);
       i = 0
       while i < streamBuff.length
         if i >= streamBuff.length - 1
           break
         uint = Math.floor(multiplier * streamBuff.readInt16LE(i))
         # Ensure value stays within 16bit
-        uint = Math.min(65534, uint)
-        uint = Math.max(-65534, uint)
+        uint = Math.min(32767, uint)
+        uint = Math.max(-32767, uint)
         # Write 2 new bytes into other buffer;
         out.writeInt16LE(uint, i)
         i += 2

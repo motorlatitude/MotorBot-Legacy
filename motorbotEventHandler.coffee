@@ -7,12 +7,28 @@ req = require 'request'
 moment = require 'moment'
 cheerio = require 'cheerio'
 say = require 'say'
+turndown = require 'turndown'
 
 class motorbotEventHandler
 
   constructor: (@app, @client) ->
     @setUpEvents()
     @already_announced = false
+
+  debug: (msg,level = "debug") ->
+    if level == "info"
+      level = "\x1b[34m[INFO ]\x1b[0m"
+    else if level == "error"
+      level = "\x1b[31m[ERROR]\x1b[0m"
+    else if level == "warn"
+      level = "\x1b[5m\x1b[33m[WARN ]\x1b[0m"
+    else if level == "notification"
+      level = "\x1b[5m\x1b[35m[NOTIF]\x1b[0m"
+    else if level == "debug"
+      level = "\x1b[2m[DEBUG]"
+    d = new Date()
+    time = "["+d.getDate()+"/"+(parseInt(d.getMonth())+1)+"/"+d.getFullYear()+" "+d.toLocaleTimeString()+"] "
+    console.log(level+time+msg+"\x1b[0m")
 
   setupSoundboard: (guild_id, filepath, volume = 1) ->
     self = @
@@ -44,22 +60,108 @@ class motorbotEventHandler
     else
       self.app.debug("Soundboard already playing")
 
+  toTitleCase: (str) ->
+    return str.replace(/\w\S*/g, (txt) ->
+      return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+    );
+
+  patchListener: (game) ->
+    self = @
+    if game == "ow"
+      patches = {}
+      p = []
+      req({
+          url: "https://playoverwatch.com/en-us/game/patch-notes/pc/"
+        }, (error, httpResponse, body) ->
+        console.log "Overwatch Request Complete"
+        if error then console.log error
+        $ = cheerio.load(body)
+        $(".patch-notes-body").each((i, element) ->
+          p[i] = $(this).attr("id")
+          console.log p[i]
+          desc = $(this).html().replace(/<\/h2>/,'sdfgpoih345e87th').split('sdfgpoih345e87th')[1]
+          patches[$(this).attr("id")] = {
+            patch_id: $(this).attr("id"),
+            title: $(this).find("h1").text(),
+            sub_title: $(this).find("h2").eq(0).text(),
+            desc: desc
+          }
+        )
+        #find all logged patches
+        patchCollection = self.app.database.collection("patches")
+        patchCollection.find({patch_id: {"$in": p}}).toArray((err, results) ->
+          if err then return console.log err
+          if results[0]
+            console.log "found patches in db"
+            for result in results
+              for patch_id, patch of patches
+                if result.patch_id == patch_id
+                  delete patches[patch_id] #remove patch from patches array
+          #process any left patches
+          console.log "processing any left patches"
+          td = new turndown()
+          database_patches = []
+          for key, new_patch of patches
+            d = new Date()
+            database_patches.push(new_patch)
+            embed_element = {
+              title: self.toTitleCase(new_patch.title),
+              url: "https://playoverwatch.com/en-us/game/patch-notes/pc/#" + new_patch.patch_id,
+              description: new_patch.sub_title + "\n------\n" + td.turndown(new_patch.desc).substring(0, 1000) + "\n\n[Read More](https://playoverwatch.com/en-us/game/patch-notes/pc/#" + new_patch.patch_id+")",
+              color: 16751872,
+              timestamp: d.toISOString(),
+              type: "rich",
+              "footer": {
+                "icon_url": "https://mb.lolstat.net/overwatch_sm.png",
+                "text": "Patch Notification"
+              },
+              thumbnail: {
+                url: "https://mb.lolstat.net/overwatch_sm.png"
+              }
+            }
+            console.log embed_element
+            self.app.client.channels["438307738250903553"].sendMessage("", {
+              embed: embed_element
+            })
+          if database_patches.length > 0
+            patchCollection.insertMany(database_patches)
+        )
+      )
+
+
   twitchSubscribeToStream: (user_id) ->
     # Subscribe to Twitch Webhook Services
+    self = @
     req.post({
         url: "https://api.twitch.tv/helix/webhooks/hub?hub.mode=subscribe&hub.topic=https://api.twitch.tv/helix/streams?user_id="+user_id+"&hub.callback=https://mb.lolstat.net/twitch/callback&hub.lease_seconds=864000&hub.secret=hexweaver"
         headers: {
-          "Client-ID": "1otsv80onfatqfom7ny85js3vakssl"
+          "Client-ID": keys.twitch
         },
         json: true
       }, (error, httpResponse, body) ->
-      console.log "Twitch Webhook Subscription Response Code: "+httpResponse.statusCode
-      if error
-        console.log "subscription error to webhook"
-        console.log error
-
-      console.log body
+        self.debug("Twitch Webhook Subscription Response Code: "+httpResponse.statusCode, "debug")
+        if error
+          self.debug("subscription error to webhook", "error")
+          console.log error
     )
+
+  changeNickname: (guild_id, user_id, user_name, karma) ->
+    # doesn't work for same roles and roles above bots current role
+    ###req({
+        url: "https://discordapp.com/api/guilds/"+guild_id+"/members/"+user_id,
+        method: "PATCH"
+        headers: {
+          "Authorization": "Bot "+keys.token
+        },
+        json: true
+        body: {
+          nick: user_name+" ("+karma+")"
+        }
+    }, (err, httpResponse, body) ->
+      if err then console.log err
+      console.log "request complete"
+      console.log body
+    )###
 
   setUpEvents: () ->
     self = @
@@ -67,10 +169,30 @@ class motorbotEventHandler
     self.twitchSubscribeToStream(26752266) #mutme
     self.twitchSubscribeToStream(24991333) #imaqtpie
     self.twitchSubscribeToStream(22510310) #GDQ
+    #League LCS
+    self.twitchSubscribeToStream(36029255) #RiotGames
+    self.twitchSubscribeToStream(36794584) #RiotGames2
+
 
     @client.on("ready", () ->
       self.app.debug("Ready!")
     )
+
+    y = 0
+    @client.on("guildCreate", (server) ->
+      if self.client.channels["432351112616738837"]
+        d = new Date()
+        time = "`["+d.getDate()+"/"+(parseInt(d.getMonth())+1)+"/"+d.getFullYear()+" "+d.toLocaleTimeString()+"]` "
+        self.client.channels["432351112616738837"].sendMessage(time + " Joined Guild: "+server.name+" ("+server.presences.length+" online / "+(parseInt(server.member_count)-server.presences.length)+" offline)")
+        if y == 0
+          #Listen for patches
+          setInterval( () ->
+            self.patchListener("ow")
+          , 3600000)
+          y = 1
+    )
+
+    voiceStates = {}
 
     @client.on("voiceChannelUpdate", (data) ->
       if data.user_id == '169554882674556930'
@@ -78,6 +200,170 @@ class motorbotEventHandler
             self.app.websocket.broadcast(JSON.stringify({type: "voiceUpdate", status: "join", channel: data.channel.name}))
         else
           self.app.websocket.broadcast(JSON.stringify({type: "voiceUpdate", status: "leave", channel: undefined}))
+      d = new Date()
+      time = "`["+d.getDate()+"/"+(parseInt(d.getMonth())+1)+"/"+d.getFullYear()+" "+d.toLocaleTimeString()+"]` "
+      if data.channel
+        if voiceStates[data.user_id]
+          if voiceStates[data.user_id].channel
+            #previously in channel hence channel voice state change
+            #voice state trigger
+            if data.deaf && !voiceStates[data.user_id].deaf
+              #deafened from server
+              self.client.channels["432351112616738837"].sendMessage(time+"<@"+data.user_id+"> was server deafened in the `"+data.channel.name+"` voice channel")
+            if data.mute && !voiceStates[data.user_id].mute
+              #muted from server
+              self.client.channels["432351112616738837"].sendMessage(time+"<@"+data.user_id+"> was server muted in the `"+data.channel.name+"` voice channel")
+            if data.self_deaf && !voiceStates[data.user_id].self_deaf
+              #user has deafened himself
+              self.client.channels["432351112616738837"].sendMessage(time+"<@"+data.user_id+"> has deafened them self in the `"+data.channel.name+"` voice channel")
+            if data.self_mute && !voiceStates[data.user_id].self_mute
+              #user has muted himself
+              self.client.channels["432351112616738837"].sendMessage(time+"<@"+data.user_id+"> has muted them self in the `"+data.channel.name+"` voice channel")
+            #voice state trigger reverse
+            if !data.deaf && voiceStates[data.user_id].deaf
+              #undeafened from server
+              self.client.channels["432351112616738837"].sendMessage(time+"<@"+data.user_id+"> is no longer server deafened in the `"+data.channel.name+"` voice channel")
+            if !data.mute && voiceStates[data.user_id].mute
+              #unmuted from server
+              self.client.channels["432351112616738837"].sendMessage(time+"<@"+data.user_id+"> is no longer server muted in the `"+data.channel.name+"` voice channel")
+            if !data.self_deaf && voiceStates[data.user_id].self_deaf
+              #user has undeafened himself
+              self.client.channels["432351112616738837"].sendMessage(time+"<@"+data.user_id+"> is no longer deafened in the `"+data.channel.name+"` voice channel")
+            if !data.self_mute && voiceStates[data.user_id].self_mute
+              #user has unmuted himself
+              self.client.channels["432351112616738837"].sendMessage(time+"<@"+data.user_id+"> is no longer muted in the `"+data.channel.name+"` voice channel")
+          else
+            #newly joined
+            self.client.channels["432351112616738837"].sendMessage(time+"<@"+data.user_id+"> has joined the `"+data.channel.name+"` voice channel")
+        else
+          self.client.channels["432351112616738837"].sendMessage(time+"<@"+data.user_id+"> has joined the `"+data.channel.name+"` voice channel")
+      else
+        self.client.channels["432351112616738837"].sendMessage(time+"<@"+data.user_id+"> has left a voice channel")
+
+      voiceStates[data.user_id] = data
+    )
+
+    userStatus = {}
+
+    @client.on("status", (user_id,status,game,extra_info) ->
+      if extra_info.guild_id == "130734377066954752" #only listening for presence updates in the KTJ guild for now to avoid duplicates across multiple channels
+        if game
+          self.debug(user_id+"'s status ("+status+") has changed; "+game.name+"("+game.type+")","notification")
+        else
+          self.debug(user_id+"'s status ("+status+") has changed", "notification")
+        d = new Date()
+        time = "`["+d.getDate()+"/"+(parseInt(d.getMonth())+1)+"/"+d.getFullYear()+" "+d.toLocaleTimeString()+"]` "
+        gameText = ""
+        statusText = ""
+        additionalString = ""
+        if game
+          extra_info["last_game_update"] = new Date().getTime()
+          if userStatus[user_id]
+            if userStatus[user_id].game
+              if userStatus[user_id].game.name == game.name
+                extra_info["last_game_update"] = userStatus[user_id].last_game_update
+          if game.details
+            additionalString += "\n"+time+" *"+game.details+"*"
+          if game.state
+            additionalString += "\n"+time+" "+game.state
+
+        if userStatus[user_id]
+          if userStatus[user_id].status == status
+            #no status change, only game update
+            if !game && userStatus[user_id].game
+              if userStatus[user_id].game.type == 0
+                statusText = " has stopped playing **"+userStatus[user_id].game.name+"** after "+(moment.unix(userStatus[user_id].last_game_update/1000).fromNow()).replace(" ago","")
+              else if userStatus[user_id].game.type == 1
+                statusText = " has stopped streaming **"+userStatus[user_id].game.name+"** after "+(moment.unix(userStatus[user_id].last_game_update/1000).fromNow()).replace(" ago","")
+              else if userStatus[user_id].game.type == 2
+                statusText = " has stopped listening to **"+userStatus[user_id].game.name+"** after "+(moment.unix(userStatus[user_id].last_game_update/1000).fromNow()).replace(" ago","")
+            extra_info["last_update"] = userStatus[user_id].last_update
+          else
+            #status change
+            statusText = " was `"+userStatus[user_id].status+"` for "+(moment.unix(userStatus[user_id].last_update/1000).fromNow()).replace(" ago","")+" and is now `"+status+"`"
+            extra_info["last_update"] = new Date().getTime()
+        else
+          #we don't know previous status so assume status change
+          statusText = "'s status has changed to `"+status+"`"
+          extra_info["last_update"] = new Date().getTime()
+
+        if game && game.type == 0
+          gameText = " is now playing **"+game.name+"**"
+        else if game && game.type == 1
+          gameText = " is now streaming **"+game.name+"**"
+        else if game && game.type == 2
+          gameText = " is now listening to **"+game.name+"**"
+        else
+          gameText = "" #status change
+
+        if game
+          if userStatus[user_id]
+            if userStatus[user_id].game
+              if userStatus[user_id].game.name == game.name && game.type == 0
+                gameText = " game presence update :video_game: "
+              else if userStatus[user_id].game.name == game.name && game.type == 2
+        gameText = " is switching song"
+
+        someText = if(gameText != "" && statusText != "") then " and"+gameText else gameText
+        self.client.channels["432351112616738837"].sendMessage(time+"<@"+user_id+">"+statusText+someText+additionalString)
+
+        userStatus[user_id] = extra_info
+    )
+
+    @client.on("reaction", (type, data) ->
+      if data.user_id != "169554882674556930"
+        d = new Date()
+        time = "`["+d.getDate()+"/"+(parseInt(d.getMonth())+1)+"/"+d.getFullYear()+" "+d.toLocaleTimeString()+"]` "
+        if type == "add"
+          self.client.channels["432351112616738837"].sendMessage(time+"<@"+data.user_id+"> has added the `"+data.emoji.name+"` reaction to message `"+data.message_id+"` in channel <#"+data.channel_id+">")
+          #find message for user
+          if data.emoji.name == "upvote"
+            self.client.channels[data.channel_id].getMessage(data.message_id).then((message) ->
+              author_id = message.author.id
+              karmaCollection = self.app.database.collection("karma_points")
+              karmaCollection.find({"author": author_id}).toArray((err, results) ->
+                if err then return console.log err
+                if results[0]
+                  author_karma = results[0].karma
+                else
+                  author_karma = 0
+                author_karma += 1
+                karma_obj = {
+                  author: author_id,
+                  karma: author_karma
+                }
+                karmaCollection.insert(karma_obj)
+                self.changeNickname(message.guild_id , author_id, message.author.username, author_karma)
+              )
+            ).catch((err) ->
+              console.log "Couldn't retrieve message"
+              console.log err
+            )
+        else if type == "remove"
+          self.client.channels["432351112616738837"].sendMessage(time+"<@"+data.user_id+"> has removed the `"+data.emoji.name+"` reaction on message `"+data.message_id+"` in channel <#"+data.channel_id+">")
+          #find message for user
+          if data.emoji.name == "downvote"
+            self.client.channels[data.channel_id].getMessage(data.message_id).then((message) ->
+              author_id = message.author.id
+              karmaCollection = self.app.database.collection("karma_points")
+              karmaCollection.find({"author": author_id}).toArray((err, results) ->
+                if err then return console.log err
+                if results[0]
+                  author_karma = results[0].karma
+                else
+                  author_karma = 0
+                author_karma -= 1
+                karma_obj = {
+                  author: author_id,
+                  karma: author_karma
+                }
+                karmaCollection.insert(karma_obj)
+                self.changeNickname(message.guild_id , author_id, message.author.username, author_karma)
+              )
+            ).catch((err) ->
+              console.log "Couldn't retrieve message"
+              console.log err
+            )
     )
 
     @client.on("message", (msg) ->
@@ -124,20 +410,10 @@ class motorbotEventHandler
             msg.channel.sendMessage("```diff\n- Unknown Server\n```")
         else if msg.content.match(/^\!voice\s(.*?)\sleave/)
           selected_guild_id = msg.content.match(/^\!voice\s(.*?)\sleave/)[1]
-          console.log msg.author
           if self.client.guilds[selected_guild_id]
             self.client.leaveVoiceChannel(selected_guild_id)
           else
             msg.channel.sendMessage("```diff\n- Unknown Server\n```")
-        else if msg.content.match(/^!dev\stts\s/gmi)
-          ttsmessage = msg.content.replace(/^!dev\stts\s/gmi,"")
-          ###say.export(ttsmessage, "voice_default", 1, __dirname+"/soundboard/voice.wav", (err) ->
-            if err
-              self.app.debug("Error Occurred Generating TTS Message")
-              console.log err
-            self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/voice.wav")
-          )###
-          self.setupSoundboard(msg.guild_id, __dirname+"/"+ttsmessage+".wav")
         else if msg.content.match(/^!ban doug/gmi)
           msg.channel.sendMessage("If only I could :rolling_eyes: <@"+msg.author.id+">")
         else if msg.content.match(/^!kys/gmi) || msg.content.match(/kys/gmi)
@@ -432,6 +708,14 @@ class motorbotEventHandler
           })
         else if msg.content == "Reacting!" && msg.author.id == "169554882674556930"
           msg.addReaction("%F0%9F%91%BB")
+        else if msg.content.match(/http(s|):\/\//gmi) && msg.channel.id == "130734377066954752"
+          console.log "we got a meme bois"
+          setTimeout( () ->
+            msg.addReaction("\:upvote\:429449534389616641")
+            setTimeout( () ->
+              msg.addReaction("\:downvote\:429449638454493187")
+            , 500)
+          , 500)
         else if msg.content.match(/^\!reddit/)
             subreddit = "/r/all"
             cmds = msg.content.replace(/^\!reddit\s/gmi,"")
@@ -508,7 +792,19 @@ class motorbotEventHandler
             )
             msg.delete()
         else
+          #console.log msg.content
           #do nothing, aint a command or anything
+        if msg.author.id != "169554882674556930"
+          d = new Date()
+          time = "`["+d.getDate()+"/"+(parseInt(d.getMonth())+1)+"/"+d.getFullYear()+" "+d.toLocaleTimeString()+"]` "
+          self.client.channels["432351112616738837"].sendMessage(time + " Message sent by <@"+msg.author.id+"> to the #"+msg.channel.name+" channel in the "+self.client.guilds[msg.channel.guild_id].name+" guild")
+    )
+
+    @client.on("messageDelete", (msg_id, channel) ->
+      if self.client.channels["432351112616738837"]
+        d = new Date()
+        time = "`["+d.getDate()+"/"+(parseInt(d.getMonth())+1)+"/"+d.getFullYear()+" "+d.toLocaleTimeString()+"]` "
+        self.client.channels["432351112616738837"].sendMessage(time + " Message "+msg_id+" was deleted from the #"+channel.name+" channel in the "+self.client.guilds[channel.guild_id].name+" guild")
     )
 
 module.exports = motorbotEventHandler

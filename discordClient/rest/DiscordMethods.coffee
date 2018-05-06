@@ -97,7 +97,7 @@ class DiscordMethods
   getMessage: (channel_id, message_id) ->
     self = @
     return new Promise((resolve, reject) ->
-      self.requester.sendRequest("GET", "/channels/"+channel_id+"/messages/"+message_id, options).then((response) ->
+      self.requester.sendRequest("GET", "/channels/"+channel_id+"/messages/"+message_id).then((response) ->
         resolve(new Message(self.client, response.body))
       ).catch((err) ->
         reject(err)
