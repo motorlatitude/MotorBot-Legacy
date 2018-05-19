@@ -288,11 +288,11 @@ class motorbotEventHandler
           extra_info["last_update"] = new Date().getTime()
 
         if game && game.type == 0
-          gameText = " is now playing **"+game.name+"**"
+          gameText = " is playing **"+game.name+"**"
         else if game && game.type == 1
-          gameText = " is now streaming **"+game.name+"**"
+          gameText = " is streaming **"+game.name+"**"
         else if game && game.type == 2
-          gameText = " is now listening to **"+game.name+"**"
+          gameText = " is listening to **"+game.name+"**"
         else
           gameText = "" #status change
 
@@ -302,10 +302,37 @@ class motorbotEventHandler
               if userStatus[user_id].game.name == game.name && game.type == 0
                 gameText = " game presence update :video_game: "
               else if userStatus[user_id].game.name == game.name && game.type == 2
-        gameText = " is switching song"
+                gameText = " is switching song"
 
         someText = if(gameText != "" && statusText != "") then " and"+gameText else gameText
-        self.client.channels["432351112616738837"].sendMessage(time+"<@"+user_id+">"+statusText+someText+additionalString)
+        if game && game.type == 2
+          additionalString = ""
+          if game.details
+            additionalString += "\n"+time+" **"+game.details+"**"
+          if game.state
+            additionalString += "\n"+time+" by "+game.state
+          if game.assets.large_text
+            additionalString += "\n"+time+" on "+game.assets.large_text
+          console.log game
+          desc = time+"<@"+user_id+">"+statusText+someText+additionalString
+          thumbnail_url = ""
+          if game.assets
+            if game.assets.large_image
+              thumbnail_id = game.assets.large_image.replace("spotify:","")
+              thumbnail_url = "https://i.scdn.co/image/"+thumbnail_id
+          console.log thumbnail_url
+          self.client.channels["432351112616738837"].sendMessage("","embed": {
+            "description": desc,
+            "color": 2021216,
+            "thumbnail": {
+              "url": thumbnail_url
+            }
+          })
+        else
+          if statusText == "" && someText == "" && additionalString == ""
+            self.client.channels["432351112616738837"].sendMessage(time+"<@"+user_id+"> is `invisible` and a status refresh event occurred")
+          else
+            self.client.channels["432351112616738837"].sendMessage(time+"<@"+user_id+">"+statusText+someText+additionalString)
 
         userStatus[user_id] = extra_info
     )
@@ -314,10 +341,10 @@ class motorbotEventHandler
       if data.user_id != "169554882674556930"
         d = new Date()
         time = "`["+d.getDate()+"/"+(parseInt(d.getMonth())+1)+"/"+d.getFullYear()+" "+d.toLocaleTimeString()+"]` "
-        if type == "add"
-          self.client.channels["432351112616738837"].sendMessage(time+"<@"+data.user_id+"> has added the `"+data.emoji.name+"` reaction to message `"+data.message_id+"` in channel <#"+data.channel_id+">")
-          #find message for user
-          if data.emoji.name == "upvote"
+        if data.emoji.name == "downvote" || data.emoji.name == "upvote"
+          if type == "add"
+            self.client.channels["432351112616738837"].sendMessage(time+"<@"+data.user_id+"> has added the `"+data.emoji.name+"` reaction to message `"+data.message_id+"` in channel <#"+data.channel_id+">")
+            #find message for user
             self.client.channels[data.channel_id].getMessage(data.message_id).then((message) ->
               author_id = message.author.id
               karmaCollection = self.app.database.collection("karma_points")
@@ -327,22 +354,25 @@ class motorbotEventHandler
                   author_karma = results[0].karma
                 else
                   author_karma = 0
-                author_karma += 1
+                if data.emoji.name == "upvote"
+                  author_karma += 1
+                else if data.emoji.name == "downvote"
+                  author_karma -= 1
                 karma_obj = {
                   author: author_id,
                   karma: author_karma
                 }
-                karmaCollection.insert(karma_obj)
+                self.client.channels["432351112616738837"].sendMessage(time+"<@"+author_id+"> now has "+author_karma+" karma")
+                karmaCollection.update({author: author_id}, karma_obj, {upsert: true})
                 self.changeNickname(message.guild_id , author_id, message.author.username, author_karma)
               )
             ).catch((err) ->
               console.log "Couldn't retrieve message"
               console.log err
             )
-        else if type == "remove"
-          self.client.channels["432351112616738837"].sendMessage(time+"<@"+data.user_id+"> has removed the `"+data.emoji.name+"` reaction on message `"+data.message_id+"` in channel <#"+data.channel_id+">")
-          #find message for user
-          if data.emoji.name == "downvote"
+          else if type == "remove"
+            self.client.channels["432351112616738837"].sendMessage(time+"<@"+data.user_id+"> has removed the `"+data.emoji.name+"` reaction on message `"+data.message_id+"` in channel <#"+data.channel_id+">")
+            #find message for user
             self.client.channels[data.channel_id].getMessage(data.message_id).then((message) ->
               author_id = message.author.id
               karmaCollection = self.app.database.collection("karma_points")
@@ -352,12 +382,16 @@ class motorbotEventHandler
                   author_karma = results[0].karma
                 else
                   author_karma = 0
-                author_karma -= 1
+                if data.emoji.name == "upvote"
+                  author_karma -= 1
+                else if data.emoji.name == "downvote"
+                  author_karma += 1
                 karma_obj = {
                   author: author_id,
                   karma: author_karma
                 }
-                karmaCollection.insert(karma_obj)
+                self.client.channels["432351112616738837"].sendMessage(time+"<@"+author_id+"> now has "+author_karma+" karma")
+                karmaCollection.update({author: author_id}, karma_obj, {upsert: true})
                 self.changeNickname(message.guild_id , author_id, message.author.username, author_karma)
               )
             ).catch((err) ->
@@ -367,6 +401,28 @@ class motorbotEventHandler
     )
 
     @client.on("message", (msg) ->
+        #store all messages
+        messageCollection = self.app.database.collection("messages")
+        db_msg_obj = {
+          id: msg.id,
+          channel_id: msg.channel_id,
+          guild_id: msg.guild_id,
+          author: msg.author,
+          content: msg.content,
+          timestamp: msg.timestamp,
+          edited_timestamp: msg.edited_timestamp,
+          tts: msg.tts,
+          mention_everyone: msg.mention_everyone,
+          mentions: msg.mentions,
+          mention_roles: msg.mention_roles,
+          attachments: msg.attachments,
+          embeds: msg.embeds,
+          reactions: msg.reactions,
+          nonce: msg.nonce,
+          pinned: msg.pinned,
+          webhook_id: msg.webhook_id
+        }
+        messageCollection.update({id: msg.id}, db_msg_obj, {upsert: true})
         if msg.content.match(/^\!voice\sjoin/)
           channelName = msg.content.replace(/^\!voice\sjoin\s/,"")
           joined = false
@@ -427,11 +483,6 @@ class motorbotEventHandler
             msg.channel.sendMessage(":one: Heads <@"+msg.author.id+">")
           else
             msg.channel.sendMessage(":zero: Tails <@"+msg.author.id+">")
-        else if msg.content.match(/cum\son\sme/)
-          msg.channel.sendMessage("8====D- -- - (O)")
-        else if msg.content.match(/^(!(initiate\s|)self(\s|)destruct(\ssequence|)|!kill(\s|)me)/gmi)
-          output_msg = ":cold_sweat: No pleeeaaassssseee, I have children :cry: https://pbs.twimg.com/media/Cefcn6zW8AA09mQ.jpg"
-          msg.channel.sendMessage(output_msg)
         else if msg.content.match(/\!random/)
           msg.channel.sendMessage("Random Number: "+(Math.round((Math.random()*100))))
         else if msg.content == "!sb diddly"
@@ -678,11 +729,20 @@ class motorbotEventHandler
           )
         else if msg.content == "!triggerTyping"
           msg.channel.triggerTyping()
+        else if msg.content.match(/^\!setStatus\s/gmi)
+          newStatus = msg.content.replace(/^\!setStatus\s/gmi,"")
+          self.client.setStatus(newStatus, 0, "online")
+        else if msg.content.match(/^\!setState\s/gmi)
+          newState = msg.content.replace(/^\!setState\s/gmi,"")
+          if newState == "online" || newState == "offline" || newState == "dnd" || newState == "idle" || newState == "invisible"
+            self.client.setStatus(null, 0, newState)
+          else
+            msg.channel.sendMessage("That state is not recognised, please use a standard state as specified here https://discordapp.com/developers/docs/topics/gateway#update-status")
         else if msg.content.match(/^setChannelName\s/gmi)
           name = msg.content.replace(/^setChannelName\s/gmi,"")
           msg.channel.setChannelName(name)
         else if msg.content.match(/^\!setUserLimit\s/gmi)
-          user_limit = parseInt(msg.content.replace(/^setUserLimit\s/gmi,""))
+          user_limit = parseInt(msg.content.replace(/^\!setUserLimit\s/gmi,""))
           self.client.channels["194904787924418561"].setUserLimit(user_limit)
         else if msg.content.match(/^\!test_embed/)
           msg.channel.sendMessage("",{
@@ -797,14 +857,70 @@ class motorbotEventHandler
         if msg.author.id != "169554882674556930"
           d = new Date()
           time = "`["+d.getDate()+"/"+(parseInt(d.getMonth())+1)+"/"+d.getFullYear()+" "+d.toLocaleTimeString()+"]` "
-          self.client.channels["432351112616738837"].sendMessage(time + " Message sent by <@"+msg.author.id+"> to the #"+msg.channel.name+" channel in the "+self.client.guilds[msg.channel.guild_id].name+" guild")
+          self.client.channels["432351112616738837"].sendMessage(time + " Message sent by <@"+msg.author.id+"> to the <#"+msg.channel_id+"> channel in the "+self.client.guilds[msg.channel.guild_id].name+" guild")
+    )
+
+    @client.on("messageUpdate", (msg) ->
+      if self.client.channels["432351112616738837"] && msg.channel_id != "432351112616738837"
+        d = new Date()
+        time = "`["+d.getDate()+"/"+(parseInt(d.getMonth())+1)+"/"+d.getFullYear()+" "+d.toLocaleTimeString()+"]` "
+        self.client.channels["432351112616738837"].sendMessage(time + " Message `"+msg.id+"` was updated in the <#"+msg.channel_id+"> channel")
     )
 
     @client.on("messageDelete", (msg_id, channel) ->
       if self.client.channels["432351112616738837"]
         d = new Date()
         time = "`["+d.getDate()+"/"+(parseInt(d.getMonth())+1)+"/"+d.getFullYear()+" "+d.toLocaleTimeString()+"]` "
-        self.client.channels["432351112616738837"].sendMessage(time + " Message "+msg_id+" was deleted from the #"+channel.name+" channel in the "+self.client.guilds[channel.guild_id].name+" guild")
+        desc = time + " Cached Message (`"+msg_id+"`) :link:"
+        self.client.channels["432351112616738837"].sendMessage(time + " Message `"+msg_id+"` was deleted from the <#"+channel.id+"> channel in the "+self.client.guilds[channel.guild_id].name+" guild", {
+          "embed": {
+            "title": desc,
+            "url": "https://mb.lolstat.net/api/message_history/"+msg_id,
+            "color": 38609
+          }
+        })
+    )
+
+    @client.on("channelCreate", (type, channel) ->
+      if self.client.channels["432351112616738837"]
+        d = new Date()
+        time = "`["+d.getDate()+"/"+(parseInt(d.getMonth())+1)+"/"+d.getFullYear()+" "+d.toLocaleTimeString()+"]` "
+        self.client.channels["432351112616738837"].sendMessage(time + " The <#"+channel.id+"> channel was created with channel type `"+type+"`")
+    )
+
+    @client.on("channelUpdate", (type, channel) ->
+      if self.client.channels["432351112616738837"]
+        d = new Date()
+        time = "`["+d.getDate()+"/"+(parseInt(d.getMonth())+1)+"/"+d.getFullYear()+" "+d.toLocaleTimeString()+"]` "
+        self.client.channels["432351112616738837"].sendMessage(time + " The <#"+channel.id+"> channel was modified")
+    )
+
+    @client.on("channelDelete", (type, channel) ->
+      if self.client.channels["432351112616738837"]
+        d = new Date()
+        time = "`["+d.getDate()+"/"+(parseInt(d.getMonth())+1)+"/"+d.getFullYear()+" "+d.toLocaleTimeString()+"]` "
+        self.client.channels["432351112616738837"].sendMessage(time + " The channel `"+channel.id+"` was deleted")
+    )
+
+    @client.on("channelPinsUpdate", (update) ->
+      if self.client.channels["432351112616738837"]
+        d = new Date()
+        time = "`["+d.getDate()+"/"+(parseInt(d.getMonth())+1)+"/"+d.getFullYear()+" "+d.toLocaleTimeString()+"]` "
+        self.client.channels["432351112616738837"].sendMessage(time + " Pins updated in channel <#"+update.channel_id+">")
+    )
+
+    @client.on("typingStart", (user_id, channel, timestamp) ->
+      if self.client.channels["432351112616738837"]
+        d = new Date()
+        time = "`["+d.getDate()+"/"+(parseInt(d.getMonth())+1)+"/"+d.getFullYear()+" "+d.toLocaleTimeString()+"]` "
+        self.client.channels["432351112616738837"].sendMessage(time + " <@"+user_id+"> has started typing in the <#"+channel.id+"> channel")
+    )
+
+    @client.on("userUpdate", (user_id, username, data) ->
+      if self.client.channels["432351112616738837"]
+        d = new Date()
+        time = "`["+d.getDate()+"/"+(parseInt(d.getMonth())+1)+"/"+d.getFullYear()+" "+d.toLocaleTimeString()+"]` "
+        self.client.channels["432351112616738837"].sendMessage(time + " <@"+user_id+"> updated their discord profile")
     )
 
 module.exports = motorbotEventHandler

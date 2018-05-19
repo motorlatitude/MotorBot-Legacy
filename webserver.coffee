@@ -73,6 +73,7 @@ class WebServer
     @site.use("/api/spotify", require('./routes/api_routes/spotify'))
     @site.use("/api/electron", require('./routes/api_routes/electron'))
     @site.use("/api/search", require('./routes/api_routes/search'))
+    @site.use("/api/message_history", require('./routes/api_routes/message_history'))
     @site.use("/twitch", require('./routes/twitch'))
 
     #redirect for when adding bot

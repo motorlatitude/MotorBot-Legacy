@@ -47,16 +47,22 @@ class DiscordClient extends EventEmitter
     @voiceConnections = {}
     @getGateway()
 
-  setStatus: (status) ->
+  setStatus: (status, type = 2, state = "online") ->
+    since = null
+    game = null
+    if status != null
+      game = {
+        "name": status,
+        "type": type
+      }
+    if state == "idle"
+      since = new Date().getTime()
     dataMsg = {
       "op": 3,
       "d" :{
-        "since": new Date().getTime(),
-        "game": {
-          "name": status,
-          "type": 2
-        },
-        "status": "online",
+        "since": since,
+        "game": game,
+        "status": state,
         "afk": false
       }
     }
@@ -74,6 +80,7 @@ class DiscordClient extends EventEmitter
         "self_deaf": false
       }
     }
+    @voiceConnections[server] = undefined
     @gatewayWS.send(JSON.stringify(leaveVoicePackage))
 
 module.exports = DiscordClient

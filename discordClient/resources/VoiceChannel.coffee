@@ -45,6 +45,7 @@ class VoiceChannel
         "self_deaf": false
       }
     }
+    @client.voiceConnections[@guild_id] = undefined
     @client.gatewayWS.send(JSON.stringify(leaveVoicePackage))
 
   modify: (options) ->

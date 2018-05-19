@@ -19,14 +19,19 @@ class Dispatcher
     @discordClient.internals.sequence = data.s
     switch data.t
       when 'READY' then @handleReady(data)
+      when 'CHANNEL_CREATE' then @handleChannelCreate(data)
+      when 'CHANNEL_UPDATE' then @handleChannelUpdate(data)
+      when 'CHANNEL_DELETE' then @handleChannelDelete(data)
+      when 'CHANNEL_PINS_UPDATE' then @handleChannelPinsUpdate(data)
       when 'GUILD_CREATE' then @handleGuildCreate(data)
       when 'MESSAGE_CREATE' then @handleMessageCreate(data)
+      when 'MESSAGE_UPDATE' then @handleMessageUpdate(data)
       when 'MESSAGE_DELETE' then @handleMessageDelete(data)
       when 'MESSAGE_REACTION_ADD' then @handleMessageReactionAdd(data)
       when 'MESSAGE_REACTION_REMOVE' then @handleMessageReactionRemove(data)
-      when 'TYPING_START' then utils.debug("<@"+data.d.user_id+"> is typing")
+      when 'TYPING_START' then @handleTypingStart(data)
       when 'PRESENCE_UPDATE' then @discordClient.emit("status",data.d.user.id,data.d.status,data.d.game,data.d)
-      when 'CHANNEL_UPDATE' then utils.debug("CHANNEL_UPDATE event caught")
+      when 'USER_UPDATE' then @handleUserUpdate(data)
       when 'VOICE_STATE_UPDATE' then @handleVoiceStateUpdate(data)
       when 'VOICE_SERVER_UPDATE' then @handleVoiceConnection(data)
       when 'RESUMED' then @handleResume(data)
@@ -42,6 +47,70 @@ class Dispatcher
     for dm in data.d.private_channels
       @discordClient.channels[dm.id] = new DirectMessageChannel(@discordClient, dm) #TODO might have changed, so might have to use extra endpoint call
     @discordClient.emit("ready", data.d)
+
+  handleChannelCreate: (data) ->
+    #console.log data.d
+    if data.d.type == Constants.channelTypes.text
+      @discordClient.channels[data.d.id] = new TextChannel(@discordClient, data.d)
+      @discordClient.emit("channelCreate", Constants.channelTypes.text, new TextChannel(@discordClient, data.d))
+    else if data.d.type == Constants.channelTypes.DirectMessage
+      @discordClient.channels[data.d.id] = new DirectMessageChannel(@discordClient, data.d)
+      @discordClient.emit("channelCreate", Constants.channelTypes.DirectMessage, new DirectMessageChannel(@discordClient, data.d))
+    else if data.d.type == Constants.channelTypes.voice
+      @discordClient.channels[data.d.id] = new VoiceChannel(@discordClient, data.d)
+      @discordClient.emit("channelCreate", Constants.channelTypes.voice, new VoiceChannel(@discordClient, data.d))
+    else if data.d.type == Constants.channelTypes.groupDirectMessage
+      #TODO check if the GroupDM is similar or the same as DM
+      @discordClient.channels[data.d.id] = new DirectMessageChannel(@discordClient, data.d)
+      @discordClient.emit("channelCreate", Constants.channelTypes.groupDirectMessage, new DirectMessageChannel(@discordClient, data.d))
+    else if data.d.type == Constants.channelTypes.channelCategory
+      #@discordClient.emit("channelCreate", Constants.channelTypes.channelCategory, new DirectMessageChannel(@discordClient, data.d))
+    else
+      utils.debug("Channel Create Event Occurred with an unknown channel type","warn")
+
+  handleChannelUpdate: (data) ->
+    #console.log data.d
+    if data.d.type == Constants.channelTypes.text
+      @discordClient.emit("channelUpdate", Constants.channelTypes.text, new TextChannel(@discordClient, data.d))
+    else if data.d.type == Constants.channelTypes.DirectMessage
+      @discordClient.emit("channelUpdate", Constants.channelTypes.DirectMessage, new DirectMessageChannel(@discordClient, data.d))
+    else if data.d.type == Constants.channelTypes.voice
+      @discordClient.emit("channelUpdate", Constants.channelTypes.voice, new VoiceChannel(@discordClient, data.d))
+    else if data.d.type == Constants.channelTypes.groupDirectMessage
+      #TODO check if the GroupDM is similar or the same as DM
+      @discordClient.emit("channelUpdate", Constants.channelTypes.groupDirectMessage, new DirectMessageChannel(@discordClient, data.d))
+    else if data.d.type == Constants.channelTypes.channelCategory
+      #@discordClient.emit("channelCreate", Constants.channelTypes.channelCategory, new DirectMessageChannel(@discordClient, data.d))
+    else
+      utils.debug("Channel Update Event Occurred with an unknown channel type","warn")
+
+  handleChannelDelete: (data) ->
+    #console.log data.d
+    if data.d.type == Constants.channelTypes.text
+      if @discordClient.channels[data.d.id] then delete @discordClient.channels[data.d.id]
+      @discordClient.emit("channelDelete", Constants.channelTypes.text, new TextChannel(@discordClient, data.d))
+    else if data.d.type == Constants.channelTypes.DirectMessage
+      if @discordClient.channels[data.d.id] then delete @discordClient.channels[data.d.id]
+      @discordClient.emit("channelDelete", Constants.channelTypes.DirectMessage, new DirectMessageChannel(@discordClient, data.d))
+    else if data.d.type == Constants.channelTypes.voice
+      if @discordClient.channels[data.d.id] then delete @discordClient.channels[data.d.id]
+      @discordClient.emit("channelDelete", Constants.channelTypes.voice, new VoiceChannel(@discordClient, data.d))
+    else if data.d.type == Constants.channelTypes.groupDirectMessage
+      #TODO check if the GroupDM is similar or the same as DM
+      if @discordClient.channels[data.d.id] then delete @discordClient.channels[data.d.id]
+      @discordClient.emit("channelDelete", Constants.channelTypes.groupDirectMessage, new DirectMessageChannel(@discordClient, data.d))
+    else if data.d.type == Constants.channelTypes.channelCategory
+      if @discordClient.channels[data.d.id] then delete @discordClient.channels[data.d.id]
+      #@discordClient.emit("channelCreate", Constants.channelTypes.channelCategory, new DirectMessageChannel(@discordClient, data.d))
+    else
+      utils.debug("Channel Delete Event Occurred with an unknown channel type","warn")
+      utils.debug("Channel has not been removed from discordClient channel object")
+
+  handleChannelPinsUpdate: (data) ->
+    if @discordClient.channels[data.d.channel_id]
+      @discordClient.emit("channelPinsUpdate", data.d)
+    else
+      utils.debug("Channel Pins Update Event Occurred in unknown channel","warn")
 
   handleGuildCreate: (data) -> #fired when bot lazy loads available guilds and joins a new guild
     for i, channel of data.d.channels
@@ -87,6 +156,14 @@ class Dispatcher
     else
       utils.debug("Message Create Event Occurred in unknown channel","warn")
 
+  handleMessageUpdate: (data) ->
+    #console.log data.d
+    msg = data.d
+    if @discordClient.channels[data.d.channel_id]
+      @discordClient.emit("messageUpdate",new Message(@discordClient, msg))
+    else
+      utils.debug("Message Update Event Occurred in unknown channel","warn")
+
   handleMessageDelete: (data) ->
     #console.log data.d
     msg = data.d
@@ -94,7 +171,22 @@ class Dispatcher
     if channel
       @discordClient.emit("messageDelete", data.d.id, channel)
     else
-      utils.debug("Message DeleteEvent Occurred in unknown channel","warn")
+      utils.debug("Message Delete Event Occurred in unknown channel","warn")
+
+  handleTypingStart: (data) ->
+    #console.log data.d
+    channel = @discordClient.channels[data.d.channel_id]
+    if channel
+      @discordClient.emit("typingStart", data.d.user_id, channel, data.d.timestamp)
+    else
+      utils.debug("Typing Start Event Occurred in unknown channel","warn")
+
+  handleUserUpdate: (data) ->
+    user = data.d
+    if user.id
+      @discordClient.emit("userUpdate", user.id, username, data.d)
+    else
+      utils.debug("UserUpdate event occurred for an unknown user")
 
   handleVoiceStateUpdate: (data) ->
     utils.debug("VOICE_STATE_UPDATE event caught")
