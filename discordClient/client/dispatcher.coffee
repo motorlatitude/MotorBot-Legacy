@@ -184,7 +184,7 @@ class Dispatcher
   handleUserUpdate: (data) ->
     user = data.d
     if user.id
-      @discordClient.emit("userUpdate", user.id, username, data.d)
+      @discordClient.emit("userUpdate", user.id, user.username, data.d)
     else
       utils.debug("UserUpdate event occurred for an unknown user")
 

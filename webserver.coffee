@@ -75,6 +75,7 @@ class WebServer
     @site.use("/api/search", require('./routes/api_routes/search'))
     @site.use("/api/message_history", require('./routes/api_routes/message_history'))
     @site.use("/twitch", require('./routes/twitch'))
+    @site.use("/destiny2", require('./routes/destiny2'))
 
     #redirect for when adding bot
     @site.get("/redirect", (req, res) ->

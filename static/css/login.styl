@@ -4,8 +4,7 @@
 body
   margin 0
   padding 0
-  background url('../bg.jpg') no-repeat
-  background-size cover
+  background rgba(42, 45, 50, 1)
   color #fff
   font-family 'Ubuntu', 'Open Sans', sans-serif
   font-size 13px
@@ -13,49 +12,74 @@ body
   min-width 1128px
   overflow hidden
 
-.sidebar
+.loginSidebar
   position absolute
   top 0
   left 0
-  right 0
   bottom 0
-  width 25%
+  width 550px
   height 100%
-  background rgba(42, 45, 50, 0.95)
+  background rgba(42, 45, 50, 1)
+  z-index 2
+  & .motorbotIcon
+    position absolute
+    top 15px
+    width 450px
+    left 25px
+    & img
+      width 50px
+      float left
+    & .motorbot
+      float left
+      font-size 25px
+      font-weight bold
+      margin-top 8px
+      margin-left 4px
+      color #eee
 
 .bg_opacity
   position absolute
   top 0
-  left 0
-  right 0
+  left 550px
   bottom 0
   width 100%
   height 100%
-  background rgba(42, 45, 50, 0.95)
+  background url('../bg.jpg') no-repeat
+  background-size cover
+  opacity 0.4
+  z-index 1
 
 .form
   position absolute
-  left 15%
-  top calc(50% - 170px)
-  width 450px
-  border-top-right-radius 4px
-  border-bottom-right-radius 4px
-  border-left 4px solid #03A4D8
-  padding 30px
+  left 40px
+  top calc(50% - 200px)
+  width 470px
   background #2A2D32
-  box-shadow 0 0 50px rgba(0,0,0,0.4)
-  & h1
+  z-index 3
+  & h3
     font-family 'Ubuntu', 'Open Sans', sans-serif
-    font-size 38px
-    color #fff
+    font-size 22px
+    color rgba(39, 132, 246, 1)
     font-weight 300
+    padding-left 0
+    line-height 35px
+    position relative
+    top 0
+    & b
+      color #eee
+      font-weight 300
+    & span
+      color rgba(255,255,255,0.4)
+      font-size 20px
+      line-height 40px
   & .error
-    width 100%
+    width calc(100% - 20px)
     padding 4px 10px
-    line-height 30px
+    line-height 40px
     background rgba(238, 62, 62, 1.00)
     color rgba(0,0,0,0.5)
-    border-radius 3px
+    border-radius 4px
+    margin-bottom 10px
   & input[type="text"], input[type="password"]
     width calc(100% - 20px)
     line-height 32px
@@ -63,42 +87,75 @@ body
     padding 4px 10px
     font-family 'Ubuntu', 'Open Sans', sans-serif
     font-size 13px
-    border-radius 3px
     border 0 solid transparent
     color #fff
-    margin-top 12px
+    margin-top 1px
+    position relative
+    top 0
     &::-webkit-input-placeholder
       color rgba(255,255,255,0.1)
     &:focus
       outline none
-  & input[type="submit"]
-    width 40%
-    background rgba(3, 164, 216, 1.00)
-    border 0 solid transparent
-    color #fff
-    font-family 'Ubuntu', 'Open Sans', sans-serif
-    font-size 13px
-    font-weight bold
-    line-height 32px
-    margin-top 16px
-    border-radius 3px
-    cursor pointer
-    &:focus
-      outline none
-    &:active
-      outline none
-  & .register
-    width calc(60% - 12px)
-    text-align right
-    margin-left 10px
-    display inline-block
-    & a
-      text-decoration none
-      color rgba(3, 164, 216, 1.00)
+  & .username_wrapper
+    position relative
+    top 0
+    & .txt
+      position absolute
+      top 12px
+      left 10px
+    & input[type="text"]
+      border-top-left-radius 4px
+      border-top-right-radius 4px
+      padding-top 25px
+  & .password_wrapper
+    position relative
+    top 0
+    & .txt
+      position absolute
+      top 12px
+      left 10px
+    & input[type="password"]
+      border-bottom-left-radius 4px
+      border-bottom-right-radius 4px
+      padding-top 25px
+  & .button_wrapper
+    margin-top 15px
+    & input[type="submit"]
+      width 40%
+      background rgba(19, 112, 226, 1)
+      border 0 solid transparent
+      color #fff
+      font-family 'Ubuntu', 'Open Sans', sans-serif
+      font-size 14px
+      font-weight 400
+      line-height 40px
+      margin-top 16px
+      border-radius 5px
+      cursor pointer
+      box-shadow 0 0 15px rgba(34, 36, 40, 1)
+      &:focus
+        outline none
+      &:active
+        outline none
+      &:hover
+        background rgba(29, 122, 236, 1)
+    & .register
+      width calc(60% - 22px)
+      text-align right
+      margin-left 10px
+      padding-right 10px
+      display inline-block
+      font-size 14px
+      font-weight 400
+      & a
+        text-decoration none
+        color rgba(19, 112, 226, 1)
+        &:hover
+          text-decoration underline
 
 .auth-error
   position absolute
-  left calc(63% - 150px)
+  left calc(50% - 150px)
   top calc(50% - 90px)
   width 300px
   text-align center

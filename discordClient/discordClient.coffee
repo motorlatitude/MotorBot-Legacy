@@ -80,7 +80,9 @@ class DiscordClient extends EventEmitter
         "self_deaf": false
       }
     }
-    @voiceConnections[server] = undefined
-    @gatewayWS.send(JSON.stringify(leaveVoicePackage))
+    self = @
+    utils.debug("Leaving voice channel in guild: "+server,"info")
+    delete self.voiceConnections[server]
+    self.gatewayWS.send(JSON.stringify(leaveVoicePackage))
 
 module.exports = DiscordClient

@@ -3,13 +3,13 @@ html(lang="en")
     head
         title Motorbot Playlist
         meta(name="viewport",content="width=1128px, initial-scale=1")
-        link(type='image/png',rel='icon',href='https://mb.lolstat.net/motorbotIcon_transparent.png')
+        link(type='image/png',rel='icon',href='https://mb.lolstat.net/another_icon.png')
         link(href="https://fonts.googleapis.com/css?family=Open+Sans|Ubuntu",rel="stylesheet")
         //link(href='/css/playlist.css',rel='stylesheet')
         link(href='/css/main.css',rel='stylesheet')
-        link(href='/font-awesome-4.6.3/css/font-awesome.min.css',rel='stylesheet')
-        link(rel="stylesheet",href="https://unpkg.com/simplebar@latest/dist/simplebar.css")
-        script(src="https://unpkg.com/simplebar@latest/dist/simplebar.js")
+        link(href='/fontawesome-free-5.0.13/web-fonts-with-css/css/fontawesome-all.css',rel='stylesheet')
+        link(href="/css/simplebar.css",rel="stylesheet")
+        script(src="/js/simplebar.js")
         script.
             electron_app = false
             if (typeof module === 'object') {window.module = module; module = undefined; electron_app = true}
@@ -351,7 +351,18 @@ html(lang="en")
                                     $.each(data, function (i, item) {
                                         if(item.commit){
                                             if(item.commit.message !== ""){
-                                                $("#commitHistory").append("<li><div class='date'>"+item.commit.author.date.replace(/T/gmi,"&nbsp;&bull;&nbsp;").replace(/-/gmi,"/").replace(/Z/gmi,"")+"&nbsp;&bull;&nbsp;<span class='author'>"+item.author.login+"</span></div><div class='commit'>"+item.sha.substr(0,7)+"</div><div class='container'>"+marked(item.commit.message.replace(/<(.*?)>$/gmi,"&lt;$1&gt;").replace(/FIX/g,"<div class='type fix'>FIX</div>").replace(/NEW/g,"<div class='type new'>NEW</div>").replace(/TODO/g,"<div class='type todo'>TODO</div>").replace(/CODE\sIMPROVEMENT/g,"<div class='type code'>CODE</div>").replace(/CODE/g,"<div class='type code'>CODE</div>").replace(/IMPROVEMENT/g,"<div class='type improvement'>IMPROVEMENT</div>").replace(/DEPRECIATED/g,"<div class='type depreciated'>DEPRECIATED</div>"))+"</div></li>");
+                                                $("#commitHistory").append("<li>" +
+                                                    "<div class='date'>" +
+                                                        item.commit.author.date.replace(/T/gmi,"&nbsp;&bull;&nbsp;").replace(/-/gmi,"/").replace(/Z/gmi,"") +
+                                                        "&nbsp;&bull;&nbsp;<span class='author'>" +
+                                                            item.author.login +
+                                                        "</span>" +
+                                                    "</div>" +
+                                                    "<div class='commit'>" +
+                                                        item.sha.substr(0,7) +
+                                                    "</div>" +
+                                                    "<div class='container'>" +
+                                                        marked(item.commit.message.replace(/Signed-off-by(.*?)$/gmi,"").replace(/<(.*?)>$/gmi,"&lt;$1&gt;").replace(/FIX/g,"<div class='type fix'>FIX</div>").replace(/NEW/g,"<div class='type new'>NEW</div>").replace(/TODO/g,"<div class='type todo'>TODO</div>").replace(/CODE\sIMPROVEMENT/g,"<div class='type code'>CODE</div>").replace(/CODE/g,"<div class='type code'>CODE</div>").replace(/IMPROVEMENT/g,"<div class='type improvement'>IMPROVEMENT</div>").replace(/DEPRECIATED/g,"<div class='type depreciated'>DEPRECIATED</div>"))+"</div></li>");
                                             }
                                         }
                                     });
@@ -1314,7 +1325,8 @@ html(lang="en")
     body
     .titlebar
         .motorbotIcon
-            img(src="https://mb.lolstat.net/motorboticon_transparent_new.png")
+            img(src="https://mb.lolstat.net/another_icon.png")
+            .motorbot MotorBot
         input.search(type="text",placeholder="Search Something New...",onkeyup="loadView('search', $(this).val())")
         .searchIcon <i class="fa fa-search" aria-hidden="true"></i>
         .version
@@ -1334,22 +1346,22 @@ html(lang="en")
                     li dev
                     li AFK
         .profile(onclick="$('#channelOptions').removeClass('visible'); $('#serverOptions').removeClass('visible'); $('#accountOptions').toggleClass('visible');")
-            .profileArrow <i class="fa fa-chevron-down"></i>
-            .profileName #{user.username}<span class="disc">##{user.discriminator}</span>
+            .profileArrow <i class="fas fa-chevron-down"></i>
             .profileIcon(style="background: url('https://cdn.discordapp.com/avatars/" + user.id + "/" + user.avatar + ".png?size=128') no-repeat center; background-size: cover;")
+            .profileName #{user.username}<span class="disc">##{user.discriminator}</span><br /><span class="karma"><i class="fas fa-asterisk" aria-hidden="true"></i> &nbsp; #{user.karma} karma
             ul.options#accountOptions
-                li(onclick='loadView("account","undefined");') Account
-                li(onclick='loadView("developer","undefined");') Developer
-                li(onclick="window.location.href='https://mb.lolstat.net/loginflow/logout'") Logout
+                li(onclick='loadView("account","undefined");') <i class="fas fa-user-astronaut" aria-hidden="true"></i> &nbsp; &nbsp; Account
+                li(onclick='loadView("developer","undefined");') <i class="fas fa-wrench" aria-hidden="true"></i> &nbsp; &nbsp; Developer
+                li(onclick="window.location.href='https://mb.lolstat.net/loginflow/logout'") <i class="fas fa-sign-out-alt" aria-hidden="true"></i> &nbsp; &nbsp; Logout
     .errorList
         ul
             li.warn
                 .icon
-                    .iconWrapper <i class="fa fa-wrench" aria-hidden="true"></i>
+                    .iconWrapper <i class="fas fa-wrench" aria-hidden="true"></i>
                 .content Playlist is under active development, some features may not work.
             li.fatal#socketClose
                 .icon
-                    .iconWrapper <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+                    .iconWrapper <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
                 .content You've been disconnected from our server, please refresh the page!
     .flexContainer
         .sidebar(data-simplebar)
@@ -1368,9 +1380,9 @@ html(lang="en")
     .playerBar
         .bg(style="")
         .controls
-            .prev <i class="fa fa-step-backward" onclick='prevMusic();' style='cursor: pointer;' aria-hidden="true"></i>
-            .playStopButton <span id="playStop"><i class="fa fa-play" aria-hidden="true" onclick='playMusic();' style='cursor: pointer;'></i></span>
-            .skip <i class="fa fa-step-forward" onclick='skipMusic();' style='cursor: pointer;' aria-hidden="true"></i>
+            .prev <i class="fas fa-step-backward" onclick='prevMusic();' style='cursor: pointer;' aria-hidden="true"></i>
+            .playStopButton <span id="playStop"><i class="fas fa-play" aria-hidden="true" onclick='playMusic();' style='cursor: pointer;'></i></span>
+            .skip <i class="fas fa-step-forward" onclick='skipMusic();' style='cursor: pointer;' aria-hidden="true"></i>
         .activeArtwork(style="")
         .duration 00:00 / 00:00
         .now_playing Now Playing

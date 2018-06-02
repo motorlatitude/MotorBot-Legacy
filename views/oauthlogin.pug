@@ -3,7 +3,7 @@ html(lang="en")
     head
         title Motorbot Playlist
         meta(name="viewport",content="width=1128px, initial-scale=1")
-        link(type='image/png',rel='icon',href='https://mb.lolstat.net/motorbotIcon_transparent.png')
+        link(type='image/png',rel='icon',href='https://mb.lolstat.net/another_icon.png')
         link(href="https://fonts.googleapis.com/css?family=Open+Sans|Ubuntu",rel="stylesheet")
         link(href='/css/login.css',rel='stylesheet')
         link(href='/font-awesome-4.6.3/css/font-awesome.min.css',rel='stylesheet')
@@ -15,14 +15,22 @@ html(lang="en")
                 $("#loginform").attr("action", window.location.href)
             });
     body
-        .sidebar
         .bg_opacity
-        form(id="loginform",class="form",method="POST",action="/api/oauth2/login")
-            h1 Login to MotorBot Music
-            if err != ""
-                .error <i class="fa fa-times"></i> &nbsp; #{err}
-            input(type="text",name="user",placeholder="USERNAME")
-            input(type="password",name="pass",placeholder="PASSWORD")
-            input(type="submit",value="LOGIN")
-            .register
-                a(href="/loginflow/register") Sign up
+        .loginSidebar
+            .motorbotIcon
+                img(src="https://mb.lolstat.net/another_icon.png")
+                .motorbot MotorBot
+            form(id="loginform", class="form", method="POST", action="/api/oauth2/login", autocomplete="off")
+                h3 | &nbsp;<b>Welcome Back</b><br /><span>&nbsp; &nbsp;Please login to your account</span>
+                if err != ""
+                    .error <i class="fa fa-times"></i> &nbsp; #{err}
+                .username_wrapper
+                    .txt Username
+                    input(type="text", name="user", placeholder="enter your username", autocomplete="off")
+                .password_wrapper
+                    .txt Password
+                    input(type="password", name="pass", placeholder="enter your password")
+                .button_wrapper
+                    input(type="submit", value="Login")
+                    .register
+                        a(href="/loginflow/register") Sign up

@@ -28,9 +28,18 @@ passport.serializeUser((user, done) ->
 
 passport.deserializeUser((id, done) ->
   usersCollection = globals.db.collection("users")
+  karmaCollection = globals.db.collection("karma_points")
   usersCollection.find({id: id}).toArray((err, results) ->
     if results[0]
-      done(null, results[0])
+      karmaCollection.find({author: id}).toArray((err, karma_points) ->
+        if err then console.log err
+        if karma_points[0]
+          results[0].karma = {}
+          results[0].karma = karma_points[0]
+        console.log "Deserializing User"
+        console.log results[0]
+        done(null, results[0])
+      )
   )
 )
 
@@ -42,26 +51,37 @@ passport.use(new DiscordStrategy({
   },
   (accessToken, refreshToken, profile, cb) ->
     usersCollection = globals.db.collection("users")
-    usersCollection.find({id: profile.id}).toArray((err, results) ->
+    karmaCollection = globals.db.collection("karma_points")
+    karmaCollection.find({author: profile.id}).toArray((err, results) ->
       if err then console.log err
       if results[0]
-        usersCollection.update({id: profile.id}, {$set:{avatar: profile.avatar, username: profile.username, guilds: profile.guilds}}, (err, result) ->
-          if err then console.log err
-          return cb(err, profile)
-        )
-      else
-        userObj = {
-          id: profile.id,
-          username: profile.username,
-          discriminator: profile.discriminator,
-          avatar: profile.avatar,
-          guilds: profile.guilds,
-          playlists: ["YFX7clE6pCquMNnsHtxlzgJiHXIixFxk"]
-        }
-        usersCollection.insertOne(userObj, (err, result) ->
-          if err then console.log err
-          return cb(err, profile)
-        )
+        profile.karma = {}
+        profile.karma = results[0]
+      usersCollection.find({id: profile.id}).toArray((err, results) ->
+        if err then console.log err
+        if results[0]
+          usersCollection.update({id: profile.id}, {$set:{avatar: profile.avatar, username: profile.username, guilds: profile.guilds}}, (err, result) ->
+            if err then console.log err
+            console.log "PASSPORT USE"
+            console.log profile
+            return cb(err, profile)
+          )
+        else
+          userObj = {
+            id: profile.id,
+            username: profile.username,
+            discriminator: profile.discriminator,
+            avatar: profile.avatar,
+            guilds: profile.guilds,
+            playlists: ["YFX7clE6pCquMNnsHtxlzgJiHXIixFxk"]
+          }
+          usersCollection.insertOne(userObj, (err, result) ->
+            if err then console.log err
+            console.log "PASSPORT USE"
+            console.log profile
+            return cb(err, profile)
+          )
+      )
     )
 ))
 

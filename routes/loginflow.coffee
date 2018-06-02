@@ -14,9 +14,16 @@ passport.serializeUser((user, done) ->
 
 passport.deserializeUser((req, id, done) ->
   usersCollection = req.app.locals.motorbot.database.collection("users")
+  karmaCollection = req.app.locals.motorbot.database.collection("karma_points")
   usersCollection.find({id: id}).toArray((err, results) ->
-    if results[0]
-      done(null, results[0])
+    karmaCollection.find({author: id}).toArray((err, karma_points) ->
+      if err then console.log err
+      if karma_points[0]
+        results[0].karma = 0
+        results[0].karma = karma_points[0].karma
+      if results[0]
+        done(null, results[0])
+    )
   )
 )
 #MB Login

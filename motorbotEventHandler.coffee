@@ -15,21 +15,6 @@ class motorbotEventHandler
     @setUpEvents()
     @already_announced = false
 
-  debug: (msg,level = "debug") ->
-    if level == "info"
-      level = "\x1b[34m[INFO ]\x1b[0m"
-    else if level == "error"
-      level = "\x1b[31m[ERROR]\x1b[0m"
-    else if level == "warn"
-      level = "\x1b[5m\x1b[33m[WARN ]\x1b[0m"
-    else if level == "notification"
-      level = "\x1b[5m\x1b[35m[NOTIF]\x1b[0m"
-    else if level == "debug"
-      level = "\x1b[2m[DEBUG]"
-    d = new Date()
-    time = "["+d.getDate()+"/"+(parseInt(d.getMonth())+1)+"/"+d.getFullYear()+" "+d.toLocaleTimeString()+"] "
-    console.log(level+time+msg+"\x1b[0m")
-
   setupSoundboard: (guild_id, filepath, volume = 1) ->
     self = @
     if !self.app.soundboard[guild_id]
@@ -139,9 +124,9 @@ class motorbotEventHandler
         },
         json: true
       }, (error, httpResponse, body) ->
-        self.debug("Twitch Webhook Subscription Response Code: "+httpResponse.statusCode, "debug")
+        self.app.debug("Twitch Webhook Subscription Response Code: "+httpResponse.statusCode, "debug")
         if error
-          self.debug("subscription error to webhook", "error")
+          self.app.debug("subscription error to webhook", "error")
           console.log error
     )
 
@@ -183,7 +168,16 @@ class motorbotEventHandler
       if self.client.channels["432351112616738837"]
         d = new Date()
         time = "`["+d.getDate()+"/"+(parseInt(d.getMonth())+1)+"/"+d.getFullYear()+" "+d.toLocaleTimeString()+"]` "
-        self.client.channels["432351112616738837"].sendMessage(time + " Joined Guild: "+server.name+" ("+server.presences.length+" online / "+(parseInt(server.member_count)-server.presences.length)+" offline)")
+        if server.id == "130734377066954752"
+          self.client.channels["432351112616738837"].sendMessage(":x: <@&443191635657097217>","embed": {
+            "title": "MOTORBOT RESTARTED"
+            "description": "Motorbot had to restart either through manual input or due to a fatal error occurring, please consult error logs in console if the latter.",
+            "color": 16724787
+          })
+          setTimeout(() ->
+            self.client.channels["432351112616738837"].sendMessage("```JSON\n"+self.app.log_history.join("\n")+"\n```")
+          , 5000)
+        #self.client.channels["432351112616738837"].sendMessage(time + " Joined Guild: "+server.name+" ("+server.presences.length+" online / "+(parseInt(server.member_count)-server.presences.length)+" offline)")
         if y == 0
           #Listen for patches
           setInterval( () ->
@@ -248,9 +242,9 @@ class motorbotEventHandler
     @client.on("status", (user_id,status,game,extra_info) ->
       if extra_info.guild_id == "130734377066954752" #only listening for presence updates in the KTJ guild for now to avoid duplicates across multiple channels
         if game
-          self.debug(user_id+"'s status ("+status+") has changed; "+game.name+"("+game.type+")","notification")
+          self.app.debug(user_id+"'s status ("+status+") has changed; "+game.name+"("+game.type+")","notification")
         else
-          self.debug(user_id+"'s status ("+status+") has changed", "notification")
+          self.app.debug(user_id+"'s status ("+status+") has changed", "notification")
         d = new Date()
         time = "`["+d.getDate()+"/"+(parseInt(d.getMonth())+1)+"/"+d.getFullYear()+" "+d.toLocaleTimeString()+"]` "
         gameText = ""
@@ -854,10 +848,13 @@ class motorbotEventHandler
         else
           #console.log msg.content
           #do nothing, aint a command or anything
-        if msg.author.id != "169554882674556930"
+        if self.client.channels["432351112616738837"] && msg.author.id != "169554882674556930"
           d = new Date()
           time = "`["+d.getDate()+"/"+(parseInt(d.getMonth())+1)+"/"+d.getFullYear()+" "+d.toLocaleTimeString()+"]` "
-          self.client.channels["432351112616738837"].sendMessage(time + " Message sent by <@"+msg.author.id+"> to the <#"+msg.channel_id+"> channel in the "+self.client.guilds[msg.channel.guild_id].name+" guild")
+          if self.client.guilds[msg.channel.guild_id]
+            self.client.channels["432351112616738837"].sendMessage(time + " Message sent by <@"+msg.author.id+"> to the <#"+msg.channel_id+"> channel in the "+self.client.guilds[msg.channel.guild_id].name+" guild")
+          else
+            self.client.channels["432351112616738837"].sendMessage(time + " Message sent by <@"+msg.author.id+"> to the <#"+msg.channel_id+"> channel (DM)")
     )
 
     @client.on("messageUpdate", (msg) ->
