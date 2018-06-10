@@ -166,6 +166,11 @@ class VoiceConnection
       while i < streamBuff.length
         if i >= streamBuff.length - 1
           break
+        ###int = streamBuff.readInt16LE(i)
+        if int > 20000
+          multiplier = Math.pow(self.volume+0.3, 1.660964);
+        else if int < -20000
+          multiplier = Math.pow(self.volume+0.3, 1.660964);###
         uint = Math.floor(multiplier * streamBuff.readInt16LE(i))
         # Ensure value stays within 16bit
         uint = Math.min(32767, uint)
@@ -174,7 +179,7 @@ class VoiceConnection
         out.writeInt16LE(uint, i)
         i += 2
       streamBuff = out;
-      encoded = @opusEncoder.encode(streamBuff, 1920)
+      encoded = @opusEncoder.encode(streamBuff, 1920*channels)
       audioPacket = new VoicePacket(encoded, @)
       @packageList.push(audioPacket)
       nextTime = startTime + (cnt + 1) * 20

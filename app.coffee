@@ -16,7 +16,6 @@ class App
     @soundboard = {}
     @say = {}
     @yStream = {}
-    @voiceConnections = {}
     @init()
     @log_history = []
     console.log = (d) ->
@@ -123,20 +122,20 @@ class App
         self.yStream[guild_id] = youtubeStream(requestUrl,{quality: 'highest', filter: 'audio'})
         thisystream = self.yStream[guild_id]
         thisystream.on("error", (e) ->
-          console.log e
+          console.log "e: "+e.toString()
           self.debug("Error Occurred Loading Youtube Video")
+          self.websocket.broadcast(JSON.stringify({type: 'youtubeError', err: e.toString()}))
           self.nextSong()
         )
         thisystream.on("info", (info, format) ->
           #console.log "INFO"
           #console.log "URL: "+format.url
-          #console.log format
           volume = 0.6 #set default, as some videos (recently uploaded maybe?) don't have loudness value
           #stabilise volume to avoid really loud or really quiet playback
           if info.loudness
             volume = (parseFloat(info.loudness)/-27)
             self.debug "Setting Volume Based on Video Loudness ("+info.loudness+"): "+volume
-          self.voiceConnections[guild_id].playFromStream(thisystream).then((audioPlayer) ->
+          self.client.voiceConnections[guild_id].playFromStream(thisystream).then((audioPlayer) ->
             self.musicPlayers[guild_id] = audioPlayer
             self.musicPlayers[guild_id].on('ready', () ->
               self.musicPlayers[guild_id].setVolume(volume)
@@ -158,6 +157,7 @@ class App
             #musicPlayers[guild_id].pause()
             self.musicPlayers[guild_id].on("streamDone", () ->
               self.musicPlayers[guild_id] = undefined
+              self.client.setStatus("") # reset to blank
               self.nextSong()
             )
           )

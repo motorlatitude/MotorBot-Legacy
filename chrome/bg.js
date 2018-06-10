@@ -1,4 +1,4 @@
-var accessToken = null;
+var access_token = null;
 
 var tokenFetcher = (function() {
   var clientId = '1a23590021f0168gz276f43d1de3d6ef';
@@ -6,7 +6,6 @@ var tokenFetcher = (function() {
   var redirectUri = 'https://' + chrome.runtime.id +
                     '.chromiumapp.org/provider_cb';
   var redirectRe = new RegExp(redirectUri + '[#\?](.*)');
-  access_token = null
 
   return {
     getToken: function(interactive, callback) {
@@ -78,6 +77,8 @@ var tokenFetcher = (function() {
             console.log(response.access_token);
             setAccessToken(response.access_token);
             access_token = response.access_token;
+            refresh_token = response.refresh_token;
+            expires_in = new Date().getTime() + response.expires_in
           }
         };
         xhr.send(params);
@@ -88,63 +89,90 @@ var tokenFetcher = (function() {
         callback(null, access_token);
       }
     },
-
-    removeCachedToken: function(token_to_remove) {
-      if (access_token == token_to_remove)
-        access_token = null;
+    getAccessToken: function(callback){
+      if(!access_token){
+        chrome.storage.sync.get("userInfo", function(user) {
+            access_token = user.userInfo.token;
+            callback(user.userInfo.token);
+        });
+      }
+      else{
+        console.log("getAccessToken: "+access_token);
+        callback(access_token);
+      }
     }
   }
 })();
 
 var userInfo = {};
 
-function getUserData(accessToken){
+function getUserData(accessToken, authorization) {
+    console.log(accessToken);
     var xhr = new XMLHttpRequest();
     xhr.open('GET', 'https://mb.lolstat.net/api/user/me?api_key=caf07b8b-366e-44ab-9bda-152a42g8d1ef');
     xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
-    xhr.onload = guildRequestComplete;
-    xhr.send();
-}
-
-function guildRequestComplete(){
-  if(this.status == 200){
-    userInfo = JSON.parse(this.response);
-    userInfo.worthy = false;
-    userInfo.token = access_token;
-    for(var i=0;i<userInfo.guilds.length;i++){
-      if(userInfo.guilds[i].id == "130734377066954752"){
-        userInfo.worthy = true;
-      }
+    xhr.onload = function () {
+        if (this.status == 200) {
+            userInfo = JSON.parse(this.response);
+            userInfo.worthy = false;
+            userInfo.token = access_token;
+            for (var i = 0; i < userInfo.guilds.length; i++) {
+                if (userInfo.guilds[i].id == "130734377066954752") {
+                    userInfo.worthy = true;
+                }
+            }
+            chrome.storage.sync.set({'userInfo': userInfo}, function () {
+              console.log("Saved userInfo values");
+              chrome.runtime.sendMessage({type: authorization}, function (response) {
+                  console.log("Sending " + authorization + " event");
+                  console.log(response);
+              });
+            });
+            console.log(userInfo);
+        }
+        else {
+            console.error("Error Occurred Getting User Data");
+            console.log(this.response);
+        }
     }
-    chrome.storage.sync.set({'userInfo': userInfo}, function() {
-      console.log("Saved userInfo values");
-    });
-    console.log(userInfo);
-  }
-  else{
-    console.error("Error Occurred Getting User Data");
-    console.log(this.response);
-  }
+    xhr.send()
 }
 
 
-chrome.extension.onRequest.addListener(function(message,sender,sendResponse) {
+chrome.runtime.onMessage.addListener(function(message,sender,sendResponse) {
+  tf = tokenFetcher
   if (message.type == 'authorize') {
     console.log(chrome.runtime.id);
     console.log("Message From Popup");
-    tokenFetcher.getToken(true, function(error, access_token) {
+    tf.getToken(true, function(error, access_token) {
       if (error) {
         console.error(error);
       } else {
-          getUserData(access_token);
+        getUserData(access_token, "authorizationComplete");
       }
       return true;
     });
     return true;
   }
-  else if(message.type == "authorizeCheck"){
-    //check if we're still authorized
-
+  else if(message.type == "refresh"){
+      tf.getAccessToken(function(access_token){
+          getUserData(access_token, "authorizationComplete2");
+          return true;
+      });
+      return true;
   }
   return true;
 });
+
+//Detect youtube requests and try and add button, send message to contentscript
+
+chrome.webRequest.onCompleted.addListener(function(data){
+    chrome.tabs.query({url: ["https://www.youtube.com/*"]}, function(tabs) {
+      if(tabs) {
+          chrome.tabs.sendMessage(tabs[0].id, {type: "youtube_request"}, function (response) {
+              console.log("Sending youtube_request event");
+              console.log(response);
+          });
+      }
+    });
+},{urls: ["<all_urls>"]});

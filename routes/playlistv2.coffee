@@ -58,8 +58,8 @@ router.get('/dashboard/:view/:param?', (req, res) ->
           res.render('layout',{user: req.user, view: 'playlists', param: undefined})
       else if req.params.view == "home"
         res.render('layout',{user: req.user, view: 'home', param: undefined})
-      else if req.params.view == "queue"
-        res.render('layout',{user: req.user, view: 'queue', param: undefined})
+      else if req.params.view == "browse"
+        res.render('layout',{user: req.user, view: 'browse', param: undefined})
       else if req.params.view == "library"
         res.render('library',{user: req.user, view: 'library', param: undefined})
       else if req.params.view == "account"

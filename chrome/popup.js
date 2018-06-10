@@ -5,43 +5,44 @@ $(document).ready(function () {
      console.error(error);
      }
      });*/
+    $("#signInButton").css("display", "none");
+    chrome.runtime.onMessage.addListener(function(message,sender,sendResponse) {
+        if (message.type == 'authorizationComplete') {
+            console.log("Received AUTHORIZATIONCOMPLETE event for AUTHORIZE request");
+            return window.location.reload(true);
+        }
+        return true;
+    });
+    chrome.runtime.onMessage.addListener(function(message,sender,sendResponse) {
+        if (message.type == 'authorizationComplete2') {
+            console.log("Received AUTHORIZATIONCOMPLETE2 event for REFRESH request");
+            chrome.storage.sync.get('userInfo', function (value) {
+                if (value.userInfo) {
+                    $(".frame").css("display", "none");
+                    $(".successFrame").css("display", "block");
+                    $(".successFrame .title .titleText").html(value.userInfo.username + "<br><span>#" + value.userInfo.discriminator + "</span>");
+                    $(".successFrame .title .icon .iconImg").css("background", "url('https://cdn.discordapp.com/avatars/" + value.userInfo.id + "/" + value.userInfo.avatar + ".png?size=256') no-repeat center").css("background-size", "cover");
+                    return true;
+                }
+                return true;
+            });
+        }
+        return true;
+    });
     chrome.storage.sync.get('userInfo', function (value) {
-        if (value.userInfo == null && !value.userInfo.token) {
+        if (value.userInfo == null) {
             console.log("Gotta Authenticate M8");
+            $("#signInButton").css("display", "inline-block");
+            $("#signInButton").click(function () {
+                chrome.runtime.sendMessage({type: 'authorize'}, function (response) {
+                    console.log(response);
+                });
+            });
         }
         else {
-            if (value.userInfo) {
-                $.ajax({
-                    url: "https://mb.lolstat.net/api/oauth2/tokeninfo?token=" + value.userInfo.token,
-                    dataType: "json",
-                    success: function (data) {
-                        if (data.valid === true) {
-                            $(".frame").css("display", "none");
-                            $(".successFrame").css("display", "block");
-                            $(".successFrame .title .titleText").html(value.userInfo.username + "<br><span>#" + value.userInfo.discriminator + "</span>");
-                            $(".successFrame .title .icon .iconImg").css("background", "url('https://discordapp.com/api/users/" + value.userInfo.id + "/avatars/" + value.userInfo.avatar + ".jpg') no-repeat center").css("background-size", "120%");
-                        }
-                        else {
-                            chrome.storage.sync.clear();
-                            console.log("Gotta Authenticate M8");
-                        }
-                    },
-                    error: function (err) {
-                        console.error(err);
-                        chrome.storage.sync.clear();
-                        console.log("Gotta Authenticate M8");
-                    }
-                });
-            }
-            else{
-                chrome.storage.sync.clear();
-                console.log("Gotta Authenticate M8");
-            }
+            chrome.runtime.sendMessage({type: 'refresh'}, function (response) {
+                console.log(response);
+            });
         }
-    });
-    $("#signInButton").click(function () {
-        chrome.extension.sendRequest({type: 'authorize'}, function (response) {
-            console.log(response);
-        });
     });
 });

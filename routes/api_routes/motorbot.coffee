@@ -33,10 +33,58 @@ router.use((req, res, next) ->
     )
 )
 
+router.get("/guilds", (req, res) ->
+  res.type('json')
+  if req.app.locals.motorbot.client.guilds
+    response = {
+      "Response": req.app.locals.motorbot.client.guilds,
+      "ErrorCode": 1,
+      "ErrorStatus": "Success",
+      "Message": "Ok"
+    }
+  else
+    response = {
+      "Response": {},
+      "ErrorCode": 2,
+      "ErrorStatus": "Not Found",
+      "Message": "Connected guilds could not be found"
+    }
+  res.end(JSON.stringify(response, (key, value) ->
+    if key == "client"
+      return undefined
+    else
+      return value
+  ))
+)
+
+router.get("/channels", (req, res) ->
+  res.type('json')
+  if req.app.locals.motorbot.client.channels
+    response = {
+      "Response": req.app.locals.motorbot.client.channels,
+      "ErrorCode": 1,
+      "ErrorStatus": "Success",
+      "Message": "Ok"
+    }
+  else
+    response = {
+      "Response": {},
+      "ErrorCode": 2,
+      "ErrorStatus": "Not Found",
+      "Message": "Connected channels could not be found"
+    }
+  res.end(JSON.stringify(response, (key, value) ->
+    if key == "client"
+      return undefined
+    else
+      return value
+  ))
+)
+
 router.get("/channel", (req, res) ->
   res.type('json')
-  if req.app.locals.motorbot.voiceConnections["130734377066954752"]
-    channelName = req.app.locals.motorbot.voiceConnections["130734377066954752"].channel_name
+  if req.app.locals.motorbot.client.voiceConnections["130734377066954752"]
+    channelName = req.app.locals.motorbot.client.voiceConnections["130734377066954752"].channel_name
     res.end(JSON.stringify({channel: channelName}))
   else
     res.end(JSON.stringify({channel: undefined}))

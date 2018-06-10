@@ -7,6 +7,17 @@ async = require('async')
 request = require 'request'
 uid = require('rand-token').uid;
 async = require 'async'
+multer = require 'multer'
+path = require 'path'
+
+storage = multer.diskStorage({
+  destination: (req, file, callback) ->
+    callback(null, path.join(__dirname, '../../static/AlbumArt'))
+  ,filename: (req, file, callback) ->
+    req.app.locals.albumartkey = uid(20)+"."+file.originalname.split('.')[1]
+    callback(null, req.app.locals.albumartkey)
+})
+upload = multer({ storage : storage}).single('artworkFile');
 
 ###
   PLAYLIST ENDPOINT
@@ -144,37 +155,60 @@ refreshSpotifyAccessToken = (req, res, next) ->
       next()
   )
 
+router.post("/uploadArtwork", (req, res) ->
+  upload(req,res,(err) ->
+    if err
+      console.log err
+      console.log "Error Uploading File"
+      return res.end("Error uploading file")
+    else
+      res.end("File is uploaded")
+  )
+)
+
 router.post("/", (req, res) ->
   res.type("json")
   user_id = req.user_id
   playlistsCollection = req.app.locals.motorbot.database.collection("playlists")
   usersCollection = req.app.locals.motorbot.database.collection("users")
   playlist_id = uid(32);
-  playlistObj = {
-    id: playlist_id
-    name: req.body.playlist_name
-    description: ""
-    songs: []
-    creator: user_id
-    create_date: new Date().getTime()
-    followers: [user_id]
-    artwork: ""
-    private: req.body.private || false
-    collaborative: req.body.collaborative || false
-  }
-  playlistsCollection.insertOne(playlistObj, (err, result) ->
-    if err then return res.status(500).send({code: 500, status: "Database Error", error: err})
-    usersCollection.find({id: user_id}).toArray((err, results) ->
+  album_key = undefined
+  if req.app.locals.albumartkey
+    album_key = "https://mb.lolstat.net/AlbumArt/"+req.app.locals.albumartkey
+  if req.body.playlist_name
+    playlistObj = {
+      id: playlist_id
+      name: req.body.playlist_name
+      description: req.body.playlist_description || ""
+      songs: []
+      creator: user_id
+      create_date: new Date().getTime()
+      followers: [user_id]
+      artwork: album_key || ""
+      private: req.body.private || false
+      collaborative: req.body.collaborative || false
+    }
+    playlistsCollection.insertOne(playlistObj, (err, result) ->
       if err then return res.status(500).send({code: 500, status: "Database Error", error: err})
-      if results[0]
-        playlists = results[0].playlists
-        playlists.push(playlist_id)
-        usersCollection.update({id: user_id},{$set: {playlists: playlists}}, (err, result) ->
-          if err then return res.status(500).send({code: 500, status: "Database Error", error: err})
-          res.send(playlistObj)
-        )
+      usersCollection.find({id: user_id}).toArray((err, results) ->
+        if err then return res.status(500).send({code: 500, status: "Database Error", error: err})
+        if results[0]
+          playlists = results[0].playlists
+          playlists.push(playlist_id)
+          usersCollection.update({id: user_id},{$set: {playlists: playlists}}, (err, result) ->
+            if err then return res.status(500).send({code: 500, status: "Database Error", error: err})
+            res.send(playlistObj)
+          )
+      )
     )
-  )
+  else
+    api_response = {
+      "Response": {},
+      "ErrorCode": 3,
+      "ErrorStatus": "Incorrectly Formatted Request",
+      "Message": "No playlist name was supplied"
+    }
+    res.send(api_response)
 )
 
 convertTimestampToSeconds = (input) ->
@@ -398,7 +432,7 @@ router.put("/:playlist_id/song", refreshSpotifyAccessToken, (req, res) ->
             if err then return res.status(500).send({code: 500, status: "Youtube API Error", error: err})
             if data.items[0]
               modifiedTitle = data.items[0].snippet.title.replace(/\[((?!.*?Remix))[^\)]*\]/gmi, '').replace(/\(((?!.*?Remix))[^\)]*\)/gmi, '').replace(/\-(\s|)[0-9]*(\s|)\-/g, '').replace(/(\s|)-(\s|)/gmi," ").replace(/(\sI\s|\s:\s)/gmi, " ").replace(/\sFrom\s(.*)\/(|\s)Soundtrack/gmi, "").replace(/(high\squality|\sOST|playlist|\sHD|\sHQ|\s1080p|\s720p|ft\.|feat\.|ft\s|lyrics|official\svideo|\"|official|video|:|\/Soundtrack\sVersion|\/Soundtrack|\||w\/|\/)/gmi, '')
-              modifiedTitle = encodeURIComponent(modifiedTitle)
+              modifiedTitle = encodeURIComponent(modifiedTitle.trim())
               console.log modifiedTitle
               request.get({
                 url: "https://api.spotify.com/v1/search?type=track&q=" + modifiedTitle,

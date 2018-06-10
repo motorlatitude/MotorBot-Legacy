@@ -18,7 +18,7 @@ class motorbotEventHandler
   setupSoundboard: (guild_id, filepath, volume = 1) ->
     self = @
     if !self.app.soundboard[guild_id]
-      self.app.voiceConnections[guild_id].playFromFile(filepath).then((audioPlayer) ->
+      self.app.client.voiceConnections[guild_id].playFromFile(filepath).then((audioPlayer) ->
         self.app.soundboard[guild_id] = audioPlayer
         self.app.org_volume = 0.5 #set default
         self.app.soundboard[guild_id].on('streamDone', () ->
@@ -180,9 +180,9 @@ class motorbotEventHandler
         #self.client.channels["432351112616738837"].sendMessage(time + " Joined Guild: "+server.name+" ("+server.presences.length+" online / "+(parseInt(server.member_count)-server.presences.length)+" offline)")
         if y == 0
           #Listen for patches
-          setInterval( () ->
-            self.patchListener("ow")
-          , 3600000)
+          #setInterval( () ->
+            #self.patchListener("ow")
+          #, 3600000)
           y = 1
     )
 
@@ -424,7 +424,7 @@ class motorbotEventHandler
             for channel in self.client.guilds[msg.guild_id].channels
               if channel.name == channelName && channel.type == 2
                 channel.join().then((VoiceConnection) ->
-                  self.app.voiceConnections[msg.guild_id] = VoiceConnection
+                  self.app.client.voiceConnections[msg.guild_id] = VoiceConnection
                 )
                 joined = true
                 break
@@ -432,7 +432,7 @@ class motorbotEventHandler
             for channel in self.client.guilds[msg.guild_id].channels
               if channel.type == 2
                 channel.join().then((VoiceConnection) ->
-                  self.app.voiceConnections[msg.guild_id] = VoiceConnection
+                  self.app.client.voiceConnections[msg.guild_id] = VoiceConnection
                 )
                 break
         else if msg.content.match(/^\!voice\s(.*?)\sjoin/)
@@ -445,7 +445,7 @@ class motorbotEventHandler
               for channel in self.client.guilds[selected_guild_id].channels
                 if channel.name == channelName && channel.type == 2
                   channel.join().then((VoiceConnection) ->
-                    self.app.voiceConnections[selected_guild_id] = VoiceConnection
+                    self.app.client.voiceConnections[selected_guild_id] = VoiceConnection
                   )
                   joined = true
                   break
@@ -453,7 +453,7 @@ class motorbotEventHandler
               for channel in self.client.guilds[selected_guild_id].channels
                 if channel.type == 2
                   channel.join().then((VoiceConnection) ->
-                    self.app.voiceConnections[selected_guild_id] = VoiceConnection
+                    self.app.client.voiceConnections[selected_guild_id] = VoiceConnection
                   )
                   break
           else

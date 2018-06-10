@@ -26,6 +26,7 @@ class AudioPlayer extends EventEmitter
       '-ar', '48000',
       '-ss', '0',
       '-ac', '2',
+      '-loglevel', '0',
       'pipe:1'
     ]).on('error', (e) ->
       utils.debug("FFMPEG encoding error: "+e.toString(),"error")

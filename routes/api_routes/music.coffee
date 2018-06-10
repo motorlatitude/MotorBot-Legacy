@@ -182,6 +182,7 @@ pauseSong = (req, res) ->
     req.app.locals.motorbot.musicPlayers["130734377066954752"].pause()
     req.app.locals.motorbot.musicPlayers["130734377066954752"].playing = false
     req.app.locals.motorbot.websocket.broadcast(JSON.stringify({type: 'playUpdate', status: 'pause'}))
+    req.app.locals.motorbot.client.setStatus("")
     res.sendStatus(200)
   else
     res.sendStatus(400)
@@ -192,6 +193,7 @@ stopSong = (req, res) ->
     req.app.locals.motorbot.musicPlayers["130734377066954752"].stop()
     req.app.locals.motorbot.musicPlayers["130734377066954752"].playing = false
     req.app.locals.motorbot.websocket.broadcast(JSON.stringify({type: 'playUpdate', status: 'stop'}))
+    req.app.locals.motorbot.client.setStatus("")
     res.sendStatus(200)
   else
     res.sendStatus(400)
@@ -228,6 +230,8 @@ router.get("/playing", (req, res) ->
     if err
       res.sendStatus(500)
     if results[0]
+      results[0]["currently_playing"] = false
+      results[0]["currently_playing"] = req.app.locals.motorbot.musicPlayers["130734377066954752"].playing
       res.end(JSON.stringify(results[0]))
     else
       res.sendStatus(404)

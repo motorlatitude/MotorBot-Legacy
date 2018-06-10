@@ -79,10 +79,12 @@ router.get("/playlists", (req, res) ->
     usersCollection.find({id: userId}).toArray((err, results) ->
       if err then console.log err
       if results[0]
+        playlists = results[0].playlists
         playlistsCollection = req.app.locals.motorbot.database.collection("playlists")
-        playlistsCollection.find({id: {$in: results[0].playlists}}).toArray((err, results) ->
+        playlistsCollection.find({id: {$in: playlists}}).toArray((err, results) ->
           creators = []
           for playlist in results
+            playlist.position = playlists.indexOf(playlist.id)
             creators.push(playlist.creator)
           playlists = results
           usersCollection.find({id: {$in: creators}}).toArray((err, results) ->
@@ -94,6 +96,44 @@ router.get("/playlists", (req, res) ->
             res.type("json")
             res.end(JSON.stringify(playlists))
           )
+        )
+      else
+        res.sendStatus(403)
+    )
+  else
+    res.sendStatus(403)
+)
+
+router.patch("/sortPlaylists/:playlistID/:position", (req, res) ->
+  if req.user
+    userId = req.user_id
+    usersCollection = req.app.locals.motorbot.database.collection("users")
+    usersCollection.find({id: userId}).toArray((err, results) ->
+      if err then console.log err
+      if results[0]
+        playlists = results[0].playlists
+        playlists.splice(playlists.indexOf(req.params.playlistID),1)
+        playlists.splice(parseInt(req.params.position), 0, req.params.playlistID)
+        usersCollection.update({id: userId}, {"$set": {playlists: playlists}}, (err, result) ->
+          if err then console.log err
+          if result[0]
+            res.type("json")
+            response = {
+              "Response": result[0],
+              "ErrorCode": 1,
+              "ErrorStatus": "Success",
+              "Message": ""
+            }
+            res.end(JSON.stringify(response))
+          else
+            res.type("json")
+            response = {
+              "Response": {},
+              "ErrorCode": 4,
+              "ErrorStatus": "Empty Response",
+              "Message": "Nothing was returned at this endpoint"
+            }
+            res.end(JSON.stringify(response))
         )
       else
         res.sendStatus(403)
