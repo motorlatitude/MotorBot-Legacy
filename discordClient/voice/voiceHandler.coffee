@@ -19,6 +19,7 @@ class VoiceConnection
     utils.debug("New Voice Connection Started")
     @sequence = 0
     @timestamp = 0
+    @timestamp_inc = (48000 / 100) * 2;
 
   connect: (params) ->
     @token = params.token
@@ -39,8 +40,9 @@ class VoiceConnection
     @avgPing = 0
     @bytesTransmitted = 0
     @buffer_size = 0
+    @AudioPlayers = []
     utils.debug("Generating new voice WebSocket connection")
-    @vws = new ws("wss://" + @endpoint.split(":")[0])
+    @vws = new ws("wss://" + @endpoint.split(":")[0]) #using version 3 now
     self = @
     @opusEncoder = new Opus.OpusEncoder(48000, 2)
     @vws.once('open', () -> self.voiceGatewayOpen())
@@ -125,6 +127,7 @@ class VoiceConnection
 
   handleSpeaking: (msg) ->
     @users[msg.d.user_id] = {ssrc: msg.d.ssrc} #for receiving voice data
+    @discordClient.emit("voiceUpdate_Speaking", msg.d)
 
   handleHeartbeat: (msg, guild_id) ->
     ping = new Date().getTime() - @gatewayPing
@@ -159,20 +162,18 @@ class VoiceConnection
     if streamPacket
       streamBuff = streamPacket
       @sequence = if (@sequence + 1) < 65535 then @sequence += 1 else @sequence = 0
-      @timestamp = if (@timestamp + 960) < 4294967295 then @timestamp += 960 else @timestamp = 0
+      @timestamp = if (@timestamp + @timestamp_inc) < 4294967295 then @timestamp += @timestamp_inc else @timestamp = 0
       out = new Buffer(streamBuff.length);
-      multiplier =  Math.pow(self.volume, 1.660964);
       i = 0
       while i < streamBuff.length
         if i >= streamBuff.length - 1
           break
-        ###int = streamBuff.readInt16LE(i)
-        if int > 20000
-          multiplier = Math.pow(self.volume+0.3, 1.660964);
-        else if int < -20000
-          multiplier = Math.pow(self.volume+0.3, 1.660964);###
+        multiplier =  Math.pow(self.volume, 1.660964);
         uint = Math.floor(multiplier * streamBuff.readInt16LE(i))
         # Ensure value stays within 16bit
+        if uint > 32767 || uint < -32767
+          utils.debug("Audio Peaking, Lowering Volume","warn")
+          self.volume = self.volume - 0.05 #lower volume automatically if we're peaking
         uint = Math.min(32767, uint)
         uint = Math.max(-32767, uint)
         # Write 2 new bytes into other buffer;
@@ -200,14 +201,28 @@ class VoiceConnection
         if err
           utils.debug("Error Sending Voice Packet: " + err.toString(), "error")
       )
-    nextTime = startTime + (cnt + 1) * 20
     return setTimeout(() ->
       self.send(startTime, (cnt + 1))
-    , 20 + (nextTime - new Date().getTime()))
+    , 1)
 
   playFromStream: (stream) ->
-    ps = new audioPlayer(stream, @, @discordClient)
-    return ps
+    self = @
+    if @AudioPlayers.length > 0
+      utils.debug("MORE THAN ONE AUDIO PLAYER FOR THIS VOICE HANDLER!!!!")
+      for a in @AudioPlayers
+        if a
+          a.stop_kill()
+          i = self.AudioPlayers.indexOf(a)
+          if i > -1
+            @AudioPlayers.splice(i,1)
+      @streamPacketList = []
+      ah = new audioPlayer(stream, @, @discordClient)
+      @AudioPlayers.push(ah)
+      return ah
+    else
+      ah = new audioPlayer(stream, @, @discordClient)
+      @AudioPlayers.push(ah)
+      return ah
 
   playFromFile: (file) ->
     ps = new audioPlayer(fs.createReadStream(file), @, @discordClient)

@@ -1,0 +1,263 @@
+<div class="title">
+    Get Current User's Playlists
+    <a href="#endpoints/user/playlists" title="Get User's Playlists">
+        <i class="fa fa-anchor anchor" aria-hidden="true"></i>
+    </a>
+    <div class="method get">GET</div>
+    <div class="type">Endpoint</div>
+</div>
+<p>
+
+</p>
+<br/>
+<div class="code" data-codeBlockId="1">
+    <pre class="http" data-codeBlock="1-HTTP"><code class="http">GET https://mb.lolstat.net/api/user/playlists HTTP/1.1
+Authorization: Bearer {access_token}</code></pre>
+</div>
+<p>
+    Returns a list of playlists that this user has created or follows. These playlist objects will contain basic playlist information and short song objects.
+</p>
+<h1>Request Parameters</h1>
+<h2>Header Fields</h2>
+<table class="endpointTable headers">
+    <thead>
+        <tr>
+            <td>Header Field</td>
+            <td>Value</td>
+        </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>Authorization<br><span class="required">REQUIRED</span></td>
+        <td>A valid access token from the MotorBot authorization system. See the <span class="link" onclick="loadView('endpoints/oauth2')">OAuth 2.0 endpoint</span> or the <span class="link" onclick="loadView('guides/authorization')">User Authorization Guide</span> for further information. The access token must have been issued on behalf of the current user.</td>
+    </tr>
+    </tbody>
+</table>
+<br/>
+<h2>Query Parameters</h2>
+<table class="endpointTable queryParameters">
+    <thead>
+    <tr>
+        <td>Query Parameter</td>
+        <td>Value</td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>limit<br><span class="optional">OPTIONAL</span></td>
+        <td>Limit the number of returned playlist objects. Default is 20, Min: 1, Max: 50</td>
+    </tr>
+    <tr>
+        <td>offset<br><span class="optional">OPTIONAL</span></td>
+        <td>Set the offset of were to start returning playlist objects, to be used in conjunction with the <code>limit</code> parameter. Default is 0</td>
+    </tr>
+    <tr>
+        <td>filter<br><span class="optional">OPTIONAL</span></td>
+        <td>Set which values should be returned, for example to only return the values for keys <code>name</code> and <code>description</code>, the following query should be used: <code>?filter=name,description</code>. The default behaviour will return all fields.</td>
+    </tr>
+    </tbody>
+</table>
+<br/>
+<h1>Response Format</h1>
+<p>
+    On success, the HTTP status code in the response header will be set to <code>200</code> <b>OK</b> and the response body will contain a pagination object which will contain an array of simplified playlist objects in JSON format. Should an error occur, the header status code in the response header will be set to the corresponding error. If either your API key or the required access token for the requested user are not present a <code>401</code> <b>Unauthorized</b> response header will be returned.
+</p>
+<div class="code" data-codeBlockId="1">
+    <pre class="http" data-codeBlock="1-HTTP"><code class="http">HTTP/1.1 200 OK
+Content-Type: application/json</code></pre>
+</div>
+<h2>Playlist Object (Simplified)</h2>
+<table class="endpointTable object playlistObject">
+    <thead>
+    <tr>
+        <td>Key</td>
+        <td>Value Type</td>
+        <td>Value Description</td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>id</td>
+        <td>string</td>
+        <td>The unique identifier that is assigned to the playlist</td>
+    </tr>
+    <tr>
+        <td>name</td>
+        <td>string</td>
+        <td>The name of the playlist</td>
+    </tr>
+    <tr>
+        <td>description</td>
+        <td>string</td>
+        <td>The description of the playlist</td>
+    </tr>
+    <tr>
+        <td>songs</td>
+        <td>an array of short song objects</td>
+        <td>A list containing short song objects</td>
+    </tr>
+    <tr>
+        <td>creator</td>
+        <td>string</td>
+        <td>The <code>id</code> of the user who created the playlist</td>
+    </tr>
+    <tr>
+        <td>create_date</td>
+        <td>integer</td>
+        <td>The timestamp of when the playlist was created by a user</td>
+    </tr>
+    <tr>
+        <td>followers</td>
+        <td>an array of strings</td>
+        <td>A list of <code>id</code>'s of the users that are currently following this playlist. This includes the current user.</td>
+    </tr>
+    <tr>
+        <td>artwork</td>
+        <td>strings</td>
+        <td>A URL for the cover art for the playlist. If none is supplied by the user, it will automatically generate one by using the first added track'S (that has a cover art) cover art</td>
+    </tr>
+    <tr>
+        <td>private</td>
+        <td>boolean</td>
+        <td>Has the owner made this playlist private? If set to <code>false</code> anyone can view this playlist and it can be returned as part of the browse endpoint</td>
+    </tr>
+    <tr>
+        <td>collaborative</td>
+        <td>boolean</td>
+        <td>Will be set to <code>true</code> if the owner has allowed other users to modify the playlist</td>
+    </tr>
+    <tr>
+        <td>position</td>
+        <td>integer</td>
+        <td>The order in which the user has ordered their playlists</td>
+    </tr>
+    <tr>
+        <td>owner</td>
+        <td>object</td>
+        <td>Contains basic owner information such as their <code>id</code>, <code>username</code> and <code>discriminator</code></td>
+    </tr>
+    </tbody>
+</table>
+<div class="code" data-codeBlockId="2">
+    <pre class="json" data-codeBlock="1-JSON"><code class="json">
+{
+  "items": [
+    {
+      "id": "YAk87OrCDJWOexfI6vM5u0QDnUiy6M1o",
+      "name": "League Playlist",
+      "description": null,
+      "songs": [
+        {
+          "id": "57967c978aa4e45748542b98",
+          "date_added": 1484180236021,
+          "play_count": 3,
+          "last_played": 1528819465394
+        },
+        ...
+      ],
+      "creator": "95164972807487488",
+      "create_date": 1484180121531,
+      "followers": [
+        "95164972807487488"
+      ],
+      "artwork": "https://i.scdn.co/image/cbaae5a0a78584e707943c56035123195639a48b",
+      "private": true,
+      "collaborative": false,
+      "position": 1,
+      "owner": {
+        "username": "squírrel",
+        "discriminator": "2549",
+        "id": "95164972807487488"
+      }
+    },
+    ...
+  ],
+  "limit": 10,
+  "offset": 0,
+  "total": 16,
+  "next": "https://mb.lolstat.net/api/user/playlists?limit=10&offset=10"
+}</code></pre>
+</div>
+<h2>Pagination Object</h2>
+<table class="endpointTable object paginationObject">
+    <thead>
+    <tr>
+        <td>Key</td>
+        <td>Value Type</td>
+        <td>Value Description</td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>items</td>
+        <td>an array of objects</td>
+        <td>A list of the requested data</td>
+    </tr>
+    <tr>
+        <td>limit</td>
+        <td>integer</td>
+        <td>The limit set per the request (this is corrected if the supplied value exceeds the preset bounds)</td>
+    </tr>
+    <tr>
+        <td>offset</td>
+        <td>integer</td>
+        <td>An offset to be used for the items returned (this is corrected if the supplied value exceeds the preset bounds)</td>
+    </tr>
+    <tr>
+        <td>total</td>
+        <td>integer</td>
+        <td>The total number of items that can be requested</td>
+    </tr>
+    <tr>
+        <td>next</td>
+        <td>string</td>
+        <td>A URL to request the next page of results. This will be <code>undefined</code> should there not be anymore data available</td>
+    </tr>
+    <tr>
+        <td>prev</td>
+        <td>string</td>
+        <td>A URL to request the previous page of results. This will be <code>undefined</code> if the offset is below or equal to <code>0</code></td>
+    </tr>
+    </tbody>
+</table>
+<h2>Short Song Object</h2>
+<table class="endpointTable object shortSongObject">
+    <thead>
+    <tr>
+        <td>Key</td>
+        <td>Value Type</td>
+        <td>Value Description</td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>id</td>
+        <td>string</td>
+        <td>The track <code>id</code> for the track</td>
+    </tr>
+    <tr>
+        <td>date_added</td>
+        <td>integer</td>
+        <td>The timestamp at which the track was added to the playlist</td>
+    </tr>
+    <tr>
+        <td>play_count</td>
+        <td>integer</td>
+        <td>The number of times the track has been played as part of the playlist</td>
+    </tr>
+    <tr>
+        <td>last_played</td>
+        <td>integer</td>
+        <td>The timestamp at which the track was last played as part of the playlist</td>
+    </tr>
+    </tbody>
+</table>
+<div class="code" data-codeBlockId="2">
+    <pre class="json" data-codeBlock="1-JSON"><code class="json">
+{
+  "id": "57967c978aa4e45748542b98",
+  "date_added": 1484180236021,
+  "play_count": 3,
+  "last_played": 1528819465394
+}</code></pre>
+</div>

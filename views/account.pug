@@ -1,26 +1,16 @@
-.contentWrapper
-    .subTitleBar(style="display: block;")
+.contentWrapper(style="padding-left: 4%; padding-right: 4%; width: 90%;")
+    .contentTitle Account
+    br
+    br
+    br
+    br
+    .subTitleBar
         .subWrapper
-            ul.subnav
-                li.active MY ACCOUNT
-                li(onclick='loadView("connections","undefined")') CONNECTIONS
+            ul.subnav#account_navigation
+                li(data-view="accountView") ACCOUNT
+                li(data-view="connections") CONNECTIONS
     br
-    .contentTitle(style="font-size: 15px;") My Account
-    br
-    br
-    .accountBox
-        .account_avatar(style="background: url('https://cdn.discordapp.com/avatars/" + user.id + "/" + user.avatar + ".png?size=2048') no-repeat center; background-size: cover;")
-        .account_label Username
-        br
-        br
-        .account_value #{user.username}<span>##{user.discriminator}</span>
-        br
-        br
-        .account_label ID
-        br
-        br
-        .account_value #{user.id}
-    br
-    br
-    .contentTitle(style="font-size: 15px;") Raw Account Data
-    pre(style="font-size: 12px;") #{JSON.stringify(user, null, "    ")}
+    #ajax_accountView
+
+    //--.contentTitle(style="font-size: 15px;") Raw Account Data
+    //--pre(style="font-size: 12px;") #{JSON.stringify(user, null, "    ")}

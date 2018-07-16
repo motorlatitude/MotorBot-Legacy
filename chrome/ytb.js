@@ -30,7 +30,7 @@ function addExtraButton() {
                         $("#motorbotDropDown").html("<div class='loader'></div>");
                         var videoId = getParameterByName("v", window.location.href);
                         $.ajax({
-                            url: "https://mb.lolstat.net/api/user/playlists?api_key=caf07b8b-366e-44ab-9bda-152a42g8d1ef",
+                            url: "https://mb.lolstat.net/api/user/playlists?limit=50&filter=id,name,creator&api_key=caf07b8b-366e-44ab-9bda-152a42g8d1ef",
                             dataType: "json",
                             beforeSend: function (xhr) {
                                 xhr.setRequestHeader("Authorization", "Bearer " + value.userInfo.token);
@@ -49,47 +49,49 @@ function addExtraButton() {
                                     "    font-weight: 400;\n" +
                                     "    line-height: 2rem;\n" +
                                     "} .motorbot-user-scrollview{overflow-y: auto; overflow-x: hidden; width: 100%; max-height: 300px;} #motorbot-user-playlists{list-style: none; margin: 15px; margin-top: 10px; margin-bottom: 10px; padding: 0;} #motorbot-user-playlists li{font-size: 1.4rem; font-weight: 400; color: #fff; line-height: 40px; width: calc(100% - 20px); padding-left: 10px; padding-right: 10px; font-family: 'Roboto', 'Noto', sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; -webkit-font-smoothing: antialiased; border-radius: 4px;} #motorbot-user-playlists li:hover{background: rgba(200,200,200,0.1);}</style>");
-                                $.each(data, function (i, item) {
-                                    if (item.creator == value.userInfo.id.toString()) {
-                                        $("#motorbot-user-playlists").append("<li class='motorbot-playlist-item' data-playlistId='" + item.id + "'>" + item.name + "</li>");
-                                    }
-                                });
-                                $(".motorbot-playlist-item").each(function (index) {
-                                    $(this).click(function (e) {
-                                        var playlistId = $(this).attr("data-playlistId");
-                                        chrome.storage.sync.get('userInfo', function (value) {
-                                            if (value.userInfo == null) {
-                                                $("#motorbot-button").attr("disabled", "true").css("opacity", "1").html("<span class=\"yt-uix-button-content\" style='color: rgba(255, 0, 0, 1.00); vertical-align: middle; font-family: Roboto, Arial, sans-serif; font-size: 13px; font-weight: 500; letter-spacing: 0.007px; line-height: 21px;'>AUTHENTICATION ERROR</span>");
-                                                console.error("[Motorbot] Error Occurred Sending Video to motorbot: You're not authenticated :(");
-                                            }
-                                            else {
-                                                var videoId = getParameterByName("v", window.location.href);
-                                                console.info("[Motorbot] " + value.userInfo.id + " Adding video " + videoId + " to playlist " + playlistId);
-                                                $.ajax({
-                                                    url: "https://mb.lolstat.net/api/playlist/" + playlistId + "/song?api_key=caf07b8b-366e-44ab-9bda-152a42g8d1ef",
-                                                    type: "PUT",
-                                                    dataType: "json",
-                                                    processData: false,
-                                                    contentType: 'application/json',
-                                                    data: JSON.stringify({"source": "ytb", "video_id": videoId}),
-                                                    beforeSend: function (xhr) {
-                                                        xhr.setRequestHeader("Authorization", "Bearer " + value.userInfo.token);
-                                                    },
-                                                    success: function (data) {
-                                                        if (data.added) {
-                                                            $("#motorbot-button").attr("disabled", "true").css("opacity", "1").html("<span class=\"yt-uix-button-content\" style='color: rgba(0, 200, 83, 1.00); vertical-align: middle; font-family: Roboto, Arial, sans-serif; font-size: 13px; font-weight: 500; letter-spacing: 0.007px; line-height: 21px;'>ADDED</span>");
+                                if(data.items) {
+                                    $.each(data.items, function (i, item) {
+                                        if (item.creator == value.userInfo.id.toString()) {
+                                            $("#motorbot-user-playlists").append("<li class='motorbot-playlist-item' data-playlistId='" + item.id + "'>" + item.name + "</li>");
+                                        }
+                                    });
+                                    $(".motorbot-playlist-item").each(function (index) {
+                                        $(this).click(function (e) {
+                                            var playlistId = $(this).attr("data-playlistId");
+                                            chrome.storage.sync.get('userInfo', function (value) {
+                                                if (value.userInfo == null) {
+                                                    $("#motorbot-button").attr("disabled", "true").css("opacity", "1").html("<span class=\"yt-uix-button-content\" style='color: rgba(255, 0, 0, 1.00); vertical-align: middle; font-family: Roboto, Arial, sans-serif; font-size: 13px; font-weight: 500; letter-spacing: 0.007px; line-height: 21px;'>AUTHENTICATION ERROR</span>");
+                                                    console.error("[Motorbot] Error Occurred Sending Video to motorbot: You're not authenticated :(");
+                                                }
+                                                else {
+                                                    var videoId = getParameterByName("v", window.location.href);
+                                                    console.info("[Motorbot] " + value.userInfo.id + " Adding video " + videoId + " to playlist " + playlistId);
+                                                    $.ajax({
+                                                        url: "https://mb.lolstat.net/api/playlist/" + playlistId + "/song?api_key=caf07b8b-366e-44ab-9bda-152a42g8d1ef",
+                                                        type: "PUT",
+                                                        dataType: "json",
+                                                        processData: false,
+                                                        contentType: 'application/json',
+                                                        data: JSON.stringify({"source": "ytb", "video_id": videoId}),
+                                                        beforeSend: function (xhr) {
+                                                            xhr.setRequestHeader("Authorization", "Bearer " + value.userInfo.token);
+                                                        },
+                                                        success: function (data) {
+                                                            if (data.added) {
+                                                                $("#motorbot-button").attr("disabled", "true").css("opacity", "1").html("<span class=\"yt-uix-button-content\" style='color: rgba(0, 200, 83, 1.00); vertical-align: middle; font-family: Roboto, Arial, sans-serif; font-size: 13px; font-weight: 500; letter-spacing: 0.007px; line-height: 21px;'>ADDED</span>");
+                                                            }
+                                                            $("#motorbotDropDown").css("display", "none");
+                                                        },
+                                                        error: function (err) {
+                                                            $("#motorbot-button").attr("disabled", "true").css("opacity", "1").html("<span class=\"yt-uix-button-content\" style='color: rgba(255, 0, 0, 1.00); vertical-align: middle; font-family: Roboto, Arial, sans-serif; font-size: 13px; font-weight: 500; letter-spacing: 0.007px; line-height: 21px;'>ERROR</span>");
+                                                            console.error("Error Occurred Sending Video to motorbot: " + err);
                                                         }
-                                                        $("#motorbotDropDown").css("display", "none");
-                                                    },
-                                                    error: function (err) {
-                                                        $("#motorbot-button").attr("disabled", "true").css("opacity", "1").html("<span class=\"yt-uix-button-content\" style='color: rgba(255, 0, 0, 1.00); vertical-align: middle; font-family: Roboto, Arial, sans-serif; font-size: 13px; font-weight: 500; letter-spacing: 0.007px; line-height: 21px;'>ERROR</span>");
-                                                        console.error("Error Occurred Sending Video to motorbot: " + err);
-                                                    }
-                                                });
-                                            }
+                                                    });
+                                                }
+                                            });
                                         });
                                     });
-                                });
+                                }
                             },
                             error: function (err) {
                                 $("#motorbot-button").attr("disabled", "true").css("opacity", "1").html("<span class=\"yt-uix-button-content\" style='color: rgba(255, 0, 0, 1.00); vertical-align: middle; font-family: Roboto, Arial, sans-serif; font-size: 13px; font-weight: 500; letter-spacing: 0.007px; line-height: 21px;'>ERROR</span>");

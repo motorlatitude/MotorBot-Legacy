@@ -1,4 +1,4 @@
-.header
+.header#playlist_header
     .bg(style="")
     .playlistType PLAYLIST
     .playlistName
@@ -11,14 +11,14 @@
             .txt &bull;
             .value <span class="songTotal">0</span> songs,
         .statFrame.totalPlayTime
-            .txt &bull;
-            .value <span class="songTotalPlaytime">0 hr 0 mins</span>
+            .txt
+            .value <span class="songTotalPlaytime" id="songTotalPlaytime">0 hr 0 mins</span>
         .statFrame.numberOfFollowers
             .txt Followers
             br
             .value <span class="followCount"></span>
     .playlistOptions
-        .playPlaylistButton <i class="fas fa-play" aria-hidden="true"></i> &nbsp; &nbsp;PLAY
+        .playPlaylistButton#playplaylist <i class="fas fa-play" aria-hidden="true"></i> &nbsp; &nbsp;PLAY
         -var isFollowingPlaylist = false
         each playlist in user.playlists
             if playlist == playlistId
@@ -32,12 +32,12 @@
 ul#playlist
     li.titleRow
         .trackRow
-            .item &nbsp;
-            .title SONG
-            .artist ARTIST
-            .album ALBUM
-            .timestamp <i class="fa fa-calendar" aria-hidden="true"></i>
-            .time <i class="fas fa-stopwatch" aria-hidden="true"></i>
+            .item#item_header &nbsp;
+            .title#title_header SONG
+            .artist#artist_header ARTIST
+            .album#album_header ALBUM
+            .timestamp#timestamp_header <i class="fa fa-calendar" aria-hidden="true"></i>
+            .time#time_header <i class="fas fa-stopwatch" aria-hidden="true"></i>
 #song_info
     .song_info_header
         .song_artwork

@@ -329,7 +329,7 @@ router.get("/", (req, res) ->
       playlistsCollection = req.app.locals.motorbot.database.collection("playlists")
       playlistsCollection.find({id: {$in: playlists}}).sort({create_date: -1}).limit(10).toArray((err, results) ->
         playlists = results
-        playlistsCollection.aggregate({"$match":{"private":false}},{"$project":{"id":"$$ROOT","songs":1,"_id":1}},{"$unwind":"$songs"},{"$group":{"_id": "$_id","totalCount":{"$sum":"$songs.play_count"},"count":{"$sum":1},"playlist":{"$first":"$id"}}},{"$project":{"_id":1,"totalCount":1,"count":1,"playlist":1,"popularity":{"$divide":["$totalCount","$count"]}}},{"$sort":{"popularity":-1}},{"$limit":5}).limit(5).toArray((err, heavy_rotation_playlists) ->
+        playlistsCollection.aggregate({"$match":{"private":false}},{"$project":{"id":"$$ROOT","songs":1,"_id":1}},{"$unwind":"$songs"},{"$group":{"_id": "$_id","totalCount":{"$sum":"$songs.play_count"},"count":{"$sum":1},"playlist":{"$first":"$id"},"totalLastPlayed": {"$sum":"$songs.last_played"}}},{"$project":{"_id":1,"totalCount":1,"count":1,"playlist":1,"popularity":{"$divide":["$totalCount","$count"]}, "avgLastPlayed":{"$divide":["$totalLastPlayed","$count"]}}},{"$sort":{"avgLastPlayed": -1, "popularity":-1}},{"$limit":10}).limit(10).toArray((err, heavy_rotation_playlists) ->
           if err then return res.status(500).send({code: 500, status: "Database Error", error: err})
           if heavy_rotation_playlists[0]
             res.end(JSON.stringify({"spotlight":playlists,"heavy_rotation":heavy_rotation_playlists}))

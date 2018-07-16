@@ -78,14 +78,19 @@ router.get("/authorize", authorization, (req, res) ->
   if req.user
     AuthorizationCodesCollection = req.app.locals.motorbot.database.collection("authorizationCodes")
     authorizationcode = crypto.randomBytes(16).toString('hex')
+    state = undefined
+    if req.query.state
+      state = req.query.state.toString()
     code = {
       value: authorizationcode
       client_id: req.query.client_id.toString()
       redirect_uri: req.query.redirect_uri.toString()
       user_id: req.user.id
+      state: state
     }
     AuthorizationCodesCollection.insertOne(code, (err, results) ->
-      res.redirect(req.query.redirect_uri.toString()+"?code="+authorizationcode)
+      state = if state then "&state="+state else ""
+      res.redirect(req.query.redirect_uri.toString()+"?code="+authorizationcode+state)
     )
   else
     res.render("oauthlogin",{err: req.flash('error')})
@@ -94,6 +99,9 @@ router.get("/authorize", authorization, (req, res) ->
 router.post("/authorize", authorization, passport.authenticate('local', {failureRedirect : '/', failureFlash: true, session: false}), (req, res) ->
   if req.user
     client_id = req.query.client_id.toString()
+    state = undefined
+    if req.query.state
+      state = req.query.state.toString()
     AuthorizationCodesCollection = req.app.locals.motorbot.database.collection("authorizationCodes")
     authorizationcode = crypto.randomBytes(16).toString('hex')
     code = {
@@ -102,9 +110,11 @@ router.post("/authorize", authorization, passport.authenticate('local', {failure
       redirect_uri: req.query.redirect_uri.toString()
       user_id: req.user.id
       expires: new Date().getTime() + 60000
+      state: state
     }
     AuthorizationCodesCollection.insertOne(code, (err, results) ->
-      res.redirect(req.query.redirect_uri.toString()+"?code="+authorizationcode)
+      state = if state then "&state="+state else ""
+      res.redirect(req.query.redirect_uri.toString()+"?code="+authorizationcode+state)
       setTimeout(() ->
         #delete authorization code after 10 minutes
         AuthorizationCodesCollection.remove({value: authorizationcode, client_id: client_id}, (err, result) ->
@@ -124,7 +134,7 @@ router.post("/token", (req, res) ->
   client_secret = req.body.client_secret #Required
   authorization = req.get("authorization")
   if authorization #recommended approach
-    credentials = new Buffer(auth.split(" ").pop(), "base64").toString("ascii").split(":");
+    credentials = new Buffer(authorization.split(" ").pop(), "base64").toString("ascii").split(":");
     client_id = credentials[0]
     client_secret = credentials[1]
   if grant_type == "authorization_code"

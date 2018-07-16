@@ -4,6 +4,7 @@ fs = require 'fs'
 utils = new u()
 VoicePacket = require './voicePacket.coffee'
 childProc = require 'child_process'
+chunker = require 'stream-chunker'
 
 class AudioPlayer extends EventEmitter
   
@@ -19,6 +20,8 @@ class AudioPlayer extends EventEmitter
     @streamFinished = false
     @streamBuffErrorCount = 0
     @seekCnt = 0
+    @seekPosition = 0
+    @packageList = []
     self = @
     self.enc = childProc.spawn('ffmpeg', [
       '-i', 'pipe:0',
@@ -26,12 +29,24 @@ class AudioPlayer extends EventEmitter
       '-ar', '48000',
       '-ss', '0',
       '-ac', '2',
-      '-loglevel', '0',
+      '-af', 'bass=g=4:f=140:w=0.7',
+      '-vn',
+      '-copy_unknown',
+      '-loglevel', 'verbose',
       'pipe:1'
     ]).on('error', (e) ->
       utils.debug("FFMPEG encoding error: "+e.toString(),"error")
     )
+    chnkr = chunker(1920*2, {
+      flush: true,
+      align: true
+    })
+    self.opusEncoder = self.voiceConnection.opusEncoder
+    chnkr.on("data", (chunk) ->
+      self.packageData(chunk)
+    )
     stream.pipe(self.enc.stdin)
+    self.enc.stdout.pipe(chnkr)
 
     self.enc.on('error', (err) ->
       utils.debug("Error Occurred: "+err.toString(),"error")
@@ -52,54 +67,43 @@ class AudioPlayer extends EventEmitter
       self.ffmpegDone = true
     )
 
-    self.enc.stderr.on('data', (d) ->
-      #console.log 'data: '+d
-    )
-
-    self.enc.stdout.once('readable', () ->
+    self.enc.stderr.once('data', (d) ->
       utils.debug("Storing Voice Packets")
-      self.packageList = []
-      self.opusEncoder = self.voiceConnection.opusEncoder
-      self.packageData(self.enc.stdout, new Date().getTime(), 1)
       self.stopSend = false
       self.emit("ready")
     )
+
+    self.enc.stderr.on('data', (d) ->
+      utils.debug("[STDERR]: "+d)
+      if d.toString().match(/time=(.*?)\s/gmi)
+        regexMatch = /time=(.*?)\s/gmi
+        matches = regexMatch.exec(d.toString())
+        time = matches[1]
+        a = time.split(':')
+        seconds = (+a[0]) * 60 * 60 + (+a[1]) * 60 + (+a[2].split(".")[0])
+        self.emit("progress", seconds)
+    )
+
+    self.enc.stdout.once('readable', () ->
+      utils.debug("ffmpeg stream readable")
+    )
+
     stream.on('close', () ->
       utils.debug("User Stream Closed","warn")
     )
+
     stream.on('error', (err) ->
       utils.debug("User Stream Error","error")
       console.log err
     )
+
     stream.on('end', () ->
       utils.debug "User Stream Ended"
     )
 
-  packageData: (stream, startTime, cnt) ->
-    channels = 2 #just assume it's 2 for now
-    self = @
-    if stream
-      streamBuff=stream.read(1920*channels)
-      if streamBuff && streamBuff.length != 1920 * channels
-        newBuffer = new Buffer(1920 * channels).fill(0)
-        streamBuff.copy(newBuffer)
-        streamBuff = newBuffer
-      if streamBuff
-        @packageList.push(streamBuff)
-        nextTime = startTime + (cnt+1) * 10
-        return setTimeout(() ->
-          self.packageData(stream, startTime, cnt + 1)
-        , 10 + (nextTime - new Date().getTime()));
-      else
-        if @streamBuffErrorCount < 6
-          @streamBuffErrorCount++
-          return setTimeout(() ->
-            self.packageData(stream, startTime, cnt)
-          , 200);
-    else
-      return setTimeout(() ->
-        self.packageData(stream, startTime, cnt)
-      , 200);
+  packageData: (chunk) ->
+    if chunk && chunk instanceof Buffer
+      @packageList.push(chunk)
 
   sendToVoiceConnection: (startTime, cnt) ->
     self = @
@@ -109,11 +113,13 @@ class AudioPlayer extends EventEmitter
       if packet
         @voiceConnection.streamPacketList.push(packet)
         @emit("streamTime",self.seekCnt*20)
+        @seekPosition = self.seekCnt*20
       else if @ffmpegDone && !@streamFinished
         @streamFinished = true
         @sendEmptyBuffer()
         utils.debug("Stream Done in sendToVoiceConnection")
         @emit("streamDone")
+        @seekPosition = 0
         self.destroy()
       nextTime = startTime + (cnt+1) * 20
       self.seekCnt++
@@ -126,12 +132,9 @@ class AudioPlayer extends EventEmitter
       @emit("paused")
 
   sendEmptyBuffer: () ->
-    streamBuff = new Buffer(1920).fill(0)
-    #encoded = @opusEncoder.encode(streamBuff, 1920)
-    #audioPacket = new VoicePacket(encoded, @, @voiceConnection)
-    #@voiceConnection.packageList.push(audioPacket)
+    streamBuff = new Buffer(1920*2).fill(0)
     if @packageList
-      @packageList.push(streamBuff)
+      @voiceConnection.streamPacketList.push(streamBuff)
     else
       utils.debug("Couldn't send empty buffer","error")
 
@@ -160,22 +163,35 @@ class AudioPlayer extends EventEmitter
   stop: () ->
     #stop sending voice data and turn speaking off for bot
     utils.debug("Stopping Stream")
+    @voiceConnection.streamPacketList = [] #empty current packet list to be sent to avoid stuttering
     @sendEmptyBuffer()
     @voiceConnection.setSpeaking(false)
     self = @
     self.stopSending()
     try
-      self.glob_stream.end()
-      self.glob_stream.destroy()
+      self.glob_stream.unpipe()
       self.enc.kill("SIGSTOP")
-      setTimeout(() ->
-        #completely kill the process after delay
-        self.enc.kill()
-        self.emit("streamDone")
-        self.destroy()
-      ,1000)
+      self.enc.kill()
+      self.emit("streamDone")
+      self.destroy()
     catch err
       self.emit("streamDone")
+      self.destroy()
+      utils.debug("Error stopping sending of voice packets: "+err.toString(),"error")
+
+  stop_kill: () ->
+    utils.debug("Stopping Stream")
+    @voiceConnection.streamPacketList = [] #empty current packet list to be sent to avoid stuttering
+    @sendEmptyBuffer()
+    @voiceConnection.setSpeaking(false)
+    self = @
+    self.stopSending()
+    try
+      self.glob_stream.unpipe()
+      self.enc.kill("SIGSTOP")
+      self.enc.kill()
+      self.destroy()
+    catch err
       self.destroy()
       utils.debug("Error stopping sending of voice packets: "+err.toString(),"error")
 
@@ -184,6 +200,8 @@ class AudioPlayer extends EventEmitter
 
   setVolume: (volume) ->
     @voiceConnection.volume = volume
+    multiplier =  Math.pow(volume, 1.660964);
+    console.log "Init Volume Multiplier: "+multiplier
 
   getVolume: () ->
     return @voiceConnection.volume

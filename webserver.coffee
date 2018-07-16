@@ -1,20 +1,20 @@
-morgan = require('morgan')
+morgan = require 'morgan'
 express = require "express"
 fs = require 'fs'
-https = require 'https'
 stylus = require 'stylus'
 nib = require 'nib'
-compression = require('compression')
+compression = require 'compression'
 serveStatic = require 'serve-static'
-serveIndex = require('serve-index')
 bodyParser = require('body-parser')
 cookieParser = require('cookie-parser')
 session = require('express-session')
+responseTime = require('response-time')
 passport = require 'passport'
 LocalStrategy = require('passport-local').Strategy
+RedisStore = require('connect-redis')(session)
 flash = require('connect-flash')
-crypto = require 'crypto'
-uuid = require 'node-uuid'
+http2 = require 'http2'
+expressHTTP2WorkaroundMiddleware = require('express-http2-workaround')({ express:express, http2:http2 });
 
 
 class WebServer
@@ -24,7 +24,8 @@ class WebServer
   start: () ->
     self = @
     @site = express()
-    @site.use(morgan('combined'))
+    @site.use(expressHTTP2WorkaroundMiddleware);
+    #@site.use(morgan('combined'))
     compile = (str, path) ->
       stylus(str).set('filename',path).use(nib())
     @site.set('views', __dirname+'/views')
@@ -41,17 +42,22 @@ class WebServer
       res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, PATCH, PUT')
       res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type')
       res.setHeader('Access-Control-Allow-Credentials', true)
+      res.setHeader('X-Cluster-Identifier',process.pid)
       next()
     )
+    @site.use(responseTime());
     @site.use(compression())
-    @site.use(bodyParser.json());
-    @site.use(bodyParser.urlencoded({ extended: false }))
-    @site.use(cookieParser("9`hIi6Z89*0gMHfYqLEJGfWMCK(d9YM0C"))
+    @site.use(bodyParser.json({limit: "10mb"}));
+    @site.use(bodyParser.urlencoded({ extended: false, limit: "10mb"}))
+    @site.use(cookieParser("9`hIi6Z89*0gMHfgh3sdsfdwerwrefd43"))
     @site.use(session({
-      secret: '9`hIi6Z89*0gMHfYqLEJGfWMCK(d9YM0C',
-      resave: true,
+      secret: '9`hIi6Z89*0gMHfgh3sdsfdwerwrefd43',
+      resave: false,
       saveUninitialized: true,
-      name: "HexweaverBag"
+      store: new RedisStore({
+        host: "localhost",
+        port: 6379
+      })
     }))
     @site.use(flash())
     @site.use(passport.initialize())

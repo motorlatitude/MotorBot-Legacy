@@ -7,7 +7,8 @@
     <link type="text/css" rel="stylesheet" href="../static/css/docs.css"/>
     <link type="text/css" rel="stylesheet" href="../static/css/code.css"/>
     <script src="../static/jquery-3.1.0.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.8.0/highlight.min.js"></script>
+    <script src="../static/highlight.pack.js" charset="utf-8"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
     <script type="text/javascript">
         function moveToAnchor(hash){
             if(hash != "" && hash != undefined) {
@@ -20,43 +21,75 @@
             }
         }
 
-        function loadView(view){
+        function loadEndpoints(view){
+            orgview = view;
+            view = view.replace("/" + view.split("/")[2], "");
+            if ($("#nav>li.active>ul>li").length < 1) {
+                $("#nav>li>ul").remove();
+                $.ajax({
+                    url: view + ".html",
+                    dataType: "html",
+                    success: function (data) {
+                        console.log(orgview);
+                        var emptyDiv = document.createElement("div");
+                        emptyDiv.innerHTML = data;
+                        emptyDiv.id = "loadEndpointsDiv";
+                        emptyDiv.style.display = "none";
+                        document.getElementsByTagName("body")[0].appendChild(emptyDiv);
+                        if($("#loadEndpointsDiv #endpoint-list tbody tr").length > 0){
+                            $("#nav>li[data-item='" + view + "']").append("<ul></ul>");
+                            $("#loadEndpointsDiv #endpoint-list tbody tr").each(function (index) {
+                                var endpoint = $(this).attr('data-endpoint');
+                                $("#nav>li[data-item='" + view + "']>ul").append("<li onclick=\"loadView('" + endpoint.split("#")[1] + "')\" data-item=\"" + endpoint.split("#")[1] + "\">" + $(this).children("td")[2].innerHTML + "</li>");
+                            });
+                            var nav = $("#nav");
+                            nav.find(">li>ul>li.active").removeClass("active");
+                            nav.find("li[data-item='"+orgview+"']").addClass("active");
+                        }
+                        $("#loadEndpointsDiv").remove();
+                    }
+                });
+            }
+        }
+
+        function loadView(view, firstLoad){
             var nav = $("#nav");
-            $(".mobileDropDownMenuContent").css("display","none");
-            $(".mobileDropDownMenu").html('<i class="fa fa-bars" aria-hidden="true"></i>');
-            nav.find(">li>ul").remove();
-            nav.find("li.active").removeClass("active");
-            nav.find("li[data-item='"+view+"']").addClass("active");
+            $(".content").removeClass("fadeIn").addClass("fadeOut");
+            console.log(view);
             $.ajax({
                 url: view+".html",
                 dataType: "html",
                 success: function(data){
-                    $(".content").html(data);
-                    $(".content .code pre").each(function(i, block){
+                    window.history.pushState(null,"Documentation", "#"+view);
+                    $(".content").html(data).removeClass("fadeOut").addClass("fadeIn");
+                    $(".content .code pre code, .content .inline-code pre code").each(function(i, block){
                         hljs.highlightBlock(block);
                     });
                     $("#nav>li[data-item='"+view+"']").append("<ul></ul>");
-                    $(".content h2").each(function(index){
-                        var anchor = $(this).find('a').attr('href');
-                        $("#nav>li[data-item='"+view+"']>ul").append("<li onclick=\"moveToAnchor('"+anchor+"')\">"+$(this).attr("data-header")+"</li>");
+                    $("#endpoint-list tbody tr").each(function(index){
+                        var endpoint = $(this).attr('data-endpoint');
+                        $("#nav>li[data-item='"+view+"']>ul").append("<li onclick=\"loadView('"+endpoint.split("#")[1]+"')\" data-item=\"" + endpoint.split("#")[1] + "\">"+$(this).children("td")[2].innerHTML+"</li>");
                     });
-                    if($("#contentsList").length){
-                        $("a[href^='#']").each(function(i){
-                            if(i>0 && $(this).attr('title')) {
-                                var anchor = $(this).attr('href');
-                                if (anchor.split("-")[2]) {
-                                    if ($("#contentsList").find("li[data-parent='" + anchor.split("-")[1] + "'] ul").length) {
-                                        $("#contentsList").find("li[data-parent='" + anchor.split("-")[1] + "'] ul").append("<li onclick=\"moveToAnchor('" + anchor + "')\" data-child='" + anchor.split("-")[1] + "'>" + $(this).attr("title").split("-")[1] + "</li>");
-                                    }
-                                    else if ($("#contentsList").find("li[data-parent='" + anchor.split("-")[1] + "']").length) {
-                                        $("#contentsList").find("li[data-parent='" + anchor.split("-")[1] + "']").append("<ul><li onclick=\"moveToAnchor('" + anchor + "')\" data-child='" + anchor.split("-")[1] + "'>" + $(this).attr("title").split("-")[1] + "</li></ul>");
-                                    }
-                                }
-                                else {
-                                    $("#contentsList").append("<li data-parent='" + $(this).attr("title").toLowerCase() + "'><div onclick=\"moveToAnchor('" + anchor + "')\">" + $(this).attr("title") + "</div></li>");
-                                }
-                            }
-                        });
+                    if(view.split("/")[2]){
+                        console.log("endpoint: "+view.split("/")[2]);
+                        $(".dark-box").css("display","block");
+                        if(firstLoad){
+                            nav.find("li[data-item='"+view.replace("/"+view.split("/")[2],"")+"']").addClass("active");
+                            loadEndpoints(view);
+                        }
+                        else{
+                            nav.find("li.active").removeClass("active");
+                            nav.find(">li>ul>li.active").removeClass("active");
+                            nav.find("li[data-item='"+view.replace("/"+view.split("/")[2],"")+"']").addClass("active");
+                            nav.find("li[data-item='"+view+"']").addClass("active");
+                        }
+                    }
+                    else{
+                        $("#nav>li>ul").remove();
+                        nav.find("li.active").removeClass("active");
+                        nav.find("li[data-item='"+view.replace("/"+view.split("/")[2],"")+"']").addClass("active");
+                        $(".dark-box").css("display","none");
+                        loadEndpoints(view);
                     }
                     $(".langSelector li").each(function(index){
                         $(this).click(function(e){
@@ -83,15 +116,7 @@
         }
 
         $(document).ready(function(){
-            $("#nav").find("li").each(function(index){
-                $(this).click(function(e){
-                    if(!$(this).hasClass("active")) {
-                        var view = $(this).attr("data-item");
-                        window.history.pushState(null,"Documentation", "#"+view);
-                        loadView(view);
-                    }
-                });
-            });
+            console.info("Welcome");
             $("#mobileNav").find("li").each(function(index){
                 $(this).on("touchend",function(e){
                     var view = $(this).attr("data-item");
@@ -122,30 +147,21 @@
             var hash = window.location.hash.substr(1);
             if(hash != "" && hash != undefined){
                 var view = hash.split("-")[0];
-                loadView(view);
+                loadView(view, true);
             }
             else {
-                loadView("introduction/overview");
+                loadView("introduction/overview", true);
             }
         });
     </script>
 </head>
 <body>
 <div class="header">
-    <div class="mobileDropDownMenu"><i class="fa fa-bars" aria-hidden="true"></i></div>
-    <div class="desktopHeaderWrapper">
-        <div class="desktopDropDownMenu" id="libSelector">
-            <div class="lib">MotorbotMusicAPI</div>
-            <div class="version">v0.5.0</div>
-            <div class="libDropDownArrow"><i class="fa fa-chevron-down" aria-hidden="true"></i></div>
-            <div class="libDropDownMenu">
-                <ul>
-                    <li onclick="window.location.href='../discordclient/#introduction/overview'">DiscordClient Library <span>0.1.0</span></li>
-                    <li onclick="window.location.href='../motorbotmusicapi/#introduction/overview'">MotorbotMusicAPI <span>0.5.0</span></li>
-                </ul>
-            </div>
-        </div>
+    <div class="motorbotIcon">
+        <img src="https://mb.lolstat.net/another_icon.png">
+        <div class="motorbot">Motorbot <span>Developer</span></div>
     </div>
+    <div class="mobileDropDownMenu"><i class="fa fa-bars" aria-hidden="true"></i></div>
 </div>
 <div class="mobileDropDownMenuContent">
     <ul id="mobileNav">
@@ -155,21 +171,49 @@
         <li class="title">Endpoints</li>
         <li class="navItem" data-item="endpoints/oauth2">OAuth 2.0</li>
         <li class="navItem" data-item="endpoints/playlist">Playlist</li>
-        <li class="navItem" data-item="endpoints/user">User</li>
+        <li class="navItem" data-item="references/user">
+            <span onclick="loadView('references/user')">User</span>
+        </li>
     </ul>
 </div>
 <div class="bodyWrapper">
     <div class="sidebar">
+        <div class="desktopDropDownMenu" id="libSelector">
+            <div class="lib">MotorBot API</div>
+            <div class="version">v0.6.0</div>
+            <div class="libDropDownArrow"><i class="fa fa-chevron-down" aria-hidden="true"></i></div>
+            <div class="libDropDownMenu">
+                <ul>
+                    <li onclick="window.location.href='../discordclient/#introduction/overview'">DiscordClient Library <span>0.1.0</span></li>
+                    <li onclick="window.location.href='../motorbotmusicapi/#introduction/overview'">MotorBot API <span>0.6.0</span></li>
+                </ul>
+            </div>
+        </div>
         <ul id="nav">
             <li class="title">INTRODUCTION</li>
-            <li class="navItem active" data-item="introduction/overview">Overview</li>
-            <li class="navItem" data-item="introduction/host">Host</li>
+            <li class="navItem" data-item="introduction/overview">
+                <span onclick="loadView('introduction/overview')">Overview</span>
+            </li>
+            <li class="navItem" data-item="introduction/host">
+                <span onclick="loadView('introduction/host')">Host</span>
+            </li>
+            <li class="title">GUIDES</li>
+            <li class="navItem" data-item="guides/authorization">
+                <span onclick="loadView('guides/authorization')">User Authorization</span>
+            </li>
             <li class="title">Endpoints</li>
-            <li class="navItem" data-item="endpoints/oauth2">OAuth 2.0</li>
-            <li class="navItem" data-item="endpoints/playlist">Playlist</li>
-            <li class="navItem" data-item="endpoints/user">User</li>
+            <li class="navItem" data-item="endpoints/oauth2">
+                <span onclick="loadView('endpoints/oauth2')">OAuth 2.0</span>
+            </li>
+            <li class="navItem" data-item="endpoints/playlist">
+                <span onclick="loadView('endpoints/playlist')">Playlist</span>
+            </li>
+            <li class="navItem" data-item="endpoints/user">
+                <span onclick="loadView('endpoints/user')">User</span>
+            </li>
         </ul>
     </div>
+    <div class="dark-box"></div>
     <div class="content">
 
     </div>

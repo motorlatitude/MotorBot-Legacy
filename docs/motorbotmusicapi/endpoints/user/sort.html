@@ -1,0 +1,65 @@
+<div class="title">
+    Sort Current User's Playlists
+    <a href="#endpoints/user/playlists" title="Sort User's Playlists">
+        <i class="fa fa-anchor anchor" aria-hidden="true"></i>
+    </a>
+    <div class="method patch">PATCH</div>
+    <div class="type">Endpoint</div>
+</div>
+<p>
+
+</p>
+<br/>
+<div class="code" data-codeBlockId="1">
+    <pre class="http" data-codeBlock="1-HTTP"><code class="http">PATCH https://mb.lolstat.net/api/user/sort/{playlist_id}/{position} HTTP/1.1
+Authorization: Bearer {access_token}</code></pre>
+</div>
+<p>
+    Allows altering the order of the current users followed and created playlists.
+</p>
+<h1>Request Parameters</h1>
+<h2>Path Parameters</h2>
+<table class="endpointTable pathParameters">
+    <thead>
+    <tr>
+        <td>Path Parameter</td>
+        <td>Value</td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>playlist_id</td>
+        <td><code>id</code> of the playlist of which the position is to be altered</td>
+    </tr>
+    <tr>
+        <td>position</td>
+        <td>An integer describing the relative position of the playlist for the current user</td>
+    </tr>
+    </tbody>
+</table>
+<br/>
+<h2>Header Fields</h2>
+<table class="endpointTable headers">
+    <thead>
+        <tr>
+            <td>Header Field</td>
+            <td>Value</td>
+        </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>Authorization<br><span class="required">REQUIRED</span></td>
+        <td>A valid access token from the MotorBot authorization system. See the <span class="link" onclick="loadView('endpoints/oauth2')">OAuth 2.0 endpoint</span> or the <span class="link" onclick="loadView('guides/authorization')">User Authorization Guide</span> for further information. The access token must have been issued on behalf of the current user.</td>
+    </tr>
+    </tbody>
+</table>
+<br/>
+<h1>Response Format</h1>
+<p>
+    On success, the HTTP status code in the response header will be set to <code>204</code> <b>No Content</b>.
+    Should an error occur, the header status code in the response header will be set to the corresponding error.
+    If either your API key or the required access token for the requested user are not present a <code>401</code> <b>Unauthorized</b> response header will be returned.
+</p>
+<div class="code" data-codeBlockId="1">
+    <pre class="http" data-codeBlock="1-HTTP"><code class="http">HTTP/1.1 204 No Content</code></pre>
+</div>

@@ -40,10 +40,17 @@ router.use((req, res, next) ->
 
 router.get("/play", (req, res) ->
   res.type('json')
-  if req.app.locals.motorbot.musicPlayers["130734377066954752"]
-    req.app.locals.motorbot.musicPlayers["130734377066954752"].play()
-    req.app.locals.motorbot.musicPlayers["130734377066954752"].playing = true
-    req.app.locals.motorbot.websocket.broadcast(JSON.stringify({type: 'playUpdate', status: 'play'}))
+  musicPlayer = req.app.locals.motorbot.musicPlayers["130734377066954752"]
+  if musicPlayer
+    musicPlayer.play()
+    musicPlayer.playing = true
+    if musicPlayer.player_state
+      musicPlayer.player_state.isPlaying = true
+      musicPlayer.player_state.isStopped = false
+      musicPlayer.player_state.isPaused = false
+      if musicPlayer.seekPosition
+        musicPlayer.player_state.seekPosition = musicPlayer.seekPosition
+    req.app.locals.motorbot.websocket.broadcast(JSON.stringify({type: 'PLAYER_UPDATE', op: 7, d: {event_type: 'PLAY', player_state: musicPlayer.player_state, playlist_id: musicPlayer.playlist_id, song_id: musicPlayer.song_id}}))
     res.sendStatus(200)
   else
     res.sendStatus(400)
@@ -54,7 +61,6 @@ songQueueStart = new Date().getTime()
 songQueueInterval = 1000
 
 scheduleSongPlay = (fn) ->
-  #TODO check if this works...
   if typeof fn == "funtion" then playSongQueue.push(fn)
   if playSongQueue.length == 0
     #empty queue
@@ -74,7 +80,7 @@ playSong = (req, res, songId, playlistId, playlistSort, playlistSortDir) ->
     playlistSortDir = -1
   else
     playlistSortDir = 1
-  sortObj = {timestamp: 1}
+  sortObj = {}
   if playlistSort == "title"
     sortObj = {title: playlistSortDir}
   else if playlistSort == "artist"
@@ -84,31 +90,23 @@ playSong = (req, res, songId, playlistId, playlistSort, playlistSortDir) ->
   playlistCollection = req.app.locals.motorbot.database.collection("playlists")
   tracksCollection = req.app.locals.motorbot.database.collection("tracks")
   songQueueCollection = req.app.locals.motorbot.database.collection("songQueue")
-  playlistCollection.find({id: playlistId}).toArray((err, results) ->
+  playlistCollection.aggregate(
+    {$match: {"id":playlistId}},
+    {$unwind: "$songs"},
+    {$sort: {"songs.date_added": playlistSortDir}},
+    {$group: {
+      '_id': '$_id',
+      'songs': {$push: '$songs'}
+    }},
+    {$project: {
+      "songs": '$songs'
+    }}).toArray((err, results) ->
     if err then console.log err
     if results[0]
       playlist = results[0]
       songsList = []
-      songs = []
       for song in playlist.songs
         songsList.push(song.id.toString())
-        songs.push(song)
-      if playlistSort == "timestamp" && playlistSortDir == 1
-        songs.sort((a,b) ->
-          if (a.date_added < b.date_added)
-            return -1;
-          if (a.date_added > b.date_added)
-            return 1;
-          return 0;
-        )
-      else if playlistSort == "timestamp" && playlistSortDir == -1
-        songs.sort((a,b) ->
-          if (a.date_added < b.date_added)
-            return 1;
-          if (a.date_added > b.date_added)
-            return -1;
-          return 0;
-        )
       tracksCollection.find({id: {$in: songsList}}).sort(sortObj).toArray((err, results) ->
         if err then console.log err
         if results[0]
@@ -116,39 +114,70 @@ playSong = (req, res, songId, playlistId, playlistSort, playlistSortDir) ->
           inserting = false
           songPlaying = {}
           k = 0
-          resultSongs = {}
-          for song in results
-            resultSongs[song.id] = song
-          for song in songs
-            song = resultSongs[song.id]
-            if song.id.toString() == songId
-              song.status = "added"
-              song.songId = song.id.toString()
-              song.playlistId = playlistId
-              songPlaying = song
-              song.randId = -1
-              song.sortId = k
-              inserting = true
-            if inserting
-              song.status = "added"
-              song.songId = song.id.toString()
-              song._id = undefined
-              song.playlistId = playlistId
-              if !song.randId
-                song.randId = Math.random()*results.length
-              song.sortId = k
-              songsToInsert.push(song)
-            else
-              song.status = "played"
-              song.songId = song.id.toString()
-              song._id = undefined
-              song.playlistId = playlistId
-              song.randId = Math.random()*results.length
-              song.sortId = k
-              songsToInsert.push(song)
-            k++
+          if playlistSort == "timestamp"
+            resultsSongs = {}
+            for song in results
+              resultsSongs[song.id] = song
+            for song_id in songsList
+              song = resultsSongs[song_id]
+              if song
+                if song.id.toString() == songId
+                  song.status = "added"
+                  song.songId = song.id.toString()
+                  song.playlistId = playlistId
+                  songPlaying = song
+                  song.randId = -1
+                  song.sortId = k
+                  inserting = true
+                if inserting
+                  song.status = "added"
+                  song.songId = song.id.toString()
+                  song._id = undefined
+                  song.playlistId = playlistId
+                  if !song.randId
+                    song.randId = Math.random()*results.length
+                  song.sortId = k
+                  songsToInsert.push(song)
+                else
+                  song.status = "played"
+                  song.songId = song.id.toString()
+                  song._id = undefined
+                  song.playlistId = playlistId
+                  song.randId = Math.random()*results.length
+                  song.sortId = k
+                  songsToInsert.push(song)
+                k++
+          else
+            for song in results
+              if song
+                if song.id.toString() == songId
+                  song.status = "added"
+                  song.songId = song.id.toString()
+                  song.playlistId = playlistId
+                  songPlaying = song
+                  song.randId = -1
+                  song.sortId = k
+                  inserting = true
+                if inserting
+                  song.status = "added"
+                  song.songId = song.id.toString()
+                  song._id = undefined
+                  song.playlistId = playlistId
+                  if !song.randId
+                    song.randId = Math.random()*results.length
+                  song.sortId = k
+                  songsToInsert.push(song)
+                else
+                  song.status = "played"
+                  song.songId = song.id.toString()
+                  song._id = undefined
+                  song.playlistId = playlistId
+                  song.randId = Math.random()*results.length
+                  song.sortId = k
+                  songsToInsert.push(song)
+                k++
           songQueueCollection.drop()
-          songQueueCollection.insert(songsToInsert, (err, results) ->
+          songQueueCollection.insertMany(songsToInsert, (err, results) ->
             if err
               res.end(JSON.stringify({success: false, message: err.toString()}))
             else
@@ -159,8 +188,9 @@ playSong = (req, res, songId, playlistId, playlistSort, playlistSortDir) ->
                 req.app.locals.motorbot.musicPlayers["130734377066954752"].stop()
               else
                 req.app.locals.motorbot.nextSong()
-              req.app.locals.motorbot.websocket.broadcast(JSON.stringify({type: 'trackUpdate', song: songPlaying}))
           )
+        else
+          res.end(JSON.stringify({success: false, message: "Tracks Couldn't be Found"}))
       )
     else
       res.end(JSON.stringify({success: false, message: "Unknown Playlist"}))
@@ -168,22 +198,32 @@ playSong = (req, res, songId, playlistId, playlistSort, playlistSortDir) ->
 
 skipSong = (req, res) ->
   res.type('json')
-  if req.app.locals.motorbot.musicPlayers["130734377066954752"]
-    req.app.locals.motorbot.skipSong()
-    req.app.locals.motorbot.musicPlayers["130734377066954752"].playing = true
-    res.sendStatus(200)
+  musicPlayer = req.app.locals.motorbot.musicPlayers["130734377066954752"]
+  if musicPlayer
+    if musicPlayer.player_state
+      if musicPlayer.player_state.next_tracks[0]
+        req.app.locals.motorbot.skipSong()
+        musicPlayer.playing = true
+        res.sendStatus(200)
   else
     req.app.locals.motorbot.skipSong()
     res.sendStatus(200)
 
 pauseSong = (req, res) ->
   res.type('json')
-  if req.app.locals.motorbot.musicPlayers["130734377066954752"]
-    req.app.locals.motorbot.musicPlayers["130734377066954752"].pause()
-    req.app.locals.motorbot.musicPlayers["130734377066954752"].playing = false
-    req.app.locals.motorbot.websocket.broadcast(JSON.stringify({type: 'playUpdate', status: 'pause'}))
-    req.app.locals.motorbot.client.setStatus("")
-    res.sendStatus(200)
+  musicPlayer = req.app.locals.motorbot.musicPlayers["130734377066954752"]
+  if musicPlayer
+    musicPlayer.pause()
+    musicPlayer.playing = false
+    if musicPlayer.player_state
+      musicPlayer.player_state.isPlaying = false
+      musicPlayer.player_state.isStopped = false
+      musicPlayer.player_state.isPaused = true
+      if musicPlayer.seekPosition
+        musicPlayer.player_state.seekPosition = musicPlayer.seekPosition
+      req.app.locals.motorbot.websocket.broadcast(JSON.stringify({type: 'PLAYER_UPDATE', op: 7, d: {event_type: 'PAUSE', player_state: musicPlayer.player_state, playlist_id: musicPlayer.playlist_id, song_id: musicPlayer.song_id}}))
+      req.app.locals.motorbot.client.setStatus("")
+      res.sendStatus(200)
   else
     res.sendStatus(400)
 
@@ -192,7 +232,7 @@ stopSong = (req, res) ->
   if req.app.locals.motorbot.musicPlayers["130734377066954752"]
     req.app.locals.motorbot.musicPlayers["130734377066954752"].stop()
     req.app.locals.motorbot.musicPlayers["130734377066954752"].playing = false
-    req.app.locals.motorbot.websocket.broadcast(JSON.stringify({type: 'playUpdate', status: 'stop'}))
+    req.app.locals.motorbot.websocket.broadcast(JSON.stringify({type: 'PLAYER_UPDATE', op: 7, d: {event_type: 'STOP', playlist_id: req.app.locals.motorbot.musicPlayers["130734377066954752"].playlist_id, song_id: req.app.locals.motorbot.musicPlayers["130734377066954752"].song_id}}))
     req.app.locals.motorbot.client.setStatus("")
     res.sendStatus(200)
   else
@@ -203,8 +243,38 @@ router.get("/play/song", (req, res) ->
   songId = req.query.id;
   playlistId = req.query.playlist_id;
   playlistSort = req.query.sort || "timestamp";
-  playlistSortDir = req.query.sort_dir;
+  playlistSortDir = req.query.sort_dir || "1";
   scheduleSongPlay(playSong(req, res, songId, playlistId, playlistSort, playlistSortDir))
+)
+
+router.get("/queue/:song_id/:playlist_id", (req, res) ->
+  tracksCollection = req.app.locals.motorbot.database.collection("tracks")
+  tracksCollection.find({id: req.params.song_id}).limit(1).toArray((err, results) ->
+    if err then console.log err
+    if results[0]
+      song = results[0]
+      song.status = "queued"
+      song.songId = song.id.toString()
+      song._id = undefined
+      song.playlistId = req.params.playlist_id
+      if !song.randId
+        song.randId = Math.random()*results.length
+      song.sortId = new Date().getTime()
+      songQueueCollection = req.app.locals.motorbot.database.collection("songQueue")
+      songQueueCollection.insertOne(song, (err, results) ->
+        if err
+          res.end(JSON.stringify({success: false, message: err.toString()}))
+        else
+          res.sendStatus(204)
+          #play if nothing is currently playing
+          if req.app.locals.motorbot.musicPlayers["130734377066954752"]
+            if !req.app.locals.motorbot.musicPlayers["130734377066954752"].playing
+              req.app.locals.motorbot.yStream["130734377066954752"].end()
+              req.app.locals.motorbot.musicPlayers["130734377066954752"].stop()
+          else
+            req.app.locals.motorbot.nextSong()
+      )
+  )
 )
 
 router.get("/stop", (req, res) ->
@@ -220,7 +290,10 @@ router.get("/skip", (req, res) ->
 )
 
 router.get("/prev", (req, res) ->
-
+  #TODO
+  #WARN
+  #INFO
+  #TODO this absolutely needs to get done
 )
 
 router.get("/playing", (req, res) ->

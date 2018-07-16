@@ -15,6 +15,10 @@
     color: rgba(132, 90, 233, 1.00);
 }
 
+.hljs-attribute{
+    font-weight: bold;
+}
+
 .hljs-params{
     color: rgba(247, 167, 0, 1.00);
 }
@@ -29,11 +33,6 @@
 
 .hljs-comment{
     color: #777;
-}
-
-.hljs-http{
-    color: rgba(247, 167, 0, 1.00);
-    font-weight: bold;
 }
 
 .hljs-endpoint-path{

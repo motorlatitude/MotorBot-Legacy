@@ -1,9 +1,14 @@
-ul#playlist(style="margin-top: 0;")
-    li.titleRow(style="top: 0; background: #2A2D32;")
-        .trackRow
-            .item &nbsp;
-            .title SONG
-            .artist ARTIST
-            .album ALBUM
-            .timestamp <i class="fa fa-calendar" aria-hidden="true"></i>
-            .time <i class="fa fa-clock-o" aria-hidden="true"></i>
+.contentWrapper
+    .contentTitle Playlists
+    ul#search_playlists
+
+    .contentTitle Songs
+    ul#search_playlist
+        li.titleRow
+            .trackRow
+                .item#item_header &nbsp;
+                .title#title_header SONG
+                .artist#artist_header ARTIST
+                .album#album_header ALBUM
+                .timestamp#timestamp_header <i class="fa fa-calendar" aria-hidden="true"></i>
+                .time#time_header <i class="fas fa-stopwatch" aria-hidden="true"></i>

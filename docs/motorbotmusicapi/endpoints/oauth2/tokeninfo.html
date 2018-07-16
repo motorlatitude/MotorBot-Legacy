@@ -1,0 +1,85 @@
+<div class="title">
+    Get Access Token Information
+    <a href="#endpoints/oauth2/tokeninfo" title="Get Access Token Information">
+        <i class="fa fa-anchor anchor" aria-hidden="true"></i>
+    </a>
+    <div class="method get">GET</div>
+    <div class="type">Endpoint</div>
+</div>
+<p>
+
+</p>
+<br/>
+<div class="code" data-codeBlockId="1">
+    <pre class="http" data-codeBlock="1-HTTP"><code class="http">GET https://mb.lolstat.net/api/oauth2/tokeninfo HTTP/1.1</code></pre>
+</div>
+<p>
+    Get information on an issued <code>access_token</code>.
+</p>
+<h1>Request Parameters</h1>
+<h2>Query Parameters</h2>
+<table class="endpointTable queryParameters">
+    <thead>
+        <tr>
+            <td>Query Parameter</td>
+            <td>Value</td>
+        </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>token<br><span class="required">REQUIRED</span></td>
+        <td>The issued <code>access_token</code> to receive information for</td>
+    </tr>
+    </tbody>
+</table>
+<br/>
+<h1>Response Format</h1>
+<p>
+    On success, the HTTP status code in the response header will be set to <code>200</code> <b>OK</b> and the response body
+    will contain an access token information object in JSON format. If the supplied token does not exist in our system a <code>404</code>
+    <b>Not Found</b> will be returned.
+</p>
+<div class="code" data-codeBlockId="2">
+    <pre class="http" data-codeBlock="2-HTTP"><code class="http">HTTP/1.1 200 OK
+Content-Type: application/json</code></pre>
+</div>
+<h2>Access Token Information Object</h2>
+<table class="endpointTable object accessToken">
+    <thead>
+    <tr>
+        <td>Key</td>
+        <td>Value</td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>value</td>
+        <td>The user issued <code>access_token</code> to be used in endpoints that require the <code>Authorization</code> request header</td>
+    </tr>
+    <tr>
+        <td>clientId</td>
+        <td>The <code>client_id</code> of the app for which the <code>access_token</code> was generated for</td>
+    </tr>
+    <tr>
+        <td>userId</td>
+        <td>The <code>id</code> of the user for which the <code>access_token</code> was issued on behalf of</td>
+    </tr>
+    <tr>
+        <td>expires</td>
+        <td>The UNIX timestamp in milliseconds at which point the <code>access_token</code> will expire. By default the generated <code>access_token</code> is valid for 24 hours from the time issued</td>
+    </tr>
+    <tr>
+        <td>valid</td>
+        <td>Is this <code>access_token</code> still valid to use, i.e. has it not expired or been revoked yet?</td>
+    </tr>
+    </tbody>
+</table>
+<div class="code" data-codeBlockId="3">
+    <pre class="json" data-codeBlock="3-JSON"><code class="json">{
+    "value": {access_token},
+    "clientId": {client_id},
+    "userId": {user_id},
+    "expires": 1484336450243,
+    "valid": true
+}</code></pre>
+</div>

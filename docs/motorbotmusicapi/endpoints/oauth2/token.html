@@ -1,0 +1,109 @@
+<div class="title">
+    Get Access Token
+    <a href="#endpoints/oauth2/token" title="Get Access Token">
+        <i class="fa fa-anchor anchor" aria-hidden="true"></i>
+    </a>
+    <div class="method post">POST</div>
+    <div class="type">Endpoint</div>
+</div>
+<p>
+
+</p>
+<br/>
+<div class="code" data-codeBlockId="1">
+    <pre class="http" data-codeBlock="1-HTTP"><code class="http">POST https://mb.lolstat.net/api/oauth2/token HTTP/1.1
+Authorization: Basic &lt;base64 encoded client_id:client_secret&gt;
+Content-Type: application/json</code></pre>
+</div>
+<p>
+    Get an <code>access_token</code> and <code>refresh_token</code> for the signed in account.
+</p>
+<h1>Request Parameters</h1>
+<h2>Header Fields</h2>
+<table class="endpointTable headers">
+    <thead>
+        <tr>
+            <td>Header Field</td>
+            <td>Value</td>
+        </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>Authorization<br><span class="required">REQUIRED</span></td>
+        <td>Base64 encoded string containing the <code>client_id</code> and <code>client_secret</code>. The fields value must have the following format: <code>Basic &lt;base 64 encoded client_id:client_secret&gt;</code></td>
+    </tr>
+    <tr>
+        <td>Content-Type<br><span class="required">REQUIRED</span></td>
+        <td>The content-type for the request body should be of type <code>application/json</code></td>
+    </tr>
+    </tbody>
+</table>
+<br/>
+<h2>Body Parameters</h2>
+<table class="endpointTable bodyParameters">
+    <thead>
+    <tr>
+        <td>Request Body Parameters</td>
+        <td>Value</td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>grant_type<br><span class="required">REQUIRED</span></td>
+        <td>As per the OAuth 2.0 standard this should be set to <code>authorization_code</code></td>
+    </tr>
+    <tr>
+        <td>redirect_uri<br><span class="required">REQUIRED</span></td>
+        <td>Should be set to the previously used <code>redirect_uri</code> that was used to retrieve the <code>authorization_code</code></td>
+    </tr>
+    <tr>
+        <td>code<br><span class="required">REQUIRED</span></td>
+        <td>Should contain the received <code>authorization_code</code></td>
+    </tr>
+    </tbody>
+</table>
+<div class="notification warn">
+    <p>Important</p>
+    <p>The <code>client_id</code> and <code>client_secret</code> can also be passed via the request body, however, we strongly encourage the use of the authorization request header.</p>
+</div>
+<br/>
+<h1>Response Format</h1>
+<p>
+    On success, the HTTP status code in the response header will be set to <code>200</code> <b>OK</b> and the response body
+    will contain an access token object in JSON format. Should an error occur, the header status code in the response header
+    will be set to the OAuth 2.0 defined standard, <code>400</code> <b>Bad Request</b>.
+</p>
+<div class="code" data-codeBlockId="2">
+    <pre class="http" data-codeBlock="2-HTTP"><code class="http">HTTP/1.1 200 OK
+Content-Type: application/json</code></pre>
+</div>
+<h2>Access Token Object</h2>
+<table class="endpointTable object accessToken">
+    <thead>
+    <tr>
+        <td>Key</td>
+        <td>Value</td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>access_token</td>
+        <td>The user issued <code>access_token</code> to be used in endpoints that require the <code>Authorization</code> request header</td>
+    </tr>
+    <tr>
+        <td>expires</td>
+        <td>The number of seconds until the <code>access_token</code> will expire. By default the generated <code>access_token</code> is valid for 24 hours from the time issued</td>
+    </tr>
+    <tr>
+        <td>token_type</td>
+        <td>How the <code>access_token</code> should be used. This value should always be <code>bearer</code></td>
+    </tr>
+    </tbody>
+</table>
+<div class="code" data-codeBlockId="3">
+    <pre class="json" data-codeBlock="3-JSON"><code class="json">{
+    "access_token": {accesstoken},
+    "expires": 86400,
+    "token_type": "bearer"
+}</code></pre>
+</div>

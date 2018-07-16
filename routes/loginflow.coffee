@@ -7,6 +7,7 @@ DiscordStrategy = require('passport-discord').Strategy
 OAuth2Strategy = require('passport-oauth2').Strategy
 crypto = require('crypto')
 uuid = require 'node-uuid'
+request = require 'request'
 
 passport.serializeUser((user, done) ->
   done(null, user.id)
@@ -33,6 +34,7 @@ passport.use(new OAuth2Strategy({
     clientID: '7c78862088c0228ca226f4462df3d4ff',
     clientSecret: '2bd12fcaf92bb63d7c11b0b6858d9d3e1c2c966cb17aa0152c9e07bdfca9535b',
     callbackURL: "https://mb.lolstat.net/loginflow/callback",
+    state: true,
     session: true,
     passReqToCallback: true
   },
@@ -46,9 +48,6 @@ passport.use(new OAuth2Strategy({
             if err then return cb(err)
             if result[0]
               profile = result[0]
-              console.log "accessToken:"+accessToken
-              console.log "refreshToken:"+refreshToken
-              console.log profile
               profile.motorbotAccessToken = accessToken
               usersCollection.update({id: profile.id}, {$set:{motorbotAccessToken: accessToken}}, (err, result) ->
                 return cb(err, profile)
@@ -74,7 +73,7 @@ passport.use(new DiscordStrategy({
     usersCollection.find({id: profile.id}).toArray((err, results) ->
       if err then console.log err
       if results[0]
-        usersCollection.update({id: profile.id}, {$set:{avatar: profile.avatar, username: profile.username, guilds: profile.guilds, accessToken: accessToken, refreshToken: refreshToken}}, (err, result) ->
+        usersCollection.update({id: profile.id}, {$set:{avatar: profile.avatar, username: profile.username, guilds: profile.guilds, discordAuth:{accessToken: accessToken, refreshToken: refreshToken}}}, (err, result) ->
           if err then console.log err
           return cb(err, profile)
           ###
@@ -111,6 +110,121 @@ passport.use(new DiscordStrategy({
   https://mb.lolstat.net/loginflow/
 ###
 
+refreshDiscordAccessToken = (req, refresh_token, cb) ->
+  request({
+      method: "POST",
+      url: "https://discordapp.com/api/v6/oauth2/token",
+      json: true
+      form: {
+        "grant_type": "refresh_token",
+        "refresh_token": refresh_token,
+        "client_id": keys.clientId,
+        "client_secret": keys.clientSecret
+      },
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      }
+    }, (err, httpResponse, body) ->
+    if err
+      console.log "---------ACCESS TOKEN ERROR----------"
+      console.log err
+    console.log "---------ACCESS TOKEN UPDATE---------"
+    console.log body
+    if body.access_token
+      usersCollection = req.app.locals.motorbot.database.collection("users")
+      usersCollection.update({id: req.user.id},{$set: {"discordAuth": {accessToken: body.access_token, refreshToken: body.refresh_token, expires: (new Date().getTime() + parseInt(body.expires_in))}}}, (err, result) ->
+        if err then console.log err
+        if typeof cb == "function" then cb(body.access_token)
+      )
+    else
+      if typeof cb == "function" then cb()
+  )
+
+getDiscordUserData = (req, access_token, cb) ->
+  request({
+      method: "GET",
+      url: "https://discordapp.com/api/v6/users/%40me",
+      json: true
+      headers: {
+        "Authorization": "Bearer "+access_token
+      }
+    },
+    (err, httpResponse, body) ->
+      if err
+        console.log "---------USER DATA ERROR----------"
+        console.log err
+      console.log "---------USER DATA UPDATE---------"
+      console.log body
+      if body.id
+        profile = body
+        usersCollection = req.app.locals.motorbot.database.collection("users")
+        usersCollection.update({id: profile.id}, {$set:{avatar: profile.avatar, username: profile.username, discriminator: profile.discriminator, email: profile.email}}, (err, result) ->
+          if err then console.log err
+          getDiscordUserGuildData(req, profile.id, access_token, cb)
+        )
+      else
+        console.log("No user data returned from discord :(")
+        if typeof cb == "function" then cb()
+  )
+
+getDiscordUserGuildData = (req, user_id, access_token, cb) ->
+  request({
+    method: "GET",
+    url: "https://discordapp.com/api/v6/users/%40me/guilds",
+    json: true
+    headers: {
+      "Authorization": "Bearer "+access_token
+    }
+  },
+    (err, httpResponse, body) ->
+      if err
+        console.log "---------USER GUILD DATA ERROR----------"
+        console.log err
+      if body
+        guilds = body
+        usersCollection = req.app.locals.motorbot.database.collection("users")
+        usersCollection.update({id: user_id}, {$set:{guilds: guilds}}, (err, result) ->
+          if err then console.log err
+          if typeof cb == "function" then cb()
+        )
+      else
+        console.log("No user guild data returned from discord :(")
+        if typeof cb == "function" then cb()
+  )
+
+refreshDiscordUserData = (req, res, next) ->
+  usersCollection = req.app.locals.motorbot.database.collection("users")
+  usersCollection.find({id: req.user.id}).toArray((err, results) ->
+    if err then console.log err
+    if results[0]
+      if results[0].discordAuth
+        if results[0].discordAuth.expires <= new Date().getTime()
+          #discord accesstoken expired, refresh
+          refreshDiscordAccessToken(req, results[0].discordAuth.refreshToken, (access_token) ->
+            getDiscordUserData(req, access_token, () ->
+              next()
+            )
+          )
+        else
+          getDiscordUserData(req, results[0].discordAuth.accessToken, () ->
+            next()
+          )
+      else
+        if results[0].refreshToken
+          refreshDiscordAccessToken(req, results[0].refreshToken, (access_token) ->
+            getDiscordUserData(req, access_token, () ->
+              next()
+            )
+          )
+        else
+          console.log("??????1")
+          next()
+    else
+      #wtf, you've logged in but you don't exist?
+      console.log("??????2")
+      next()
+  )
+
 router.get("/", passport.authenticate('oauth2'))
 
 ###
@@ -120,7 +234,7 @@ router.post("/login",  passport.authenticate('local', { failureRedirect: '/login
 )
 ###
 
-router.get("/callback", passport.authenticate('oauth2', { failureRedirect: '/?err=true', session: true }), (req, res) ->
+router.get("/callback", passport.authenticate('oauth2', { failureRedirect: '/?err=true', session: true }), refreshDiscordUserData, (req, res) ->
   console.log "callback"
   if req.user
     console.log "Logged In"

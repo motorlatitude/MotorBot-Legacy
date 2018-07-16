@@ -1,0 +1,54 @@
+*
+  -webkit-font-smoothing antialiased
+
+$active_color = rgba(19, 112, 226, 1)
+$spotify_color = #1DB954
+
+body
+html
+  margin 0
+  padding 0
+  background #2A2D32
+  overflow hidden
+
+.loadingOverlay
+  position absolute
+  z-index 10000
+  top 0
+  left 0
+  right 0
+  bottom 0
+  background rgba(20, 20, 24, 1)
+  opacity 1
+  transition opacity 0.3s ease-out
+
+.loading
+  position absolute
+  top calc(50% - 25px)
+  left calc(50% - 25px)
+  width 50px
+  height 50px
+  background #2E3136
+  border-radius 50%
+  box-shadow 0 0 4px rgba(0, 0, 0, 0.2)
+  z-index 10000
+  & .spinner
+    position absolute
+    top calc(50% - 9px)
+    left calc(50% - 9px)
+    width 18px
+    height 18px
+    border-radius 50%
+    box-sizing border-box
+    border solid 2px transparent
+    border-top-color $active_color
+    border-left-color $active_color
+    animation spinner 1.0s infinite linear
+
+@keyframes spinner
+  0% {
+    transform rotate(0deg)
+  }
+  100% {
+    transform rotate(360deg)
+  }

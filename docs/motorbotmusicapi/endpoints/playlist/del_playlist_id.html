@@ -1,0 +1,176 @@
+<div class="title">
+    Delete Playlist
+    <a href="#endpoints/playlist/del_playlist_id" title="Delete Playlist">
+        <i class="fa fa-anchor anchor" aria-hidden="true"></i>
+    </a>
+    <div class="method delete">DELETE</div>
+    <div class="type">Endpoint</div>
+</div>
+<p>
+
+</p>
+<br/>
+<div class="code" data-codeBlockId="1">
+    <pre class="http" data-codeBlock="1-HTTP"><code class="http">DELETE https://mb.lolstat.net/api/playlist/{playlist_id} HTTP/1.1
+Authorization: Bearer {access_token}</code></pre>
+</div>
+<p>
+    Delete a specific playlist owned by the current user.
+</p>
+<h1>Request Parameters</h1>
+<h2>Path Parameters</h2>
+<table class="endpointTable pathParameters">
+    <thead>
+    <tr>
+        <td>Path Parameters</td>
+        <td>Value</td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>playlist_id<br><span class="required">REQUIRED</span></td>
+        <td>A <code>playlist_id</code> of the playlist who's information should be returned</td>
+    </tr>
+    </tbody>
+</table>
+<h2>Header Fields</h2>
+<table class="endpointTable headers">
+    <thead>
+        <tr>
+            <td>Header Field</td>
+            <td>Value</td>
+        </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>Authorization<br><span class="required">REQUIRED</span></td>
+        <td>A valid access token from the MotorBot authorization system. See the <span class="link" onclick="loadView('endpoints/oauth2')">OAuth 2.0 endpoint</span> or the <span class="link" onclick="loadView('guides/authorization')">User Authorization Guide</span> for further information. The access token must have been issued on behalf of the current user.</td>
+    </tr>
+    </tbody>
+</table>
+<br/>
+<h1>Response Format</h1>
+<p>
+    On success, the HTTP status code in the response header will be set to <code>200</code> <b>OK</b> and the response body will contain a playlist object with <code>Content-Type: application/json</code>. Should an error occur, the header status code in the response header will be set to the corresponding error. If either your API key or the required access token for the requested user are not present a <code>401</code> <b>Unauthorized</b> response header will be returned.
+</p>
+<div class="code" data-codeBlockId="1">
+    <pre class="http" data-codeBlock="1-HTTP"><code class="http">HTTP/1.1 200 OK
+Content-Type: application/json</code></pre>
+</div>
+<h2>User Object</h2>
+<table class="endpointTable object userObject">
+    <thead>
+    <tr>
+        <td>Key</td>
+        <td>Value Type</td>
+        <td>Value Description</td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>id</td>
+        <td>string</td>
+        <td>A unique id that is assigned to each user and is normally directly transferred from the users discord account</td>
+    </tr>
+    <tr>
+        <td>username</td>
+        <td>string</td>
+        <td>The username for the account which has been transferred from their discord account</td>
+    </tr>
+    <tr>
+        <td>discriminator</td>
+        <td>string</td>
+        <td>Username's returned by discord are separated by discriminators which is a 4-digit number. Username's should be formatted as following <code>{username}#{disciminator}</code>, for example: John#2431</td>
+    </tr>
+    <tr>
+        <td>avatar</td>
+        <td>string</td>
+        <td>The user's avatar picture which has been transferred from discord and can be accessed through the following base: <code>https://cdn.discordapp.com/avatars/{id}/{avatar}.png?size={desired_size}</code></td>
+    </tr>
+    <tr>
+        <td>guilds</td>
+        <td>an array of small guild objects</td>
+        <td>The guilds the current user is a member or owner of</td>
+    </tr>
+    <tr>
+        <td>playlists</td>
+        <td>an array of strings</td>
+        <td>A list of all playlist's the user either follows or has created them self</td>
+    </tr>
+    <tr>
+        <td>connections</td>
+        <td>a keyed array of connection objects</td>
+        <td>An array of connection objects which have their key set to the connection identifier. Each connection object is required to contain an <code>access_token</code> and <code>refresh_token</code> key-value pair</td>
+    </tr>
+    </tbody>
+</table>
+<div class="code" data-codeBlockId="2">
+    <pre class="json" data-codeBlock="1-JSON"><code class="json">
+{
+    "id" : "112672348270021452",
+    "username" : "John",
+    "discriminator" : "2431",
+    "avatar" : "0e24e02ab46d7d4c2e184fe5b887365c",
+    "guilds" : [
+        {
+            "owner" : false,
+            "permissions" : 37215297,
+            "icon" : "0e07e02ac23d7d4c2e999fe5b567365c",
+            "id" : "956131543519112893",
+            "name" : "Guild Name"
+        },
+        ...
+    ],
+    "playlists" : [
+        "YFX7clE6pCquMNnsHtxlzgJiHXIixFxk",
+        "0u95mXpyLoj0ZqHhPFefgMAzHiyLGyFz",
+        "ekPImXI4gcBFBhNmC3u7xJShvWlTYGjQ",
+        "xsgWJmtwYwYlvZio3xGpPXqpxYls0XiU",
+        "joic2Ji2iMOA8HvhdDwmOwXPuGlcJdbX"
+    ],
+    "connections" : {
+        "spotify" : {
+            connection_object_information
+            "access_token" : "BQAAFOGOjCquTTlSP_aV7q13gO7uoWHHH2wEVgPvZkP3oW9mB4049pbRaFm7eU_81WJdNq4QaQzPV4nwKM3TSwYdWavhXEt_v2bourz1CuE-wq1biYt9vdy8Q1M3qCk2eIIKjeOwazlDh4MLDtaTJ_pHPxNrwqh_tA",
+            "refresh_token" : "AQCyFrhxWDfdAZH6Nc8bCo-WEVfIeLHDlADGBO_3IYNlSUW3F_IEIc1PE3CnXpB6s0ZZ2-3ljSBNgCNmZ0q8wZ6tzYSng5BR_XlsPxoiaFEeCSO5fSd0CtHq8634BkFJBbI"
+        }
+    }
+}</code></pre>
+</div>
+<h2 class="ignore-split">Small Guild Object</h2>
+<table class="endpointTable object smallGuildObject">
+    <thead>
+    <tr>
+        <td>Key</td>
+        <td>Value Type</td>
+        <td>Value Description</td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>owner</td>
+        <td>boolean</td>
+        <td>Is this user the creator of this guild?</td>
+    </tr>
+    <tr>
+        <td>permissions</td>
+        <td>integer</td>
+        <td>The permissions this user has in this guild. Permissions are stored within a 53-bit integer and are calculated using bitwise operations for discord and can be further explored at <a href="https://discordapp.com/developers/docs/topics/permissions">Discord's API documentation</a></td>
+    </tr>
+    <tr>
+        <td>icon</td>
+        <td>string</td>
+        <td>The guild's avatar picture which can be accessed through the following base: <code>https://cdn.discordapp.com/icons/{guild_id}/{icon}.png?size={desired_size}</code></td>
+    </tr>
+    <tr>
+        <td>id</td>
+        <td>string</td>
+        <td>The guild's ID</td>
+    </tr>
+    <tr>
+        <td>name</td>
+        <td>string</td>
+        <td>The guild's display name</code></td>
+    </tr>
+    </tbody>
+</table>

@@ -14,6 +14,8 @@ class motorbotEventHandler
   constructor: (@app, @client) ->
     @setUpEvents()
     @already_announced = false
+    @challenged = {}
+    @challenger = {}
 
   setupSoundboard: (guild_id, filepath, volume = 1) ->
     self = @
@@ -23,7 +25,7 @@ class motorbotEventHandler
         self.app.org_volume = 0.5 #set default
         self.app.soundboard[guild_id].on('streamDone', () ->
           self.app.debug("StreamDone Received")
-          self.app.soundboard[guild_id] = undefined
+          delete self.app.soundboard[guild_id]
           if self.app.musicPlayers[guild_id]
             self.app.musicPlayers[guild_id].setVolume(self.app.org_volume) #set back to original volume of music
             self.app.musicPlayers[guild_id].play()
@@ -148,6 +150,101 @@ class motorbotEventHandler
       console.log body
     )###
 
+  rockPaperScissors: (msg, author, choice) ->
+    self = @
+    compareRPS = (challenged, challengedID, challenger, challengerID, cb) ->
+      outcome = {
+        winner: undefined,
+        challenged: {
+          id: challengedID
+          win: true
+        },
+        challenger: {
+          id: challengerID
+          win: true
+        }
+      }
+      if challenged.choice == "rock"
+        if challenger.choice == "paper"
+          outcome.challenger.win = true
+          outcome.challenged.win = false
+          outcome.winner = challengerID
+        if challenger.choice == "rock"
+          outcome.challenger.win = true
+          outcome.challenged.win = true
+          outcome.winner = "tie"
+        if challenger.choice == "scissors"
+          outcome.challenger.win = false
+          outcome.challenged.win = true
+          outcome.winner = challengedID
+      else if challenged.choice == "paper"
+        if challenger.choice == "paper"
+          outcome.challenger.win = true
+          outcome.challenged.win = true
+          outcome.winner = "tie"
+        if challenger.choice == "rock"
+          outcome.challenger.win = false
+          outcome.challenged.win = true
+          outcome.winner = challengedID
+        if challenger.choice == "scissors"
+          outcome.challenger.win = true
+          outcome.challenged.win = false
+          outcome.winner = challengerID
+      else if challenged.choice == "scissors"
+        if challenger.choice == "paper"
+          outcome.challenger.win = false
+          outcome.challenged.win = true
+          outcome.winner = challengedID
+        if challenger.choice == "rock"
+          outcome.challenger.win = true
+          outcome.challenged.win = false
+          outcome.winner = challengerID
+        if challenger.choice == "scissors"
+          outcome.challenger.win = true
+          outcome.challenged.win = true
+          outcome.winner = "tie"
+      cb(outcome)
+    if self.challenged[author]
+      self.challenged[author].choice = choice
+      challenger = self.challenger[self.challenged[author].challenger]
+      if self.challenger[self.challenged[author].challenger].choice
+        #both users have made their choice, compare
+        compareRPS(self.challenged[author], author, self.challenger[self.challenged[author].challenger], self.challenged[author].challenger, (outcome) ->
+          if outcome.winner == "tie"
+            challenger.channel.sendMessage("The challenge between <@"+author+"> and <@"+self.challenged[author].challenger+"> resulted in a draw, fight again?")
+            delete self.challenger[self.challenged[author].challenger]
+            delete self.challenged[author]
+          else
+            if self.challenged[outcome.winner]
+              challenger.channel.sendMessage("Aaaaaannndd the winner is... <@"+outcome.winner+"> :trophy:, congratulations. Better luck next time <@"+self.challenged[outcome.winner].challenger+">")
+              delete self.challenger[self.challenged[outcome.winner].challenger]
+              delete self.challenged[outcome.winner]
+            else if self.challenger[outcome.winner]
+              challenger.channel.sendMessage("Aaaaaannndd the winner is... <@"+outcome.winner+"> :trophy:, congratulations. Better luck next time <@"+self.challenger[outcome.winner].challenged+">")
+              delete self.challenged[self.challenger[outcome.winner].challenged]
+              delete self.challenger[outcome.winner]
+        )
+    if self.challenger[author]
+      self.challenger[author].choice = choice
+      challenger = self.challenger[author]
+      if self.challenged[self.challenger[author].challenged].choice
+        #both users have made their choice, compare
+        compareRPS(self.challenged[self.challenger[author].challenged], self.challenger[author].challenged, self.challenger[author], author, (outcome) ->
+          if outcome.winner == "tie"
+            challenger.channel.sendMessage("The challenge between <@"+author+"> and <@"+self.challenger[author].challenged+"> resulted in a draw, fight again?")
+            delete self.challenged[self.challenger[author].challenged]
+            delete self.challenger[author]
+          else
+            if self.challenged[outcome.winner]
+              challenger.channel.sendMessage("Aaaaaannndd the winner is... <@"+outcome.winner+"> :trophy:, congratulations. Better luck next time <@"+self.challenged[outcome.winner].challenger+">")
+              delete self.challenger[self.challenged[outcome.winner].challenger]
+              delete self.challenged[outcome.winner]
+            else if self.challenger[outcome.winner]
+              challenger.channel.sendMessage("Aaaaaannndd the winner is... <@"+outcome.winner+"> :trophy:, congratulations. Better luck next time <@"+self.challenger[outcome.winner].challenged+">")
+              delete self.challenged[self.challenger[outcome.winner].challenged]
+              delete self.challenger[outcome.winner]
+        )
+
   setUpEvents: () ->
     self = @
     self.twitchSubscribeToStream(22032158) #motorlatitude
@@ -174,9 +271,6 @@ class motorbotEventHandler
             "description": "Motorbot had to restart either through manual input or due to a fatal error occurring, please consult error logs in console if the latter.",
             "color": 16724787
           })
-          setTimeout(() ->
-            self.client.channels["432351112616738837"].sendMessage("```JSON\n"+self.app.log_history.join("\n")+"\n```")
-          , 5000)
         #self.client.channels["432351112616738837"].sendMessage(time + " Joined Guild: "+server.name+" ("+server.presences.length+" online / "+(parseInt(server.member_count)-server.presences.length)+" offline)")
         if y == 0
           #Listen for patches
@@ -186,14 +280,28 @@ class motorbotEventHandler
           y = 1
     )
 
+    @client.on("voiceUpdate_Speaking", (data) ->
+      self.app.websocket.broadcast(JSON.stringify({type: "VOICE_UPDATE_SPEAKING", d:data}))
+    )
+
     voiceStates = {}
 
     @client.on("voiceChannelUpdate", (data) ->
       if data.user_id == '169554882674556930'
         if data.channel
-            self.app.websocket.broadcast(JSON.stringify({type: "voiceUpdate", status: "join", channel: data.channel.name}))
+            self.app.websocket.broadcast(JSON.stringify({type: "VOICE_UPDATE", d:{status:"JOIN", channel: data.channel.name, channel_id: data.channel.id, channel_obj: data}}, (key, value) ->
+              if key == "client"
+                return undefined
+              else
+                return value
+            ))
         else
-          self.app.websocket.broadcast(JSON.stringify({type: "voiceUpdate", status: "leave", channel: undefined}))
+          self.app.websocket.broadcast(JSON.stringify({type: "VOICE_UPDATE", d:{status:"LEAVE", channel: undefined, channel_id: undefined, channel_obj: data}}, (key, value) ->
+            if key == "client"
+              return undefined
+            else
+              return value
+          ))
       d = new Date()
       time = "`["+d.getDate()+"/"+(parseInt(d.getMonth())+1)+"/"+d.getFullYear()+" "+d.toLocaleTimeString()+"]` "
       if data.channel
@@ -523,9 +631,14 @@ class motorbotEventHandler
           self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/Pentakill1.mp3", 2)
         else if msg.content == "!sb happy birthday adz"
           self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/happybirthdayadz.wav", 3)
+        else if msg.content == "!sb airport"
+          self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/En-BAW-LHR-boarding.mp3", 2)
+        else if msg.content == "!sb airport de"
+          self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/Ge-DLH-FRA-boarding.mp3", 2)
         else if msg.content == "!sb stop"
-          self.app.soundboard[msg.guild_id].stop()
-          self.app.soundboard[msg.guild_id] = undefined
+          if self.app.soundboard[msg.guild_id]
+            self.app.soundboard[msg.guild_id].stop()
+            delete self.app.soundboard[msg.guild_id]
         else if msg.content == "!sb help"
           msg.channel.sendMessage("",{
             embed: {
@@ -551,7 +664,9 @@ class motorbotEventHandler
               **!sb enemy** - Enemy Slain\n
               **!sb victory** - Victory\n
               **!sb defeat** - Defeat\n
-              **!sb pentakill** - PENTAKILL\n\n
+              **!sb pentakill** - PENTAKILL\n
+              **!sb airport** - Airport Announcement\n
+              **!sb airport de** - German Airport Announcement\n\n
               **!sb stop** - Resets the soundboard, useful if the soundboard commands aren't working"
               color: 39125
             }
@@ -770,6 +885,34 @@ class motorbotEventHandler
               msg.addReaction("\:downvote\:429449638454493187")
             , 500)
           , 500)
+        else if msg.content.match(/^\!challenge\s/gmi)
+          challenged_user = msg.content.split(/\s/gmi)[1]
+          challenged_user_id = challenged_user.replace("<","").replace(">","").replace("@","")
+          challenger_user_id = msg.author.id
+          #if challenged_user_id != challenger_user_id
+          msg.channel.sendMessage("<@"+challenger_user_id+"> has challenged <@"+challenged_user_id+"> to a rock paper scissors duel. Both parties type `!rock`, `!paper` or `!scissors` as a DM to <@169554882674556930>")
+          self.challenged[challenged_user_id] = {}
+          self.challenged[challenged_user_id] = {
+            challenge_in_progress: true,
+            challenger: challenger_user_id,
+            choice: undefined
+          }
+          self.challenger[challenger_user_id] ={}
+          self.challenger[challenger_user_id] = {
+            challenge_in_progress: true,
+            challenged: challenged_user_id,
+            channel: msg.channel,
+            choice: undefined
+          }
+          console.log "CHALLENGED_USER: "+challenged_user
+          #else
+          #  msg.channel.sendMessage("Sorry <@"+challenger_user_id+">, you can't challenge yourself :(")
+        else if msg.content.match(/^!rock/)
+          self.rockPaperScissors(msg, msg.author.id, "rock")
+        else if msg.content.match(/^!paper/)
+          self.rockPaperScissors(msg, msg.author.id, "paper")
+        else if msg.content.match(/^!scissors/)
+          self.rockPaperScissors(msg, msg.author.id, "scissors")
         else if msg.content.match(/^\!reddit/)
             subreddit = "/r/all"
             cmds = msg.content.replace(/^\!reddit\s/gmi,"")

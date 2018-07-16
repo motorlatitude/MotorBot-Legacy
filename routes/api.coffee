@@ -822,7 +822,7 @@ router.get("/playSongFromPlaylistWithSort/:songId/:playlistId/:playlistSort/:pla
               res.end(JSON.stringify({success: true, message: "OKAY"}))
               globals.dc.stopStream()
               globals.songComplete(true)
-              globals.wss.broadcast(JSON.stringify({type: 'trackUpdate', song: songPlaying}))
+              #globals.wss.broadcast(JSON.stringify({type: 'trackUpdate', song: songPlaying})) INFO not necessary since app.coffee should capture this already
           )
       )
     else

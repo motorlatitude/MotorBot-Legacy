@@ -34,7 +34,6 @@ router.use((req, res, next) ->
           if typeof bearerHeader != 'undefined'
             bearer = bearerHeader.split(" ")
             bearerToken = bearer[1]
-            console.log bearerToken
             accessTokenCollection = req.app.locals.motorbot.database.collection("accessTokens")
             accessTokenCollection.find({value: bearerToken}).toArray((err, result) ->
               if err then console.log err
@@ -63,39 +62,104 @@ router.get("/me", (req, res) ->
     usersCollection.find({id: req.user_id}).toArray((err, results) ->
       if err then res.sendStatus(500)
       if results[0]
+        u = results[0]
+        formattedResponse = {
+          id: u.id
+          username: u.username
+          discriminator: u.discriminator
+          avatar: u.avatar
+          guilds: u.guilds
+          playlists: u.playlists
+          connections: u.connections
+        }
         res.type('json')
-        res.send(JSON.stringify(results[0]))
+        res.send(JSON.stringify(formattedResponse))
       else
         res.sendStatus(404)
     )
   else
-    res.sendStatus(429)
+    res.sendStatus(403)
 )
 
 router.get("/playlists", (req, res) ->
   if req.user_id
     userId = req.user_id
     usersCollection = req.app.locals.motorbot.database.collection("users")
+    playlistsCollection = req.app.locals.motorbot.database.collection("playlists")
+
     usersCollection.find({id: userId}).toArray((err, results) ->
       if err then console.log err
       if results[0]
         playlists = results[0].playlists
-        playlistsCollection = req.app.locals.motorbot.database.collection("playlists")
+        total = playlists.length
+        next_page = undefined
+        prev_page = undefined
+        #limit and offset
+        #reduce overloading api
+        limit = parseInt(req.query.limit) || 20
+        offset = parseInt(req.query.offset) || 0
+        if limit < 1
+          limit = 1
+        else if limit > 50
+          limit = 50
+        if total > (limit + offset) then next_page = "https://mb.lolstat.net/api/user/playlists?limit="+limit+"&offset="+(offset+limit)
+        bk = if ((offset - limit) < 0) then 0 else (offset - limit)
+        if offset > 0 then prev_page = "https://mb.lolstat.net/api/user/playlists?limit="+limit+"&offset="+bk
+        playlists = playlists.slice(offset,(offset + limit))
         playlistsCollection.find({id: {$in: playlists}}).toArray((err, results) ->
           creators = []
           for playlist in results
             playlist.position = playlists.indexOf(playlist.id)
             creators.push(playlist.creator)
           playlists = results
-          usersCollection.find({id: {$in: creators}}).toArray((err, results) ->
-            usersArray = {}
-            for user in results
-              usersArray[user.id] = {username: user.username, discriminator: user.discriminator}
-            for playlist in playlists
-              playlist["creatorName"] = usersArray[playlist.creator]
+          desiredFields = {}
+          if req.query.filter
+            for l in req.query.filter.toString().split(",")
+              desiredFields[l] = null
+          if desiredFields["owner"] == null || !req.query.filter
+            usersCollection.find({id: {$in: creators}}).toArray((err, results) ->
+              usersArray = {}
+              for user in results
+                usersArray[user.id] = {username: user.username, discriminator: user.discriminator, id: user.id}
+              for playlist in playlists
+                playlist["owner"] = usersArray[playlist.creator]
+                delete playlist._id
+              res.type("json")
+              if req.query.filter
+                filtered_playlists = []
+                for p in playlists
+                  k = {}
+                  for key, value of desiredFields
+                    k[key] = p[key]
+                  filtered_playlists.push(k)
+                playlists = filtered_playlists
+              formattedResponse = {
+                items: playlists
+                limit: limit
+                offset: offset
+                total: total
+                next: next_page
+                prev: prev_page
+              }
+              res.end(JSON.stringify(formattedResponse))
+            )
+          else
+            filtered_playlists = []
+            for p in playlists
+              k = {}
+              for key, value of desiredFields
+                k[key] = p[key]
+              filtered_playlists.push(k)
             res.type("json")
-            res.end(JSON.stringify(playlists))
-          )
+            formattedResponse = {
+              items: filtered_playlists
+              limit: limit
+              offset: offset
+              total: total
+              next: next_page
+              prev: prev_page
+            }
+            res.end(JSON.stringify(formattedResponse))
         )
       else
         res.sendStatus(403)
@@ -104,8 +168,8 @@ router.get("/playlists", (req, res) ->
     res.sendStatus(403)
 )
 
-router.patch("/sortPlaylists/:playlistID/:position", (req, res) ->
-  if req.user
+router.patch("/sort/:playlistID/:position", (req, res) ->
+  if req.user_id
     userId = req.user_id
     usersCollection = req.app.locals.motorbot.database.collection("users")
     usersCollection.find({id: userId}).toArray((err, results) ->
@@ -116,24 +180,7 @@ router.patch("/sortPlaylists/:playlistID/:position", (req, res) ->
         playlists.splice(parseInt(req.params.position), 0, req.params.playlistID)
         usersCollection.update({id: userId}, {"$set": {playlists: playlists}}, (err, result) ->
           if err then console.log err
-          if result[0]
-            res.type("json")
-            response = {
-              "Response": result[0],
-              "ErrorCode": 1,
-              "ErrorStatus": "Success",
-              "Message": ""
-            }
-            res.end(JSON.stringify(response))
-          else
-            res.type("json")
-            response = {
-              "Response": {},
-              "ErrorCode": 4,
-              "ErrorStatus": "Empty Response",
-              "Message": "Nothing was returned at this endpoint"
-            }
-            res.end(JSON.stringify(response))
+          res.sendStatus(204)
         )
       else
         res.sendStatus(403)

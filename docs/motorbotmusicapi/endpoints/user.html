@@ -1,138 +1,39 @@
 <div class="title">
     User
-    <a href="#endpoints/user-" title="User">
+    <a href="#endpoints/user" title="User">
         <i class="fa fa-anchor anchor" aria-hidden="true"></i>
     </a>
-    <div class="type">Endpoint</div>
+    <div class="type"></div>
 </div>
-<p>
-
-</p>
-<div class="contentsBox">
-    <div class="contentTitle">CONTENTS</div>
-    <ul id="contentsList">
-
-    </ul>
-</div>
-<br>
-<h2 data-header="Security">Security Requirements <a href="#endpoints/user-security" title="Security"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></h2>
-<table>
+<h3>Endpoints for retrieving information about a user</h3>
+<br/>
+<table class="endpointTable endpoints" id="endpoint-list">
     <thead>
-    <tr>
-        <td>Type</td>
-        <td>Required</td>
-        <td>Description</td>
-    </tr>
+        <tr>
+            <td>Method</td>
+            <td>Endpoint</td>
+            <td>Usage</td>
+            <td>Returns</td>
+        </tr>
     </thead>
     <tbody>
-    <tr>
-        <td>API Key</td>
-        <td style="text-align: center;"><i class="fa fa-check"></i></td>
-        <td>Your personal API Key assigned to your project, found under account settings</td>
-    </tr>
-    <tr>
-        <td>OAuth Access Token</td>
-        <td style="text-align: center;"><i class="fa fa-check"></i></td>
-        <td>Access Token for user account required for this endpoint, please consult the OAuth section of these docs</td>
-    </tr>
+        <tr data-endpoint="#endpoints/user/me">
+            <td>GET</td>
+            <td><span class="link" onclick="loadView('endpoints/user/me');">/user/me</span></td>
+            <td>Get Current User's Profile</td>
+            <td>user</td>
+        </tr>
+        <tr data-endpoint="#endpoints/user/playlists">
+            <td>GET</td>
+            <td><span class="link" onclick="loadView('endpoints/user/playlists');">/user/playlists</span></td>
+            <td>Get Current User's Playlists</td>
+            <td>playlists</td>
+        </tr>
+        <tr data-endpoint="#endpoints/user/sort">
+            <td>PATCH</td>
+            <td><span class="link" onclick="loadView('endpoints/user/sort');">/user/sort/{playlist_id}/{position}</span></td>
+            <td>Sort Current User's Playlists</td>
+            <td></td>
+        </tr>
     </tbody>
 </table>
-<br>
-<h2 data-header="Operations">Operations <a href="#endpoints/user-operations" title="Operations"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></h2>
-<p>
-    A list of all available operations for this endpoint.
-</p>
-<ul class="methodList">
-    <li>
-        <div class="method"><pre><span class="hljs-http">GET</span> <span class="hljs-endpoint-path">/user/me</span> <a href="#endpoints/user-operations-me" title="operations-Me"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
-        <div class="description">Return all user information</div>
-        <div class="returns">
-            <h3>Returns</h3>
-            <p>
-                Will return a user object
-            </p>
-            <div class="code" data-codeBlockId="1">
-                <pre class="json" data-codeBlock="1-JSON"><code class="json">
-{
-    "_id": "5a4c2csdfsf7d128e11bd8045",
-    "id": "95164972807486899",
-    "username": "discord username",
-    "discriminator": "1111",
-    "avatar": "de1f93df5fa24c9021e8447a8106dfd9",
-    "guilds": [
-        {
-            "owner": false,
-            "permissions": 104188928,
-            "icon": "bf866fa5f96be7c868d8f199e0d63f2c",
-            "id": "41771983423143937",
-            "name": "Discord Developers"
-        },
-        ...
-    ],
-    "playlists": [
-        "playlist ID",
-        ...
-    ],
-    "accessToken": "MgefYqa5Ia5RO76kBrQpjuP7NjU9fr",
-    "refreshToken": "2EaRfDAB2z96fqULpURuW2Blo42RfL",
-    "localUsername": "username",
-    "localPassword": "67c6e16cee55f8342a90b1e8ae6dab3a5663582cbdfgdfgdfg083f9517abfe4e757f8128944f3e6010c7c9e4a1780b08eb308ed1aadf7be03a1317f658c620",
-    "localSalt": "14156cd036473958139d3a022907c232503626dfgdfgdfgc5bd816e0869e3",
-    "motorbotAccessToken": "d20c0733ced654eec80bbd3e3e2c6eb624a993cfsdf44579f4d7cd6a7e0c6abc6b94922c4a58edd3e558f4d6d786d75060a7ff74cd9b7e78904ec4d9900f558",
-    "connections": {all connected accounts e.g. spotify}
-}
-
-                </code></pre>
-            </div>
-        </div>
-    </li>
-    <li>
-        <div class="method"><pre><span class="hljs-http">GET</span> <span class="hljs-endpoint-path">/user/playlists</span> <a href="#endpoints/user-operations-playlists" title="operations-Playlists"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
-        <div class="description">Returns a list of all playlists followed or created by the user.</div>
-        <div class="returns">
-            <h3>Returns</h3>
-            <p>
-                Will return a list of <code>playlist</code> objects
-            </p>
-            <div class="code" data-codeBlockId="1">
-                <pre class="json" data-codeBlock="1-JSON"><code class="json">
-[
-    {
-        "_id": "589f8980436f16474bdcd786",
-        "id": "GSeVlyKvzxRXewJ6YOsce3M1pUpCrUOy",
-        "name": "Playlist Name",
-        "description": "Playlist Description",
-        "songs": [
-            {small song object}
-        ],
-        "creator": "25164971437487456",
-        "create_date": 1486850432333,
-        "followers": [
-            "95164972807487488"
-        ],
-        "artwork": "https://url/to/address",
-        "private": false,
-        "collaborative": false,
-        "creatorName": {creator name object}
-    },
-    ...
-]
-                </code></pre>
-            </div>
-        </div>
-    </li>
-    <li>
-        <div class="method"><pre><span class="hljs-http">GET</span> <span class="hljs-endpoint-path">/user/apps</span> <a href="#endpoints/user-operations-apps" title="operations-Apps"><i class="fa fa-anchor anchor" aria-hidden="true"></i></a></pre></div>
-        <div class="description">Returns all register developer apps from a user account.</div>
-        <div class="notification warn">
-            <div class="bar"></div>
-            <p><b>Important</b></p>
-            <p>This operation is currently not publicly available.</p>
-        </div>
-        <div class="returns">
-            <h3>Returns</h3>
-            <p>
-                Will return a lists of created apps.
-            </p>
-    </li>
-</ul>

@@ -1,0 +1,23 @@
+.subContentWrapper
+    .accountBox
+        .top_background
+        .account_avatar(style="background: url('https://cdn.discordapp.com/avatars/" + user.id + "/" + user.avatar + ".png?size=2048') no-repeat center; background-size: cover;")
+        .account_name #{user.username}<span>##{user.discriminator}</span>
+    .accountBox
+        .titlebar My Details
+        .content
+            .account_details_box
+                .label Account Name
+                .value #{user.localUsername}
+            .account_details_box
+                .label Email
+                .value #{user.email}
+            .account_details_box
+                .label User Identifier
+                .value #{user.id}
+    .accountBox
+        .titlebar My Guilds
+        .content(style="text-align: center;")
+            ul
+                for g in user.guilds
+                    li #{g.name}

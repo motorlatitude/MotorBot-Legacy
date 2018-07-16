@@ -10,14 +10,10 @@ async = require 'async'
 multer = require 'multer'
 path = require 'path'
 
-storage = multer.diskStorage({
-  destination: (req, file, callback) ->
-    callback(null, path.join(__dirname, '../../static/AlbumArt'))
-  ,filename: (req, file, callback) ->
-    req.app.locals.albumartkey = uid(20)+"."+file.originalname.split('.')[1]
-    callback(null, req.app.locals.albumartkey)
-})
-upload = multer({ storage : storage}).single('artworkFile');
+utilities = require './objects/APIUtilities.coffee'
+APIUtilities = new utilities()
+objects = require './objects/APIObjects.coffee'
+APIObjects = new objects()
 
 ###
   PLAYLIST ENDPOINT
@@ -51,7 +47,6 @@ router.use((req, res, next) ->
           if typeof bearerHeader != 'undefined'
             bearer = bearerHeader.split(" ")
             bearerToken = bearer[1]
-            console.log bearerToken
             accessTokenCollection = req.app.locals.motorbot.database.collection("accessTokens")
             accessTokenCollection.find({value: bearerToken}).toArray((err, result) ->
               if err then console.log err
@@ -155,60 +150,55 @@ refreshSpotifyAccessToken = (req, res, next) ->
       next()
   )
 
-router.post("/uploadArtwork", (req, res) ->
-  upload(req,res,(err) ->
-    if err
-      console.log err
-      console.log "Error Uploading File"
-      return res.end("Error uploading file")
-    else
-      res.end("File is uploaded")
-  )
-)
-
 router.post("/", (req, res) ->
   res.type("json")
   user_id = req.user_id
   playlistsCollection = req.app.locals.motorbot.database.collection("playlists")
   usersCollection = req.app.locals.motorbot.database.collection("users")
   playlist_id = uid(32);
-  album_key = undefined
-  if req.app.locals.albumartkey
-    album_key = "https://mb.lolstat.net/AlbumArt/"+req.app.locals.albumartkey
   if req.body.playlist_name
-    playlistObj = {
-      id: playlist_id
-      name: req.body.playlist_name
-      description: req.body.playlist_description || ""
-      songs: []
-      creator: user_id
-      create_date: new Date().getTime()
-      followers: [user_id]
-      artwork: album_key || ""
-      private: req.body.private || false
-      collaborative: req.body.collaborative || false
-    }
-    playlistsCollection.insertOne(playlistObj, (err, result) ->
-      if err then return res.status(500).send({code: 500, status: "Database Error", error: err})
-      usersCollection.find({id: user_id}).toArray((err, results) ->
+    uploadRemainingData = (album_key) ->
+      if album_key then album_key = "https://mb.lolstat.net/AlbumArt/"+album_key+".png"
+      playlistObj = {
+        id: playlist_id
+        name: req.body.playlist_name
+        description: req.body.playlist_description || ""
+        songs: []
+        creator: user_id
+        create_date: new Date().getTime()
+        followers: [user_id]
+        artwork: album_key || ""
+        private: req.body.private || false
+        collaborative: req.body.collaborative || false
+      }
+      playlistsCollection.insertOne(playlistObj, (err, result) ->
         if err then return res.status(500).send({code: 500, status: "Database Error", error: err})
-        if results[0]
-          playlists = results[0].playlists
-          playlists.push(playlist_id)
-          usersCollection.update({id: user_id},{$set: {playlists: playlists}}, (err, result) ->
-            if err then return res.status(500).send({code: 500, status: "Database Error", error: err})
-            res.send(playlistObj)
-          )
+        usersCollection.find({id: user_id}).toArray((err, results) ->
+          if err then return res.status(500).send({code: 500, status: "Database Error", error: err})
+          if results[0]
+            playlists = results[0].playlists
+            playlists.push(playlist_id)
+            usersCollection.update({id: user_id},{$set: {playlists: playlists}}, (err, result) ->
+              if err then return res.status(500).send({code: 500, status: "Database Error", error: err})
+              console.log playlistObj
+              res.send(playlistObj)
+            )
+        )
       )
-    )
+    if req.body.playlist_artwork
+      console.log "Album Art Detected"
+      albumart_key = uid(20);
+      req_albumartContent = req.body.playlist_artwork.replace(/^data:([A-Za-z-+/]+);base64,/, '')
+      require("fs").writeFile(path.join(__dirname, '../../static/AlbumArt/')+albumart_key+".png", req_albumartContent, 'base64', (err) ->
+        if err then console.log(err)
+        console.log "Album Art Uploaded"
+        uploadRemainingData(albumart_key)
+      )
+    else
+      console.log("No Album Art Detected")
+      uploadRemainingData()
   else
-    api_response = {
-      "Response": {},
-      "ErrorCode": 3,
-      "ErrorStatus": "Incorrectly Formatted Request",
-      "Message": "No playlist name was supplied"
-    }
-    res.send(api_response)
+    res.send({error: "crap", message:"Incorrectly Formatted Requested"})
 )
 
 convertTimestampToSeconds = (input) ->
@@ -224,154 +214,6 @@ convertTimestampToSeconds = (input) ->
     if (matches[3]) then seconds = Number(matches[3])
 
   return hours*60*60+minutes*60+seconds;
-
-
-router.get("/songTransferToTrack/:skip/:limit", (req, res) ->
-  songsCollection = req.app.locals.motorbot.database.collection("songs")
-  tracksCollection = req.app.locals.motorbot.database.collection("tracks")
-  songsCollection.find({}).skip(parseInt(req.params.skip)).limit(parseInt(req.params.limit)).toArray((err, results) ->
-    if err then console.log err
-    if results
-      i = 1
-      async.eachSeries(results, (result, callback) ->
-        console.log "Processing "+i+"/"+results.length
-        modifiedTitle = result.title.replace(/\[((?!.*?Remix))[^\)]*\]/gmi, '').replace(/\(((?!.*?Remix))[^\)]*\)/gmi, '').replace(/\-(\s|)[0-9]*(\s|)\-/g, '').replace(/(\s|)-(\s|)/gmi," ").replace(/\sFrom\s(.*)\/(|\s)Soundtrack/gmi, "").replace(/(high\squality|\sOST|playlist|\sHD|\sHQ|\s1080p|ft\.|feat\.|ft\s|lyrics|official\svideo|\"|official|video|:|\/Soundtrack\sVersion|\/Soundtrack|\||w\/|\/)/gmi, '')
-        #modifiedTitle = encodeURIComponent(modifiedTitle)
-        console.log modifiedTitle
-        request.get({
-            url: "https://api.spotify.com/v1/search?type=track&q=" + modifiedTitle,
-            json: true,
-            headers: {
-              "Authorization": "Bearer BQAgotImSiaQGP15ALbQdTobE9V7RHprS4mArIYDb6GerOozv7XMtoTCb4lCt5Xzvyzvfm18ZBCHBpxcNNEaUKstrQ4CMgReGxtsC7-V6na_jjWe6iaHE88UMjCdOC3ZOYSIRfD_hTU4doA"
-            }
-          }, (err, httpResponse, body) ->
-          if err then return res.status(500).send({code: 500, status: "Spotify API Error", error: err})
-          else
-            artist = {}
-            album = {}
-            composer = {}
-            album_artist = {}
-            title = decodeURIComponent(modifiedTitle)
-            genres = []
-            release_date = undefined
-            track_number = 0
-            disc_number = 0
-            artwork = ""
-            explicit = false
-            if body.tracks
-              if body.tracks.items[0]
-                console.log "[->] Found on Spotify"
-                if body.tracks.items[0].artists[0]
-                  id = new Buffer(body.tracks.items[0].artists[0].name, 'base64')
-                  artist = {
-                    name: body.tracks.items[0].artists[0].name,
-                    id: id.toString('hex')
-                  }
-                if body.tracks.items[0].album
-                  id = new Buffer(body.tracks.items[0].album.name, 'base64')
-                  album_artwork = ""
-                  if body.tracks.items[0].album.images[0] then album_artwork = body.tracks.items[0].album.images[0].url
-                  artwork = album_artwork
-                  album = {
-                    name: body.tracks.items[0].album.name,
-                    artwork: album_artwork
-                    id: id.toString('hex')
-                  }
-                  if body.tracks.items[0].album.artists[0]
-                    id = new Buffer(body.tracks.items[0].album.artists[0].name, 'base64')
-                    album_artist = {
-                      name: body.tracks.items[0].album.artists[0].name,
-                      id: id.toString('hex')
-                    }
-                title = body.tracks.items[0].name.replace(/\[((?!.*?Remix))[^\)]*\]/gmi, '').replace(/\(((?!.*?Remix))[^\)]*\)/gmi, '').replace(/\-(\s|)[0-9]*(\s|)\-/g, '').replace(/(\s|)-(\s|)/gmi," ").replace(/\sFrom\s(.*)\/(|\s)Soundtrack/gmi, "").replace(/(high\squality|\sOST|playlist|\sHD|\sHQ|\s1080p|ft\.|feat\.|ft\s|lyrics|official\svideo|\"|official|video|:|\/Soundtrack\sVersion|\/Soundtrack|\||w\/|\/)/gmi, '')
-                track_number = Number(body.tracks.items[0].track_number)
-                disc_number = Number(body.tracks.items[0].disc_number)
-                explicit = body.tracks.items[0].explicit
-            track_obj = {
-              id: result._id.toString()
-              type: "youtube"
-              video_id: result.videoId,
-              video_title: result.title,
-              title: title,
-              artist: artist,
-              album: album,
-              composer: composer,
-              album_artist: album_artist
-              genres: genres,
-              duration: convertTimestampToSeconds(result.duration),
-              import_date: result.timestamp,
-              release_date: release_date,
-              track_number: track_number,
-              disc_number: disc_number,
-              play_count: 0,
-              artwork: artwork,
-              explicit: explicit
-              lyrics: "",
-              user_id: result.userId || "169554882674556930",
-            }
-            tracksCollection.insertOne(track_obj, (err, result) ->
-              if err then console.log err
-              console.log "Imported Track"
-              callback()
-            )
-            i++
-        )
-      , (err) ->
-        res.status(200).send({code: 200, status: "OKAY"})
-      )
-  )
-)
-
-router.get("/playlistTransfer", (req, res) ->
-  playlistsCollection = req.app.locals.motorbot.database.collection("old_playlists")
-  new_playlistsCollection = req.app.locals.motorbot.database.collection("playlists")
-  usersCollection = req.app.locals.motorbot.database.collection("users")
-  playlistsCollection.find({}).toArray((err, results) ->
-    if err then console.log err
-    if results[0]
-      i = 1
-      async.eachSeries(results, (result, cb) ->
-        console.log "Transferring Playlist "+i+"/"+results.length
-        i++
-        songs = []
-        followers = []
-        k = new Date().getTime() - result.songs.length*1000
-        n = 0
-        for song in result.songs
-          songs.push({
-            id: song.toString()
-            date_added: k + (n*1000)
-            play_count: 0
-            last_played: undefined
-          })
-          n++
-        usersCollection.find({playlists:{$in:[result.id]}}).toArray((err, users) ->
-          if err then cb(err)
-          if users
-            for user in users
-              followers.push(user.id)
-          playlist_obj = {
-            id: result.id
-            name: result.name
-            description: ""
-            songs: songs
-            creator: result.creator
-            create_date: result.timestamp
-            followers: followers
-            artwork: result.artwork
-            private: false
-            collaborative: false
-          }
-          new_playlistsCollection.insertOne(playlist_obj, (err, result) ->
-            cb(err)
-          )
-        )
-      , (err) ->
-        if err then console.log err
-        res.status(200).send({code: 200, status: "OKAY"})
-      )
-  )
-)
 
 router.put("/:playlist_id/song", refreshSpotifyAccessToken, (req, res) ->
   #from source so add to Songs DB
@@ -645,49 +487,103 @@ router.delete("/:playlist_id", (req, res) ->
 
 router.get("/:playlist_id", (req, res) ->
   if req.user_id
-    playlistCollection = req.app.locals.motorbot.database.collection("playlists")
-    playlistCollection.find({id: req.params.playlist_id}).toArray((err, results) ->
-      if err then console.log err
-      if results[0]
-        playlist = results[0]
-        usersCollection = req.app.locals.motorbot.database.collection("users")
-        usersCollection.find({id: playlist.creator}).toArray((err, results) ->
-          if results[0]
-            playlist["creatorName"] = {username: results[0].username, discriminator: results[0].discriminator}
-          if playlist.songs.length > 0
-            songsList = []
-            songs = {}
-            for song in playlist.songs
-              songsList.push(song.id)
-              songs[song.id.toString()] = song
-            tracksCollection = req.app.locals.motorbot.database.collection("tracks")
-            tracksCollection.find({id: {$in: songsList}}).toArray((err, results) ->
-              if err then console.log err
-              finalSongs = []
-              songList = {}
-              if results[0]
-                for song in results
-                  songList[song.id.toString()] = song
-                  songList[song.id.toString()].date_added = songs[song.id.toString()].date_added
-                  songList[song.id.toString()].playlist_play_count = songs[song.id.toString()].play_count
-                  songList[song.id.toString()].last_played = songs[song.id.toString()].last_played
-                for song in songsList
-                  finalSongs.push(songList[song.toString()])
-                playlist.songs = finalSongs
-                res.type('json')
-                res.end(JSON.stringify(playlist))
-              else
-                res.sendStatus(404)
+    filter = APIUtilities.formatFilterForMongo(req.query.filter)
+    APIObjects.playlist(req).playlistById(req.params.playlist_id.toString(), filter).then((playlist) ->
+      async.parallel([
+        (asyncParallelComplete) ->
+          if playlist.creator
+            APIObjects.user(req).userById(playlist.creator, {username: 1, discriminator: 1}).then((user) ->
+              playlist["owner"] = user
+              asyncParallelComplete()
+            ).catch((error_obj) ->
+              asyncParallelComplete(error_obj)
             )
           else
-            res.type('json')
-            res.end(JSON.stringify(playlist)) #only return the playlist object
-        )
-      else
-        res.sendStatus(404)
+            asyncParallelComplete({error: "PLAYLIST_FORMAT", message: "Unknown playlist format, (playlist is missing an owner)"})
+        ,(asyncParallelComplete) ->
+          if playlist.songs #return complete song objects for the first 50 tracks, further tracks should be retrieved from the /track endpoint
+            songs = playlist.songs.slice(0,100)
+            songIds = []
+            songsFinal = {}
+            for song in songs
+              songIds.push(song.id)
+              songsFinal[song.id] = song #store user variables
+              delete songsFinal[song.id].id
+            APIObjects.track(req).tracksForIds(songIds, {}).then((tracks) ->
+              tracks_obj = []
+              for track in tracks
+                t = {}
+                t = songsFinal[track.id]
+                t["track"] = track
+                tracks_obj.push(t)
+              playlist["tracks"] = APIObjects.pagination().paginate("/playlist/"+req.params.playlist_id+"/tracks", tracks_obj, playlist.songs.length, 0, 100)
+              delete playlist.songs
+              asyncParallelComplete()
+            ).catch((error_obj) ->
+              asyncParallelComplete(error_obj)
+            )
+          else
+            # No songs in this playlist
+            console.log "PLAYLIST_EMPTY: Playlist contains no songs"
+            asyncParallelComplete()
+      ], (error_obj) ->
+        if error_obj
+          res.type("json")
+          res.send(JSON.stringify(error_obj))
+        else
+          res.type("json")
+          res.send(JSON.stringify(playlist))
+      )
+    ).catch((error_obj) ->
+      res.type("json")
+      res.send(JSON.stringify(error_obj))
     )
   else
-    return res.status(429).send({code: 429, status: "Unauthorized"})
+    return res.status(401).send({code: 401, status: "Unauthorized"})
+)
+
+router.get("/:playlist_id/tracks", (req, res) ->
+  if req.user_id
+    APIObjects.playlist(req).playlistById(req.params.playlist_id.toString(), {songs: 1}).then((playlist) ->
+      if playlist.songs #return complete song objects for the first 50 tracks, further tracks should be retrieved from the /track endpoint
+        limit = parseInt(req.query.limit) || 100
+        offset = parseInt(req.query.offset) || 0
+        if limit < 1
+          limit = 1
+        else if limit > 100
+          limit = 100
+        songs = playlist.songs.slice(offset,(offset + limit))
+        songIds = []
+        songsFinal = {}
+        for song in songs
+          songIds.push(song.id)
+          songsFinal[song.id] = song #store user variables
+          delete songsFinal[song.id].id
+        APIObjects.track(req).tracksForIds(songIds).then((tracks) ->
+          tracks_obj = []
+          for track in tracks
+            t = {}
+            t = songsFinal[track.id]
+            t["track"] = track
+            tracks_obj.push(t)
+          finalTracks = APIObjects.pagination().paginate("/playlist/"+req.params.playlist_id+"/tracks", tracks_obj, playlist.songs.length, offset, limit)
+          finalTracks = APIUtilities.filterResponse(finalTracks,req.query.filter)
+          res.type("json")
+          res.send(JSON.stringify(finalTracks))
+
+        ).catch((error_obj) ->
+
+        )
+      else
+        # No songs in this playlist
+        console.log "PLAYLIST_EMPTY: Playlist contains no songs"
+
+    ).catch((error_obj) ->
+      res.type("json")
+      res.send(JSON.stringify(error_obj))
+    )
+  else
+    return res.status(401).send({code: 401, status: "Unauthorized"})
 )
 
 router.delete("/:playlist_id/song/:song_id", (req, res) ->

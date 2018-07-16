@@ -1,0 +1,79 @@
+<div class="title">
+    Get Authorization Code
+    <a href="#endpoints/oauth2/authorize" title="Get Authorization Code">
+        <i class="fa fa-anchor anchor" aria-hidden="true"></i>
+    </a>
+    <div class="method get">GET</div>
+    <div class="type">Endpoint</div>
+</div>
+<p>
+
+</p>
+<br/>
+<div class="code" data-codeBlockId="1">
+    <pre class="http" data-codeBlock="1-HTTP"><code class="http">GET https://mb.lolstat.net/api/oauth2/authorize HTTP/1.1</code></pre>
+</div>
+<p>
+    Receive a temporary <code>authorization_code</code> to be used to retrieve an <code>access_token</code> which is issued on behalf of the signed in user.
+</p>
+<h1>Request Parameters</h1>
+<h2>Query Parameters</h2>
+<table class="endpointTable queryParameters">
+    <thead>
+        <tr>
+            <td>Query Parameter</td>
+            <td>Value</td>
+        </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>response_type<br><span class="required">REQUIRED</span></td>
+        <td>This should always be set to <code>code</code>, this is the only supported method</td>
+    </tr>
+    <tr>
+        <td>redirect_uri<br><span class="required">REQUIRED</span></td>
+        <td>The callback url we will use to send the <code>authorization_code</code> towards</td>
+    </tr>
+    <tr>
+        <td>client_id<br><span class="required">REQUIRED</span></td>
+        <td>The <code>client_id</code> for your registered app as defined in your account developer settings</td>
+    </tr>
+    <tr>
+        <td>state<br><span class="optional">OPTIONAL</span></td>
+        <td>
+            A value that can be supplied by the client to maintain a state between the request and callback.
+            The state value will be returned along with the <code>authorization_code</code>.
+            This parameter helps prevent cross-site request forgery and hence it is highly recommended to use this when possible
+        </td>
+    </tr>
+    </tbody>
+</table>
+<br/>
+<h1>Response Format</h1>
+<p>
+    Once the user has signed in they will be redirected back towards your application as specified by the <code>redirect_uri</code> and will contain the following parameters as part of the request:
+</p>
+<div class="code" data-codeBlockId="1">
+    <pre class="http" data-codeBlock="1-HTTP"><code class="http">HTTP/1.1 302 Found
+redirect_uri?code={authorization_code}&state={state}</code></pre>
+</div>
+<table class="endpointTable queryParameters">
+    <thead>
+        <tr>
+            <td>Query Parameter</td>
+            <td>Value</td>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>code</td>
+            <td>This parameter will contain the <code>authorization_code</code> which is valid for <b>10 minutes</b></td>
+        </tr>
+        <tr>
+            <td>state</td>
+            <td>
+                Contains the supplied <code>state</code> from the original request. This parameter will not be present if no <code>state</code> parameter is supplied as part of the original request
+            </td>
+        </tr>
+    </tbody>
+</table>

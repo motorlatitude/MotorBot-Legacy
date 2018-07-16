@@ -140,6 +140,8 @@ router.get('/dashboard/:view/:param?', (req, res) ->
         res.render('layout',{user: req.user, view: 'home', param: undefined})
       else if req.params.view == "queue"
         res.render('layout',{user: req.user, view: 'queue', param: undefined})
+      else if req.params.view == "podcast"
+        res.render('layout',{user: req.user, view: 'podcast', param: undefined})
       else if req.params.view == "library"
         res.render('library',{user: req.user, view: 'library', param: undefined})
       else

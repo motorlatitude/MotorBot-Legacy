@@ -2,25 +2,24 @@ doctype html
 html(lang="en")
     head
         title Motorbot Playlist
-        meta(name="viewport",content="width=1128px, initial-scale=1")
-        link(type='image/png',rel='icon',href='https://mb.lolstat.net/another_icon.png')
-        link(href="https://fonts.googleapis.com/css?family=Open+Sans|Ubuntu",rel="stylesheet")
-        link(href='/css/login.css',rel='stylesheet')
-        link(href='/font-awesome-4.6.3/css/font-awesome.min.css',rel='stylesheet')
-        script if (typeof module === 'object') {window.module = module; module = undefined;}
-        script(src='/js/jquery-3.1.0.min.js')
-        script if (window.module) module = window.module;
+        meta(name="viewport", content="width=1128px, initial-scale=1")
+        link(type='image/png', rel='icon', href='https://mb.lolstat.net/another_icon.png')
+        link(href="/css/fonts-ubuntu.css", rel="stylesheet")
+        link(href='/fontawesome-free-5.0.13/web-fonts-with-css/css/fontawesome-all.min.css', rel='stylesheet')
+        link(href='/css/login.css', rel='stylesheet')
         script.
-            $(document).ready(function (e) {
-                $("#loginform").attr("action", window.location.href)
-            });
+            window.onload = function(){
+                console.log("Document Loaded");
+                console.log(window.location.href);
+                document.getElementById("loginform").setAttribute("action", window.location.href);
+            };
     body
         .bg_opacity
         .loginSidebar
             .motorbotIcon
                 img(src="https://mb.lolstat.net/another_icon.png")
                 .motorbot MotorBot
-            form(id="loginform", class="form", method="POST", action="/api/oauth2/login", autocomplete="off")
+            form(id="loginform", class="form", method="POST", autocomplete="off")
                 h3 | &nbsp;<b>Welcome Back</b><br /><span>&nbsp; &nbsp;Please login to your account</span>
                 if err != ""
                     .error <i class="fa fa-times"></i> &nbsp; #{err}

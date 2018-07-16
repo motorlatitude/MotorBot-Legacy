@@ -1,7 +1,7 @@
 Constants = Constants || {}
 
 Constants.api = {
-  host: "https://discordapp.com/api/v6"
+  host: "https://discordapp.com/api"
 }
 
 Constants.permissions = {

@@ -1,0 +1,157 @@
+<div class="title">
+    Authorization Guide
+    <a href="#guides/authorization" title="Authorization Guide">
+        <i class="fa fa-anchor anchor" aria-hidden="true"></i>
+    </a>
+    <div class="type"></div>
+</div>
+<p>
+    To allow the developers to have access to the end users MotorBot data after they have signed in and accepted to share this data.
+</p>
+<h2>Obtaining Authorization</h2>
+<p>
+    In order to achieve access to a users data, it is required to first authenticate. OAuth allows for the end user to authenticate using their credentials,
+    but in order to not share passwords with an app the app will be required to receive an additional <code>access_token</code> in order to access the
+    end users confidential information. As per the OAuth standard (<span class="link" onclick="window.location.href='https://tools.ietf.org/html/rfc6749'">RFC-6749</span>)
+    3 parties are required to achieve this authorization.
+</p>
+<div class="list">
+    <ul>
+        <li><b>Server</b>: This will be the MotorBot server</li>
+        <li><b>Client</b>: Your application</li>
+        <li><b>Resource Owner</b>: This is the end users data and controls</li>
+    </ul>
+</div>
+<br/>
+<br/>
+<div class="img">
+    <img src="../static/img/Obtaining Authorization.png" style="max-width: 1809px;">
+</div>
+<br/>
+<br/>
+<h2>Authorization Flow</h2>
+<p>
+    This section describes the steps to undertake in order to obtain an <code>access_token</code> and access data and controls provided by the end user. Due to the nature of this
+    authorization flow, it is required to use your <code>client_secret</code>, this approach is not suitable for public facing applications such as user-agent-based applications. Special
+    care should also be taken when using in native applications. This method is primarily suited for use in server based web applications.
+</p>
+<p>
+    For further information consult <span class="link" onclick="window.location.href='https://tools.ietf.org/html/rfc6749'">RFC-6749</span>.
+</p>
+<p>
+    <b>Client</b><br/>
+    The client is required to have a system in place to allow a web based prompt to open should the resource owner wish to grant the client access to their data or controls.
+</p>
+<p>
+    <b>Resource Owner</b><br/>
+    The resource owner is required to sign in via a web based prompt to share their data and control access.
+</p>
+<p>
+    <b>Server</b><br/>
+    The server will return an <code>access_token</code> and a <code>refresh_token</code> on successful authorization of the resource owner.
+</p>
+<br/>
+<br/>
+<div class="img">
+    <img src="../static/img/Authorization Flow.png" style="max-width: 1809px;">
+</div>
+<h4>1. Request Authorization</h4>
+<p>
+    The application should send a request to the MotorBot server to initiate the authorization flow. The application can achieve
+    this through different strategies such as a button requesting the user to authenticate or as part of the initialisation process
+    of your application.<br/><br/>
+    <i>Sample Request</i>
+</p>
+<div class="inline-code">
+    <pre class="https"><code class="https">GET https://mb.lolstat.net/api/oauth2/authorize?response_type=code&redirect_uri=https%3A%2F%2Fexample.com%2callback&state=q1sSxVFZMOBy0IC2KAKAb7NC&client_id=7c2816209934528ca226576f4gdfhhd4ej HTTP/1.1</code></pre>
+</div>
+<p>
+    This request allows the user to authenticate themself and agree to share information with your application.
+    <br/><br/>
+    Once the user has completed the sign in procedure they will return back to your application via the provided <code>redirect_uri</code>. The url will contain a temporary <code>authorization_code</code> as a query parameter which can be used to
+    request an <code>access_token</code>. If a <code>state</code> is passed in the original request, this will also be returned as an additional query parameter.
+    <br/><br/>
+    Details regarding request parameters and response formats can be further explored in the <span class="link" onclick="loadView('endpoints/oauth2')">OAuth 2.0</span> endpoint section in these docs, specifically this initial
+    request uses the <code>/oauth2/authorize</code> <span class="link" onclick="loadView('endpoints/oauth2/authorize')">endpoint</span>.
+</p>
+<h4>2. Request Access Token</h4>
+<p>
+    Once you have received the temporary <code>authorization_code</code> it should be exchanged for an <code>access_token</code> within 10 minutes. This should occur
+    in the background of your application once the user has been returned to your <code>redirect_uri</code>.<br/><br/>
+    <i>Sample Request</i>
+</p>
+<div class="inline-code">
+    <pre class="https"><code class="https hljs">POST /api/oauth2/token HTTP/1.1
+Host: mb.lolstat.net
+Authorization: Basic c2tqZGhmNDN1NWhpdWhoM3VpaGdka2doNDUzOml1c2hmaXVlemd0Nzg0MzU2Z2RmZw==
+Content-Type: application/json
+Content-Length: 242
+
+{
+  "grant_type": "authorization_code",
+  "redirect_uri": "https://example.com/callback",
+  "code": "f859b07f86c06efc2ec1f120321115299e7f49d9dda6d6e654da46543c6a228a00a216d0dfb1f513197c01624c4044437dc03f1c83687fdad840ce5abe1b89b3"
+}
+    </code></pre>
+</div>
+<p>
+    The server will return an <code>access_token</code> and a <code>refresh_token</code>. The <code>access_token</code> will typically be valid for
+    24 hours after which the <code>refresh_token</code> should be used to receive a new <code>access_token</code>.
+    <br/><br/>
+    Further information on the request parameters and response format can be found in the <span class="link" onclick="loadView('endpoints/oauth2')">OAuth 2.0</span> endpoint section in these docs. To receive an access and refresh token
+    the <code>/oauth2/token</code> <span class="link" onclick="loadView('endpoints/oauth2/token')">endpoint</span> should be used.
+</p>
+<h4>3. Request Restricted Data from the Resource Owner</h4>
+<p>
+    Your app now should have an <code>access_token</code> which can be used to return user specific data or control certain actions on behalf of the user. The <code>access_token</code>
+    should be supplied as part of an <code>Authorization</code> request header.
+    <br/><br/>
+    <i>Sample Request</i>
+</p>
+<div class="inline-code">
+    <pre class="https"><code class="https hljs">GET /api/user/me?api_key=uierih-hf4378rtg-ert34t-34564 HTTP/1.1
+Host: mb.lolstat.net
+Authorization: Bearer f859b07f86c06efc2ec1f120321115299e7f49d9dda6d6e654da46543c6a228a00a216d0dfb1f513197c01624c4044437dc03f1c83687fdad840ce5abe1b89b3
+</code></pre>
+</div>
+<p>
+    If the request is successful a successful response status code should be received such as <code>200</code> <b>OK</b>. These can be further explored in the
+    available endpoints that are part of this API. Should the request be unsuccessful due to an authorization error, a <code>401</code> <b>Unauthorized</b> response
+    status code is sent. This can represent a couple of issues;
+</p>
+<div class="list">
+    <ul>
+        <li>It could indicate that the request was missing an <code>api_key</code>, or that the supplied <code>api_key</code> is invalid.</li>
+        <li>Secondly it could also indicate that the authorization header was incorrectly formatted or the supplied <code>access_token</code> is invalid. Additionally,
+        it should be noted that should the <code>access_token</code> have expired, this will also result in a <code>401</code> <b>Unauthorized</b> error, in this case the
+        current <code>access_token</code> should be renewed by using the previously supplied <code>refresh_token</code>.</li>
+    </ul>
+</div>
+<br/><br/>
+<h4>4. Renew Access Token from Refresh Token</h4>
+<p>
+    Received access tokens are designed to expire after 24 hours after which the client should renew their <code>access_token</code> by using the <code>refresh_token</code>
+    originally obtained from the <code>authorization_code</code> exchange.
+    <br/><br/>
+    <i>Sample Request</i>
+</p>
+<div class="inline-code">
+    <pre class="https"><code class="https hljs">POST /api/oauth2/token HTTP/1.1
+Host: mb.lolstat.net
+Authorization: Basic c2tqZGhmNDN1NWhpdWhoM3VpaGdka2doNDUzOml1c2hmaXVlemd0Nzg0MzU2Z2RmZw==
+Content-Type: application/json
+Content-Length: 191
+
+{
+  "grant_type": "refresh_token",
+  "refresh_token": "f859b07f86c06efc2ec1f120321115299e7f49dfsdfgtggfgsg345ds43465466fdg4a216d0dfb1f513197c01624c4044437dc03f1c83687fdad840ce5abe1b89b3"
+}
+    </code></pre>
+</div>
+<p>
+    The server will return an <code>access_token</code> and a <code>refresh_token</code>. The <code>access_token</code> will typically be valid for 24 hours after which
+    the <code>refresh_token</code> should be used to receive a new access_token.
+    <br/><br/>
+    More detailed information about the <code>/oauth2/token</code> endpoint can be found in the <span class="link" onclick="loadView('endpoints/oauth2/token')">endpoints section</span> in
+    these documentation.
+</p>

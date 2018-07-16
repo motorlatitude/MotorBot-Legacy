@@ -1,0 +1,36 @@
+.subContentWrapper
+    .connections_connect
+        h2 Connect Your Account
+        p You can integrate accounts from other services which allows you to have access to further features on your MotorBot account.
+        ul#connections
+            li(onclick='window.location.href="https://mb.lolstat.net/api/spotify/"') <img src="/img/connections/spotify.png">
+    if user.connections
+        .connections_connected
+            h2 Connected Services
+            p Current services you have authorised MotorBot Music to have access to;
+            br
+            ul#connected
+                if user.connections
+                    each connection, key in user.connections
+                        li(class=key)
+                            .title
+                                img(src="/img/connections/"+key+"_white.png")
+                                .connection_name #{key} <br>
+                                    span.displayname #{connection.username}
+                                input.disconnect.revoke(data-revoke="spotify",type="button",value="Revoke")
+                            .content
+                                if key === "spotify"
+                                    ul.options
+                                        li
+                                            .label Synchronise Playlist's
+                                            .option.toggle#syncSpotify(data-togglesetting=(connection.sync === "true" ? "enabled" : "disabled"), data-connection="spotify", data-setting="sync")
+                                        li.sep
+                                        li
+                                            .label Import Playlist
+                                            .option.progressbar.hide#playlistimportprogress
+                                                .progressmsg#playlistimportprogressMessage Gathering Data
+                                                .progress#playlistimportprogressProgress
+                                            .option.button.disabled#playlistSelectioButton <i class="fas fa-arrow-alt-circle-right"></i>
+                                            .option.select#playlistSelection <div id="playlistSelectionValue">Select a Playlist</div>
+                                                .selectionArrow <i class="fas fa-sort-down"></i>
+                                                .selectionOptions#playlistSelectionOptions
