@@ -22,14 +22,17 @@ class Requester
         body: data
       }, (err, httpResponse, body) ->
           #console.log body
-          status = httpResponse.statusCode
-          utils.debug(status+" "+httpResponse.statusMessage+" => "+method+" - "+endpoint)
-          if err
-            reject(err)
-          else if status == 400 || status == 401 || status == 403 || status == 404 || status == 405 || status == 429 || status == 502 || status == 500
-            reject({statusCode: status, statusMessage: httpResponse.statusMessage, body: body})
+          if httpResponse
+            status = httpResponse.statusCode
+            utils.debug(status+" "+httpResponse.statusMessage+" => "+method+" - "+endpoint)
+            if err
+              reject(err)
+            else if status == 400 || status == 401 || status == 403 || status == 404 || status == 405 || status == 429 || status == 502 || status == 500
+              reject({statusCode: status, statusMessage: httpResponse.statusMessage, body: body})
+            else
+              resolve({httpResponse: httpResponse, body: body})
           else
-            resolve({httpResponse: httpResponse, body: body})
+            reject({statusCode: 500, statusMessage: "No Response", body: body})
         )
     )
 

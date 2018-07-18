@@ -168,6 +168,7 @@ html(lang="en")
             .searchAutocomplete#searchAutocomplete
             .version
             .motorbotSelection
+                .issue.button(onclick="window.location.href='https://github.com/motorlatitude/MotorBot/issues'") <i class="fas fa-bug"></i>
                 .serverSelection(onclick="document.getElementById('channelOptions').classList.remove('visible'); document.getElementById('serverOptions').classList.toggle('visible'); document.getElementById('accountOptions').classList.remove('visible');")
                     .selected#selectedServer Kill The Jester
                     ul.options#serverOptions

@@ -5,7 +5,7 @@ html(lang="en")
         meta(name="viewport", content="width=1128px, initial-scale=1")
         link(type='image/png', rel='icon', href='https://mb.lolstat.net/another_icon.png')
         link(href="/css/fonts-ubuntu.css", rel="stylesheet")
-        link(href='/fontawesome-free-5.0.13/web-fonts-with-css/css/fontawesome-all.min.css', rel='stylesheet')
+        link(href='/css/fa/all.css', rel='stylesheet')
         link(href='/css/login.css', rel='stylesheet')
         script.
             window.onload = function(){
@@ -15,12 +15,13 @@ html(lang="en")
             };
     body
         .bg_opacity
+        .sideangle
+        .motorbotIcon
+            img(src="https://mb.lolstat.net/another_icon.png")
+            .motorbot MotorBot
         .loginSidebar
-            .motorbotIcon
-                img(src="https://mb.lolstat.net/another_icon.png")
-                .motorbot MotorBot
             form(id="loginform", class="form", method="POST", autocomplete="off")
-                h3 | &nbsp;<b>Welcome Back</b><br /><span>&nbsp; &nbsp;Please login to your account</span>
+                h3 | &nbsp;<b>Welcome Back</b><br /><span>&nbsp; &nbsp; &nbsp;Please login to your account</span>
                 if err != ""
                     .error <i class="fa fa-times"></i> &nbsp; #{err}
                 .username_wrapper
@@ -31,5 +32,5 @@ html(lang="en")
                     input(type="password", name="pass", placeholder="enter your password")
                 .button_wrapper
                     input(type="submit", value="Login")
-                    .register
-                        a(href="/loginflow/register") Sign up
+                    .register Need an account? &nbsp;
+                        a(href="/loginflow/register") Register

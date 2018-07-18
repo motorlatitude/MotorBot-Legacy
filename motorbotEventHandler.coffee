@@ -275,7 +275,7 @@ class motorbotEventHandler
         if y == 0
           #Listen for patches
           #setInterval( () ->
-            #self.patchListener("ow")
+          #  self.patchListener("ow")
           #, 3600000)
           y = 1
     )
