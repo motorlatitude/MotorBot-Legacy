@@ -48,8 +48,7 @@
     "tweetnacl": "*",
     "unpipe": "^1.0.0",
     "ws": "*",
-    "ytdl-core": "^0.20.1",
-    "zlib": "^1.0.5"
+    "ytdl-core": "^0.20.1"
   },
   "author": "Lennart Hase",
   "license": "ISC"

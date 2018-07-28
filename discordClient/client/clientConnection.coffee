@@ -126,17 +126,20 @@ class ClientConnection
       @connect(self.gateway)
 
   gatewayMessage: (data, flags) ->
-    msg = if flags.binary then JSON.parse(zlib.inflateSync(data).toString()) else JSON.parse(data)
-    HELLO = 10
-    HEARTBEAT_ACK = 11
-    DISPATCH = 0
-    INVALID_SESSION = 9
-    switch msg.op
-      when HELLO then @helloPackage(msg)
-      when HEARTBEAT_ACK then @heartbeatACK(msg)
-      when DISPATCH then @dispatcher.parseDispatch(msg)
-      when INVALID_SESSION then @handleInvalidSession(msg)
-      else
-        utils.debug("Unhandled op: "+msg.op, "warn")
+    if flags
+      msg = if flags.binary then JSON.parse(zlib.inflateSync(data).toString()) else JSON.parse(data)
+      HELLO = 10
+      HEARTBEAT_ACK = 11
+      DISPATCH = 0
+      INVALID_SESSION = 9
+      switch msg.op
+        when HELLO then @helloPackage(msg)
+        when HEARTBEAT_ACK then @heartbeatACK(msg)
+        when DISPATCH then @dispatcher.parseDispatch(msg)
+        when INVALID_SESSION then @handleInvalidSession(msg)
+        else
+          utils.debug("Unhandled op: "+msg.op, "warn")
+    else
+      utils.debug("No flags returned","warn")
 
 module.exports = ClientConnection
