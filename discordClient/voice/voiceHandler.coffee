@@ -134,7 +134,7 @@ class VoiceConnection
     @pings.push(ping)
     @totalPings += ping
     @avgPing = @totalPings / @pings.length
-    utils.debug("Voice Heartbeat Sent (" + ping + "ms - average: " + (Math.round(@avgPing * 100) / 100) + "ms)")
+    utils.debug("Voice Heartbeat Sent (" + ping + "ms - average: " + (Math.round(@avgPing * 100)/100) + "ms)")
 
   handleSession: (msg) ->
     @secretKey = msg.d.secret_key
