@@ -1,10 +1,11 @@
 doctype html
 html(lang="en")
     head
-        title Motorbot Playlist
+        title MotorBot: Login
         meta(name="viewport", content="width=1128px, initial-scale=1")
-        link(type='image/png', rel='icon', href='https://mb.lolstat.net/another_icon.png')
+        link(type='image/png', rel='icon', href='https://motorbot.io/another_icon.png')
         link(href="/css/fonts-ubuntu.css", rel="stylesheet")
+        link(href='/css/fa/fontawesome.css', rel='stylesheet')
         link(href='/css/fa/all.css', rel='stylesheet')
         link(href='/css/login.css', rel='stylesheet')
         script.
@@ -17,13 +18,15 @@ html(lang="en")
         .bg_opacity
         .sideangle
         .motorbotIcon
-            img(src="https://mb.lolstat.net/another_icon.png")
+            img(src="https://motorbot.io/another_icon.png")
             .motorbot MotorBot
         .loginSidebar
             form(id="loginform", class="form", method="POST", autocomplete="off")
-                h3 | &nbsp;<b>Welcome Back</b><br /><span>&nbsp; &nbsp; &nbsp;Please login to your account</span>
                 if err != ""
+                    h3.error_header | &nbsp;<b>Welcome Back</b><br /><span>&nbsp; &nbsp; &nbsp;Please login to your account</span>
                     .error <i class="fa fa-times"></i> &nbsp; #{err}
+                else
+                    h3 | &nbsp;<b>Welcome Back</b><br /><span>&nbsp; &nbsp; &nbsp;Please login to your account</span>
                 .username_wrapper
                     .txt Username
                     input(type="text", name="user", placeholder="enter your username", autocomplete="off")

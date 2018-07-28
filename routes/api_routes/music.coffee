@@ -9,7 +9,7 @@ uid = require('rand-token').uid;
 ###
   MUSIC ENDPOINT
 
-  https://mb.lolstat.net/api/music/
+  https://motorbot.io/api/music/
 
   Contains Endpoints:
   - play

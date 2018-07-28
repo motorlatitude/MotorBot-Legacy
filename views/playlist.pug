@@ -19,7 +19,7 @@ html(lang="en")
       }
 
       function setUpWebSocketConnection(){
-        socket = new WebSocket("wss://mb.lolstat.net:3211")
+        socket = new WebSocket("wss://motorbot.io:3211")
         socket.onopen = function (event){
           console.info("Connected to WS");
           hb = setInterval(sendHB,5000);
@@ -436,7 +436,7 @@ html(lang="en")
   body
     .bodyWrapper
       .titleBar
-        .siteIcon <img src="https://mb.lolstat.net/siteIcon.png">
+        .siteIcon <img src="https://motorbot.io/siteIcon.png">
         input.search(type="text",placeholder="Search Something New...")
         .searchIcon <i class="fa fa-search" aria-hidden="true"></i>
         ul.nav

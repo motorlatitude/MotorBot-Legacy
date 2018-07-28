@@ -34,7 +34,7 @@ class VoiceCommands
       globals.dc.stopStream()
       globals.songComplete(false)
     else if command == "playing"
-      req.get({url: "https://mb.lolstat.net/api/playing"}, (err, httpResponse, body) ->
+      req.get({url: "https://motorbot.io/api/playing"}, (err, httpResponse, body) ->
         if err
           console.log err
         else
@@ -82,7 +82,7 @@ class VoiceCommands
     else if command == "play"
       globals.songComplete(true)
     else if command == "list"
-      globals.dc.sendMessage(self.channel_id,":headphones: Playlist can be viewed here: https://mb.lolstat.net/")
+      globals.dc.sendMessage(self.channel_id,":headphones: Playlist can be viewed here: https://motorbot.io/")
     else
       globals.dc.sendMessage(self.channel_id,"Unknown Voice Command :cry:")
 

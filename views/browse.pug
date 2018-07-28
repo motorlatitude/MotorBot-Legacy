@@ -1,7 +1,27 @@
 .contentWrapper
-    .contentTitle Spotlight
-    ul.playlistList#spotlight
+    .subTitleBar
+        .subWrapper
+            ul.subnav#browse_navigation
+                li(data-view="") Browse
+                li(data-view="") New Music
+                li(data-view="") Playlists
+                li(data-view="") Top Charts
+                li(data-view="") Genres
+    .playlistList#spotlight
+        .browsetitlebox
+            .icon <i class="fas fa-star"></i>
+            .title Spotlight
+            .desc Worth A Listen
+    .seperator
     br
     br
-    .contentTitle On Heavy Rotation
-    ul.playlistList#on_heavy_rotation
+    br
+    br
+    br
+    br
+    .seperator
+    .playlistList#on_heavy_rotation
+        .browsetitlebox.purple
+            .icon <i class="fas fa-fire"></i>
+            .title Trending <br/>
+            .desc On Heavy Rotation

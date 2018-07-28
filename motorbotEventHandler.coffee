@@ -99,11 +99,11 @@ class motorbotEventHandler
               timestamp: d.toISOString(),
               type: "rich",
               "footer": {
-                "icon_url": "https://mb.lolstat.net/overwatch_sm.png",
+                "icon_url": "https://motorbot.io/overwatch_sm.png",
                 "text": "Patch Notification"
               },
               thumbnail: {
-                url: "https://mb.lolstat.net/overwatch_sm.png"
+                url: "https://motorbot.io/overwatch_sm.png"
               }
             }
             console.log embed_element
@@ -120,7 +120,7 @@ class motorbotEventHandler
     # Subscribe to Twitch Webhook Services
     self = @
     req.post({
-        url: "https://api.twitch.tv/helix/webhooks/hub?hub.mode=subscribe&hub.topic=https://api.twitch.tv/helix/streams?user_id="+user_id+"&hub.callback=https://mb.lolstat.net/twitch/callback&hub.lease_seconds=864000&hub.secret=hexweaver"
+        url: "https://api.twitch.tv/helix/webhooks/hub?hub.mode=subscribe&hub.topic=https://api.twitch.tv/helix/streams?user_id="+user_id+"&hub.callback=https://motorbot.io/twitch/callback&hub.lease_seconds=864000&hub.secret=hexweaver"
         headers: {
           "Client-ID": keys.twitch
         },
@@ -1015,7 +1015,7 @@ class motorbotEventHandler
         self.client.channels["432351112616738837"].sendMessage(time + " Message `"+msg_id+"` was deleted from the <#"+channel.id+"> channel in the "+self.client.guilds[channel.guild_id].name+" guild", {
           "embed": {
             "title": desc,
-            "url": "https://mb.lolstat.net/api/message_history/"+msg_id,
+            "url": "https://motorbot.io/api/message_history/"+msg_id,
             "color": 38609
           }
         })

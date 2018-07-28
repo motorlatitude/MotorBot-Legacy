@@ -9,7 +9,7 @@ uid = require('rand-token').uid;
 ###
   MESSAGE_HISTORY ENDPOINT
 
-  https://mb.lolstat.net/api/message_history
+  https://motorbot.io/api/message_history
 
   Contains Endpoints:
   - channel

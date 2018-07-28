@@ -12,7 +12,7 @@ SpotifyStrategy = require('passport-spotify').Strategy
 ###
   SPOTIFY ENDPOINT
 
-  https://mb.lolstat.net/api/spotify/
+  https://motorbot.io/api/spotify/
 
   Contains Endpoints:
   - GET /
@@ -36,7 +36,7 @@ passport.deserializeUser((req, id, done) ->
 passport.use(new SpotifyStrategy({
     clientID: "935356234ee749df96a3ab1999e0d659",
     clientSecret: "622b1a10ae054059bd2e5c260d87dabd",
-    callbackURL: "https://mb.lolstat.net/api/spotify/callback",
+    callbackURL: "https://motorbot.io/api/spotify/callback",
     passReqToCallback: true
   },
   (req, accessToken, refreshToken, profile, done) ->
@@ -69,8 +69,8 @@ router.get("/", passport.authenticate('spotify', {scope: ['playlist-read-private
   res.type('json')
 )
 
-router.get("/callback", passport.authenticate('spotify', { failureRedirect: 'https://mb.lolstat.net/dashboard/account/connections', session: false }), (req, res) ->
-  res.redirect("https://mb.lolstat.net/dashboard/account/connections")
+router.get("/callback", passport.authenticate('spotify', { failureRedirect: 'https://motorbot.io/dashboard/account/connections', session: false }), (req, res) ->
+  res.redirect("https://motorbot.io/dashboard/account/connections")
 )
 
 authChecker = (req, res, next) ->

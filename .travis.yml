@@ -6,11 +6,12 @@ addons:
     - ubuntu-toolchain-r-test
     packages:
     - g++-4.8
-env:
-  CXX=g++-4.8
+env: CXX=g++-4.8
 before_install:
-  - npm install -g node-gyp
-  - node-gyp install
+- openssl aes-256-cbc -K $encrypted_f4857574ffa3_key -iv $encrypted_f4857574ffa3_iv
+  -in keys.json.enc -out ./keys.json -d
+- npm install -g node-gyp
+- node-gyp install
 node_js:
-  - "6"
-  - "6.3.0"
+- '6'
+- 6.3.0

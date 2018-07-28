@@ -361,11 +361,11 @@ body{
 }
 
 .content .title .method.patch{
-    background: rgba(222, 206, 77, 1);
+    background: #F2B731;
 }
 
 .content .title .method.put{
-    background: rgba(255, 154, 31, 1);
+    background: rgb(0, 101, 168);
 }
 
 .content .title .method.delete{

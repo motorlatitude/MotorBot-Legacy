@@ -115,12 +115,13 @@ html
       position relative
       top 0
       right 0
+      margin-top -2px
       margin-right 10px
       border-radius 2px
       padding 9px 12px
       font-family Open Sans, sans-serif
       font-weight 500
-      font-size 11px
+      font-size 12px
       color #fff
       background #7861ED
       border 1px solid #7861ED
@@ -464,6 +465,7 @@ html
       text-overflow: ellipsis
       white-space nowrap
       border-radius 3px
+      transition background 0.2s ease-in-out
       &:hover
         background #383B40
       &.active
@@ -692,8 +694,13 @@ html
   overflow auto
   position relative
   top 0
-  & .simplebar-track.horizontal
+  opacity 0
+  transition opacity 0.4s ease-in-out
+  transition-delay 2s
+  &>.simplebar-track.horizontal
     display: none !important;
+  & .simplebar-track
+    z-index 1000
   & .contentWrapper
     padding 30px
     width calc(100% - 60px)
@@ -891,12 +898,13 @@ html
       border-bottom-right-radius 2px
       background rgba(200,200,200,0.3)
       transition width 2s linear
-  & .random, .repeat
+  & .random, .repeat, .queue_button
     position absolute
     left calc(50% + 130px)
     top calc(50% - 17px)
     line-height 38px
     padding-bottom 2px
+    color rgba(255, 255, 255, 0.8)
     width 38px
     height 38px
     font-size 18px
@@ -907,6 +915,21 @@ html
       color $active_color
   & .repeat
     left calc(50% - 170px)
+  & .queue_button
+    left auto
+    right 125px
+    width 32px
+    transition transform 0.2s ease-in-out
+    cursor pointer
+    &:hover
+      color #fff
+      transform scale(1.1)
+    &.disabled
+      cursor default
+      color #4A4C51
+      &:hover
+        color #4A4C51
+        transform scale(1)
 
 @keyframes loadingSeekBar
   0%
@@ -965,6 +988,11 @@ html
       background rgba(0, 0, 0, 0.2)
       padding 0 10px
       line-height 24px
+      & > a
+        text-decoration none
+        color $active_color
+        &:hover
+          text-decoration underline
     .container
       width calc(100% - 80px)
       min-height 45px
@@ -1015,6 +1043,11 @@ html
         margin-top 5px
         font-family -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"
         z-index 5
+        & > a
+          text-decoration none
+          color $active_color
+          &:hover
+            text-decoration underline
       & > a
         text-decoration none
         color $active_color
@@ -1088,14 +1121,14 @@ html
   font-size 26px
   font-family Open Sans, sans-serif
   font-weight 400
-  position absolute
+  position relative
   top 0
   left 0
   overflow hidden
   z-index 9
   & .bg
     width 100%
-    height 210px
+    height 100%
     position absolute
     top 0
     right 0
@@ -1105,7 +1138,7 @@ html
       position absolute
       width 100%
       height 100%
-      background rgba(42, 45, 50, 0.9)
+      background linear-gradient(to top, #2A2D32 0%, #2A2D32 20%, rgba(42, 45, 50, 0.7) 100%)
   & .playlistType
     position absolute
     left 220px
@@ -1115,6 +1148,8 @@ html
     font-weight 400
     text-transform uppercase
     color rgba(200, 200, 200, 0.8)
+    opacity 1
+    transition opacity 0.2s ease-in-out, top 0.4s ease-in-out
   & .playlistName
     position absolute
     left 220px
@@ -1127,6 +1162,8 @@ html
     overflow hidden
     text-overflow ellipsis
     cursor pointer
+    opacity 1
+    transition opacity 0.2s ease-in-out, top 0.4s ease-in-out
   & .playlistDescription
     position absolute
     left 220px
@@ -1136,25 +1173,30 @@ html
     font-weight 500
     color rgba(220, 220, 220, 0.7)
     font-style italic
+    opacity 1
+    transition opacity 0.3s ease-in-out, top 0.4s ease-in-out
   & .playlistStats
     position absolute
     left 220px
     top 120px
     width calc(100% - 220px)
-    font-size 14px
+    font-size 16px
     font-weight 500
     color rgba(220, 220, 220, 0.8)
+    opacity 1
+    transition opacity 0.4s ease-in-out, top 0.4s ease-in-out
     & .statFrame
       float left
       width auto
       height auto
       text-align right
-      margin-right 50px
+      margin-right 40px
       & .value
         display inline-block
         font-size 18px
         font-weight bold
         color #fff
+        margin-top 4px
       & .txt
         display inline-block
       &.author, &.totalSongs, &.totalPlayTime
@@ -1178,9 +1220,11 @@ html
     left 50px
   & .playlistOptions
     position absolute
-    top 150px
+    top 155px
     left 220px
     width 390px
+    opacity 1
+    transition opacity 0.4s ease-in-out, top 0.4s ease-in-out
     & .playPlaylistButton, .followPlaylistButton, .playlistExtraOptions
       display inline-block
       border-radius 2px
@@ -1219,28 +1263,47 @@ html
     left 20px
     width 175px
     height 175px
-    border-radius 3px
+    border-radius 8px
+    box-shadow 0 0 10px rgba(11,11,11,0.4)
+    opacity 1
+    transition opacity 0.4s ease-in-out, top 0.4s ease-in-out
+  &.mini
+    position fixed
+    left 230px
+    top -40px
+    width calc(100% - 230px)
+    min-width 1128px
+    height 240px
+    & .artwork
+      top -50px
+      opacity 0
+    & .playlistType,
+      .playlistName,
+      .playlistDescription,
+      .playlistStats,
+      .playlistOptions
+      top -30px
+      opacity 0
 
 #playlist,
 #search_playlist,
 .songList
   list-style none
   margin 0
-  margin-top 83px
   padding 0
   width calc(100% - 5px)
   min-width 1128px
   height 100%
   & li
     float left
-    width calc(100% - 25px)
-    min-width 1128 ox
-    padding 0 10px
-    margin-left 5px
+    width calc(100% - 10px)
+    min-width 1128px
     cursor pointer
     //background rgba(34, 34, 41, 1.00)
     font-size 12px
     font-weight 500
+    margin-left 5px
+    margin-right 5px
     //border-bottom 1px solid rgba(36, 36, 36, 1.00)
     background transparent
     border-radius 2px
@@ -1248,23 +1311,22 @@ html
     &:nth-child(2n)
       //background rgba(0,0,0,0.1)
     &.titleRow
-      font-size 12px
-      font-weight bold
+      font-size 13px
+      font-weight 400
       text-transform uppercase
       color rgba(132, 137, 143, 1.00)
-      position absolute
-      top 209px
-      left 0
-      width calc(100% - 20px)
+      width calc(100% + 5px)
       height 30px
       line-height 30px
-      right 20px
+      margin 0
+      margin-top -30px
       cursor default
       z-index 10
-      border-bottom 1px solid rgba(50, 50, 50, 0.6)
-      border-top 1px solid rgba(50, 50, 50, 0.6)
-      &:hover
-        background transparent
+      border-radius 0
+      border-bottom 2px solid #2E3136
+      position relative
+      top 0
+      left 0
       & .sortDir
         color $active_color
         margin-left 10px
@@ -1276,7 +1338,7 @@ html
         color #fff
         opacity 1
     &:nth-child(2)
-      margin-top 165px
+      margin-top 5px
     & .trackRow
       display -webkit-flex
       display flex
@@ -1286,7 +1348,6 @@ html
       flex-wrap nowrap
       width 100%
       & .item
-        display flex
         text-align right
         vertical-align top
         line-height 40px
@@ -1303,7 +1364,6 @@ html
           font-size 14px
           color $active_color
       & .title
-        display flex
         flex-grow 1
         vertical-align top
         line-height 40px
@@ -1327,7 +1387,6 @@ html
           font-weight bold
           color rgba(238, 62, 62, 1.00)
       & .artist
-        display flex
         flex-grow 1
         width 240px
         white-space nowrap
@@ -1340,7 +1399,6 @@ html
         -webkit-flex-basis 240px
         flex-basis 240px
       & .album
-        display flex
         flex-grow 1
         width 240px
         white-space nowrap
@@ -1353,7 +1411,6 @@ html
         -webkit-flex-basis 240px
         flex-basis 240px
       & .timestamp
-        display flex
         padding-left 10px
         white-space nowrap
         overflow hidden
@@ -1365,7 +1422,6 @@ html
         & i
           margin-top 8px
       & .time
-        display flex
         width 70px
         padding-left 10px
         padding-right 10px
@@ -1378,6 +1434,8 @@ html
         line-height 40px
         -webkit-flex-basis 70px
         flex-basis 70px
+        &#time_header
+          padding-right 20px
         & i
           margin-top 8px
     /*&:hover
@@ -1391,6 +1449,14 @@ html
       color #0072ff !important
       & .timestamp, .time
         color #0072ff !important
+  &.mini
+    margin-top 245px
+    & .titleRow
+      position fixed
+      top 200px
+      left 230px
+      right 0
+      width calc(100% - 230px)
 
 #search_playlist
   margin-top 30px
@@ -1415,12 +1481,9 @@ html
   & li:nth-child(2)
     margin-top 0
 
-#search_playlists
-
 // BROWSE VIEW
 
-#search_playlists,
-.playlistList
+#search_playlists
   list-style none
   margin 0
   margin-top 20px
@@ -1491,6 +1554,102 @@ html
         white-space nowrap
         text-overflow ellipsis
 
+.playlistList
+  margin 0
+  margin-top 20px
+  padding 0
+  height 420px
+  white-space nowrap
+  margin-left 20px
+  margin-right 20px
+  width calc(100% - 40px)
+  display flex
+  flex-direction column
+  flex-wrap wrap
+  align-items flex-start
+  justify-content space-around
+  & .simplebar-track.horizontal
+    display none
+  & .simplebar-track.vertical
+    display none
+  &>div
+    flex-basis 190px
+    margin 15px
+    margin-bottom 0
+    width 150px
+    cursor pointer
+    animation commit_fade_in 0.6s linear
+    animation-fill-mode forwards
+    &.big
+      flex-basis 420px
+      width 360px
+    &.browsetitlebox
+      white-space normal
+      cursor default
+      & .icon
+        width 50px
+        height 50px
+        color #fff
+        border-radius 50%
+        line-height 50px
+        text-align center
+        font-size 25px
+        background $active_color
+      & .title
+        margin-top 12px
+        font-size 34px
+        color $active_color
+      & .desc
+        padding-top 10px
+        line-height 28px
+        letter-spacing 1px
+        font-size 20px
+        color #aaa
+      &.purple
+        & .icon
+          background #7861ED
+        & .title
+          color #7861ED
+    & .artwork
+      width 100%
+      padding-top 100%
+      background-color rgba(0, 0, 0, 0.1)
+      position relative
+      top 0
+      right 0
+      bottom 0
+      border-radius 6px
+      box-shadow 0 0 12px rgba(0, 0, 0, 0.4)
+      & .playState
+        display none
+        position absolute
+        right 5px
+        bottom 5px
+        width 35px
+        line-height 37px
+        background $active_color
+        color rgba(255, 255, 255, 0.7)
+        text-align center
+        font-size 18px
+        border-radius 50%
+        padding-left 2px
+      &:hover .playState
+        display block
+    & .playlistName
+      margin-top 10px
+      margin-left 2px
+      color rgba(255, 255, 255, 0.9)
+      font-weight bold
+      height 25px
+      white-space nowrap
+      overflow hidden
+      text-overflow ellipsis
+
+.seperator
+  width 100%
+  height 2px
+  msrgin 20px 0
+  border-bottom 2px solid rgba(0, 0, 0, 0.2)
 
 #song_info
   position absolute

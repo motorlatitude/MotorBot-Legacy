@@ -29,11 +29,11 @@ passport.deserializeUser((req, id, done) ->
 )
 #MB Login
 passport.use(new OAuth2Strategy({
-    authorizationURL: 'https://mb.lolstat.net/api/oauth2/authorize',
-    tokenURL: 'https://mb.lolstat.net/api/oauth2/token',
+    authorizationURL: 'https://motorbot.io/api/oauth2/authorize',
+    tokenURL: 'https://motorbot.io/api/oauth2/token',
     clientID: '7c78862088c0228ca226f4462df3d4ff',
     clientSecret: '2bd12fcaf92bb63d7c11b0b6858d9d3e1c2c966cb17aa0152c9e07bdfca9535b',
-    callbackURL: "https://mb.lolstat.net/loginflow/callback",
+    callbackURL: "https://motorbot.io/loginflow/callback",
     state: true,
     session: true,
     passReqToCallback: true
@@ -65,7 +65,7 @@ passport.use(new DiscordStrategy({
   clientID: keys.clientId,
   clientSecret: keys.clientSecret,
   scope: ["identify","guilds"],
-  callbackURL: 'https://mb.lolstat.net/loginflow/register/discord/callback'
+  callbackURL: 'https://motorbot.io/loginflow/register/discord/callback'
   passReqToCallback: true
 },
   (req, accessToken, refreshToken, profile, cb) ->
@@ -107,7 +107,7 @@ passport.use(new DiscordStrategy({
 ###
   LOGINFLOW
 
-  https://mb.lolstat.net/loginflow/
+  https://motorbot.io/loginflow/
 ###
 
 refreshDiscordAccessToken = (req, refresh_token, cb) ->

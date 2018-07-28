@@ -24,7 +24,7 @@ router.get("/callback", (req, res) ->
 
 router.get("/sample_notification", (req, res) ->
   #console.log "twitch notification"
-  thumbnail_url = "https://mb.lolstat.net/twitch%20notification%20layout.png"
+  thumbnail_url = "https://motorbot.io/twitch%20notification%20layout.png"
   req.app.locals.motorbot.client.channels["409781378100756483"].sendMessage("", {
     embed: {
       image: {

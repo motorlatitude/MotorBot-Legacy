@@ -1,6 +1,6 @@
 APIConstants = APIConstants || {}
 
-APIConstants.baseUrl = "https://mb.lolstat.net"
+APIConstants.baseUrl = "https://motorbot.io/api"
 
 
 # ERRORS

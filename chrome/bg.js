@@ -18,7 +18,7 @@ var tokenFetcher = (function() {
       var options = {
         'interactive': interactive,
         // url:'https://graph.facebook.com/oauth/access_token?client_id=' + clientId +
-        url:'https://mb.lolstat.net/api/oauth2/authorize?client_id=' + clientId +
+        url:'https://motorbot.io/api/oauth2/authorize?client_id=' + clientId +
             '&response_type=code' +
             '&redirect_uri=' + encodeURIComponent(redirectUri)
       }
@@ -63,7 +63,7 @@ var tokenFetcher = (function() {
         var xhr = new XMLHttpRequest();
         xhr.open('POST',
                  // 'https://www.facebook.com/dialog/oauth?'+
-                 'https://mb.lolstat.net/api/oauth2/token');
+                 'https://motorbot.io/api/oauth2/token');
         params = 'client_id=' + clientId +
             '&client_secret=' + clientSecret +
             '&redirect_uri=' + redirectUri +
@@ -109,7 +109,7 @@ var userInfo = {};
 function getUserData(accessToken, authorization) {
     console.log(accessToken);
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', 'https://mb.lolstat.net/api/user/me?api_key=caf07b8b-366e-44ab-9bda-152a42g8d1ef');
+    xhr.open('GET', 'https://motorbot.io/api/user/me?api_key=caf07b8b-366e-44ab-9bda-152a42g8d1ef');
     xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
     xhr.onload = function () {
         if (this.status == 200) {
@@ -167,8 +167,8 @@ chrome.runtime.onMessage.addListener(function(message,sender,sendResponse) {
 //Detect youtube requests and try and add button, send message to contentscript
 
 chrome.webRequest.onCompleted.addListener(function(data){
-    chrome.tabs.query({url: ["https://www.youtube.com/*"]}, function(tabs) {
-      if(tabs) {
+    chrome.tabs.query({url: ["https://www.youtube.com/*"], active: true, currentWindow: true}, function(tabs) {
+      if(tabs.length > 0) {
           chrome.tabs.sendMessage(tabs[0].id, {type: "youtube_request"}, function (response) {
               console.log("Sending youtube_request event");
               console.log(response);

@@ -18,7 +18,7 @@ APIObjects = new objects()
 ###
   PLAYLIST ENDPOINT
 
-  https://mb.lolstat.net/api/playlist/
+  https://motorbot.io/api/playlist/
 
   Contains Endpoints:
   - POST: /                                   - create new playlist
@@ -158,7 +158,7 @@ router.post("/", (req, res) ->
   playlist_id = uid(32);
   if req.body.playlist_name
     uploadRemainingData = (album_key) ->
-      if album_key then album_key = "https://mb.lolstat.net/AlbumArt/"+album_key+".png"
+      if album_key then album_key = "https://motorbot.io/AlbumArt/"+album_key+".png"
       playlistObj = {
         id: playlist_id
         name: req.body.playlist_name

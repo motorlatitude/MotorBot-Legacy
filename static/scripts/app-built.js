@@ -1,6 +1,6 @@
 define('constants',[],function(){
     return {
-        base_url: "https://mb.lolstat.net/api",
+        base_url: "https://motorbot.io/api",
         api_key: "caf07b8b-366e-44ab-9bda-623f94a9c2df",
         user_id: document.getElementById("store_userId").value,
         accessToken: document.getElementById("store_accessToken").value,
@@ -478,11 +478,11 @@ define('views',["requester","marked","simpleBar"], function(req,marked,SimpleBar
            if(param === "undefined"){
                param = undefined;
                url = "/views/"+view;
-               window.history.pushState('MotorBot Dashboard View', view, 'https://mb.lolstat.net/dashboard/'+view);
+               window.history.pushState('MotorBot Dashboard View', view, 'https://motorbot.io/dashboard/'+view);
            }
            else{
                url = "/views/"+view+"/"+param;
-               window.history.pushState('MotorBot Dashboard View', view, 'https://mb.lolstat.net/dashboard/'+view+'/'+param);
+               window.history.pushState('MotorBot Dashboard View', view, 'https://motorbot.io/dashboard/'+view+'/'+param);
            }
            document.getElementById("ajax_contentView").innerHTML = "";
            document.getElementById("ajax_loader").style.display = "block";

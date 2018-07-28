@@ -9,7 +9,7 @@ uid = require('rand-token').uid;
 ###
   MOTORBOT ENDPOINT
 
-  https://mb.lolstat.net/api/motorbot/
+  https://motorbot.io/api/motorbot/
 
   Contains Endpoints:
   - channel

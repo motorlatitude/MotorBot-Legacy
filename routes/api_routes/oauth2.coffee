@@ -9,7 +9,7 @@ uuid = require 'node-uuid'
 ###
   OAUTH 2.0
 
-  https://mb.lolstat.net/api/oauth2/
+  https://motorbot.io/api/oauth2/
 ###
 
 passport.serializeUser((user, done) ->

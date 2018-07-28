@@ -6,7 +6,7 @@ path = require 'path'
 ###
   ELECTRON ENDPOINT
 
-  https://mb.lolstat.net/api/electron/
+  https://motorbot.io/api/electron/
 
   Contains Endpoints:
   - updates/latest
@@ -40,7 +40,7 @@ router.get("/updates/latest", (req, res) ->
     res.status(204).end()
   else
     res.json({
-      url: "https://mb.lolstat.net/releases/darwin/"+latestVersion+"/MotorBotMusic.zip"
+      url: "https://motorbot.io/releases/darwin/"+latestVersion+"/MotorBotMusic.zip"
     })
 )
 

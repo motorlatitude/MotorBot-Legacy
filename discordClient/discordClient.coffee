@@ -23,6 +23,7 @@ class DiscordClient extends EventEmitter
         return @emit("disconnect")
       ping = res.elapsedTime
       utils.debug("Gateway Server: "+data.url+" ("+ping+"ms)")
+      @emit("gateway_found", data.url)
       self.establishGatewayConnection(data.url)
     )
 

@@ -47,7 +47,7 @@ passport.use(new DiscordStrategy({
     clientID: keys.clientId,
     clientSecret: keys.clientSecret,
     scope: ["identify","guilds"],
-    callbackURL: 'https://mb.lolstat.net/auth/discord/callback'
+    callbackURL: 'https://motorbot.io/auth/discord/callback'
   },
   (accessToken, refreshToken, profile, cb) ->
     usersCollection = globals.db.collection("users")

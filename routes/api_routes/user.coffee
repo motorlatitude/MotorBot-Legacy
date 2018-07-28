@@ -9,7 +9,7 @@ uid = require('rand-token').uid;
 ###
   USER ENDPOINT
 
-  https://mb.lolstat.net/api/user/
+  https://motorbot.io/api/user/
 
   Contains Endpoints:
   - me
@@ -102,9 +102,9 @@ router.get("/playlists", (req, res) ->
           limit = 1
         else if limit > 50
           limit = 50
-        if total > (limit + offset) then next_page = "https://mb.lolstat.net/api/user/playlists?limit="+limit+"&offset="+(offset+limit)
+        if total > (limit + offset) then next_page = "https://motorbot.io/api/user/playlists?limit="+limit+"&offset="+(offset+limit)
         bk = if ((offset - limit) < 0) then 0 else (offset - limit)
-        if offset > 0 then prev_page = "https://mb.lolstat.net/api/user/playlists?limit="+limit+"&offset="+bk
+        if offset > 0 then prev_page = "https://motorbot.io/api/user/playlists?limit="+limit+"&offset="+bk
         playlists = playlists.slice(offset,(offset + limit))
         playlistsCollection.find({id: {$in: playlists}}).toArray((err, results) ->
           creators = []

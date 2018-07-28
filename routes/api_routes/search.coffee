@@ -14,7 +14,7 @@ APIObjects = new objects()
 ###
   QUEUE ENDPOINT
 
-  https://mb.lolstat.net/api/search
+  https://motorbot.io/api/search
 
   Contains Endpoints:
   - GET: ?q=search+term                                            - search

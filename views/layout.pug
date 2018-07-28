@@ -3,7 +3,7 @@ html(lang="en")
     head
         title Motorbot Playlist
         meta(name="viewport", content="width=1128px, initial-scale=1")
-        link(type='image/png', rel='icon', href='https://mb.lolstat.net/motorbot_icon_128.png')
+        link(type='image/png', rel='icon', href='https://motorbot.io/motorbot_icon_128.png')
         link(href='/css/load.css', rel='stylesheet')
         script.
             function setUpWebSocketConnection(){
@@ -183,7 +183,7 @@ html(lang="en")
                     li(data-view="account") <i class="fas fa-user-astronaut" aria-hidden="true"></i> &nbsp; &nbsp; Account
                     li(data-view="podcast") <i class="fas fa-podcast" aria-hidden="true"></i> &nbsp; &nbsp; Podcast Dashboard
                     li(data-view="developer") <i class="fas fa-wrench" aria-hidden="true"></i> &nbsp; &nbsp; Developer
-                    li(onclick="window.location.href='https://mb.lolstat.net/loginflow/logout'") <i class="fas fa-sign-out-alt" aria-hidden="true"></i> &nbsp; &nbsp; Logout
+                    li(onclick="window.location.href='https://motorbot.io/loginflow/logout'") <i class="fas fa-sign-out-alt" aria-hidden="true"></i> &nbsp; &nbsp; Logout
         .errorList
             ul#notificationsList
         .flexContainer
@@ -214,8 +214,9 @@ html(lang="en")
             .timelineWrapper
                 .timeline#timelineBar
                 .downloadtimeline#timelineDownloadBar
-            .repeat(onclick='repeatMusic()') <i class="fa fa-retweet" aria-hidden="true"></i>
-            .random(onclick='randomMusic()') <i class="fa fa-random" aria-hidden="true"></i>
+            .repeat <i class="fa fa-retweet" aria-hidden="true"></i>
+            .random <i class="fa fa-random" aria-hidden="true"></i>
+            .queue_button#queue_button <i class="fas fa-indent"></i>
         .contextMenu#contextMenu
             ul
         .loader#ajax_loader
@@ -253,6 +254,7 @@ html(lang="en")
             link(href="/css/fonts-ubuntu.min.css", rel="stylesheet")
             link(href='/css/fa/fontawesome.css', rel='stylesheet')
             link(href='/css/fa/solid.css', rel='stylesheet')
+            link(href='/css/fa/regular.css', rel='stylesheet')
             link(href="/css/simplebar.min.css", rel="stylesheet")
         script.
             var loadDeferredStyles = function() {

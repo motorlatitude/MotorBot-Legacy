@@ -1,21 +1,24 @@
 doctype html
 html(lang="en")
     head
-        title Motorbot Playlist
+        title MotorBot: Login
         meta(name="viewport",content="width=1128px, initial-scale=1")
-        link(type='image/png',rel='icon',href='https://mb.lolstat.net/another_icon.png')
+        link(type='image/png',rel='icon',href='https://motorbot.io/another_icon.png')
         link(href="https://fonts.googleapis.com/css?family=Open+Sans|Ubuntu",rel="stylesheet")
+        link(href='/css/fa/fontawesome.css', rel='stylesheet')
+        link(href='/css/fa/all.css', rel='stylesheet')
         link(href='/css/login.css',rel='stylesheet')
         script if (typeof module === 'object') {window.module = module; module = undefined;}
         script if (window.module) module = window.module;
     body
         .bg_opacity
+        .sideangle
+        .motorbotIcon
+            img(src="https://motorbot.io/another_icon.png")
+            .motorbot MotorBot
         .loginSidebar
-            .motorbotIcon
-                img(src="https://mb.lolstat.net/another_icon.png")
-                .motorbot MotorBot
             .auth-error
-                .icon <i class="fa fa-times"></i>
+                .icon <i class="fas fa-times"></i>
                 h1 #{error}
                 p #{error_description}
                 p.userFriendly You may now close this window or tab.

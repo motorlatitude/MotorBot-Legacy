@@ -9,7 +9,7 @@ uid = require('rand-token').uid;
 ###
   BROWSE ENDPOINT
 
-  https://mb.lolstat.net/api/browse/
+  https://motorbot.io/api/browse/
 
   Contains Endpoints:
   - GET: /                                                              - get browse playlists
@@ -327,9 +327,9 @@ router.get("/", (req, res) ->
       for result in results
         playlists.push(result.playlist_id)
       playlistsCollection = req.app.locals.motorbot.database.collection("playlists")
-      playlistsCollection.find({id: {$in: playlists}}).sort({create_date: -1}).limit(10).toArray((err, results) ->
+      playlistsCollection.find({id: {$in: playlists}}).sort({create_date: -1}).limit(20).toArray((err, results) ->
         playlists = results
-        playlistsCollection.aggregate({"$match":{"private":false}},{"$project":{"id":"$$ROOT","songs":1,"_id":1}},{"$unwind":"$songs"},{"$group":{"_id": "$_id","totalCount":{"$sum":"$songs.play_count"},"count":{"$sum":1},"playlist":{"$first":"$id"},"totalLastPlayed": {"$sum":"$songs.last_played"}}},{"$project":{"_id":1,"totalCount":1,"count":1,"playlist":1,"popularity":{"$divide":["$totalCount","$count"]}, "avgLastPlayed":{"$divide":["$totalLastPlayed","$count"]}}},{"$sort":{"avgLastPlayed": -1, "popularity":-1}},{"$limit":10}).limit(10).toArray((err, heavy_rotation_playlists) ->
+        playlistsCollection.aggregate({"$match":{"private":false}},{"$project":{"id":"$$ROOT","songs":1,"_id":1}},{"$unwind":"$songs"},{"$group":{"_id": "$_id","totalCount":{"$sum":"$songs.play_count"},"count":{"$sum":1},"playlist":{"$first":"$id"},"totalLastPlayed": {"$sum":"$songs.last_played"}}},{"$project":{"_id":1,"totalCount":1,"count":1,"playlist":1,"popularity":{"$divide":["$totalCount","$count"]}, "avgLastPlayed":{"$divide":["$totalLastPlayed","$count"]}}},{"$sort":{"avgLastPlayed": -1, "popularity":-1}},{"$limit":10}).limit(20).toArray((err, heavy_rotation_playlists) ->
           if err then return res.status(500).send({code: 500, status: "Database Error", error: err})
           if heavy_rotation_playlists[0]
             res.end(JSON.stringify({"spotlight":playlists,"heavy_rotation":heavy_rotation_playlists}))
@@ -341,7 +341,7 @@ router.get("/", (req, res) ->
       res.status(404).send({code: 404, status: "Nothing To Browse"})
   )
 )
-#mb.lolstat.net/api/browse/youtubeImport/PLFgquLnL59amEA53mO3KiIJRSNAzO-PRZ/playlist/PqXuY9xcbWduO8Nvf4CwUPtleNAsCcJs?api_key=caf07b8b-366e-44ab-9bda-623f94a9c2df
+#motorbot.io/api/browse/youtubeImport/PLFgquLnL59amEA53mO3KiIJRSNAzO-PRZ/playlist/PqXuY9xcbWduO8Nvf4CwUPtleNAsCcJs?api_key=caf07b8b-366e-44ab-9bda-623f94a9c2df
 router.patch("/youtubeImport/:youtube_playlistId/playlist/:playlist_id", refreshSpotifyAccessToken, (req, res) ->
   playlistsCollection = req.app.locals.motorbot.database.collection("playlists")
   playlist_id = req.params.playlist_id

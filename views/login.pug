@@ -3,13 +3,16 @@ html(lang="en")
     head
         title Motorbot Playlist
             meta(name="viewport", content="width=1128px, initial-scale=1")
-            link(type='image/png', rel='icon', href='https://mb.lolstat.net/another_icon.png')
+            link(type='image/png', rel='icon', href='https://motorbot.io/another_icon.png')
             link(href="/css/fonts-Ubuntu.css", rel="stylesheet")
             link(href='/css/login.css', rel='stylesheet')
-            script if (typeof module === 'object') {
-                window.module = module;
-                module = undefined;
-            }
+            link(href='/css/fa/fontawesome.css', rel='stylesheet')
+            link(href='/css/fa/all.css', rel='stylesheet')
+            script.
+                if (typeof module === 'object') {
+                    window.module = module;
+                    module = undefined;
+                }
             script if (window.module) module = window.module;
             script.
                 document.onload = function () {

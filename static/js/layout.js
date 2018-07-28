@@ -188,11 +188,11 @@ function loadView(view,param){
     if(param == "undefined"){
         param = undefined
         url = "/views/"+view;
-        window.history.pushState('MotorBot Dashboard View', view, 'https://mb.lolstat.net/dashboard/'+view);
+        window.history.pushState('MotorBot Dashboard View', view, 'https://motorbot.io/dashboard/'+view);
     }
     else{
         url = "/views/"+view+"/"+param;
-        window.history.pushState('MotorBot Dashboard View', view, 'https://mb.lolstat.net/dashboard/'+view+'/'+param);
+        window.history.pushState('MotorBot Dashboard View', view, 'https://motorbot.io/dashboard/'+view+'/'+param);
     }
     $("#mainNavBar").find("li.active").removeClass("active");
     $("#mainNavBar").find("li[data-view='"+view+"']").addClass("active");

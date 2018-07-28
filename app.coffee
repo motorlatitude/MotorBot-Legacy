@@ -7,8 +7,6 @@ websocketServer = require("ws").Server
 MongoClient = require('mongodb').MongoClient
 youtubeStream = require 'ytdl-core'
 request = require 'request'
-stream = require 'stream'
-http2 = require 'http2'
 fs = require 'fs'
 path = require 'path'
 uid = require('rand-token').uid;
@@ -38,19 +36,20 @@ class App
     @init()
 
   debug: (msg,level = "debug") ->
-    if level == "info"
-      level = "\x1b[34m[INFO ]\x1b[0m"
-    else if level == "error"
-      level = "\x1b[31m[ERROR]\x1b[0m"
-    else if level == "warn"
-      level = "\x1b[5m\x1b[33m[WARN ]\x1b[0m"
-    else if level == "notification"
-      level = "\x1b[5m\x1b[35m[NOTIF]\x1b[0m"
-    else if level == "debug"
-      level = "\x1b[2m[DEBUG]"
-    d = new Date()
-    time = "["+d.getDate()+"/"+(parseInt(d.getMonth())+1)+"/"+d.getFullYear()+" "+d.toLocaleTimeString()+"] "
-    console.log(level+time+msg+"\x1b[0m")
+    if (process.env.NODE_ENV != 'test')
+      if level == "info"
+        level = "\x1b[34m[INFO ]\x1b[0m"
+      else if level == "error"
+        level = "\x1b[31m[ERROR]\x1b[0m"
+      else if level == "warn"
+        level = "\x1b[5m\x1b[33m[WARN ]\x1b[0m"
+      else if level == "notification"
+        level = "\x1b[5m\x1b[35m[NOTIF]\x1b[0m"
+      else if level == "debug"
+        level = "\x1b[2m[DEBUG]"
+      d = new Date()
+      time = "["+d.getDate()+"/"+(parseInt(d.getMonth())+1)+"/"+d.getFullYear()+" "+d.toLocaleTimeString()+"] "
+      console.log(level+time+msg+"\x1b[0m")
 
   init: () ->
     @debug("Initialising")

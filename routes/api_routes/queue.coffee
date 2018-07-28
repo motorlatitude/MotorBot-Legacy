@@ -9,7 +9,7 @@ uid = require('rand-token').uid;
 ###
   QUEUE ENDPOINT
 
-  https://mb.lolstat.net/api/queue/
+  https://motorbot.io/api/queue/
 
   Contains Endpoints:
   - GET: /                                            - get queue
