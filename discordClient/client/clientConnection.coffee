@@ -128,10 +128,9 @@ class ClientConnection
   gatewayMessage: (data, flags) ->
     if flags
       msg = if flags.binary then JSON.parse(zlib.inflateSync(data).toString()) else JSON.parse(data)
-    else if JSON.parse(data)
-      msg = JSON.parse(data)
     else
-      utils.debug("Error Handling Gateway Message Format","error")
+      console.log data
+      utils.debug("Error Handling Gateway Message Format, no flags present?","error")
     HELLO = 10
     HEARTBEAT_ACK = 11
     DISPATCH = 0

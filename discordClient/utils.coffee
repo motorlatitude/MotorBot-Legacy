@@ -3,7 +3,7 @@ class Utils
   constructor: () ->
 
   debug: (msg,level = "debug") ->
-    if (process.env.NODE_ENV != 'test')
+    if (process.env.NODE_ENV == 'test')
       if level == "info"
         level = "\x1b[34m[INFO ]\x1b[0m"
       else if level == "error"
