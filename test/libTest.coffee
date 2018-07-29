@@ -70,9 +70,10 @@ describe 'DiscordClient Object', ->
   describe "Awaiting Event", ->
     it "Should Receive Ready Event", (done) ->
       client.on("ready", (data) ->
-        console.log "ready"
-        console.log data
+        console.log "Ready Event Received"
         assert(data.v == 6, "Discord Gateway Protocol version should equal 6")
         done()
       )
-      client.connect()
+  it "Should Determine Gateway Address and Connect", () ->
+    client.connect()
+    expect(client.internals).to.be.a("object")
