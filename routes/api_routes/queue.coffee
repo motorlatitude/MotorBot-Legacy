@@ -61,20 +61,12 @@ router.put("/song/:song_id/playlist/:playlist_id", (req, res) ->
 router.get("/", (req, res) ->
   res.type('json')
   songQueueCollection = req.app.locals.motorbot.database.collection("songQueue")
-  if globals.randomPlayback
-    songQueueCollection.find({}).sort({randId: 1}).toArray((err, results) ->
-      if err
-        res.sendStatus(500)
-      else
-        res.end(JSON.stringify(results))
-    )
-  else
-    songQueueCollection.find({}).toArray((err, results) ->
-      if err
-        res.sendStatus(500)
-      else
-        res.end(JSON.stringify(results))
-    )
+  songQueueCollection.find({}).toArray((err, results) ->
+    if err
+      res.sendStatus(500)
+    else
+      res.end(JSON.stringify(results))
+  )
 )
 
 module.exports = router

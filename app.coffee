@@ -159,7 +159,7 @@ class App
       if user_id
         self.websocket.connectedClients.forEach((client) ->
           if client
-            if client.user_id = user_id
+            if client.user_id == user_id
               client.ws.send(data, (err) ->
                 if err then console.log err
               )
