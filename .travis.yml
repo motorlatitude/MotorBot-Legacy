@@ -14,5 +14,3 @@ before_install:
 - node-gyp install
 node_js:
 - '6'
-- 6.3.0
-- "10"
