@@ -126,7 +126,15 @@ class ClientConnection
       @connect(self.gateway)
 
   gatewayMessage: (data, flags) ->
-    msg = if flags.binary then JSON.parse(zlib.inflateSync(data).toString()) else JSON.parse(data)
+    if flags
+      msg = if flags.binary then JSON.parse(zlib.inflateSync(data).toString()) else JSON.parse(data)
+    else
+      utils.debug("No Flags Present","warn")
+      if typeof data == "object"
+        utils.debug("Received Gateway Message With Type Object -> Buffer","warn")
+        msg = {op: -1}
+      else
+        msg = JSON.parse(data)
     HELLO = 10
     HEARTBEAT_ACK = 11
     DISPATCH = 0
