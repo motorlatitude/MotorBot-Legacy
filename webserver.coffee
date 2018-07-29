@@ -13,9 +13,6 @@ passport = require 'passport'
 LocalStrategy = require('passport-local').Strategy
 RedisStore = require('connect-redis')(session)
 flash = require('connect-flash')
-http2 = require 'http2'
-expressHTTP2WorkaroundMiddleware = require('express-http2-workaround')({ express:express, http2:http2 });
-
 
 class WebServer
 
@@ -24,8 +21,7 @@ class WebServer
   start: () ->
     self = @
     @site = express()
-    @site.use(expressHTTP2WorkaroundMiddleware);
-    #@site.use(morgan('combined'))
+    @site.use(morgan('dev'))
     compile = (str, path) ->
       stylus(str).set('filename',path).use(nib())
     @site.set('views', __dirname+'/views')
@@ -67,7 +63,6 @@ class WebServer
 
     #Express Routers
     @site.use("/", require('./routes/playlistv2'))
-    #@site.use("/canary", require('./routes/playlist_canary'))
     @site.use("/loginflow", require('./routes/loginflow'))
     @site.use("/api/oauth2", require('./routes/api_routes/oauth2'))
     @site.use("/api/music", require('./routes/api_routes/music'))
@@ -85,7 +80,7 @@ class WebServer
 
     #redirect for when adding bot
     @site.get("/redirect", (req, res) ->
-    #code = req.query.code
+      #code = req.query.code
       guildId = req.query.guild_id
       #console.log req
       res.end(JSON.stringify({guildId: guildId, connected: true}))

@@ -44,7 +44,7 @@ router.get('/dashboard/:view/:param?', (req, res) ->
 
 router.get('/', (req, res, next) ->
   if req.user
-    res.redirect('/dashboard/browse')
+    res.redirect('/dashboard/home')
   else
     res.redirect('/loginflow/')
 )
