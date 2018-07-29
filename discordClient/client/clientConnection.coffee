@@ -134,7 +134,6 @@ class ClientConnection
         utils.debug("Received Gateway Message With Type Object -> Buffer","warn")
         msg = {op: -1}
       else
-        console.log data
         msg = JSON.parse(data)
     HELLO = 10
     HEARTBEAT_ACK = 11
