@@ -6,7 +6,6 @@ fs = require 'fs'
 req = require 'request'
 moment = require 'moment'
 cheerio = require 'cheerio'
-say = require 'say'
 turndown = require 'turndown'
 
 class motorbotEventHandler

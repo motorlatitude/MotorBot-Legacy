@@ -173,10 +173,15 @@ class App
         )
 
   initWebServer: () ->
+    self = @
     @debug("Starting Web Server")
     @webserver = new WebServer(@)
     @webserver.start()
-    @webserver.site.listen(3210)
+    @webserver.site.listen(3210, () ->
+      self.debug("Web Server Started and Listening on 3210","info")
+    ).on("error", (err) ->
+      console.log err
+    )
 
   initPlaylist: () ->
     self = @

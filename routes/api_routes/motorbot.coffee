@@ -1,7 +1,6 @@
 express = require 'express'
 router = express.Router()
 ObjectID = require('mongodb').ObjectID
-globals = require '../../models/globals.coffee'
 request = require('request')
 async = require('async')
 uid = require('rand-token').uid;
