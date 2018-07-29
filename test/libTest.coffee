@@ -67,10 +67,19 @@ describe 'DiscordClient Object', ->
   client = new DiscordClient({token: keys.token})
   it 'Should Create a DiscordClient Object', ->
     client.constructor.name.should.equal "DiscordClient"
-  describe "Awaiting Event", ->
-    it "Should Receive Ready Event", (done) ->
+  describe "Awaiting Events", ->
+    it "Should Receive Valid Gateway", (done) ->
+      client.on("gateway_found", (data) ->
+        console.log "\tGateway Found Event Received"
+        assert(typeof data == "string", "Discord Gateway URL should be of type string")
+        console.log "\tDiscord Gateway: "+data
+        done()
+      )
+    it "Should Receive Valid Ready Event", (done) ->
       client.on("ready", (data) ->
+        console.log "\tReady Event Received"
         assert(data.v == 6, "Discord Gateway Protocol version should equal 6")
+        console.log "\tDiscord Gateway Protocol Version 6"
         done()
       )
   it "Should Determine Gateway Address and Connect", () ->

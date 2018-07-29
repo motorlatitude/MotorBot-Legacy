@@ -5,7 +5,6 @@ session = require('express-session')
 LocalStrategy = require('passport-local').Strategy
 crypto = require('crypto')
 uuid = require 'node-uuid'
-
 ###
   OAUTH 2.0
 
@@ -127,6 +126,7 @@ router.post("/authorize", authorization, passport.authenticate('local', {failure
 )
 
 router.post("/token", (req, res) ->
+  console.log "Getting Token"
   grant_type = req.body.grant_type #Required
   code = req.body.code #Requried
   redirect_uri = req.body.redirect_uri #Required
@@ -153,6 +153,7 @@ router.post("/token", (req, res) ->
                 if err then return authError(res, "unknown_error", "Internal Database Error")
                 AccessTokenCollection = req.app.locals.motorbot.database.collection("accessTokens")
                 accesstoken = crypto.randomBytes(64).toString('hex')
+                console.log accesstoken
                 accesstokenObj = {
                   value: accesstoken,
                   clientId: client_id,

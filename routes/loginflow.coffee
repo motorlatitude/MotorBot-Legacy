@@ -2,7 +2,7 @@ express = require 'express'
 router = express.Router()
 keys = require '../keys.json'
 passport = require 'passport'
-session = require('express-session')
+session = require 'express-session'
 DiscordStrategy = require('passport-discord').Strategy
 OAuth2Strategy = require('passport-oauth2').Strategy
 crypto = require('crypto')
@@ -27,6 +27,7 @@ passport.deserializeUser((req, id, done) ->
     )
   )
 )
+
 #MB Login
 passport.use(new OAuth2Strategy({
     authorizationURL: 'https://motorbot.io/api/oauth2/authorize',
@@ -37,27 +38,31 @@ passport.use(new OAuth2Strategy({
     state: true,
     session: true,
     passReqToCallback: true
-  },
-    (req, accessToken, refreshToken, profile, cb) ->
-      accessTokenCollection = req.app.locals.motorbot.database.collection("accessTokens")
-      accessTokenCollection.find({value: accessToken}).toArray((err, result) ->
-        if err then cb(err)
-        if result[0]
-          usersCollection = req.app.locals.motorbot.database.collection("users")
-          usersCollection.find({id: result[0].userId}).toArray((err, result) ->
-            if err then return cb(err)
-            if result[0]
-              profile = result[0]
-              profile.motorbotAccessToken = accessToken
-              usersCollection.update({id: profile.id}, {$set:{motorbotAccessToken: accessToken}}, (err, result) ->
-                return cb(err, profile)
-              )
-            else
-              return cb(null, false)
-          )
-        else
-          return cb(null, false)
-      )
+  }, (req, accessToken, refreshToken, profile, cb) ->
+    accessTokenCollection = req.app.locals.motorbot.database.collection("accessTokens")
+    accessTokenCollection.find({value: accessToken}).toArray((err, result) ->
+      if err
+        console.log err
+        cb(err)
+      if result[0]
+        usersCollection = req.app.locals.motorbot.database.collection("users")
+        usersCollection.find({id: result[0].userId}).toArray((err, result) ->
+          if err
+            console.log err
+            cb(err)
+          if result[0]
+            profile = result[0]
+            profile.motorbotAccessToken = accessToken
+            usersCollection.update({id: profile.id}, {$set:{motorbotAccessToken: accessToken}}, (err, result) ->
+              if err then console.log err
+              return cb(err, profile)
+            )
+          else
+            return cb(null, false)
+        )
+      else
+        return cb(null, false)
+    )
   )
 )
 #Discord verification OAuth
@@ -181,6 +186,8 @@ getDiscordUserGuildData = (req, user_id, access_token, cb) ->
         console.log "---------USER GUILD DATA ERROR----------"
         console.log err
       if body
+        console.log "---------USER GUILD DATA UPDATE---------"
+        #console.log body
         guilds = body
         usersCollection = req.app.locals.motorbot.database.collection("users")
         usersCollection.update({id: user_id}, {$set:{guilds: guilds}}, (err, result) ->
@@ -234,11 +241,10 @@ router.post("/login",  passport.authenticate('local', { failureRedirect: '/login
 )
 ###
 
-router.get("/callback", passport.authenticate('oauth2', { failureRedirect: '/?err=true', session: true }), refreshDiscordUserData, (req, res) ->
-  console.log "callback"
+router.get("/callback", passport.authenticate('oauth2', { failureRedirect: '/?err=true', session: true}), refreshDiscordUserData, (req, res) ->
   if req.user
     console.log "Logged In"
-    res.redirect("/dashboard/home")
+    res.redirect("/dashboard/browse")
 )
 
 router.get("/register", (req, res) ->
