@@ -72,9 +72,7 @@ describe 'DiscordClient Object', ->
       client.on("ready", (data) ->
         console.log "ready"
         console.log data
-        #assert(data.v == 6, "Discord Gateway Protocol version should equal 6")
+        assert(data.v == 6, "Discord Gateway Protocol version should equal 6")
         done()
       )
-  it "Should Determine Gateway Address and Connect", () ->
-    client.connect()
-    expect(client.internals).to.be.a("object")
+      client.connect()
