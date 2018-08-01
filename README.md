@@ -1,10 +1,10 @@
 [![MotorbotHeader](https://github.com/motorlatitude/MotorBot/blob/master/motorbotHeader.png?raw=true)]()
 
 
-[![Github Issues](https://img.shields.io/github/issues/motorlatitude/motorbot.svg)]() &nbsp; &nbsp;
-[![Build Status](https://travis-ci.org/motorlatitude/MotorBot.svg?branch=master)](https://travis-ci.org/motorlatitude/MotorBot) &nbsp; &nbsp;
-[![GitHub release](https://img.shields.io/github/release/motorlatitude/motorbot.svg)]() &nbsp; &nbsp;
-[![Chrome Web Store](https://img.shields.io/chrome-web-store/v/pgkdpldhnmmhpdfmmkgpnpofaaagomab.svg)]()
+[![Github Issues](https://img.shields.io/github/issues/motorlatitude/motorbot.svg?style=flat-square)]() &nbsp; &nbsp;
+[![Build Status](https://travis-ci.org/motorlatitude/MotorBot.svg?branch=master&style=flat-square)](https://travis-ci.org/motorlatitude/MotorBot) &nbsp; &nbsp;
+[![GitHub release](https://img.shields.io/github/release/motorlatitude/motorbot.svg?style=flat-square)]() &nbsp; &nbsp;
+[![Chrome Web Store](https://img.shields.io/chrome-web-store/v/pgkdpldhnmmhpdfmmkgpnpofaaagomab.svg?style=flat-square)]()
 
 
 MotorBot is a bot designed for discord, built on the [Node.js](https://nodejs.org/) javascript runtime environment. It allows
