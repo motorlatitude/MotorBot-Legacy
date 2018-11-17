@@ -79,10 +79,13 @@ class App
 
   initWebSocket: () ->
     self = @
+    @debug("Initialising WebSocket Connection")
     @websocket = websocketServer({port: 3006}) #public port is 443 (wss://wss.lolstat.net) and local 3006 via nginx proxy
     @websocket.connectedClients = []
     @websocket.on('connection', (ws) ->
+      self.debug("WebSocket Connection")
       session = Buffer(new Date().getTime() + uid(32)).toString("base64")
+      self.debug("A New WebSocket Connection Has Been Registered: "+session,"info");
 
       ws.on("close", (e) ->
         console.log "SOCKET CLOSED"
@@ -177,7 +180,7 @@ class App
     @debug("Starting Web Server")
     @webserver = new WebServer(@)
     @webserver.start()
-    @webserver.site.listen(3210, () ->
+    @webserver.site.listen(3210, "localhost", () ->
       self.debug("Web Server Started and Listening on 3210","info")
     ).on("error", (err) ->
       console.log err

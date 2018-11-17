@@ -208,38 +208,43 @@ findVideos = (req, importStartTime, tracks) ->
           console.log "Youtube Error: "+err
           videos["not_found"][track_id] = track
           cb()
-        if body.items
-          if body.items[0]
-            request({url: "https://www.googleapis.com/youtube/v3/videos?id="+body.items[0].id.videoId+"&key=AIzaSyAyoWcB_yzEqESeJm-W_eC5QDcOu5R1M90&part=snippet,contentDetails", json: true}, (err, httpResponse, detailedBody) ->
-              if err
-                console.log "Youtube Error: "+err
-                videos["not_found"][track_id] = track
-                cb()
-              if detailedBody.items
-                if detailedBody.items[0]
-                  video_obj = {
-                    video_id: body.items[0].id.videoId,
-                    video_title: body.items[0].snippet.title,
-                    video_duration: convertTimestampToSeconds(detailedBody.items[0].contentDetails.duration)
-                    track_details: tracks[track_id]
-                  }
-                  req.app.locals.motorbot.websocket.broadcast(JSON.stringify({type: 'SPOTIFY_IMPORT', op: 9, d: {event_type: "UPDATE", event_data: {user: req.user_id, start: importStartTime, message: "Finding "+track, progress: (25*(k/Object.keys(tracks).length)+25)/100}}}), req.user_id)
-                  videos["found"][track_id] = video_obj
-                  cb()
-                else
-                  videos["not_found"][track_id] = track
-                  cb()
+        else
+          if body
+            if body.items
+              if body.items[0]
+                request({url: "https://www.googleapis.com/youtube/v3/videos?id="+body.items[0].id.videoId+"&key=AIzaSyAyoWcB_yzEqESeJm-W_eC5QDcOu5R1M90&part=snippet,contentDetails", json: true}, (err, httpResponse, detailedBody) ->
+                  if err
+                    console.log "Youtube Error: "+err
+                    videos["not_found"][track_id] = track
+                    cb()
+                  if detailedBody.items
+                    if detailedBody.items[0]
+                      video_obj = {
+                        video_id: body.items[0].id.videoId,
+                        video_title: body.items[0].snippet.title,
+                        video_duration: convertTimestampToSeconds(detailedBody.items[0].contentDetails.duration)
+                        track_details: tracks[track_id]
+                      }
+                      req.app.locals.motorbot.websocket.broadcast(JSON.stringify({type: 'SPOTIFY_IMPORT', op: 9, d: {event_type: "UPDATE", event_data: {user: req.user_id, start: importStartTime, message: "Finding "+track, progress: (25*(k/Object.keys(tracks).length)+25)/100}}}), req.user_id)
+                      videos["found"][track_id] = video_obj
+                      cb()
+                    else
+                      videos["not_found"][track_id] = track
+                      cb()
+                  else
+                    videos["not_found"][track_id] = track
+                    cb()
+                  k++
+                )
               else
                 videos["not_found"][track_id] = track
                 cb()
-              k++
-            )
+            else
+              videos["not_found"][track_id] = track
+              cb()
           else
             videos["not_found"][track_id] = track
             cb()
-        else
-          videos["not_found"][track_id] = track
-          cb()
       )
     , (err) ->
       if err then console.log err

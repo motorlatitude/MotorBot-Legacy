@@ -15,7 +15,8 @@ html(lang="en")
                 document.getElementById("loginform").setAttribute("action", window.location.href);
             };
     body
-        .bg_opacity
+        -var r = Math.random()*4;
+        div(class="bg_opacity " + (r > 3 ? "w1" : (r > 2 ? "w2" : (r > 1 ? "w3" : (r > 0 ? "w4" : "w1")))))
         .sideangle
         .motorbotIcon
             img(src="https://motorbot.io/another_icon.png")

@@ -22,7 +22,8 @@ html(lang="en")
                 };
     body
         .loginSidebar
-        .bg_opacity
+        -var r = Math.random()*4;
+        div(class="bg_opacity "+(r > 3 ? "w1" : (r > 2 ? "w2" : (r > 1 ? "w3" : (r > 0 ? "w4" : "w1")))))
         form(class="form",method="POST",action="/loginflow/login")
             h1 Login to MotorBot Music
             if err

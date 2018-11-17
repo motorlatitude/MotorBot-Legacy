@@ -22,6 +22,8 @@ class WebServer
     @site.use(morgan('\[DEBUG\]\['+new Date().getDate()+"\/"+(parseInt(new Date().getMonth())+1)+"\/"+new Date().getFullYear()+' \] :remote-addr :remote-user :method :url HTTP/:http-version :status :res[content-length] - :response-time ms'))
     compile = (str, path) ->
       stylus(str).set('filename',path).set("compress",true).use(nib())
+    @app.debug("Express Should Trust Proxy Connections")
+    @site.set('trust proxy', 1)
     @app.debug("Setting Views Directory")
     @site.set('views', __dirname+'/views')
     @app.debug("Setting View Engine")
@@ -46,6 +48,7 @@ class WebServer
     )
     @app.debug("Setting Compression")
     @site.use(compression())
+    @app.debug("Setting Body Parser")
     @site.use(bodyParser.json({limit: "10mb"}));
     @site.use(bodyParser.urlencoded({ extended: false, limit: "10mb"}))
     @app.debug("Setting up Cookie Parser")

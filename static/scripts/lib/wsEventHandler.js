@@ -379,11 +379,14 @@ define(["constants", "playerbar", "serverSelection","notification","audioPlayer"
                                         twitterHandle += "@motorlatitude"
                                     }
                                     else if(data.d.user_id == "122072295689682944"){
-                                        twitterHandle += "@mutme_"
-                                        twitterHandle += "&nbsp; &bull; &nbsp;<i class=\"fab fa-twitch\"></i> &nbsp; Mutme"
+                                        twitterHandle += "@KariTTV"
+                                        twitterHandle += "&nbsp; &bull; &nbsp;<i class=\"fab fa-twitch\"></i> &nbsp; KariTTV"
                                     }
                                     else if(data.d.user_id == "122072558270021633"){
                                         twitterHandle += "@Cronus__"
+                                    }
+                                    else if(data.d.user_id == "122068247225827330"){
+                                        twitterHandle += "@ProbableCos";
                                     }
                                     new_user.innerHTML = "<div class=\"podcast_user_icon\" style=\"background-image: url('https://cdn.discordapp.com/avatars/" + data.d.user_id + "/" + users[data.d.user_id].avatar + ".png?size=1024'); background-repeat: no-repeat; background-position: center; background-size: cover;\"></div><div class='podcast_username'>"+twitterHandle+"</div>";
                                 }

@@ -4,7 +4,6 @@ fs = require 'fs'
 {EventEmitter} = require 'events'
 dgram = require 'dgram'
 nacl = require('tweetnacl')
-Opus = require 'node-opus'
 async = require 'async'
 
 class UDPClient extends EventEmitter
@@ -14,7 +13,7 @@ class UDPClient extends EventEmitter
     @nonce = new Buffer(24);
     @nonce.fill(0);
     @conn = {}
-    @opusEncoder = new Opus.OpusEncoder(96000, 2)
+    #@opusEncoder = new Opus.OpusEncoder(96000, 2)
     @userPacketQueue = {}
     @timestampDiff = undefined
     @prevTimestamp = undefined

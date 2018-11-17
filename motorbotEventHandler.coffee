@@ -634,6 +634,8 @@ class motorbotEventHandler
           self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/En-BAW-LHR-boarding.mp3", 2)
         else if msg.content == "!sb airport de"
           self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/Ge-DLH-FRA-boarding.mp3", 2)
+        else if msg.content == "!sb airport du"
+          self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/Du-KLM-AMS-boarding.mp3", 2)
         else if msg.content == "!sb stop"
           if self.app.soundboard[msg.guild_id]
             self.app.soundboard[msg.guild_id].stop()
@@ -665,7 +667,8 @@ class motorbotEventHandler
               **!sb defeat** - Defeat\n
               **!sb pentakill** - PENTAKILL\n
               **!sb airport** - Airport Announcement\n
-              **!sb airport de** - German Airport Announcement\n\n
+              **!sb airport de** - German Airport Announcement\n
+              **!sb airport du** - Dutch Airport Announcement\n\n
               **!sb stop** - Resets the soundboard, useful if the soundboard commands aren't working"
               color: 39125
             }
