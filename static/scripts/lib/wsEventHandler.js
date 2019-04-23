@@ -23,6 +23,8 @@ define(["constants", "playerbar", "serverSelection","notification","audioPlayer"
                         pb.updateDetails(playing.title, playing.artist, playing.album);
                         pb.updateSeek((parseFloat(playing.position) / 1000), playing.duration);
                         let elPlayButton = document.getElementById("playStop");
+                        let back = document.getElementById("playerBack");
+                        let skip = document.getElementById("playerSkip");
                         if(playing.currently_playing) {
                             elPlayButton.innerHTML = "<i class=\"fa fa-pause\" aria-hidden=\"true\" style=\"cursor: pointer;\"></i>";
                             elPlayButton.onclick = function(){
@@ -35,6 +37,26 @@ define(["constants", "playerbar", "serverSelection","notification","audioPlayer"
                                 AudioPlayer.resume();
                             };
                             clearInterval(c.seekInterval);
+                        }
+                        if(playing.player_state.previous_tracks[0]){
+                            back.classList.remove("disabled");
+                            back.onclick = function(e){
+                                AudioPlayer.back()
+                            };
+                        }
+                        else{
+                            back.classList.add("disabled");
+                            back.onclick = undefined;
+                        }
+                        if(playing.player_state.next_tracks[0]){
+                            skip.classList.remove("disabled");
+                            skip.onclick = function(e){
+                                AudioPlayer.skip()
+                            };
+                        }
+                        else{
+                            skip.classList.add("disabled");
+                            skip.onclick = undefined;
                         }
                     }
                     if(channel){
@@ -108,6 +130,13 @@ define(["constants", "playerbar", "serverSelection","notification","audioPlayer"
                                 pb.updateArtwork(packet.event_data.artwork);
                                 pb.updateDetails(packet.event_data.title, packet.event_data.artist, packet.event_data.album);
                                 pb.updateSeek(0, packet.event_data.duration);
+                                if(document.getElementById("currentSong_artwork")){
+                                    document.getElementById("currentSong_artwork").style.backgroundImage = "url('"+packet.event_data.artwork+"')";
+                                    document.getElementById("currentSong_artwork").style.backgroundSize = "cover";
+                                    document.getElementById("currentSong_artwork").style.backgroundRepeat = "no-repeat";
+                                    document.getElementById("currentSong_title").innerHTML = packet.event_data.title || "";
+                                    document.getElementById("currentSong_artist").innerHTML = packet.event_data.artist.name || "";
+                                }
                                 break;
                         }
                     }

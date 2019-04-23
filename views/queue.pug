@@ -1,33 +1,30 @@
 .contentWrapper
-    .contentTitle Current Song
-    br
-    br
+    .bigcircle
     #currentSong
-        .artwork
-        .title
-        .album_name Nothing Currently Playing
-        .artist_name
-        .length
+        .artwork#currentSong_artwork
+        .title#currentSong_title Nothing Currently Playing
+        .album_name#currentSong_artist Album Name
+        //.artist_name Artist Name
+        //.length 3:40
+    .playlistQueueContainer(style="margin-top: 50px;")
+        .playlistTitle Queued Songs
+        //.clearQueueButton.button.blue <i class="fa fa-trash" aria-hidden="true"></i> &nbsp; Clear
+        ul.songList#queueList
+            li.titleRow
+                .trackRow
+                    .item
+                    .title SONG
+                    .artist ARTIST
+                    .album ALBUM
+                    .time <i class="fa fa-clock-o" aria-hidden="true"></i>
 
-.playlistQueueContainer(style="margin-top: 350px;")
-    .playlistTitle Queued Songs
-    .clearQueueButton.button.blue <i class="fa fa-trash" aria-hidden="true"></i> &nbsp; Clear
-    ul.songList#queueList
-        li.titleRow
-            .trackRow
-                .item
-                .title SONG
-                .artist ARTIST
-                .album ALBUM
-                .time <i class="fa fa-clock-o" aria-hidden="true"></i>
-
-.playlistQueueContainer(style="margin-top: 350px;")
-    .playlistTitle Next Songs
-    ul.songList#nextSongsList
-        li.titleRow
-            .trackRow
-                .item
-                .title SONG
-                .artist ARTIST
-                .album ALBUM
-                .time <i class="fa fa-clock-o" aria-hidden="true"></i>
+    .playlistQueueContainer(style="margin-top: 150px;")
+        .playlistTitle Next Songs
+        ul.songList#nextSongsList
+            li.titleRow
+                .trackRow
+                    .item
+                    .title SONG
+                    .artist ARTIST
+                    .album ALBUM
+                    .time <i class="fa fa-clock-o" aria-hidden="true"></i>

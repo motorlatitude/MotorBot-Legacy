@@ -341,7 +341,7 @@ router.get("/Xur", (req, res) ->
           )
     )
   else
-    #we're screwed, need new tokens
+    # We're screwed, need new tokens
     console.log "Can no longer get Xur items as a re-authorisation is required"
 
 

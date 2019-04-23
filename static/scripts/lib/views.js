@@ -153,12 +153,22 @@ define(["constants","requester","marked","simpleBar","playlist"], function(c,req
                                    document.getElementById("nextSongsList").appendChild(elPlaylistTrack);
                                    x++;
                                }
+                               if(track.status === "playing"){
+                                   if(document.getElementById("currentSong_artwork")){
+                                       document.getElementById("currentSong_artwork").style.backgroundImage = "url('"+track.artwork+"')";
+                                       document.getElementById("currentSong_artwork").style.backgroundSize = "cover";
+                                       document.getElementById("currentSong_artwork").style.backgroundRepeat = "no-repeat";
+                                       document.getElementById("currentSong_title").innerHTML = track.title || "";
+                                       document.getElementById("currentSong_artist").innerHTML = track.artist.name || "";
+                                   }
+                               }
                            }
                            document.getElementById("ajax_loader").style.display = "none";
                            document.getElementById("ajax_contentView").style.opacity = "1";
                            new SimpleBar(document.getElementById("ajax_contentView"));
                        }).catch(function(err){
-
+                           console.error("Error Occurred Returning Queue");
+                            console.error(err);
                        });
                        break;
                    case "search":

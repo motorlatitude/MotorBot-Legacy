@@ -125,6 +125,10 @@ class Dispatcher
         utils.debug("Channel Category Registered: "+channel.name)
       else
         utils.debug("Unknown channel type: "+channel.type,"warn")
+    for i, user of data.d.members
+      u = user.user
+      utils.debug("Registering User "+u.username+"#"+u.discriminator)
+      @discordClient.users[u.id] = u
     @discordClient.guilds[data.d.id] = data.d
     @discordClient.guilds[data.d.id].voice = {}
     thisServer = @discordClient.guilds[data.d.id]

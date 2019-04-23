@@ -900,6 +900,8 @@ define('wsEventHandler',["constants", "playerbar", "serverSelection","notificati
                         pb.updateDetails(playing.title, playing.artist, playing.album);
                         pb.updateSeek((parseFloat(playing.position) / 1000), playing.duration);
                         let elPlayButton = document.getElementById("playStop");
+                        let back = document.getElementById("playerBack");
+                        let skip = document.getElementById("playerSkip");
                         if(playing.currently_playing) {
                             elPlayButton.innerHTML = "<i class=\"fa fa-pause\" aria-hidden=\"true\" style=\"cursor: pointer;\"></i>";
                             elPlayButton.onclick = function(){
@@ -912,6 +914,26 @@ define('wsEventHandler',["constants", "playerbar", "serverSelection","notificati
                                 AudioPlayer.resume();
                             };
                             clearInterval(c.seekInterval);
+                        }
+                        if(playing.player_state.previous_tracks[0]){
+                            back.classList.remove("disabled");
+                            back.onclick = function(e){
+                                AudioPlayer.back()
+                            };
+                        }
+                        else{
+                            back.classList.add("disabled");
+                            back.onclick = undefined;
+                        }
+                        if(playing.player_state.next_tracks[0]){
+                            skip.classList.remove("disabled");
+                            skip.onclick = function(e){
+                                AudioPlayer.skip()
+                            };
+                        }
+                        else{
+                            skip.classList.add("disabled");
+                            skip.onclick = undefined;
                         }
                     }
                     if(channel){
@@ -985,6 +1007,13 @@ define('wsEventHandler',["constants", "playerbar", "serverSelection","notificati
                                 pb.updateArtwork(packet.event_data.artwork);
                                 pb.updateDetails(packet.event_data.title, packet.event_data.artist, packet.event_data.album);
                                 pb.updateSeek(0, packet.event_data.duration);
+                                if(document.getElementById("currentSong_artwork")){
+                                    document.getElementById("currentSong_artwork").style.backgroundImage = "url('"+packet.event_data.artwork+"')";
+                                    document.getElementById("currentSong_artwork").style.backgroundSize = "cover";
+                                    document.getElementById("currentSong_artwork").style.backgroundRepeat = "no-repeat";
+                                    document.getElementById("currentSong_title").innerHTML = packet.event_data.title || "";
+                                    document.getElementById("currentSong_artist").innerHTML = packet.event_data.artist.name || "";
+                                }
                                 break;
                         }
                     }
@@ -1256,11 +1285,14 @@ define('wsEventHandler',["constants", "playerbar", "serverSelection","notificati
                                         twitterHandle += "@motorlatitude"
                                     }
                                     else if(data.d.user_id == "122072295689682944"){
-                                        twitterHandle += "@mutme_"
-                                        twitterHandle += "&nbsp; &bull; &nbsp;<i class=\"fab fa-twitch\"></i> &nbsp; Mutme"
+                                        twitterHandle += "@KariTTV"
+                                        twitterHandle += "&nbsp; &bull; &nbsp;<i class=\"fab fa-twitch\"></i> &nbsp; KariTTV"
                                     }
                                     else if(data.d.user_id == "122072558270021633"){
                                         twitterHandle += "@Cronus__"
+                                    }
+                                    else if(data.d.user_id == "122068247225827330"){
+                                        twitterHandle += "@ProbableCos";
                                     }
                                     new_user.innerHTML = "<div class=\"podcast_user_icon\" style=\"background-image: url('https://cdn.discordapp.com/avatars/" + data.d.user_id + "/" + users[data.d.user_id].avatar + ".png?size=1024'); background-repeat: no-repeat; background-position: center; background-size: cover;\"></div><div class='podcast_username'>"+twitterHandle+"</div>";
                                 }
@@ -6523,8 +6555,9 @@ define('playlist',["constants","requester","audioPlayer","simpleBar","eventListe
                     document.querySelector(".playlistDescription").innerHTML = d.description;
                 }
                 else{
-                    document.querySelector(".playlistType").style.top = "30px";
-                    document.querySelector(".playlistName").style.top = "60px";
+                    document.querySelector(".playlistType").style.top = "75px";
+                    document.querySelector(".playlistName").style.top = "110px";
+                    document.querySelector(".playlistName").style.fontSize = "45px";
                 }
                 document.querySelector(".playlistStats .user").innerHTML = d.owner.username+"#"+d.owner.discriminator;
                 if((d.followers.length - 1) === 1) {
@@ -6900,12 +6933,22 @@ define('views',["constants","requester","marked","simpleBar","playlist"], functi
                                    document.getElementById("nextSongsList").appendChild(elPlaylistTrack);
                                    x++;
                                }
+                               if(track.status === "playing"){
+                                   if(document.getElementById("currentSong_artwork")){
+                                       document.getElementById("currentSong_artwork").style.backgroundImage = "url('"+track.artwork+"')";
+                                       document.getElementById("currentSong_artwork").style.backgroundSize = "cover";
+                                       document.getElementById("currentSong_artwork").style.backgroundRepeat = "no-repeat";
+                                       document.getElementById("currentSong_title").innerHTML = track.title || "";
+                                       document.getElementById("currentSong_artist").innerHTML = track.artist.name || "";
+                                   }
+                               }
                            }
                            document.getElementById("ajax_loader").style.display = "none";
                            document.getElementById("ajax_contentView").style.opacity = "1";
                            new SimpleBar(document.getElementById("ajax_contentView"));
                        }).catch(function(err){
-
+                           console.error("Error Occurred Returning Queue");
+                            console.error(err);
                        });
                        break;
                    case "search":

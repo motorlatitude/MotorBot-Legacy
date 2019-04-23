@@ -188,6 +188,8 @@ html(lang="en")
             ul#notificationsList
         .flexContainer
             .sidebar(data-simplebar)
+                .scrollFader.top
+                .scrollFader.bottom
                 .title Main
                 ul.mainNav
                     li(data-view="home").active Overview
@@ -198,7 +200,7 @@ html(lang="en")
                     li(data-view="recently-played") Recently Played
                 .title Playlists
                 ul.mainNav.playlistNav#playlistNav
-                .newPlaylistButton#newPlaylistButton <i class="fas fa-plus" aria-hidden="true"></i> &nbsp; &nbsp; New Playlist
+                .newPlaylistButton#newPlaylistButton New Playlist
             .contentView#ajax_contentView(data-simplebar)
                 p
         .playerBar
@@ -256,6 +258,7 @@ html(lang="en")
             link(href='/css/fa/solid.css', rel='stylesheet')
             link(href='/css/fa/regular.css', rel='stylesheet')
             link(href="/css/simplebar.min.css", rel="stylesheet")
+            link(href="https://fonts.googleapis.com/css?family=Montserrat:400,500,600,700,800,900", rel="stylesheet")
         script.
             var loadDeferredStyles = function() {
                 var addStylesNode = document.getElementById("deferred-styles");

@@ -61,5 +61,5 @@
     "ytdl-core": "^0.26.1"
   },
   "author": "Lennart Hase",
-  "license": "ISC"
+  "license": "MIT"
 }

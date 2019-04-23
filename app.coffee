@@ -133,6 +133,7 @@ class App
                     results[0]["start_time"] = self.musicPlayers["130734377066954752"].start_time
                     results[0]["position"] = self.musicPlayers["130734377066954752"].seekPosition
                     results[0]["playlist_id"] = self.musicPlayers["130734377066954752"].playlist_id
+                    results[0]["player_state"] = self.musicPlayers["130734377066954752"].player_state
                 welcome_obj.playing = results[0]
               else
                 welcome_obj.playing = {currently_playing: false}

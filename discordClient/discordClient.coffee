@@ -44,6 +44,7 @@ class DiscordClient extends EventEmitter
     @internals.sequence = 0
     @channels = {}
     @guilds = {}
+    @users = {}
     @voiceHandlers = {}
     @voiceConnections = {}
     @getGateway()

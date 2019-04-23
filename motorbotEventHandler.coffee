@@ -244,15 +244,29 @@ class motorbotEventHandler
               delete self.challenger[outcome.winner]
         )
 
+  statusIcon: (status) ->
+    if status == "online"
+      return "<:online:525335249350295553>"
+    else if status == "dnd"
+      return "<:dnd:525335249224466456>"
+    else if status == "offline"
+      return "<:offline:525335249308090375>"
+    else if status == "idle"
+      return "<:idle:525335249362616320>"
+    else if status == "streaming"
+      return "<:streaming:525335249576525856>"
+    else
+      return "<:offline:525335249308090375>"
+
   setUpEvents: () ->
     self = @
     self.twitchSubscribeToStream(22032158) #motorlatitude
     self.twitchSubscribeToStream(26752266) #mutme
-    self.twitchSubscribeToStream(24991333) #imaqtpie
+    self.twitchSubscribeToStream(26538483) #sips_
     self.twitchSubscribeToStream(22510310) #GDQ
     #League LCS
     self.twitchSubscribeToStream(36029255) #RiotGames
-    self.twitchSubscribeToStream(36794584) #RiotGames2
+    #self.twitchSubscribeToStream(36794584) #RiotGames2
 
 
     @client.on("ready", () ->
@@ -265,18 +279,23 @@ class motorbotEventHandler
         d = new Date()
         time = "`["+d.getDate()+"/"+(parseInt(d.getMonth())+1)+"/"+d.getFullYear()+" "+d.toLocaleTimeString()+"]` "
         if server.id == "130734377066954752"
-          self.client.channels["432351112616738837"].sendMessage(":x: <@&443191635657097217>","embed": {
-            "title": "MOTORBOT RESTARTED"
-            "description": "Motorbot had to restart either through manual input or due to a fatal error occurring, please consult error logs in console if the latter.",
-            "color": 16724787
+          self.client.channels["432351112616738837"].sendMessage("","embed": {
+            "title": ":warning: MOTORBOT RESTARTED"
+            "description": "\n \nMotorBot had to restart, please contact the system administrator if this behaviour was unexpected.\n\n*version: 0.6.0*\n*author: Lennart Hase*\n*license: MIT License Copyright (c) 2018 Lennart Hase*\n \n",
+            "color": 16724787,
+            "timestamp": new Date().toISOString(),
+            "footer": {
+              "icon_url": "https://cdn.discordapp.com/avatars/169554882674556930/eb3d8df4dc7cf9852701cf5031da0c2f.png?size=512",
+              "text": "MotorBot"
+            },
           })
-        #self.client.channels["432351112616738837"].sendMessage(time + " Joined Guild: "+server.name+" ("+server.presences.length+" online / "+(parseInt(server.member_count)-server.presences.length)+" offline)")
-        if y == 0
-          #Listen for patches
-          #setInterval( () ->
-          #  self.patchListener("ow")
-          #, 3600000)
-          y = 1
+          #self.client.channels["432351112616738837"].sendMessage(time + " Joined Guild: "+server.name+" ("+server.presences.length+" online / "+(parseInt(server.member_count)-server.presences.length)+" offline)")
+          if y == 0
+            #Listen for patches
+            #setInterval( () ->
+            #  self.patchListener("ow")
+            #, 3600000)
+            y = 1
     )
 
     @client.on("voiceUpdate_Speaking", (data) ->
@@ -364,28 +383,131 @@ class motorbotEventHandler
               if userStatus[user_id].game.name == game.name
                 extra_info["last_game_update"] = userStatus[user_id].last_game_update
           if game.details
-            additionalString += "\n"+time+" *"+game.details+"*"
+            additionalString += "\n`[---------------------]` *"+game.details+"*"
           if game.state
-            additionalString += "\n"+time+" "+game.state
+            additionalString += "\n`[---------------------]` "+game.state
 
         if userStatus[user_id]
           if userStatus[user_id].status == status
             #no status change, only game update
             if !game && userStatus[user_id].game
               if userStatus[user_id].game.type == 0
-                statusText = " has stopped playing **"+userStatus[user_id].game.name+"** after "+(moment.unix(userStatus[user_id].last_game_update/1000).fromNow()).replace(" ago","")
+                statusText = " has stopped playing **"+userStatus[user_id].game.name+"** after "+(moment.unix(userStatus[user_id].last_game_update/1000).fromNow()).replace(" ago","")+"\n"
               else if userStatus[user_id].game.type == 1
-                statusText = " has stopped streaming **"+userStatus[user_id].game.name+"** after "+(moment.unix(userStatus[user_id].last_game_update/1000).fromNow()).replace(" ago","")
+                statusText = " has stopped streaming **"+userStatus[user_id].game.name+"** after "+(moment.unix(userStatus[user_id].last_game_update/1000).fromNow()).replace(" ago","")+"\n"
               else if userStatus[user_id].game.type == 2
-                statusText = " has stopped listening to **"+userStatus[user_id].game.name+"** after "+(moment.unix(userStatus[user_id].last_game_update/1000).fromNow()).replace(" ago","")
+                statusText = " has stopped listening to **"+userStatus[user_id].game.name+"** after "+(moment.unix(userStatus[user_id].last_game_update/1000).fromNow()).replace(" ago","")+"\n"
+            if extra_info.client_status.desktop != userStatus[user_id].client_status.desktop || extra_info.client_status.mobile != userStatus[user_id].client_status.mobile || extra_info.client_status.web != userStatus[user_id].client_status.web
+              #status event update on an alternative client
+              if statusText != ""
+                x = "`[---------------------]`"
+              else
+                x = "\n`[---------------------]`";
+              if extra_info.client_status.desktop != userStatus[user_id].client_status.desktop
+                statusText += x+" Status changed on the `desktop` client to `"+(if extra_info.client_status.desktop then extra_info.client_status.desktop else "offline")+"`"
+              if extra_info.client_status.mobile != userStatus[user_id].client_status.mobile
+                statusText += x+" Status changed  on the `mobile` client to `"+(if extra_info.client_status.mobile then extra_info.client_status.mobile else "offline")+"`"
+              if extra_info.client_status.web != userStatus[user_id].client_status.web
+                statusText += x+" Status changed  on the `web` client to `"+(if extra_info.client_status.web then extra_info.client_status.web else "offline")+"`"
+            else
+              statusText = statusText.replace(/\n/gmi,"");
             extra_info["last_update"] = userStatus[user_id].last_update
           else
             #status change
-            statusText = " was `"+userStatus[user_id].status+"` for "+(moment.unix(userStatus[user_id].last_update/1000).fromNow()).replace(" ago","")+" and is now `"+status+"`"
+            if extra_info.client_status.desktop != userStatus[user_id].client_status.desktop || extra_info.client_status.mobile != userStatus[user_id].client_status.mobile || extra_info.client_status.web != userStatus[user_id].client_status.web
+              #status event update on an alternative client
+              if extra_info.client_status.desktop != userStatus[user_id].client_status.desktop
+                statusText += "Status change on the `desktop` client to `"+(if extra_info.client_status.desktop then extra_info.client_status.desktop else "offline")+"`\n"
+              if extra_info.client_status.mobile != userStatus[user_id].client_status.mobile
+                statusText += "Status change on the `mobile` client to `"+(if extra_info.client_status.mobile then extra_info.client_status.mobile else "offline")+"`\n"
+              if extra_info.client_status.web != userStatus[user_id].client_status.web
+                statusText += "Status change on the `web` client to `"+(if extra_info.client_status.web then extra_info.client_status.web else "offline")+"`\n"
+              self.client.channels["432351112616738837"].sendMessage("","embed": {
+                "title": ":bellhop: User Presence Update",
+                "description": statusText+"\n",
+                "fields": [
+                  {
+                    "name": "Last Status",
+                    "value": self.statusIcon(userStatus[user_id].status)+" "+userStatus[user_id].status+" for "+(moment.unix(userStatus[user_id].last_update/1000).fromNow()).replace(" ago","")
+                  },
+                  {
+                    "name": "Current Status",
+                    "value": self.statusIcon(status)+" "+status
+                  },
+                  {
+                    "name": "Desktop",
+                    "value": self.statusIcon((if extra_info.client_status.desktop then extra_info.client_status.desktop else "offline"))+" "+(if extra_info.client_status.desktop then extra_info.client_status.desktop else "offline"),
+                    "inline": true
+                  },
+                  {
+                    "name": "Web",
+                    "value": self.statusIcon((if extra_info.client_status.web then extra_info.client_status.web else "offline"))+" "+(if extra_info.client_status.web then extra_info.client_status.web else "offline"),
+                    "inline": true
+                  },
+                  {
+                    "name": "Mobile",
+                    "value": self.statusIcon((if extra_info.client_status.mobile then extra_info.client_status.mobile else "offline"))+" "+(if extra_info.client_status.mobile then extra_info.client_status.mobile else "offline"),
+                    "inline": true
+                  }],
+                "color": 14474718,
+                "timestamp": new Date().toISOString(),
+                "footer": {
+                  "icon_url": "https://cdn.discordapp.com/avatars/"+user_id+"/"+self.client.users[user_id].avatar+".png?size=512",
+                  "text": self.client.users[user_id].username+"#"+self.client.users[user_id].discriminator
+                },
+              })
+              statusText = ""
+            ###else
+              statusText = "'s status was `"+userStatus[user_id].status+"` for "+(moment.unix(userStatus[user_id].last_update/1000).fromNow()).replace(" ago","")+" and is now `"+status+"`"###
             extra_info["last_update"] = new Date().getTime()
         else
           #we don't know previous status so assume status change
-          statusText = "'s status has changed to `"+status+"`"
+          self.client.channels["432351112616738837"].sendMessage("","embed": {
+            "title": ":spy: Registering New Event User",
+            "description": "A user that has not undergone a presence update after MotorBot was launched has undergone a presence update event\n\n",
+            "fields": [
+              {
+                "name": "User",
+                "value": "<@"+user_id+">"
+                "inline": true
+              },
+              {
+                "name": "User Identifier",
+                "value": "`"+user_id+"`",
+                "inline": true
+              },
+              {
+                "name": "Current Status",
+                "value": self.statusIcon(status)+" "+status,
+                "inline": true
+              },
+              {
+                "name": " ‏‏‎ ",
+                "value": " ‏‏‎ "
+              },
+              {
+                "name": "Desktop",
+                "value": self.statusIcon((if extra_info.client_status.desktop then extra_info.client_status.desktop else "offline"))+" "+(if extra_info.client_status.desktop then extra_info.client_status.desktop else "offline"),
+                "inline": true
+              },
+              {
+                "name": "Web",
+                "value": self.statusIcon((if extra_info.client_status.web then extra_info.client_status.web else "offline"))+" "+(if extra_info.client_status.web then extra_info.client_status.web else "offline"),
+                "inline": true
+              },
+              {
+                "name": "Mobile",
+                "value": self.statusIcon((if extra_info.client_status.mobile then extra_info.client_status.mobile else "offline"))+" "+(if extra_info.client_status.mobile then extra_info.client_status.mobile else "offline"),
+                "inline": true
+            }],
+            "color": 1274082,
+            "timestamp": new Date().toISOString(),
+            "footer": {
+              "icon_url": "https://cdn.discordapp.com/avatars/"+user_id+"/"+self.client.users[user_id].avatar+".png?size=512",
+              "text": self.client.users[user_id].username+"#"+self.client.users[user_id].discriminator
+            },
+          })
+          statusText = ""
           extra_info["last_update"] = new Date().getTime()
 
         if game && game.type == 0
@@ -393,7 +515,7 @@ class motorbotEventHandler
         else if game && game.type == 1
           gameText = " is streaming **"+game.name+"**"
         else if game && game.type == 2
-          gameText = " is listening to **"+game.name+"**"
+          gameText = "**"+game.name+"** Presence Update Event (Play/Pause)"
         else
           gameText = "" #status change
 
@@ -401,21 +523,20 @@ class motorbotEventHandler
           if userStatus[user_id]
             if userStatus[user_id].game
               if userStatus[user_id].game.name == game.name && game.type == 0
-                gameText = " game presence update :video_game: "
+                gameText = " game presence update :space_invader:"
               else if userStatus[user_id].game.name == game.name && game.type == 2
-                gameText = " is switching song"
+                gameText = "**"+game.name+"** Presence Update Event (Switching)"
 
         someText = if(gameText != "" && statusText != "") then " and"+gameText else gameText
         if game && game.type == 2
           additionalString = ""
           if game.details
-            additionalString += "\n"+time+" **"+game.details+"**"
+            additionalString += "\n**"+game.details+"**"
           if game.state
-            additionalString += "\n"+time+" by "+game.state
+            additionalString += "\n*by "+game.state+"*"
           if game.assets.large_text
-            additionalString += "\n"+time+" on "+game.assets.large_text
+            additionalString += "\non "+game.assets.large_text
           console.log game
-          desc = time+"<@"+user_id+">"+statusText+someText+additionalString
           thumbnail_url = ""
           if game.assets
             if game.assets.large_image
@@ -423,17 +544,24 @@ class motorbotEventHandler
               thumbnail_url = "https://i.scdn.co/image/"+thumbnail_id
           console.log thumbnail_url
           self.client.channels["432351112616738837"].sendMessage("","embed": {
-            "description": desc,
+            "title": "<:spotify:525318301367271425>  "+statusText+someText,
+            "description": additionalString,
             "color": 2021216,
             "thumbnail": {
               "url": thumbnail_url
-            }
+            },
+            "timestamp": new Date().toISOString(),
+            "footer": {
+              "icon_url": "https://cdn.discordapp.com/avatars/"+user_id+"/"+self.client.users[user_id].avatar+".png?size=512",
+              "text": self.client.users[user_id].username+"#"+self.client.users[user_id].discriminator
+            },
           })
         else
           if statusText == "" && someText == "" && additionalString == ""
-            self.client.channels["432351112616738837"].sendMessage(time+"<@"+user_id+"> is `invisible` and a status refresh event occurred")
+            #self.client.channels["432351112616738837"].sendMessage(time+"<@"+user_id+"> is `invisible` and a status refresh event occurred")
           else
             self.client.channels["432351112616738837"].sendMessage(time+"<@"+user_id+">"+statusText+someText+additionalString)
+            console.log(extra_info);
 
         userStatus[user_id] = extra_info
     )
@@ -742,7 +870,15 @@ class motorbotEventHandler
                 style: {'padding-left':1, 'padding-right':1, head:[], border:[]}
               })
               avgPing = (Math.round(self.client.voiceHandlers[server].avgPing*100)/100)
-              connectedTime = (Math.round(((new Date().getTime() - self.client.voiceHandlers[server].connectTime)/1000)*10)/10)
+              connectedTime = (
+                Math.round(
+                  (
+                    (
+                      new Date().getTime() - self.client.voiceHandlers[server].connectTime
+                    )/1000
+                  )*10
+                )/10
+              )
               table.push(["Endpoint",self.client.voiceHandlers[server].endpoint])
               table.push(["Local Port",self.client.voiceHandlers[server].localPort])
               table.push(["Average Ping",avgPing+"ms"])
