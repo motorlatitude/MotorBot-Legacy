@@ -16,7 +16,7 @@ uid = require('rand-token').uid;
   - pause
   - skip
   - prev
-  -playing
+  - playing
 
   Authentication Required: false
   API Key Required: true
@@ -208,6 +208,19 @@ skipSong = (req, res) ->
     req.app.locals.motorbot.skipSong()
     res.sendStatus(200)
 
+backSong = (req, res) ->
+  res.type('json')
+  musicPlayer = req.app.locals.motorbot.musicPlayers["130734377066954752"]
+  if musicPlayer
+    if musicPlayer.player_state
+      if musicPlayer.player_state.previous_tracks[0]
+        req.app.locals.motorbot.backSong()
+        musicPlayer.playing = true
+        res.sendStatus(200)
+  else
+    req.app.locals.motorbot.backSong()
+    res.sendStatus(200)
+
 pauseSong = (req, res) ->
   res.type('json')
   musicPlayer = req.app.locals.motorbot.musicPlayers["130734377066954752"]
@@ -289,10 +302,7 @@ router.get("/skip", (req, res) ->
 )
 
 router.get("/prev", (req, res) ->
-  #TODO
-  #WARN
-  #INFO
-  #TODO this absolutely needs to get done
+  scheduleSongPlay(backSong(req, res))
 )
 
 router.get("/playing", (req, res) ->

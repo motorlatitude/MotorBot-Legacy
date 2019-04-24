@@ -29,12 +29,12 @@ class AudioPlayer extends EventEmitter
       '-ar', '48000',
       '-ss', '0',
       '-ac', '2',
-      '-af', 'bass=g=4:f=140:w=0.7',
+      '-af', 'bass=g=2:f=140:w=0.7',
       '-vn',
       '-copy_unknown',
       '-loglevel', 'verbose',
       'pipe:1'
-    ]).on('error', (e) ->
+    ], {detached: true}).on('error', (e) ->
       utils.debug("FFMPEG encoding error: "+e.toString(),"error")
     )
     chnkr = chunker(1920*2, {
@@ -59,6 +59,7 @@ class AudioPlayer extends EventEmitter
     self.enc.stdout.once('end', () ->
       utils.debug("Stdout END")
       self.enc.kill()
+      process.kill(-self.enc.pid); #stop possible memory leak
     )
 
     self.enc.once('close', (code, signal) ->
@@ -172,6 +173,7 @@ class AudioPlayer extends EventEmitter
       self.glob_stream.unpipe()
       self.enc.kill("SIGSTOP")
       self.enc.kill()
+      process.kill(-self.enc.pid); #stop possible memory leak
       self.emit("streamDone")
       self.destroy()
     catch err
@@ -190,6 +192,7 @@ class AudioPlayer extends EventEmitter
       self.glob_stream.unpipe()
       self.enc.kill("SIGSTOP")
       self.enc.kill()
+      process.kill(-self.enc.pid); #stop possible memory leak
       self.destroy()
     catch err
       self.destroy()

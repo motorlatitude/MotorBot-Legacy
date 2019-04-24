@@ -2328,8 +2328,14 @@ html
   left -50%
   width 90%
   height 200%
-  background rgba(100,100,100,0.1)
+  background rgba(0,0,0,1)
   border-radius 50%
+  overflow hidden
+  & .artwork
+    width 100%
+    height 100%
+    filter blur(20px)
+    opacity 0.1
 
 .contentWrapper #currentSong
   position absolute
@@ -2375,5 +2381,13 @@ html
   color #494E57
 
 .contentWrapper .playlistQueueContainer
-  width 60%
-  margin-left 40%
+  width calc(60% - 40px)
+  margin-left calc(40% + 40px)
+  & .songList
+    min-width 300px
+    & li
+      margin-top 10px
+      min-width 300px
+      cursor default
+      &:last-child
+        padding-bottom 50px

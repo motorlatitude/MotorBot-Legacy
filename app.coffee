@@ -333,11 +333,43 @@ class App
         self.goThroughSongQueue()
     )
 
+  lastSong: () ->
+      self = @
+      songQueueCollection = @database.collection("songQueue")
+      songQueueCollection.find({status: "playing"}).sort({sortId: 1}).toArray((err, results) ->
+        if err then console.log err
+        if results[0]
+          trackId = results[0]._id
+          playlistId = results[0].playlistId
+          songQueueCollection.updateOne({'_id': trackId, 'playlistId': playlistId},{'$set':{'status':'added'}},() ->
+            self.debug("Track Status Changed");
+            songQueueCollection.find({status: "played"}).sort({sortId: -1}).toArray((err, results) ->
+              if err then console.log err
+              if results[0]
+                trackId = results[0]._id
+                playlistId = results[0].playlistId
+                songQueueCollection.updateOne({'_id': trackId, 'playlistId': playlistId},{'$set':{'status':'added'}},() ->
+                  self.debug("Track Status Changed");
+                  setTimeout(() ->
+                    self.goThroughSongQueue()
+                  ,1000)
+                )
+              else
+                self.debug("No Songs To Go Back To");
+            )
+          )
+        else
+          self.goThroughSongQueue()
+      )
+
   skipSong: () ->
     if @musicPlayers["130734377066954752"]
       @musicPlayers["130734377066954752"].stop()
     else
       @nextSong()
+
+  backSong: () ->
+    @lastSong()
 
 
 app = new App()

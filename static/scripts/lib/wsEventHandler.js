@@ -30,33 +30,37 @@ define(["constants", "playerbar", "serverSelection","notification","audioPlayer"
                             elPlayButton.onclick = function(){
                                 AudioPlayer.pause();
                             };
+                            if(playing.player_state.previous_tracks[0]){
+                                back.classList.remove("disabled");
+                                back.onclick = function(e){
+                                    AudioPlayer.back()
+                                };
+                            }
+                            else{
+                                back.classList.add("disabled");
+                                back.onclick = undefined;
+                            }
+                            if(playing.player_state.next_tracks[0]){
+                                skip.classList.remove("disabled");
+                                skip.onclick = function(e){
+                                    AudioPlayer.skip()
+                                };
+                            }
+                            else{
+                                skip.classList.add("disabled");
+                                skip.onclick = undefined;
+                            }
                         }
                         else{//paused
                             elPlayButton.innerHTML = "<i class=\"fa fa-play\" aria-hidden=\"true\" style=\"cursor: pointer;\"></i>";
                             elPlayButton.onclick = function(){
                                 AudioPlayer.resume();
                             };
-                            clearInterval(c.seekInterval);
-                        }
-                        if(playing.player_state.previous_tracks[0]){
-                            back.classList.remove("disabled");
-                            back.onclick = function(e){
-                                AudioPlayer.back()
-                            };
-                        }
-                        else{
                             back.classList.add("disabled");
                             back.onclick = undefined;
-                        }
-                        if(playing.player_state.next_tracks[0]){
-                            skip.classList.remove("disabled");
-                            skip.onclick = function(e){
-                                AudioPlayer.skip()
-                            };
-                        }
-                        else{
                             skip.classList.add("disabled");
                             skip.onclick = undefined;
+                            clearInterval(c.seekInterval);
                         }
                     }
                     if(channel){
@@ -134,8 +138,13 @@ define(["constants", "playerbar", "serverSelection","notification","audioPlayer"
                                     document.getElementById("currentSong_artwork").style.backgroundImage = "url('"+packet.event_data.artwork+"')";
                                     document.getElementById("currentSong_artwork").style.backgroundSize = "cover";
                                     document.getElementById("currentSong_artwork").style.backgroundRepeat = "no-repeat";
+                                    document.getElementById("currentSong_bgartwork").style.backgroundImage = "url('"+packet.event_data.artwork+"')";
+                                    document.getElementById("currentSong_bgartwork").style.backgroundSize = "cover";
+                                    document.getElementById("currentSong_bgartwork").style.backgroundRepeat = "no-repeat";
                                     document.getElementById("currentSong_title").innerHTML = packet.event_data.title || "";
                                     document.getElementById("currentSong_artist").innerHTML = packet.event_data.artist.name || "";
+                                    console.log("Refreshing Queues View");
+                                    //views.load("queue","undefined");
                                 }
                                 break;
                         }

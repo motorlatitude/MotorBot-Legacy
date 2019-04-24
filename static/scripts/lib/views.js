@@ -112,11 +112,11 @@ define(["constants","requester","marked","simpleBar","playlist"], function(c,req
                                    elPlaylistTrack.id = track.id;
                                    elPlaylistTrack.setAttribute("data-songid", track.id);
                                    elPlaylistTrack.innerHTML = "<div class='trackRow'>" +
-                                       "<div class='item' data-trackNo='" + trackNo + "'>" + trackNo + "</div>" +
+                                       //"<div class='item' data-trackNo='" + trackNo + "'>" + trackNo + "</div>" +
                                        "<div class='title' data-sortIndex='" + track.title.toUpperCase() + "'>" + track.title + " " + explicit + "</div>" +
-                                       "<div class='artist' data-sortIndex='" + artist.toUpperCase() + "'>" + artist + "</div>" +
-                                       "<div class='album' data-sortIndex='" + album.toUpperCase() + "'>" + album + "</div>" +
-                                       "<div class='timestamp' data-sortIndex='" + track.import_date + "'>" + added + "</div>" +
+                                       //"<div class='artist' data-sortIndex='" + artist.toUpperCase() + "'>" + artist + "</div>" +
+                                       //"<div class='album' data-sortIndex='" + album.toUpperCase() + "'>" + album + "</div>" +
+                                       //"<div class='timestamp' data-sortIndex='" + track.import_date + "'>" + added + "</div>" +
                                        "<div class='time'>" + formattedDuration + "</div>" +
                                        "</div>";
                                    document.getElementById("queueList").appendChild(elPlaylistTrack);
@@ -143,11 +143,11 @@ define(["constants","requester","marked","simpleBar","playlist"], function(c,req
                                    elPlaylistTrack.id = track.id;
                                    elPlaylistTrack.setAttribute("data-songid", track.id);
                                    elPlaylistTrack.innerHTML = "<div class='trackRow'>" +
-                                       "<div class='item' data-trackNo='" + trackNo + "'>" + trackNo + "</div>" +
+                                       //"<div class='item' data-trackNo='" + trackNo + "'>" + trackNo + "</div>" +
                                        "<div class='title' data-sortIndex='" + track.title.toUpperCase() + "'>" + track.title + " " + explicit + "</div>" +
-                                       "<div class='artist' data-sortIndex='" + artist.toUpperCase() + "'>" + artist + "</div>" +
-                                       "<div class='album' data-sortIndex='" + album.toUpperCase() + "'>" + album + "</div>" +
-                                       "<div class='timestamp' data-sortIndex='" + track.import_date + "'>" + added + "</div>" +
+                                       //"<div class='artist' data-sortIndex='" + artist.toUpperCase() + "'>" + artist + "</div>" +
+                                       //"<div class='album' data-sortIndex='" + album.toUpperCase() + "'>" + album + "</div>" +
+                                       //"<div class='timestamp' data-sortIndex='" + track.import_date + "'>" + added + "</div>" +
                                        "<div class='time'>" + formattedDuration + "</div>" +
                                        "</div>";
                                    document.getElementById("nextSongsList").appendChild(elPlaylistTrack);
@@ -158,6 +158,9 @@ define(["constants","requester","marked","simpleBar","playlist"], function(c,req
                                        document.getElementById("currentSong_artwork").style.backgroundImage = "url('"+track.artwork+"')";
                                        document.getElementById("currentSong_artwork").style.backgroundSize = "cover";
                                        document.getElementById("currentSong_artwork").style.backgroundRepeat = "no-repeat";
+                                       document.getElementById("currentSong_bgartwork").style.backgroundImage = "url('"+track.artwork+"')";
+                                       document.getElementById("currentSong_bgartwork").style.backgroundSize = "cover";
+                                       document.getElementById("currentSong_bgartwork").style.backgroundRepeat = "no-repeat";
                                        document.getElementById("currentSong_title").innerHTML = track.title || "";
                                        document.getElementById("currentSong_artist").innerHTML = track.artist.name || "";
                                    }
