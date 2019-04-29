@@ -1,7 +1,5 @@
-APIConstants = require './APIConstants.coffee'
-APIObjects = require './APIObjects.coffee'
 
-class User extends APIObjects
+class User
 
   constructor:(@req) ->
     @database = @req.app.locals.motorbot.database.collection("users")

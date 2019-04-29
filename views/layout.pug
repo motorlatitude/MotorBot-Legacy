@@ -1,8 +1,14 @@
 doctype html
 html(lang="en")
     head
-        title Motorbot Playlist
-        meta(name="viewport", content="width=1128px, initial-scale=1")
+        title MotorBot Playlist
+        //Mobile Web App Meta Tags
+        link(rel="manifest", href="/manifest.json")
+        //meta(name="viewport", content="width=1128px, initial-scale=1")
+        meta(name="viewport", content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no")
+        meta(name="mobile-web-app-capable", content="yes")
+        meta(name="apple-mobile-web-app-capable", content="yes")
+        meta(name="apple-mobile-web-app-status-bar-style", content="black")
         link(type='image/png', rel='icon', href='https://motorbot.io/motorbot_icon_128.png')
         link(href='/css/load.css', rel='stylesheet')
         script.
@@ -203,8 +209,9 @@ html(lang="en")
                 .newPlaylistButton#newPlaylistButton New Playlist
             .contentView#ajax_contentView(data-simplebar)
                 p
-        .playerBar
-            .bg(style="")
+        .playerBar#pb
+            .bg#pb_bg_artwork(style="")
+            .downButton#mobile_pb_downButton <i class="fas fa-chevron-down" aria-hidden="true"></i>
             .controls
                 .prev#playerBack <i class="fas fa-backward" aria-hidden="true"></i>
                 .playStopButton <span id="playStop"><i class="fas fa-play" aria-hidden="true" onclick='playMusic();' style='cursor: pointer;'></i></span>
@@ -219,6 +226,11 @@ html(lang="en")
             .repeat <i class="fa fa-retweet" aria-hidden="true"></i>
             .random <i class="fa fa-random" aria-hidden="true"></i>
             .queue_button#queue_button <i class="fas fa-indent"></i>
+        .mobileNavigation
+            ul
+                li <i class="fas fa-home" aria-hidden="true"></i>
+                li <i class="fas fa-search" aria-hidden="true"></i>
+                li <i class="fas fa-book-open" aria-hidden="true"></i>
         .contextMenu#contextMenu
             ul
         .loader#ajax_loader
@@ -231,7 +243,7 @@ html(lang="en")
             .icon <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
             .content
                 .title Connection Closed
-                .description You've been disconnected from the MotorBot server due to an internal error, please refresh the page in a couple of minutes.
+                .description You've been disconnected from the MotorBot server due to an internal error, we will try to re-establish your connection in 5 seconds.
         #newPlaylistModal.modal
             .playlist_art#newPlaylistModal_artwork <i class="fa fa-music" aria-hidden="true"></i><div class='edit_icon'><i class="fa fa-pencil-alt" aria-hidden="true"></i></div>
                 input(type="file", name="artworkFile", id="newPlaylistArtworkFile")
@@ -253,6 +265,7 @@ html(lang="en")
         input(id="store_accessToken", type="hidden", value=user.motorbotAccessToken)
         noscript#deferred-styles
             link(href='/css/main.css', rel='stylesheet', id="mainstyle")
+            link(href='/css/mobile.css', rel='stylesheet', id="mobilestyle")
             link(href="/css/fonts-ubuntu.min.css", rel="stylesheet")
             link(href='/css/fa/fontawesome.css', rel='stylesheet')
             link(href='/css/fa/solid.css', rel='stylesheet')

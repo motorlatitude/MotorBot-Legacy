@@ -97,6 +97,7 @@ class App
       )
       ws.on('message', (message) ->
         #recieved message
+        self.debug("[WEBSOCKET][INCOMING]: "+message)
         msg = JSON.parse(message);
         switch msg.op
           when 0
@@ -104,12 +105,6 @@ class App
               if err then console.log err
             )
           when 2
-            ###
-            loadPlaying();
-            #loadRandom(); Depreciated currently
-            getCurrentChannel();
-            loadGuilds();
-            ###
             self.websocket.connectedClients.push({
               id: new Date().getTime() + msg.d.user_id,
               user_id: msg.d.user_id,
@@ -117,48 +112,88 @@ class App
               session: session
             })
             welcome_obj = {
-              playing: {},
-              channel: undefined,
               guilds: {},
               session: session
             }
-            songQueueCollection = self.database.collection("songQueue")
-            songQueueCollection.find({status:'playing'}).toArray((err, results) ->
+            if self.client.guilds then welcome_obj.guilds = self.client.guilds #this should be changed to be user specific and only show the ones motorbot is part of
+            ws.send(JSON.stringify({op: 3, type:"WELCOME", d:welcome_obj}, (key, value) ->
+              if key == "client" then return undefined else return value
+            ), (err) ->
               if err then console.log err
-              if results[0]
-                results[0]["currently_playing"] = false
-                if self.musicPlayers #weird
-                  if self.musicPlayers["130734377066954752"]
-                    results[0]["currently_playing"] = self.musicPlayers["130734377066954752"].playing
-                    results[0]["start_time"] = self.musicPlayers["130734377066954752"].start_time
-                    results[0]["position"] = self.musicPlayers["130734377066954752"].seekPosition
-                    results[0]["playlist_id"] = self.musicPlayers["130734377066954752"].playlist_id
-                    results[0]["player_state"] = self.musicPlayers["130734377066954752"].player_state
-                welcome_obj.playing = results[0]
-              else
-                welcome_obj.playing = {currently_playing: false}
-
-              if self.client.voiceConnections["130734377066954752"] then welcome_obj.channel = self.client.voiceConnections["130734377066954752"].channel_name
-              if self.client.guilds then welcome_obj.guilds = self.client.guilds #this should be changed to be user specific and only show the ones motorbot is part of
-              ws.send(JSON.stringify({op: 3, type:"WELCOME", d:welcome_obj}, (key, value) ->
-                if key == "client" then return undefined else return value
-              ), (err) ->
-                if err then console.log err
-              )
             )
           when 8
-            if self.musicPlayers["130734377066954752"]
-              playlistId = self.musicPlayers["130734377066954752"].playlist_id
-              songId = self.musicPlayers["130734377066954752"].song_id
-              player_state = self.musicPlayers["130734377066954752"].player_state
-              if self.musicPlayers["130734377066954752"].playing
-                self.websocket.broadcast(JSON.stringify({type: 'PLAYER_UPDATE', op: 7, d: {event_type: 'PLAY', player_state: player_state, playlist_id: playlistId, song_id: songId}}))
-              else
-                self.websocket.broadcast(JSON.stringify({type: 'PLAYER_UPDATE', op: 7, d: {event_type: 'PAUSE', player_state: player_state, playlist_id: playlistId, song_id: songId}}))
-            else
-              self.websocket.broadcast(JSON.stringify({type: 'PLAYER_UPDATE', op: 7, d: {event_type: 'STOP', player_state: player_state, playlist_id: undefined, song_id: undefined}}))
+            #PLAYER_STATE
+            cc = undefined
+            self.websocket.connectedClients.forEach((client) ->
+              if client
+                if client.session == msg.d.session
+                  cc = client
+                  if cc
+                    if cc.guild
+                      if self.musicPlayers[cc.guild]
+                        playlistId = self.musicPlayers[cc.guild].playlist_id
+                        songId = self.musicPlayers[cc.guild].song_id
+                        player_state = self.musicPlayers[cc.guild].player_state
+                        self.debug("PLAYER_STATE requested")
+                        if self.musicPlayers[cc.guild].playing
+                          ws.send(JSON.stringify({type: 'PLAYER_UPDATE', op: 7, d: {event_type: 'PLAY', player_state: player_state, playlist_id: playlistId, song_id: songId}}))
+                        else
+                          ws.send(JSON.stringify({type: 'PLAYER_UPDATE', op: 7, d: {event_type: 'PAUSE', player_state: player_state, playlist_id: playlistId, song_id: songId}}))
+                      else
+                        ws.send(JSON.stringify({type: 'PLAYER_UPDATE', op: 7, d: {event_type: 'STOP', player_state: player_state, playlist_id: undefined, song_id: undefined}}))
+                    else
+                      self.debug("PLAYER_STATE requested without registering WebSocket connection first", "warn")
+                  else
+                    self.debug("PLAYER_STATE requested without registering WebSocket connection first", "warn")
+            )
+          when 10
+            #connect to a guild
+            self.websocket.connectedClients.forEach((client, i) ->
+              if client
+                if client.session == msg.d.session
+                  self.websocket.connectedClients[i].guild = msg.d.id
+                  self.debug("Updating Connected Clients")
+                  guild_state_obj = {
+                    playing: {},
+                    channel: undefined,
+                    session: session
+                  }
+                  songQueueCollection = self.database.collection("songQueue")
+                  songQueueCollection.find({status:'playing', guild: msg.d.id}).toArray((err, results) ->
+                    if err then console.log err
+                    if results[0]
+                      results[0][msg.d.id] = false
+                      if self.musicPlayers #weird
+                        if self.musicPlayers[msg.d.id]
+                          results[0]["currently_playing"] = self.musicPlayers[msg.d.id].playing
+                          results[0]["start_time"] = self.musicPlayers[msg.d.id].start_time
+                          results[0]["position"] = self.musicPlayers[msg.d.id].seekPosition
+                          results[0]["playlist_id"] = self.musicPlayers[msg.d.id].playlist_id
+                          results[0]["player_state"] = self.musicPlayers[msg.d.id].player_state
+                      guild_state_obj.playing = results[0]
+                    else
+                      guild_state_obj.playing = {currently_playing: false}
+
+                    if self.client.voiceConnections[msg.d.id] then guild_state_obj.channel = self.client.voiceConnections[msg.d.id].channel_name
+                    ws.send(JSON.stringify({op: 11, type:"GUILD_STATE", d:guild_state_obj}, (key, value) ->
+                      if key == "client" then return undefined else return value
+                    ), (err) ->
+                      if err then console.log err
+                    )
+                  )
+            )
         )
       )
+    @websocket.broadcastByGuildID = (data, guild_id) ->
+      if guild_id
+        self.websocket.connectedClients.forEach((client) ->
+          if client
+            if client.guild == guild_id
+              client.ws.send(data, (err) ->
+                if err then console.log err
+              )
+        )
+
     @websocket.broadcast = (data, user_id) ->
       if user_id
         self.websocket.connectedClients.forEach((client) ->
@@ -199,9 +234,9 @@ class App
         )
     )
 
-  streamNewTrack: (results) ->
+  streamNewTrack: (results, guild_id) ->
     self = @
-    guild_id = "130734377066954752"
+    #guild_id = "130734377066954752"
     songQueueCollection = @database.collection("songQueue")
     tracksCollection = @database.collection("tracks")
     playlistsCollection = @database.collection("playlists")
@@ -213,7 +248,7 @@ class App
       playlistId = results[0].playlistId
       song = results[0]
       if videoId
-        songQueueCollection.updateOne({'_id': trackId, 'playlistId': playlistId},{'$set':{'status':'playing'}},(err, result) ->
+        songQueueCollection.updateOne({'_id': trackId, 'playlistId': playlistId, guild: guild_id},{'$set':{'status':'playing'}},(err, result) ->
           if !err then self.debug("Track Status Changed")
         )
         tracksCollection.updateOne({'id': song_id},{'$inc':{'play_count':1}},(err, result) ->
@@ -236,9 +271,10 @@ class App
               console.log "e: "+e.toString()
               self.debug("Error Occurred Loading Youtube Video")
               self.websocket.broadcast(JSON.stringify({type: 'YOUTUBE_ERROR', op:6, d: {error: e.toString()}}))
-              self.nextSong()
+              self.nextSong(guild_id)
             )
             if self.client.voiceConnections[guild_id]
+              console.log self.client.voiceConnections
               self.client.voiceConnections[guild_id].playFromStream(thisystream).then((audioPlayer) ->
                 self.musicPlayers[guild_id] = audioPlayer
                 self.musicPlayers[guild_id].on('ready', () ->
@@ -261,7 +297,7 @@ class App
                   }
                   if !results[1]
                     playerState.restrictions["skip"] = true
-                  songQueueCollection.find({status: "played"}).sort({sortId: -1}).toArray((err, results) ->
+                  songQueueCollection.find({status: "played", guild: guild_id}).sort({sortId: -1}).toArray((err, results) ->
                     if err then console.log err
                     if !results[0]
                       playerState.restrictions["back"] = true
@@ -280,7 +316,7 @@ class App
                 self.musicPlayers[guild_id].on("streamDone", () ->
                   delete self.musicPlayers[guild_id]
                   self.client.setStatus("") # reset to blank
-                  self.nextSong()
+                  self.nextSong(guild_id)
                 )
               ).catch((err) ->
                 console.log "ERROR OCCURRED CREATING AUDIO PLAYER"
@@ -291,16 +327,16 @@ class App
           else
             self.debug("Error Occurred Loading Youtube Video")
             self.websocket.broadcast(JSON.stringify({type: 'YOUTUBE_ERROR', op:6, d: {error: "We couldn't retrieve information for this youtube video"}}))
-            self.nextSong()
+            self.nextSong(guild_id)
         )
 
-  goThroughSongQueue: () ->
+  goThroughSongQueue: (guild_id) ->
     self = @
     songQueueCollection = @database.collection("songQueue")
-    songQueueCollection.find({status: "queued"}).sort({sortId: 1}).toArray((err, results) ->
+    songQueueCollection.find({status: "queued", guild: guild_id}).sort({sortId: 1}).toArray((err, results) ->
       if err then console.log err
       if results[0]
-        self.streamNewTrack(results)
+        self.streamNewTrack(results, guild_id)
       else
         #no songs in queue, go to nextSong
         ###if globals.randomPlayback
@@ -309,41 +345,41 @@ class App
             streamNewTrack(results)
           )
         else###
-        songQueueCollection.find({status: "added"}).sort({sortId: 1}).toArray((err, results) ->
+        songQueueCollection.find({status: "added", guild: guild_id}).sort({sortId: 1}).toArray((err, results) ->
           if err then console.log err
-          self.streamNewTrack(results)
+          self.streamNewTrack(results, guild_id)
         )
     )
 
-  nextSong: () ->
+  nextSong: (guild_id) ->
     self = @
     songQueueCollection = @database.collection("songQueue")
-    songQueueCollection.find({status: "playing"}).sort({sortId: 1}).toArray((err, results) ->
+    songQueueCollection.find({status: "playing", guild: guild_id}).sort({sortId: 1}).toArray((err, results) ->
       if err then console.log err
       if results[0]
         trackId = results[0]._id
         playlistId = results[0].playlistId
-        songQueueCollection.updateOne({'_id': trackId, 'playlistId': playlistId},{'$set':{'status':'played'}},() ->
+        songQueueCollection.updateOne({'_id': trackId, 'playlistId': playlistId, guild: guild_id},{'$set':{'status':'played'}},() ->
           self.debug("Track Status Changed")
           setTimeout(() ->
-            self.goThroughSongQueue()
+            self.goThroughSongQueue(guild_id)
           ,1000)
         )
       else
-        self.goThroughSongQueue()
+        self.goThroughSongQueue(guild_id)
     )
 
-  lastSong: () ->
+  lastSong: (guild_id) ->
       self = @
       songQueueCollection = @database.collection("songQueue")
-      songQueueCollection.find({status: "playing"}).sort({sortId: 1}).toArray((err, results) ->
+      songQueueCollection.find({status: "playing", guild: guild_id}).sort({sortId: 1}).toArray((err, results) ->
         if err then console.log err
         if results[0]
           trackId = results[0]._id
           playlistId = results[0].playlistId
-          songQueueCollection.updateOne({'_id': trackId, 'playlistId': playlistId},{'$set':{'status':'added'}},() ->
+          songQueueCollection.updateOne({'_id': trackId, 'playlistId': playlistId, guild: guild_id},{'$set':{'status':'added'}},() ->
             self.debug("Track Status Changed");
-            songQueueCollection.find({status: "played"}).sort({sortId: -1}).toArray((err, results) ->
+            songQueueCollection.find({status: "played", guild: guild_id}).sort({sortId: -1}).toArray((err, results) ->
               if err then console.log err
               if results[0]
                 trackId = results[0]._id
@@ -351,7 +387,7 @@ class App
                 songQueueCollection.updateOne({'_id': trackId, 'playlistId': playlistId},{'$set':{'status':'added'}},() ->
                   self.debug("Track Status Changed");
                   setTimeout(() ->
-                    self.goThroughSongQueue()
+                    self.goThroughSongQueue(guild_id)
                   ,1000)
                 )
               else
@@ -359,17 +395,27 @@ class App
             )
           )
         else
-          self.goThroughSongQueue()
+          self.goThroughSongQueue(guild_id)
       )
 
-  skipSong: () ->
-    if @musicPlayers["130734377066954752"]
-      @musicPlayers["130734377066954752"].stop()
-    else
-      @nextSong()
+  connectedGuild: (user_id) ->
+    self = @
+    guild_id = undefined
+    for client in self.websocket.connectedClients
+      if client
+        if client.user_id == user_id
+          guild_id = client.guild
+          if !guild_id then self.debug("This user isn't connected to a guild currently?")
+          return guild_id
 
-  backSong: () ->
-    @lastSong()
+  skipSong: (guild_id) ->
+    if @musicPlayers[guild_id]
+      @musicPlayers[guild_id].stop()
+    else
+      @nextSong(guild_id)
+
+  backSong: (guild_id) ->
+    @lastSong(guild_id)
 
 
 app = new App()

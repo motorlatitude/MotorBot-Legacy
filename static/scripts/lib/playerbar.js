@@ -9,6 +9,7 @@ define(["constants"], function(c){
                 elTimelineBar.style.width = "150px";
                 elTimelineBar.classList.add("loading");
                 document.getElementById("pb_artwork").setAttribute("style", "background-image: url(''); background-repeat: no-repeat; background-position: center; background-size: cover;");
+                document.getElementById("pb_bg_artwork").setAttribute("style", "background-image: url(''); background-repeat: no-repeat; background-position: center; background-size: cover;");
                 document.getElementsByClassName("activeTrack")[0].innerHTML = "";
                 document.getElementsByClassName("activeArtist")[0].innerHTML = "";
             },
@@ -20,6 +21,7 @@ define(["constants"], function(c){
         },
         updateArtwork: function(url){
             document.getElementById("pb_artwork").setAttribute("style", "background-image: url('"+url+"'); background-repeat: no-repeat; background-position: center; background-size: cover;");
+            document.getElementById("pb_bg_artwork").setAttribute("style", "background-image: url('"+url+"'); background-repeat: no-repeat; background-position: center; background-size: cover;");
         },
         updateDetails: function(title, artist, album){
             let elActiverTrack = document.getElementsByClassName("activeTrack")[0];

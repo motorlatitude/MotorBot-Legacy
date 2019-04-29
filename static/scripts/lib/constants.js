@@ -14,8 +14,12 @@ define(["moment"], function(moment){
             "YOUTUBE_ERROR": 6,
             "PLAYER_UPDATE": 7,
             "PLAYER_STATE": 8,
-            "SPOTIFY_IMPORT": 9
+            "SPOTIFY_IMPORT": 9,
+            "GUILD": 10,
+            "GUILD_STATE": 11
         },
+        websocketSession: undefined,
+        currentGuild: undefined,
         currentChannel: undefined,
         playlistSort: "timestamp",
         playlistSortDirection: 1,

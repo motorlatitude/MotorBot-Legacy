@@ -5,21 +5,21 @@ define(["constants", "requester","notification","playerbar"], function(c, req, N
         },
         play: function(){
             pb.loading.start();
-            req.get(c.base_url+"/music/play?api_key="+c.api_key, {dataType: "json"}).then(function(response){
+            req.get(c.base_url+"/music/play?api_key="+c.api_key, {dataType: "json", authorize: true}).then(function(response){
                 pb.loading.end();
             }).catch(function(error){
                 console.warn(error);
             });
         },
         pause: function(){
-            req.get(c.base_url+"/music/pause?api_key="+c.api_key, {dataType: "json"}).then(function(response){
+            req.get(c.base_url+"/music/pause?api_key="+c.api_key, {dataType: "json", authorize: true}).then(function(response){
 
             }).catch(function(error){
                 console.warn(error);
             });
         },
         stop: function(){
-            req.get(c.base_url+"/music/stop?api_key="+c.api_key, {dataType: "json"}).then(function(response){
+            req.get(c.base_url+"/music/stop?api_key="+c.api_key, {dataType: "json", authorize: true}).then(function(response){
 
             }).catch(function(error){
                 console.warn(error);
@@ -30,7 +30,7 @@ define(["constants", "requester","notification","playerbar"], function(c, req, N
         },
         skip: function(){
             pb.loading.start();
-            req.get(c.base_url+"/music/skip?api_key="+c.api_key, {dataType: "json"}).then(function(response){
+            req.get(c.base_url+"/music/skip?api_key="+c.api_key, {dataType: "json", authorize: true}).then(function(response){
                 pb.loading.end();
             }).catch(function(error){
                 console.warn(error);
@@ -38,7 +38,7 @@ define(["constants", "requester","notification","playerbar"], function(c, req, N
         },
         back: function(){
             pb.loading.start();
-            req.get(c.base_url+"/music/prev?api_key="+c.api_key, {dataType: "json"}).then(function(response){
+            req.get(c.base_url+"/music/prev?api_key="+c.api_key, {dataType: "json", authorize: true}).then(function(response){
                 pb.loading.end();
             }).catch(function(error){
                 console.warn(error);
@@ -47,7 +47,7 @@ define(["constants", "requester","notification","playerbar"], function(c, req, N
         playSongFromPlaylist: function(songId, playlistId){
             if(c.currentChannel) {
                 pb.loading.start();
-                req.get(c.base_url+'/music/play/song?id=' + songId + '&playlist_id=' + playlistId + '&sort=' + c.playlistSort + '&sort_dir=' + c.playlistSortDirection + '&api_key=' + c.api_key,{dataType: 'json'}).then(function (response) {
+                req.get(c.base_url+'/music/play/song?id=' + songId + '&playlist_id=' + playlistId + '&guild_id=' + c.currentGuild + '&sort=' + c.playlistSort + '&sort_dir=' + c.playlistSortDirection + '&api_key=' + c.api_key,{dataType: 'json', authorize: true}).then(function (response) {
                     if (response.error) {
                         console.error(response.error);
                         pb.loading.end();

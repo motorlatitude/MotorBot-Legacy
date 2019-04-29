@@ -30,7 +30,7 @@ class VoiceChannel
       self.client.on("VOICE_STATE_UPDATE", (voiceConnection) ->
         voiceConnection.channel_id = self.id
         voiceConnection.channel_name = self.name
-        self.client.voiceConnections[self.guild_id] = voiceConnection
+        #self.client.voiceConnections[self.guild_id] = voiceConnection
         resolve(voiceConnection)
       )
     )

@@ -1,10 +1,10 @@
-APIConstants = require './APIConstants.coffee'
 APIObjects = require './APIObjects.coffee'
 
-class Playlist extends APIObjects
+class Playlist
 
   constructor:(@req) ->
-    @database = @req.app.locals.motorbot.database.collection("playlists")
+    self = @
+    self.database = @req.app.locals.motorbot.database.collection("playlists")
 
   playlistById: (playlist_id, filter = {}) ->
     self = @

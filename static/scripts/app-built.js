@@ -539,8 +539,12 @@ define('constants',["moment"], function(moment){
             "YOUTUBE_ERROR": 6,
             "PLAYER_UPDATE": 7,
             "PLAYER_STATE": 8,
-            "SPOTIFY_IMPORT": 9
+            "SPOTIFY_IMPORT": 9,
+            "GUILD": 10,
+            "GUILD_STATE": 11
         },
+        websocketSession: undefined,
+        currentGuild: undefined,
         currentChannel: undefined,
         playlistSort: "timestamp",
         playlistSortDirection: 1,
@@ -571,6 +575,7 @@ define('playerbar',["constants"], function(c){
                 elTimelineBar.style.width = "150px";
                 elTimelineBar.classList.add("loading");
                 document.getElementById("pb_artwork").setAttribute("style", "background-image: url(''); background-repeat: no-repeat; background-position: center; background-size: cover;");
+                document.getElementById("pb_bg_artwork").setAttribute("style", "background-image: url(''); background-repeat: no-repeat; background-position: center; background-size: cover;");
                 document.getElementsByClassName("activeTrack")[0].innerHTML = "";
                 document.getElementsByClassName("activeArtist")[0].innerHTML = "";
             },
@@ -582,6 +587,7 @@ define('playerbar',["constants"], function(c){
         },
         updateArtwork: function(url){
             document.getElementById("pb_artwork").setAttribute("style", "background-image: url('"+url+"'); background-repeat: no-repeat; background-position: center; background-size: cover;");
+            document.getElementById("pb_bg_artwork").setAttribute("style", "background-image: url('"+url+"'); background-repeat: no-repeat; background-position: center; background-size: cover;");
         },
         updateDetails: function(title, artist, album){
             let elActiverTrack = document.getElementsByClassName("activeTrack")[0];
@@ -638,7 +644,7 @@ define('playerbar',["constants"], function(c){
     };
     return PlayerBar;
 });
-define('serverSelection',["constants"], function(c){
+define('serverSelection',["constants", "ws"], function(c, ws){
    serverSelection = {
        setChannel: function(channel){
            var elChannelSelector = document.getElementById("selectedChannel");
@@ -654,13 +660,30 @@ define('serverSelection',["constants"], function(c){
                elChannelSelector.className = "selected yellow";
            }
        },
-       setGuilds: function(guilds){
+       setGuilds: function(guilds, ws){
            elGuildSelector = document.getElementById("serverOptions");
            for(var i=0;i<guilds.length;i++){
                var elguild_item = document.createElement("li");
-               elguild_item.innerHTML = guilds[i];
+               elguild_item.innerHTML = guilds[i].name;
+               elguild_item.setAttribute("data-guildID",guilds[i].id)
+               elguild_item.onclick = function(e){
+                   let elServerSelector = document.getElementById("selectedServer");
+                   elServerSelector.innerHTML = this.innerHTML;
+                   serverSelection.connectToGuild(this.getAttribute("data-guildID"), ws)
+               }
                elGuildSelector.appendChild(elguild_item);
            }
+       },
+       connectToGuild: function(guild_id, ws){
+           c.currentGuild = guild_id
+           ws.send(JSON.stringify({
+               op: c.op["GUILD"],
+               type: "GUILD",
+               d: {
+                   id: guild_id,
+                   session: c.websocketSession
+               }
+           }));
        },
        setChannels: function(channels){
 
@@ -800,21 +823,21 @@ define('audioPlayer',["constants", "requester","notification","playerbar"], func
         },
         play: function(){
             pb.loading.start();
-            req.get(c.base_url+"/music/play?api_key="+c.api_key, {dataType: "json"}).then(function(response){
+            req.get(c.base_url+"/music/play?api_key="+c.api_key, {dataType: "json", authorize: true}).then(function(response){
                 pb.loading.end();
             }).catch(function(error){
                 console.warn(error);
             });
         },
         pause: function(){
-            req.get(c.base_url+"/music/pause?api_key="+c.api_key, {dataType: "json"}).then(function(response){
+            req.get(c.base_url+"/music/pause?api_key="+c.api_key, {dataType: "json", authorize: true}).then(function(response){
 
             }).catch(function(error){
                 console.warn(error);
             });
         },
         stop: function(){
-            req.get(c.base_url+"/music/stop?api_key="+c.api_key, {dataType: "json"}).then(function(response){
+            req.get(c.base_url+"/music/stop?api_key="+c.api_key, {dataType: "json", authorize: true}).then(function(response){
 
             }).catch(function(error){
                 console.warn(error);
@@ -825,7 +848,7 @@ define('audioPlayer',["constants", "requester","notification","playerbar"], func
         },
         skip: function(){
             pb.loading.start();
-            req.get(c.base_url+"/music/skip?api_key="+c.api_key, {dataType: "json"}).then(function(response){
+            req.get(c.base_url+"/music/skip?api_key="+c.api_key, {dataType: "json", authorize: true}).then(function(response){
                 pb.loading.end();
             }).catch(function(error){
                 console.warn(error);
@@ -833,7 +856,7 @@ define('audioPlayer',["constants", "requester","notification","playerbar"], func
         },
         back: function(){
             pb.loading.start();
-            req.get(c.base_url+"/music/prev?api_key="+c.api_key, {dataType: "json"}).then(function(response){
+            req.get(c.base_url+"/music/prev?api_key="+c.api_key, {dataType: "json", authorize: true}).then(function(response){
                 pb.loading.end();
             }).catch(function(error){
                 console.warn(error);
@@ -842,7 +865,7 @@ define('audioPlayer',["constants", "requester","notification","playerbar"], func
         playSongFromPlaylist: function(songId, playlistId){
             if(c.currentChannel) {
                 pb.loading.start();
-                req.get(c.base_url+'/music/play/song?id=' + songId + '&playlist_id=' + playlistId + '&sort=' + c.playlistSort + '&sort_dir=' + c.playlistSortDirection + '&api_key=' + c.api_key,{dataType: 'json'}).then(function (response) {
+                req.get(c.base_url+'/music/play/song?id=' + songId + '&playlist_id=' + playlistId + '&guild_id=' + c.currentGuild + '&sort=' + c.playlistSort + '&sort_dir=' + c.playlistSortDirection + '&api_key=' + c.api_key,{dataType: 'json', authorize: true}).then(function (response) {
                     if (response.error) {
                         console.error(response.error);
                         pb.loading.end();
@@ -894,9 +917,46 @@ define('wsEventHandler',["constants", "playerbar", "serverSelection","notificati
                     console.info("Welcome Package Received");
                     wsConstants = packet;
                     console.log(packet);
+                    console.log(event);
+                    let guilds = packet.guilds;
+                    c.websocketSession = packet.session;
+                    if(guilds){
+                        let guild_names = [];
+                        let i = 0;
+                        for(let guild_id in guilds) {
+                            let guild = guilds[guild_id];
+                            if (guild.members) {
+                                for (let i = 0; i < guild.members.length; i++) {
+                                    let id = guild.members[i].user.id;
+                                    users[id] = guild.members[i].user;
+                                }
+                            }
+                            if(guild.name){
+                                guild_names.push({name: guild.name, id: guild.id})
+                            }
+                            if(i === 0){
+                                console.log("Connecting to Guild: "+guild_id)
+                                c.currentGuild = guild_id
+                                ws.send(JSON.stringify({
+                                    op: c.op["GUILD"],
+                                    type: "GUILD",
+                                    d: {
+                                        id: guild_id,
+                                        session: packet.session
+                                    }
+                                }));
+                            }
+                            i++;
+                        }
+                        ss.setGuilds(guild_names, ws);
+                    }
+                    break;
+                case "GUILD_STATE":
+                    console.info("GUILD_STATE Package Received");
+                    wsConstants = packet;
+                    console.log(packet);
                     let playing = packet.playing;
                     let channel = packet.channel;
-                    let guilds = packet.guilds;
                     if(playing){
                         if (playing.artwork) {
                             pb.updateArtwork(playing.artwork);
@@ -947,22 +1007,6 @@ define('wsEventHandler',["constants", "playerbar", "serverSelection","notificati
                     if(channel){
                         console.log("Loading Channel: "+channel);
                         ss.setChannel(channel)
-                    }
-                    if(guilds){
-                        let guild_names = [];
-                        for(guild_id in guilds) {
-                            let guild = guilds[guild_id];
-                            if (guild.members) {
-                                for (let i = 0; i < guild.members.length; i++) {
-                                    let id = guild.members[i].user.id;
-                                    users[id] = guild.members[i].user;
-                                }
-                            }
-                            if(guild.name){
-                                guild_names.push(guild.name)
-                            }
-                        }
-                        ss.setGuilds(guild_names);
                     }
                     break;
                 case "SPOTIFY_IMPORT":
@@ -1024,8 +1068,6 @@ define('wsEventHandler',["constants", "playerbar", "serverSelection","notificati
                                     document.getElementById("currentSong_bgartwork").style.backgroundRepeat = "no-repeat";
                                     document.getElementById("currentSong_title").innerHTML = packet.event_data.title || "";
                                     document.getElementById("currentSong_artist").innerHTML = packet.event_data.artist.name || "";
-                                    console.log("Refreshing Queues View");
-                                    //views.load("queue","undefined");
                                 }
                                 break;
                         }
@@ -1048,6 +1090,7 @@ define('wsEventHandler',["constants", "playerbar", "serverSelection","notificati
                         let playlist = document.getElementById("playlist");
                         let back = document.getElementById("playerBack");
                         let skip = document.getElementById("playerSkip");
+                        let queueList = document.getElementById("nextSongsList");
                         switch(packet.event_type){
                             case "STOP":
                                 elPlayButton.innerHTML = "<i class=\"fa fa-play\" aria-hidden=\"true\" style=\"cursor: pointer;\"></i>";
@@ -1058,6 +1101,9 @@ define('wsEventHandler',["constants", "playerbar", "serverSelection","notificati
                                 back.onclick = undefined;
                                 skip.classList.add("disabled");
                                 skip.onclick = undefined;
+                                if(queueList){
+                                    queueList.innerHTML = "";
+                                }
                                 clearInterval(c.seekInterval);
                                 if(playlist){
                                     let elPlaylistPlayButton = document.getElementById("playplaylist");
@@ -1095,10 +1141,32 @@ define('wsEventHandler',["constants", "playerbar", "serverSelection","notificati
                                         skip.onclick = function(e){
                                             AudioPlayer.skip()
                                         };
+                                        if(queueList){
+                                            queueList.innerHTML = "";
+                                            for(i in packet.player_state.next_tracks){
+                                                let track = packet.player_state.next_tracks[i];
+                                                let formattedDuration = c.secondsToHms(track.duration);
+                                                let explicit = "";
+                                                if (track.explicit) {
+                                                    explicit = "<div class='explicit'>E</div>";
+                                                }
+                                                let elPlaylistTrack = document.createElement("li");
+                                                elPlaylistTrack.id = track.id;
+                                                elPlaylistTrack.setAttribute("data-songid", track.id);
+                                                elPlaylistTrack.innerHTML = "<div class='trackRow'>" +
+                                                    "<div class='title' data-sortIndex='" + track.title.toUpperCase() + "'>" + track.title + " " + explicit + "</div>" +
+                                                    "<div class='time'>" + formattedDuration + "</div>" +
+                                                    "</div>";
+                                                queueList.appendChild(elPlaylistTrack);
+                                            }
+                                        }
                                     }
                                     else{
                                         skip.classList.add("disabled");
                                         skip.onclick = undefined;
+                                        if(queueList){
+                                            queueList.innerHTML = "";
+                                        }
                                     }
                                     pb.updateArtwork(packet.player_state.current_song.artwork);
                                     pb.updateDetails(packet.player_state.current_song.title, packet.player_state.current_song.artist, packet.player_state.current_song.album);
@@ -1168,10 +1236,32 @@ define('wsEventHandler',["constants", "playerbar", "serverSelection","notificati
                                         skip.onclick = function(e){
                                             AudioPlayer.skip()
                                         };
+                                        if(queueList){
+                                            queueList.innerHTML = "";
+                                            for(i in packet.player_state.next_tracks){
+                                                let track = packet.player_state.next_tracks[i];
+                                                let formattedDuration = c.secondsToHms(track.duration);
+                                                let explicit = "";
+                                                if (track.explicit) {
+                                                    explicit = "<div class='explicit'>E</div>";
+                                                }
+                                                let elPlaylistTrack = document.createElement("li");
+                                                elPlaylistTrack.id = track.id;
+                                                elPlaylistTrack.setAttribute("data-songid", track.id);
+                                                elPlaylistTrack.innerHTML = "<div class='trackRow'>" +
+                                                    "<div class='title' data-sortIndex='" + track.title.toUpperCase() + "'>" + track.title + " " + explicit + "</div>" +
+                                                    "<div class='time'>" + formattedDuration + "</div>" +
+                                                    "</div>";
+                                                queueList.appendChild(elPlaylistTrack);
+                                            }
+                                        }
                                     }
                                     else{
                                         skip.classList.add("disabled");
                                         skip.onclick = undefined;
+                                        if(queueList) {
+                                            queueList.innerHTML = "";
+                                        }
                                     }
                                     pb.updateArtwork(packet.player_state.current_song.artwork);
                                     pb.updateDetails(packet.player_state.current_song.title, packet.player_state.current_song.artist, packet.player_state.current_song.album);
@@ -1334,8 +1424,10 @@ define('ws',["constants", "wsEventHandler"], function(c, wsEventHandler){
     let WebSocketConnection = {
         init: function () {
             wss = new WebSocket("wss://wss.motorbot.io");
+            wss.session = undefined;
             wss.onopen = function (event) {
                 console.info("websocket connection opened");
+                //[C] HELLO -> [S] WELCOME -> [C] JOIN GUILD -> [S] GUILD STATE
                 WebSocketConnection.send("HELLO",{
                     api_key: "caf07b8b-366e-44ab-9bda-623f94a9c2df",
                     client_id: "7c78862088c0228ca226f4462df3d4ff",
@@ -1344,6 +1436,11 @@ define('ws',["constants", "wsEventHandler"], function(c, wsEventHandler){
                 HEARTBEAT_INTERVAL = setInterval(function(){
                     WebSocketConnection.send("HEARTBEAT")
                 },41250);
+                document.getElementById("websocketDisconnectOverlay").style.display = "none";
+                document.querySelector(".flexContainer").style.filter = "blur(0)";
+                document.querySelector(".playerBar").style.filter = "blur(0)";
+                document.querySelector(".errorList").style.filter = "blur(0)";
+                document.querySelector(".modalityOverlay").style.display = "none";
             };
 
             wss.onmessage = function (event) {
@@ -1358,6 +1455,9 @@ define('ws',["constants", "wsEventHandler"], function(c, wsEventHandler){
                 document.querySelector(".modalityOverlay").style.display = "block";
                 document.getElementById("newPlaylistModal").style.display = "none"; //INFO: make sure no other modals are open
                 document.getElementById("websocketDisconnectOverlay").style.display = "block";
+                setTimeout(function(){
+                    WebSocketConnection.init();
+                },5000);
             };
 
             return wss;
@@ -1366,6 +1466,7 @@ define('ws',["constants", "wsEventHandler"], function(c, wsEventHandler){
             if(!message){
                 message = {};
             }
+            message.session = wss.session;
             wss.send(JSON.stringify({
                 op: c.op[type],
                 type: type,
@@ -6568,9 +6669,11 @@ define('playlist',["constants","requester","audioPlayer","simpleBar","eventListe
                     document.querySelector(".playlistDescription").innerHTML = d.description;
                 }
                 else{
-                    document.querySelector(".playlistType").style.top = "75px";
-                    document.querySelector(".playlistName").style.top = "110px";
-                    document.querySelector(".playlistName").style.fontSize = "45px";
+                    if(!window.navigator.standalone && !window.matchMedia('(display-mode: standalone)').matches && window.innerWidth >= 600) {
+                        document.querySelector(".playlistType").style.top = "75px";
+                        document.querySelector(".playlistName").style.top = "110px";
+                        document.querySelector(".playlistName").style.fontSize = "45px";
+                    }
                 }
                 document.querySelector(".playlistStats .user").innerHTML = d.owner.username+"#"+d.owner.discriminator;
                 if((d.followers.length - 1) === 1) {
@@ -6877,7 +6980,7 @@ define('views',["constants","requester","marked","simpleBar","playlist"], functi
                        playlist.load(param);
                        break;
                    case "queue":
-                       req.get(c.base_url+"/queue?api_key="+c.api_key,{dataType: "json", authorize: true}).then(function(response){
+                       req.get(c.base_url+"/queue/"+c.currentGuild+"?api_key="+c.api_key,{dataType: "json", authorize: true}).then(function(response){
                            console.log(response);
                            let data = response.data;
                            let l = 0;
@@ -7587,6 +7690,22 @@ define('eventListener',["constants","audioPlayer","views","playlist","user","req
                         }
                     }
                 }
+                let elMobilePlayerBarDownButton = document.getElementById("mobile_pb_downButton");
+                if(elMobilePlayerBarDownButton){
+                    elMobilePlayerBarDownButton.addEventListener("click", function(e){
+                        let elPlayerBar = document.getElementById("pb")
+                        if(elPlayerBar){
+                            if(elPlayerBar.classList.contains("mini")){
+                                elPlayerBar.classList.remove("mini");
+                                elMobilePlayerBarDownButton.innerHTML = "<i class=\"fas fa-chevron-down\" aria-hidden=\"true\"></i>";
+                            }
+                            else{
+                                elPlayerBar.classList.add("mini");
+                                elMobilePlayerBarDownButton.innerHTML = "<i class=\"fas fa-chevron-up\" aria-hidden=\"true\"></i>";
+                            }
+                        }
+                    });
+                }
             },
             accountOptions: function(){
                 let elAccountOptions = [].slice.call(document.querySelectorAll("#accountOptions li"));
@@ -7629,7 +7748,7 @@ define('eventListener',["constants","audioPlayer","views","playlist","user","req
             playlistScroll: function(){
                 let ph = document.getElementById("playlist_header");
                 let plst = document.getElementById("playlist");
-                if(ph) {
+                if(ph && !window.navigator.standalone && !window.matchMedia('(display-mode: standalone)').matches && window.innerWidth >= 600) {
                     let elContentView = document.getElementById("ajax_contentView");
                     let sb = new SimpleBar(elContentView);
                     sb.getScrollElement().onscroll = function () {
@@ -7697,6 +7816,9 @@ define('eventListener',["constants","audioPlayer","views","playlist","user","req
                             elContextMenuList.appendChild(elContextMenuListItem_sep);
                             let elContextMenuListItem_info = document.createElement("li");
                             elContextMenuListItem_info.innerHTML = "Details";
+                            elContextMenuListItem_info.onclick = function(){
+                                document.getElementById("song_info").style.display = "block";
+                            };
                             elContextMenuList.appendChild(elContextMenuListItem_info);
                             let elContextMenuListItem_sep2 = document.createElement("li");
                             elContextMenuListItem_sep2.className = "sep";

@@ -11,6 +11,7 @@ clientConnection = require './client/clientConnection.coffee'
 class DiscordClient extends EventEmitter
 
   constructor: (@options) ->
+    super()
     if !@options.token then throw new Error("No Token Provided")
     @rest = new DiscordManager(@)
 

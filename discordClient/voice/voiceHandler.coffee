@@ -23,6 +23,8 @@ class VoiceConnection
 
   connect: (params) ->
     @token = params.token
+    utils.debug("Setting Guild For Voice Handler")
+    utils.debug("Guild ID: "+params.guild_id)
     @guild_id = params.guild_id
     @endpoint = params.endpoint
     @user_id = @discordClient.internals.user_id
@@ -93,6 +95,7 @@ class VoiceConnection
       }
       self.gatewayPing = new Date().getTime()
       self.vws.send(JSON.stringify(hbpackage))
+      console.log "Guild ID on heartbeat: "+self.guild_id
     , msg.d.heartbeat_interval)
 
     @ssrc = msg.d.ssrc

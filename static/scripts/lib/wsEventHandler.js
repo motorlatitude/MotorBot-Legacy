@@ -13,9 +13,46 @@ define(["constants", "playerbar", "serverSelection","notification","audioPlayer"
                     console.info("Welcome Package Received");
                     wsConstants = packet;
                     console.log(packet);
+                    console.log(event);
+                    let guilds = packet.guilds;
+                    c.websocketSession = packet.session;
+                    if(guilds){
+                        let guild_names = [];
+                        let i = 0;
+                        for(let guild_id in guilds) {
+                            let guild = guilds[guild_id];
+                            if (guild.members) {
+                                for (let i = 0; i < guild.members.length; i++) {
+                                    let id = guild.members[i].user.id;
+                                    users[id] = guild.members[i].user;
+                                }
+                            }
+                            if(guild.name){
+                                guild_names.push({name: guild.name, id: guild.id})
+                            }
+                            if(i === 0){
+                                console.log("Connecting to Guild: "+guild_id)
+                                c.currentGuild = guild_id
+                                ws.send(JSON.stringify({
+                                    op: c.op["GUILD"],
+                                    type: "GUILD",
+                                    d: {
+                                        id: guild_id,
+                                        session: packet.session
+                                    }
+                                }));
+                            }
+                            i++;
+                        }
+                        ss.setGuilds(guild_names, ws);
+                    }
+                    break;
+                case "GUILD_STATE":
+                    console.info("GUILD_STATE Package Received");
+                    wsConstants = packet;
+                    console.log(packet);
                     let playing = packet.playing;
                     let channel = packet.channel;
-                    let guilds = packet.guilds;
                     if(playing){
                         if (playing.artwork) {
                             pb.updateArtwork(playing.artwork);
@@ -66,22 +103,6 @@ define(["constants", "playerbar", "serverSelection","notification","audioPlayer"
                     if(channel){
                         console.log("Loading Channel: "+channel);
                         ss.setChannel(channel)
-                    }
-                    if(guilds){
-                        let guild_names = [];
-                        for(guild_id in guilds) {
-                            let guild = guilds[guild_id];
-                            if (guild.members) {
-                                for (let i = 0; i < guild.members.length; i++) {
-                                    let id = guild.members[i].user.id;
-                                    users[id] = guild.members[i].user;
-                                }
-                            }
-                            if(guild.name){
-                                guild_names.push(guild.name)
-                            }
-                        }
-                        ss.setGuilds(guild_names);
                     }
                     break;
                 case "SPOTIFY_IMPORT":
@@ -143,8 +164,6 @@ define(["constants", "playerbar", "serverSelection","notification","audioPlayer"
                                     document.getElementById("currentSong_bgartwork").style.backgroundRepeat = "no-repeat";
                                     document.getElementById("currentSong_title").innerHTML = packet.event_data.title || "";
                                     document.getElementById("currentSong_artist").innerHTML = packet.event_data.artist.name || "";
-                                    console.log("Refreshing Queues View");
-                                    //views.load("queue","undefined");
                                 }
                                 break;
                         }
@@ -167,6 +186,7 @@ define(["constants", "playerbar", "serverSelection","notification","audioPlayer"
                         let playlist = document.getElementById("playlist");
                         let back = document.getElementById("playerBack");
                         let skip = document.getElementById("playerSkip");
+                        let queueList = document.getElementById("nextSongsList");
                         switch(packet.event_type){
                             case "STOP":
                                 elPlayButton.innerHTML = "<i class=\"fa fa-play\" aria-hidden=\"true\" style=\"cursor: pointer;\"></i>";
@@ -177,6 +197,9 @@ define(["constants", "playerbar", "serverSelection","notification","audioPlayer"
                                 back.onclick = undefined;
                                 skip.classList.add("disabled");
                                 skip.onclick = undefined;
+                                if(queueList){
+                                    queueList.innerHTML = "";
+                                }
                                 clearInterval(c.seekInterval);
                                 if(playlist){
                                     let elPlaylistPlayButton = document.getElementById("playplaylist");
@@ -214,10 +237,32 @@ define(["constants", "playerbar", "serverSelection","notification","audioPlayer"
                                         skip.onclick = function(e){
                                             AudioPlayer.skip()
                                         };
+                                        if(queueList){
+                                            queueList.innerHTML = "";
+                                            for(i in packet.player_state.next_tracks){
+                                                let track = packet.player_state.next_tracks[i];
+                                                let formattedDuration = c.secondsToHms(track.duration);
+                                                let explicit = "";
+                                                if (track.explicit) {
+                                                    explicit = "<div class='explicit'>E</div>";
+                                                }
+                                                let elPlaylistTrack = document.createElement("li");
+                                                elPlaylistTrack.id = track.id;
+                                                elPlaylistTrack.setAttribute("data-songid", track.id);
+                                                elPlaylistTrack.innerHTML = "<div class='trackRow'>" +
+                                                    "<div class='title' data-sortIndex='" + track.title.toUpperCase() + "'>" + track.title + " " + explicit + "</div>" +
+                                                    "<div class='time'>" + formattedDuration + "</div>" +
+                                                    "</div>";
+                                                queueList.appendChild(elPlaylistTrack);
+                                            }
+                                        }
                                     }
                                     else{
                                         skip.classList.add("disabled");
                                         skip.onclick = undefined;
+                                        if(queueList){
+                                            queueList.innerHTML = "";
+                                        }
                                     }
                                     pb.updateArtwork(packet.player_state.current_song.artwork);
                                     pb.updateDetails(packet.player_state.current_song.title, packet.player_state.current_song.artist, packet.player_state.current_song.album);
@@ -287,10 +332,32 @@ define(["constants", "playerbar", "serverSelection","notification","audioPlayer"
                                         skip.onclick = function(e){
                                             AudioPlayer.skip()
                                         };
+                                        if(queueList){
+                                            queueList.innerHTML = "";
+                                            for(i in packet.player_state.next_tracks){
+                                                let track = packet.player_state.next_tracks[i];
+                                                let formattedDuration = c.secondsToHms(track.duration);
+                                                let explicit = "";
+                                                if (track.explicit) {
+                                                    explicit = "<div class='explicit'>E</div>";
+                                                }
+                                                let elPlaylistTrack = document.createElement("li");
+                                                elPlaylistTrack.id = track.id;
+                                                elPlaylistTrack.setAttribute("data-songid", track.id);
+                                                elPlaylistTrack.innerHTML = "<div class='trackRow'>" +
+                                                    "<div class='title' data-sortIndex='" + track.title.toUpperCase() + "'>" + track.title + " " + explicit + "</div>" +
+                                                    "<div class='time'>" + formattedDuration + "</div>" +
+                                                    "</div>";
+                                                queueList.appendChild(elPlaylistTrack);
+                                            }
+                                        }
                                     }
                                     else{
                                         skip.classList.add("disabled");
                                         skip.onclick = undefined;
+                                        if(queueList) {
+                                            queueList.innerHTML = "";
+                                        }
                                     }
                                     pb.updateArtwork(packet.player_state.current_song.artwork);
                                     pb.updateDetails(packet.player_state.current_song.title, packet.player_state.current_song.artist, packet.player_state.current_song.album);

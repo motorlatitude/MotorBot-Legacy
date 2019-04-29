@@ -51,9 +51,11 @@ define(["constants","requester","audioPlayer","simpleBar","eventListener","views
                     document.querySelector(".playlistDescription").innerHTML = d.description;
                 }
                 else{
-                    document.querySelector(".playlistType").style.top = "75px";
-                    document.querySelector(".playlistName").style.top = "110px";
-                    document.querySelector(".playlistName").style.fontSize = "45px";
+                    if(!window.navigator.standalone && !window.matchMedia('(display-mode: standalone)').matches && window.innerWidth >= 600) {
+                        document.querySelector(".playlistType").style.top = "75px";
+                        document.querySelector(".playlistName").style.top = "110px";
+                        document.querySelector(".playlistName").style.fontSize = "45px";
+                    }
                 }
                 document.querySelector(".playlistStats .user").innerHTML = d.owner.username+"#"+d.owner.discriminator;
                 if((d.followers.length - 1) === 1) {

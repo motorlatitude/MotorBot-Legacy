@@ -9,6 +9,7 @@ async = require 'async'
 class UDPClient extends EventEmitter
 
   constructor: (@voiceConnection) ->
+    super()
     @connected = false
     @nonce = new Buffer(24);
     @nonce.fill(0);

@@ -84,7 +84,7 @@ define(["constants","requester","marked","simpleBar","playlist"], function(c,req
                        playlist.load(param);
                        break;
                    case "queue":
-                       req.get(c.base_url+"/queue?api_key="+c.api_key,{dataType: "json", authorize: true}).then(function(response){
+                       req.get(c.base_url+"/queue/"+c.currentGuild+"?api_key="+c.api_key,{dataType: "json", authorize: true}).then(function(response){
                            console.log(response);
                            let data = response.data;
                            let l = 0;

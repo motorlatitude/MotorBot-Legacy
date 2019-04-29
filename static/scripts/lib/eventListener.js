@@ -271,6 +271,22 @@ define(["constants","audioPlayer","views","playlist","user","requester", "simple
                         }
                     }
                 }
+                let elMobilePlayerBarDownButton = document.getElementById("mobile_pb_downButton");
+                if(elMobilePlayerBarDownButton){
+                    elMobilePlayerBarDownButton.addEventListener("click", function(e){
+                        let elPlayerBar = document.getElementById("pb")
+                        if(elPlayerBar){
+                            if(elPlayerBar.classList.contains("mini")){
+                                elPlayerBar.classList.remove("mini");
+                                elMobilePlayerBarDownButton.innerHTML = "<i class=\"fas fa-chevron-down\" aria-hidden=\"true\"></i>";
+                            }
+                            else{
+                                elPlayerBar.classList.add("mini");
+                                elMobilePlayerBarDownButton.innerHTML = "<i class=\"fas fa-chevron-up\" aria-hidden=\"true\"></i>";
+                            }
+                        }
+                    });
+                }
             },
             accountOptions: function(){
                 let elAccountOptions = [].slice.call(document.querySelectorAll("#accountOptions li"));
@@ -313,7 +329,7 @@ define(["constants","audioPlayer","views","playlist","user","requester", "simple
             playlistScroll: function(){
                 let ph = document.getElementById("playlist_header");
                 let plst = document.getElementById("playlist");
-                if(ph) {
+                if(ph && !window.navigator.standalone && !window.matchMedia('(display-mode: standalone)').matches && window.innerWidth >= 600) {
                     let elContentView = document.getElementById("ajax_contentView");
                     let sb = new SimpleBar(elContentView);
                     sb.getScrollElement().onscroll = function () {
@@ -381,6 +397,9 @@ define(["constants","audioPlayer","views","playlist","user","requester", "simple
                             elContextMenuList.appendChild(elContextMenuListItem_sep);
                             let elContextMenuListItem_info = document.createElement("li");
                             elContextMenuListItem_info.innerHTML = "Details";
+                            elContextMenuListItem_info.onclick = function(){
+                                document.getElementById("song_info").style.display = "block";
+                            };
                             elContextMenuList.appendChild(elContextMenuListItem_info);
                             let elContextMenuListItem_sep2 = document.createElement("li");
                             elContextMenuListItem_sep2.className = "sep";

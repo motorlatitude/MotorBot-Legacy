@@ -58,10 +58,10 @@ router.put("/song/:song_id/playlist/:playlist_id", (req, res) ->
   )
 )
 
-router.get("/", (req, res) ->
+router.get("/:guild_id", (req, res) ->
   res.type('json')
   songQueueCollection = req.app.locals.motorbot.database.collection("songQueue")
-  songQueueCollection.find({}).toArray((err, results) ->
+  songQueueCollection.find({guild: req.params.guild_id}).toArray((err, results) ->
     if err
       res.sendStatus(500)
     else

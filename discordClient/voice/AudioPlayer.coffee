@@ -13,6 +13,7 @@ class AudioPlayer extends EventEmitter
   ###
   
   constructor: (stream, @voiceConnection, @discordClient) ->
+    super()
     utils.debug("New AudioPlayer constructed")
     @glob_stream = stream
     #setup stream
