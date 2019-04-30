@@ -223,3 +223,211 @@ body
   & .userFriendly
     color #888
     font-style italic
+
+@media (display-mode: standalone), (max-width: 500px)
+  body
+    font-size 15px
+    min-width 300px
+    & .motorbotIcon
+      position absolute
+      top 10px
+      width 450px
+      left 10px
+      z-index 5
+      & img
+        width 40px
+        float left
+      & .motorbot
+        float left
+        font-size 20px
+        font-weight bold
+        margin-top 8px
+        margin-left 4px
+        color #eee
+    .sideangle
+      display none
+    .loginSidebar
+      position absolute
+      top auto
+      border-radius 0
+      left 0
+      bottom 0
+      width 100%
+      height 50%
+      min-height 425px
+      background linear-gradient(to top, rgba(42, 45, 50, 1) 0%, rgba(42, 45, 50, 0.9) 80%, rgba(42, 45, 50, 0) 100%)
+      z-index 2
+      box-shadow 0 0 25px rgba(0,0,0,0)
+    .bg_opacity
+      position absolute
+      top 0
+      left 0
+      right 0
+      bottom 0
+      width 100%
+      height 100%
+      background url('../img/login_backgrounds/w1.jpg') no-repeat center
+      background-size cover
+      opacity 0.5
+      z-index 1
+      &.w1
+        background url('../img/login_backgrounds/w1.jpg') no-repeat center
+        background-size cover
+      &.w2
+        background url('../img/login_backgrounds/w2.jpg') no-repeat center
+        background-size cover
+      &.w3
+        background url('../img/login_backgrounds/w3.jpg') no-repeat center
+        background-size cover
+      &.w4
+        background url('../img/login_backgrounds/w4.jpg') no-repeat center
+        background-size cover
+
+    .form
+      position absolute
+      left 10px
+      top 10px
+      width calc(100% - 20px)
+      background transparent
+      z-index 3
+      & h3
+        font-family 'Ubuntu', 'Open Sans', sans-serif
+        font-size 20px
+        color rgba(39, 132, 246, 1)
+        font-weight 300
+        padding-left 0
+        line-height 35px
+        position relative
+        top 0
+        & b
+          color #fff
+          font-weight 300
+        & span
+          color rgba(255,255,255,0.4)
+          font-size 15px
+          line-height 40px
+      & h3.error_header
+        margin-top -5px
+      & .error
+        margin-top -5px
+        width calc(100% - 20px)
+        padding 4px 10px
+        line-height 40px
+        background rgba(238, 62, 62, 1.00)
+        color rgba(0,0,0,0.5)
+        border-radius 4px
+        margin-bottom 15px
+      & input[type="text"], input[type="password"]
+        width calc(100% - 20px)
+        line-height 32px
+        background rgba(0,0,0,0.2)
+        padding 4px 10px
+        font-family 'Ubuntu', 'Open Sans', sans-serif
+        font-size 13px
+        border 0 solid transparent
+        color #fff
+        margin-top 1px
+        position relative
+        top 0
+        &::-webkit-input-placeholder
+          color rgba(255,255,255,0.2)
+        &::placeholder
+          color rgba(255,255,255,0.2)
+        &:focus
+          outline none
+      & .username_wrapper
+        position relative
+        top 0
+        & .txt
+          position absolute
+          top 12px
+          left 10px
+        & input[type="text"]
+          border-top-left-radius 4px
+          border-top-right-radius 4px
+          padding-top 25px
+      & .password_wrapper
+        position relative
+        top 0
+        & .txt
+          position absolute
+          top 12px
+          left 10px
+        & input[type="password"]
+          border-bottom-left-radius 4px
+          border-bottom-right-radius 4px
+          padding-top 25px
+      & .button_wrapper
+        margin-top 15px
+        & input[type="submit"]
+          width 30%
+          background rgba(19, 112, 226, 1)
+          border 0 solid transparent
+          color #fff
+          font-family 'Ubuntu', 'Open Sans', sans-serif
+          font-size 15px
+          font-weight 400
+          line-height 40px
+          margin-top 16px
+          border-radius 5px
+          cursor pointer
+          box-shadow 0 0 15px rgba(34, 36, 40, 1)
+          &:focus
+            outline none
+          &:active
+            outline none
+          &:hover
+            background rgba(29, 122, 236, 1)
+        & .register
+          width calc(70% - 22px)
+          text-align right
+          margin-left 10px
+          padding-right 10px
+          display inline-block
+          font-size 14px
+          font-weight 400
+          color rgba(255,255,255,0.4)
+          & a
+            text-decoration none
+            color rgba(19, 112, 226, 1)
+            &:hover
+              text-decoration underline
+
+    .auth-error
+      position absolute
+      left calc(50% - 150px)
+      top calc(50% - 90px)
+      width 300px
+      text-align center
+      & .icon
+        display inline-block
+        line-height 50px
+        width 50px
+        background rgba(0,0,0,0.1)
+        position relative
+        top 0
+        border-radius 50%
+        color #fff
+        font-size 30px
+        margin-bottom 30px
+        &:after
+          content ''
+          position absolute
+          top -6px
+          left -6px
+          right -6px
+          bottom -6px
+          width auto
+          height auto
+          border 4px solid rgba(255,255,255,0.3)
+          border-radius 50%
+      & h1
+        text-transform uppercase
+        margin 6px
+        padding 0
+      & p
+        margin 6px
+        padding 0
+      & .userFriendly
+        color #888
+        font-style italic
