@@ -32,15 +32,7 @@ define(["constants", "playerbar", "serverSelection","notification","audioPlayer"
                             }
                             if(i === 0){
                                 console.log("Connecting to Guild: "+guild_id)
-                                c.currentGuild = guild_id
-                                ws.send(JSON.stringify({
-                                    op: c.op["GUILD"],
-                                    type: "GUILD",
-                                    d: {
-                                        id: guild_id,
-                                        session: packet.session
-                                    }
-                                }));
+                                ss.connectToGuild(guild_id, guild.name, ws);
                             }
                             i++;
                         }

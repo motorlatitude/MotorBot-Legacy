@@ -667,15 +667,15 @@ define('serverSelection',["constants", "ws"], function(c, ws){
                elguild_item.innerHTML = guilds[i].name;
                elguild_item.setAttribute("data-guildID",guilds[i].id)
                elguild_item.onclick = function(e){
-                   let elServerSelector = document.getElementById("selectedServer");
-                   elServerSelector.innerHTML = this.innerHTML;
-                   serverSelection.connectToGuild(this.getAttribute("data-guildID"), ws)
+                   serverSelection.connectToGuild(this.getAttribute("data-guildID"), this.innerHTML, ws)
                }
                elGuildSelector.appendChild(elguild_item);
            }
        },
-       connectToGuild: function(guild_id, ws){
+       connectToGuild: function(guild_id, guild_name, ws){
            c.currentGuild = guild_id
+           let elServerSelector = document.getElementById("selectedServer");
+           elServerSelector.innerHTML = guild_name;
            ws.send(JSON.stringify({
                op: c.op["GUILD"],
                type: "GUILD",
@@ -936,15 +936,7 @@ define('wsEventHandler',["constants", "playerbar", "serverSelection","notificati
                             }
                             if(i === 0){
                                 console.log("Connecting to Guild: "+guild_id)
-                                c.currentGuild = guild_id
-                                ws.send(JSON.stringify({
-                                    op: c.op["GUILD"],
-                                    type: "GUILD",
-                                    d: {
-                                        id: guild_id,
-                                        session: packet.session
-                                    }
-                                }));
+                                ss.connectToGuild(guild_id, guild.name, ws);
                             }
                             i++;
                         }

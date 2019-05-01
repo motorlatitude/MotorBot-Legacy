@@ -155,6 +155,7 @@ class App
                   self.debug("Updating Connected Clients")
                   guild_state_obj = {
                     playing: {},
+                    guild: self.client.guilds[msg.d.id],
                     channel: undefined,
                     session: session
                   }
