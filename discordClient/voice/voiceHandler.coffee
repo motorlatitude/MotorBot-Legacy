@@ -1,5 +1,3 @@
-u = require('../utils.coffee')
-utils = new u()
 Constants = require './../constants.coffee'
 ws = require 'ws'
 zlib = require 'zlib'
@@ -16,15 +14,15 @@ class VoiceConnection
   ###
 
   constructor: (@discordClient) ->
-    utils.debug("New Voice Connection Started")
+    @discordClient.utils.debug("New Voice Connection Started")
     @sequence = 0
     @timestamp = 0
     @timestamp_inc = (48000 / 100) * 2;
 
   connect: (params) ->
     @token = params.token
-    utils.debug("Setting Guild For Voice Handler")
-    utils.debug("Guild ID: "+params.guild_id)
+    @discordClient.utils.debug("Setting Guild For Voice Handler")
+    @discordClient.utils.debug("Guild ID: "+params.guild_id)
     @guild_id = params.guild_id
     @endpoint = params.endpoint
     @user_id = @discordClient.internals.user_id
@@ -43,7 +41,7 @@ class VoiceConnection
     @bytesTransmitted = 0
     @buffer_size = 0
     @AudioPlayers = []
-    utils.debug("Generating new voice WebSocket connection")
+    @discordClient.utils.debug("Generating new voice WebSocket connection")
     @vws = new ws("wss://" + @endpoint.split(":")[0]) #using version 3 now
     self = @
     @opusEncoder = new Opus.OpusEncoder(48000, 2)
@@ -53,7 +51,7 @@ class VoiceConnection
     @vws.on('message', (msg, flags) -> self.voiceGatewayMessage(msg, flags))
 
   voiceGatewayOpen: (guild_id) ->
-    utils.debug("Connected to Voice Gateway Server: " + @endpoint, "info")
+    @discordClient.utils.debug("[VOICESOCKET]: Connected to Voice Gateway Server: " + @endpoint, "info")
     #send identity package
     idpackage = {
       "op": 0
@@ -65,14 +63,15 @@ class VoiceConnection
       }
     }
     @vws.send(JSON.stringify(idpackage))
+    @discordClient.utils.debug("[VOICESOCKET] ~> ["+@endpoint.split(":")[0].toUpperCase()+"]: Sent Identification Payload")
 
   voiceGatewayClose: () ->
-    utils.debug("Voice gateway server is CLOSED", "warn")
+    @discordClient.utils.debug("[VOICESOCKET] Voice gateway server is CLOSED", "warn")
     #reset voice data, we need full reconnect
     clearInterval(@vhb)
 
   voiceGatewayError: (err, guild_id) ->
-    utils.debug("Voice gateway server encountered an error: " + err.toString(), "error")
+    @discordClient.utils.debug("[VOICESOCKET] Voice gateway server encountered an error: " + err.toString(), "error")
 
   voiceGatewayMessage: (data, flags) ->
     msg = if flags.binary then JSON.parse(zlib.inflateSync(data).toString()) else JSON.parse(data)
@@ -81,12 +80,14 @@ class VoiceConnection
       when Constants.voice.PacketCodes.HEARTBEAT then @handleHeartbeat(msg)
       when Constants.voice.PacketCodes.SPEAKING then @handleSpeaking(msg)
       when Constants.voice.PacketCodes.SESSION_DESC then @handleSession(msg)
-      when 8 then utils.debug("Got Heartbeat Interval", "info")
+      when Constants.voice.PacketCodes.HELLO then @discordClient.utils.debug("Got Heartbeat Interval", "info")
+      when Constants.voice.PacketCodes.CLIENT_CONNECT then @discordClient.utils.debug("A client has joined the current voice channel", "info")
+      when Constants.voice.PacketCodes.CLIENT_DISCONNECT then @discordClient.utils.debug("A client has disconnected from the current voice channel", "info")
       else
-        utils.debug("Unhandled Voice OP: " + msg.op, "warn")
+        @discordClient.utils.debug("Unhandled Voice OP: " + msg.op, "warn")
 
   handleReady: (msg) ->
-#start HB
+    #start HB
     self = @
     @vhb = setInterval(() ->
       hbpackage = {
@@ -95,7 +96,7 @@ class VoiceConnection
       }
       self.gatewayPing = new Date().getTime()
       self.vws.send(JSON.stringify(hbpackage))
-      console.log "Guild ID on heartbeat: "+self.guild_id
+      self.discordClient.utils.debug("[VOICESOCKET] ~> ["+self.endpoint.split(":")[0].toUpperCase()+"]: Sent Heartbeat")
     , msg.d.heartbeat_interval)
 
     @ssrc = msg.d.ssrc
@@ -124,6 +125,7 @@ class VoiceConnection
         }
       }
       self.vws.send(JSON.stringify(selectProtocolPayload))
+      self.discordClient.utils.debug("[VOICESOCKET] ~> ["+self.endpoint.split(":")[0].toUpperCase()+"]: Sent UDP Protocol Payload")
       self.packageData(new Date().getTime(), 1)
       self.send(new Date().getTime(), 1)
     )
@@ -137,12 +139,12 @@ class VoiceConnection
     @pings.push(ping)
     @totalPings += ping
     @avgPing = @totalPings / @pings.length
-    utils.debug("Voice Heartbeat Sent (" + ping + "ms - average: " + (Math.round(@avgPing * 100)/100) + "ms)")
+    @discordClient.utils.debug("[VOICESOCKET] <~ ["+@endpoint.split(":")[0].toUpperCase()+"]: Voice Heartbeat Acknowledged (" + ping + "ms - average: " + (Math.round(@avgPing * 100)/100) + "ms)")
 
   handleSession: (msg) ->
     @secretKey = msg.d.secret_key
     @mode = msg.d.mode
-    utils.debug("Received Voice Session Description")
+    @discordClient.utils.debug("[VOICESOCKET] <~ ["+@endpoint.split(":")[0].toUpperCase()+"]: Received Voice Session Description")
 
   setSpeaking: (value) ->
     speakingPackage = {
@@ -155,8 +157,9 @@ class VoiceConnection
     }
     if @vws.readyState == @vws.OPEN
       @vws.send(JSON.stringify(speakingPackage))
+      @discordClient.utils.debug("[VOICESOCKET] ~> ["+@endpoint.split(":")[0].toUpperCase()+"]: Sent Speaking Payload")
     else
-      utils.debug("Websocket Connection not open to set bot to speaking", "warn")
+      @discordClient.utils.debug("[VOICESOCKET]: WebSocket Connection not open to set bot to speaking", "warn")
 
   packageData: (startTime, cnt) ->
     channels = 2 #just assume it's 2 for now
@@ -175,7 +178,7 @@ class VoiceConnection
         uint = Math.floor(multiplier * streamBuff.readInt16LE(i))
         # Ensure value stays within 16bit
         if uint > 32767 || uint < -32767
-          utils.debug("Audio Peaking, Lowering Volume","warn")
+          self.discordClient.utils.debug("Audio Peaking, Lowering Volume","warn")
           self.volume = self.volume - 0.05 #lower volume automatically if we're peaking
         uint = Math.min(32767, uint)
         uint = Math.max(-32767, uint)
@@ -202,7 +205,7 @@ class VoiceConnection
       self.bytesTransmitted += packet.length
       @udpClient.send(packet, 0, packet.length, @port, @endpoint.split(":")[0], (err, bytes) ->
         if err
-          utils.debug("Error Sending Voice Packet: " + err.toString(), "error")
+          self.discordClient.utils.debug("Error Sending Voice Packet: " + err.toString(), "error")
       )
     return setTimeout(() ->
       self.send(startTime, (cnt + 1))
@@ -211,7 +214,7 @@ class VoiceConnection
   playFromStream: (stream) ->
     self = @
     if @AudioPlayers.length > 0
-      utils.debug("MORE THAN ONE AUDIO PLAYER FOR THIS VOICE HANDLER!!!!")
+      @discordClient.utils.debug("More than one AudioPlayers in this VoiceHandler, killing all AudioPlayers","warn")
       for a in @AudioPlayers
         if a
           a.stop_kill()

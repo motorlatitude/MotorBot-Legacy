@@ -3,7 +3,7 @@ router = express.Router()
 ObjectID = require('mongodb').ObjectID
 request = require('request')
 async = require('async')
-uid = require('rand-token').uid;
+uid = require('uuid/v4')
 passport = require 'passport'
 moment = require 'moment'
 SpotifyStrategy = require('passport-spotify').Strategy
@@ -262,7 +262,7 @@ importSongs = (req, videos, importStartTime) ->
     async.eachSeries(videos, (track, cb) ->
       console.log track
       v = track
-      track_id = uid(32)
+      track_id = uid()
       artist = {}
       album = {}
       composer = {}
@@ -373,9 +373,9 @@ getPlaylistTracks = (req, cb, tracks = {}, next = undefined, playlist_obj = unde
         console.log "Parsing Tracks"
         for track in data.tracks.items
           console.log track.track.id+": "+track.track.name
-          tracks[track.track.id || uid(32)] = track
+          tracks[track.track.id || uid()] = track
         if data.tracks.offset == 0 && !playlist_obj
-          playlist_id = uid(32)
+          playlist_id = uid()
           artwork = ""
           if data.images[0]
             artwork = data.images[0].url
@@ -404,7 +404,7 @@ getPlaylistTracks = (req, cb, tracks = {}, next = undefined, playlist_obj = unde
       console.log "Parsing Tracks:Offset:"+data.offset
       for track in data.items
         console.log track.track.id+": "+track.track.name
-        tracks[track.track.id || uid(32)] = track
+        tracks[track.track.id || uid()] = track
       if data.next
         getPlaylistTracks(req, cb, tracks, data.next, playlist_obj)
       else

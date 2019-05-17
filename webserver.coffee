@@ -19,7 +19,7 @@ class WebServer
   start: () ->
     self = @
     @site = express()
-    @site.use(morgan('\[DEBUG\]\['+new Date().getDate()+"\/"+(parseInt(new Date().getMonth())+1)+"\/"+new Date().getFullYear()+' \] :remote-addr :remote-user :method :url HTTP/:http-version :status :res[content-length] - :response-time ms'))
+    #@site.use(morgan('\[DEBUG\]\['+new Date().getDate()+"\/"+(parseInt(new Date().getMonth())+1)+"\/"+new Date().getFullYear()+' \] :remote-addr :remote-user :method :url HTTP/:http-version :status :res[content-length] - :response-time ms'))
     compile = (str, path) ->
       stylus(str).set('filename',path).set("compress",true).use(nib())
     @app.debug("Express Should Trust Proxy Connections")

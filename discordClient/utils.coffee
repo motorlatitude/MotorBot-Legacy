@@ -1,6 +1,8 @@
 
 class Utils
   constructor: () ->
+    @level = "verbose"
+    @output_list = []
 
   debug: (msg,level = "debug") ->
     if (process.env.NODE_ENV != 'test')
@@ -11,9 +13,11 @@ class Utils
       else if level == "warn"
         level = "\x1b[5m\x1b[33m[WARN ]\x1b[0m"
       else if level == "debug"
-        level = "\x1b[2m[DEBUG]"
+        level = "\x1b[38;5;244m[DEBUG]"
       d = new Date()
       time = "["+d.getDate()+"/"+(parseInt(d.getMonth())+1)+"/"+d.getFullYear()+" "+d.toLocaleTimeString()+"] "
-      console.log(level+time+msg+"\x1b[0m")
+      if @level == "verbose" then console.log(level+time+msg+"\x1b[0m")
+      else if @level == "cmd" then @output_list.push(level+time+msg+"\x1b[0m")
+
 
 module.exports = Utils

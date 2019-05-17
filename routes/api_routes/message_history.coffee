@@ -3,7 +3,6 @@ router = express.Router()
 ObjectID = require('mongodb').ObjectID
 request = require('request')
 async = require('async')
-uid = require('rand-token').uid;
 
 ###
   MESSAGE_HISTORY ENDPOINT

@@ -1,5 +1,3 @@
-u = require('../utils.coffee')
-utils = new u()
 util = require 'util'
 Constants = require '../constants'
 voiceHandler = require '../voice/voiceHandler'
@@ -17,6 +15,7 @@ class Dispatcher
 
   parseDispatch: (data) ->
     @discordClient.internals.sequence = data.s
+    @discordClient.utils.debug("[GATEWAYSOCKET] <~ ["+@discordClient.internals.gateway.toUpperCase()+"]: Received "+data.t+" Payload");
     switch data.t
       when 'READY' then @handleReady(data)
       when 'CHANNEL_CREATE' then @handleChannelCreate(data)
@@ -36,10 +35,10 @@ class Dispatcher
       when 'VOICE_SERVER_UPDATE' then @handleVoiceConnection(data)
       when 'RESUMED' then @handleResume(data)
       else
-        utils.debug("Unhandled Dispatch t: "+data.t, "warn")
+        @discordClient.utils.debug("Unhandled Dispatch t: "+data.t, "warn")
 
   handleReady: (data) ->
-    utils.debug("Gateway Ready, Guilds: 0 Available / "+data.d.guilds.length+" Unavailable", "info")
+    @discordClient.utils.debug("Gateway Ready, Guilds: 0 Available / "+data.d.guilds.length+" Unavailable", "info")
     @discordClient.internals.session_id = data.d.session_id
     @discordClient.internals.user_id = data.d.user.id
     self = @
@@ -66,7 +65,7 @@ class Dispatcher
     else if data.d.type == Constants.channelTypes.channelCategory
       #@discordClient.emit("channelCreate", Constants.channelTypes.channelCategory, new DirectMessageChannel(@discordClient, data.d))
     else
-      utils.debug("Channel Create Event Occurred with an unknown channel type","warn")
+      @discordClient.utils.debug("Channel Create Event Occurred with an unknown channel type","warn")
 
   handleChannelUpdate: (data) ->
     #console.log data.d
@@ -82,7 +81,7 @@ class Dispatcher
     else if data.d.type == Constants.channelTypes.channelCategory
       #@discordClient.emit("channelCreate", Constants.channelTypes.channelCategory, new DirectMessageChannel(@discordClient, data.d))
     else
-      utils.debug("Channel Update Event Occurred with an unknown channel type","warn")
+      @discordClient.utils.debug("Channel Update Event Occurred with an unknown channel type","warn")
 
   handleChannelDelete: (data) ->
     #console.log data.d
@@ -103,14 +102,14 @@ class Dispatcher
       if @discordClient.channels[data.d.id] then delete @discordClient.channels[data.d.id]
       #@discordClient.emit("channelCreate", Constants.channelTypes.channelCategory, new DirectMessageChannel(@discordClient, data.d))
     else
-      utils.debug("Channel Delete Event Occurred with an unknown channel type","warn")
-      utils.debug("Channel has not been removed from discordClient channel object")
+      @discordClient.utils.debug("Channel Delete Event Occurred with an unknown channel type","warn")
+      @discordClient.utils.debug("Channel has not been removed from discordClient channel object")
 
   handleChannelPinsUpdate: (data) ->
     if @discordClient.channels[data.d.channel_id]
       @discordClient.emit("channelPinsUpdate", data.d)
     else
-      utils.debug("Channel Pins Update Event Occurred in unknown channel","warn")
+      @discordClient.utils.debug("Channel Pins Update Event Occurred in unknown channel","warn")
 
   handleGuildCreate: (data) -> #fired when bot lazy loads available guilds and joins a new guild
     for i, channel of data.d.channels
@@ -122,19 +121,19 @@ class Dispatcher
         @discordClient.channels[channel.id] = new TextChannel(@discordClient, channel)
         data.d.channels[i] = new TextChannel(@discordClient, channel)
       else if channel.type == Constants.channelTypes.channelCategory
-        utils.debug("Channel Category Registered: "+channel.name)
+        @discordClient.utils.debug("Channel Category Registered: "+channel.name)
       else
-        utils.debug("Unknown channel type: "+channel.type,"warn")
+        @discordClient.utils.debug("Unknown channel type: "+channel.type,"warn")
     for i, user of data.d.members
       u = user.user
-      utils.debug("Registering User "+u.username+"#"+u.discriminator)
+      @discordClient.utils.debug("Registering User "+u.username+"#"+u.discriminator)
       @discordClient.users[u.id] = u
     @discordClient.guilds[data.d.id] = data.d
     @discordClient.guilds[data.d.id].voice = {}
     thisServer = @discordClient.guilds[data.d.id]
     #console.log thisServer.channels
     @discordClient.emit("guildCreate", thisServer)
-    utils.debug("Joined Guild: "+thisServer.name+" ("+thisServer.presences.length+" online / "+(parseInt(thisServer.member_count)-thisServer.presences.length)+" offline)","info")
+    @discordClient.utils.debug("Joined Guild: "+thisServer.name+" ("+thisServer.presences.length+" online / "+(parseInt(thisServer.member_count)-thisServer.presences.length)+" offline)","info")
 
   handleMessageReactionAdd: (data) ->
     #console.log data.d
@@ -142,7 +141,7 @@ class Dispatcher
     if @discordClient.channels[data.d.channel_id]
       @discordClient.emit("reaction", "add", msg)
     else
-      utils.debug("Message Reaction Add Event Occurred in unknown channel","warn")
+      @discordClient.utils.debug("Message Reaction Add Event Occurred in unknown channel","warn")
 
   handleMessageReactionRemove: (data) ->
     #console.log data.d
@@ -150,7 +149,7 @@ class Dispatcher
     if @discordClient.channels[data.d.channel_id]
       @discordClient.emit("reaction", "remove", msg)
     else
-      utils.debug("Message Reaction Remove Event Occurred in unknown channel","warn")
+      @discordClient.utils.debug("Message Reaction Remove Event Occurred in unknown channel","warn")
 
   handleMessageCreate: (data) ->
     #console.log data.d
@@ -158,7 +157,7 @@ class Dispatcher
     if @discordClient.channels[data.d.channel_id]
       @discordClient.emit("message",new Message(@discordClient, msg))
     else
-      utils.debug("Message Create Event Occurred in unknown channel","warn")
+      @discordClient.utils.debug("Message Create Event Occurred in unknown channel","warn")
 
   handleMessageUpdate: (data) ->
     #console.log data.d
@@ -166,7 +165,7 @@ class Dispatcher
     if @discordClient.channels[data.d.channel_id]
       @discordClient.emit("messageUpdate",new Message(@discordClient, msg))
     else
-      utils.debug("Message Update Event Occurred in unknown channel","warn")
+      @discordClient.utils.debug("Message Update Event Occurred in unknown channel","warn")
 
   handleMessageDelete: (data) ->
     #console.log data.d
@@ -175,7 +174,7 @@ class Dispatcher
     if channel
       @discordClient.emit("messageDelete", data.d.id, channel)
     else
-      utils.debug("Message Delete Event Occurred in unknown channel","warn")
+      @discordClient.utils.debug("Message Delete Event Occurred in unknown channel","warn")
 
   handleTypingStart: (data) ->
     #console.log data.d
@@ -183,18 +182,18 @@ class Dispatcher
     if channel
       @discordClient.emit("typingStart", data.d.user_id, channel, data.d.timestamp)
     else
-      utils.debug("Typing Start Event Occurred in unknown channel","warn")
+      @discordClient.utils.debug("Typing Start Event Occurred in unknown channel","warn")
 
   handleUserUpdate: (data) ->
     user = data.d
     if user.id
       @discordClient.emit("userUpdate", user.id, user.username, data.d)
     else
-      utils.debug("UserUpdate event occurred for an unknown user")
+      @discordClient.utils.debug("UserUpdate event occurred for an unknown user")
 
   handleVoiceStateUpdate: (data) ->
-    utils.debug("VOICE_STATE_UPDATE event caught")
-    console.log data
+    @discordClient.utils.debug("VOICE_STATE_UPDATE event caught")
+    #console.log data
     if data.d
       if data.d.channel_id
         data.d.channel = @discordClient.channels[data.d.channel_id]
@@ -204,14 +203,13 @@ class Dispatcher
       @discordClient.emit("voiceChannelUpdate", data.d)
 
   handleVoiceConnection: (data) -> #bot has connected to voice channel
-    utils.debug("Joined Voice Channel","info")
+    @discordClient.utils.debug("Joined Voice Channel","info")
     @discordClient.voiceHandlers[data.d.guild_id] = new voiceHandler(@discordClient)
     @discordClient.voiceHandlers[data.d.guild_id].connect(data.d)
     @discordClient.emit("VOICE_STATE_UPDATE",new VoiceConnection(@discordClient, @discordClient.voiceHandlers[data.d.guild_id]))
 
   handleResume: (data) ->
-    console.log data
-    utils.debug("Connection Resumed","info")
+    @discordClient.utils.debug("Connection Resumed","info")
     @discordClient.internals.resuming = false
     @discordClient.internals.connection_retry_count = 0
     @connected = true

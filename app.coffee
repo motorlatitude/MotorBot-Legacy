@@ -11,16 +11,28 @@ youtubeStream = require 'ytdl-core'
 request = require 'request'
 fs = require 'fs'
 path = require 'path'
-uid = require('rand-token').uid;
+uuidv4 = require('uuid/v4');
+readline = require('readline');
+Table = require 'cli-table'
+StringArgv = require 'string-argv'
+ImageToASCII = require 'asciify-image'
+chalk = require 'chalk'
+
+readline.emitKeypressEvents(process.stdin);
+if (process.stdin.isTTY)
+  process.stdin.setRawMode(true);
 
 class App
 
   constructor: () ->
     self = @
+    @client
     @musicPlayers = {}
     @soundboard = {}
     @say = {}
     @yStream = {}
+    @debug_level = "verbose";
+    @debug_output_list = [];
     ###if cluster.isMaster
       cluster.on('online', (worker) ->
         console.log('Worker ' + worker.process.pid + ' is online')
@@ -48,14 +60,267 @@ class App
       else if level == "notification"
         level = "\x1b[5m\x1b[35m[NOTIF]\x1b[0m"
       else if level == "debug"
-        level = "\x1b[2m[DEBUG]"
+        level = "\x1b[38;5;244m[DEBUG]"
       d = new Date()
       time = "["+d.getDate()+"/"+(parseInt(d.getMonth())+1)+"/"+d.getFullYear()+" "+d.toLocaleTimeString()+"] "
-      console.log(level+time+msg+"\x1b[0m")
+      if @debug_level == "verbose" then console.log(level+time+msg+"\x1b[0m")
+      else if @debug_level == "cmd" then @debug_output_list.push(level+time+msg+"\x1b[0m")
+
+
+  cmd: () ->
+    rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+      prompt: "\x1b[34mMotorBot \u2771 \x1b[0m",
+      completer: (line) ->
+        completions = 'state logs clients voice gateway'.split(' ')
+        hits = completions.filter((c) -> c.startsWith(line))
+        c = if hits.length then hits else completions
+        return [c, line];
+    });
+    cli_mode = false
+    self = @;
+    rl.on('line', (input) ->
+      if input == ">cli"
+        self.client.setDebugLevel("cmd");
+        self.debug_level = "cmd";
+        readline.cursorTo(process.stdout, 0,0)
+        readline.clearScreenDown(process.stdout)
+        process.stdout.write('Loading MotorBot CLI...\n');
+        process.stdout.write('Creating Interface for Readline\n');
+        process.stdout.write('Configuring Interface for Readline\n');
+        process.stdout.write('Setting Logging Mode To: cmd\n');
+        process.stdout.write('process.stdin.isTTY: '+process.stdin.isTTY+"\n")
+        process.stdout.write('Converting MotorBot Icon To ASCII\n');
+        process.stdout.write('CLI Width: '+process.stdout.columns+'; CLI Height: '+process.stdout.rows+"\n");
+        process.stdout.write('\n')
+        ImageToASCII("https://motorbot.io/img/another_icon.png", {
+          fit: 'box',
+          height: 16,
+          c_ratio: 2
+        }, (err, converted) ->
+          process.stdout.write(converted);
+          process.stdout.write('\nWelcome to the MotorBot CLI (version - 0.6.0)\n\nSome Other Info\n\n')
+          cli_mode = true
+          rl.prompt(true)
+        )
+      if cli_mode
+        args = StringArgv.parseArgsStringToArgv(input);
+        #console.log args
+        cmd = args[0]
+        if cmd == "state"
+          newState = "online"
+          newStatus = null
+          newType = 0
+          setting_state = false
+          if args.indexOf("-h") > 0 || args.indexOf("--help") > 0
+            process.stdout.write("\n"+
+              "Usage: state [arguments]\n\n"+
+              "Arguments:\n\n"+
+              "  -s, --state               set the state of MotorBot, accepts: online, offline, dnd, idle or invisible\n"+
+              "  -m, --message, --msg      set status message of MotorBot, this is the text displayed after 'Playing ' or 'Listening to '\n"+
+              "  -t, --type                set type of state, accepts: 0, 1 or 2\n\n"+
+              "  If no arguments are passed this will return the current state of MotorBot\n\n")
+          else
+            for c, i in args
+              if c == "-s" || c == "--state"
+                #set state
+                setting_state = true
+                newState = args[i+=1]
+              else if c == "-m" || c == "--message" || c == "--msg"
+                #set status message
+                setting_state = true
+                newStatus = args[i+=1]
+              else if c == "-t" || c == "--type"
+                #set status type
+                newType = args[i+=1]
+            if setting_state
+              if newState == "online" || newState == "offline" || newState == "dnd" || newState == "idle" || newState == "invisible"
+                self.client.setStatus(newStatus, newType, newState)
+                process.stdout.write("\x1b[32m\u25CF\x1b[0m OKAY: State change sent successfully\n")
+              else
+                process.stdout.write("Incorrect argument passed for the state (-s) option\nExpected: online, offline, dnd, idle or invisible\nGot:"+newState+"\n");
+            else
+              #return current state
+              process.stdout.write("No Arguments Passed?\n")
+        else if cmd == "help"
+          process.stdout.write("\n"+
+            "Usage: [command] -h or --help\n\n"+
+            "Commands:\n\n"+
+            "  state          alter state of MotorBot\n"+
+            "  logs           get logs for MotorBot or DiscordClient Library\n"+
+            "  clients        get MotorBot Music connected users\n"+
+            "  voice          standard MotorBot voice commands\n"+
+            "  gateway        get gateway status\n\n")
+        else if cmd == "logs"
+          setting_state = false
+          which = 0
+          level = "verbose"
+          if args.indexOf("-h") > 0 || args.indexOf("--help") > 0
+            process.stdout.write("\n"+
+              "Usage: logs [arguments]\n\n"+
+              "Arguments:\n\n"+
+              "  -l, --level               only display logs at this or above this level, accepts: verbose, debug, info, notif, warn or error\n"+
+              "  -w, --which               select which logs to display, accepts; '\n"+
+              "                                                 0, all             show both MotorBot and DiscordClient Library logs\n"+
+              "                                                 1                  MotorBot logs\n"+
+              "                                                 2                  DiscordClient library logs\n\n"+
+              "  If no arguments are passed the default values will be used (level=verbose,which=all)\n\n")
+          else
+            for c, i in args
+              if c == "-l" || c == "--level"
+                # only return logs at this or above this level
+                # verbose - return all
+                #   debug - return all
+                #    info - return info and below
+                #   notif - return notif and below
+                #    warn - return warn and below
+                #   error - only return errors
+                level = args[i+=1]
+              else if c == "-w" || c == "--which"
+                # which logs to return
+                # 0 | all - all
+                #       1 - MotorBot logs
+                #       2 - Discord Client logs
+                which = args[i+=1]
+                if which == "all" then which = 0
+                which = parseInt(which)
+            print_log = (list) ->
+              until list.length == 0
+                log_line = list.shift()
+                if level == "verbose" || level == "debug"
+                  process.stdout.write(log_line+"\n")
+                else if level == "info"
+                  if log_line.match(/^\[INFO \]/gmi) || log_line.match(/^\[WARN \]/gmi) || log_line.match(/^\[ERROR\]/gmi) || log_line.match(/^\[NOTIF\]/gmi)
+                    process.stdout.write(log_line+"\n")
+                else if level == "notif"
+                  if log_line.match(/^\[WARN \]/gmi) || log_line.match(/^\[ERROR\]/gmi) || log_line.match(/^\[NOTIF\]/gmi)
+                    process.stdout.write(log_line+"\n")
+                else if level == "warn"
+                  if log_line.match(/^\[WARN \]/gmi) || log_line.match(/^\[ERROR\]/gmi)
+                    process.stdout.write(log_line+"\n")
+                else if level == "error"
+                  if log_line.match(/^\[ERROR\]/gmi)
+                    process.stdout.write(log_line+"\n")
+            if which == 0
+              process.stdout.write("--- MotorBot Log ---\n")
+              print_log(self.debug_output_list)
+              process.stdout.write("--- DiscordClient Library Log ---\n")
+              print_log(self.client.utils.output_list)
+            else if which == 1
+              process.stdout.write("--- MotorBot Log ---\n")
+              print_log(self.debug_output_list)
+            else if which == 2
+              process.stdout.write("--- DiscordClient Library Log ---\n")
+              print_log(self.client.utils.output_list)
+        else if cmd == "clients"
+          process.stdout.write("Connected MotorBot WebSocket Clients: "+self.websocket.connectedClients.length+"\n\n")
+          table = new Table({
+            style: {'padding-left':1, 'padding-right':1, head:[], border:[]},
+            head: ["Socket ID","User ID","Session ID","Since"],
+            colWidths: [35, 19, 70, 70]
+          })
+          if self.websocket.connectedClients.length > 0
+            for c in self.websocket.connectedClients
+              table.push([c.id,c.user_id,c.session,new Date(c.t)])
+            process.stdout.write(table.toString()+"\n\n")
+        else if cmd == "voice"
+          channelName = undefined
+          selected_guild_id = undefined
+          joining = false
+          leaving = false
+          if args.indexOf("-h") > 0 || args.indexOf("--help") > 0
+            process.stdout.write("\n"+
+              "Usage: voice [arguments]\n\n"+
+              "Arguments:\n\n"+
+              "  Must contain either join or leave arguments\n\n"+
+              "    -j, --join                   join a voice channel\n"+
+              "    -l, --leave                  leave a voice channel\n\n"+
+              "  -g, --guild                The guild id of the server in which the voice channel is located; This is required for any voice command\n"+
+              "  -c, --channel              The channel name of the voice channel MotorBot should join; This is required for the join argument\n\n")
+          else
+            for c, i in args
+              if c == "-j" || c == "--join"
+                #joining voice channel
+                joining = true
+              else if c == "-l" || c == "--leave"
+                leaving = true
+              else if c == "-g" || c == "--guild"
+                selected_guild_id = args[i+=1]
+              else if c == "-c" || c == "--channel"
+                channelName = args[i+=1]
+            if joining && !leaving
+              if self.client.guilds[selected_guild_id]
+                if channelName
+                  for channel in self.client.guilds[selected_guild_id].channels
+                    if channel.name == channelName && channel.type == 2
+                      channel.join().then((VoiceConnection) ->
+                        self.client.voiceConnections[selected_guild_id] = VoiceConnection
+                        process.stdout.write("\x1b[32m\u25CF\x1b[0m OKAY: Successfully join voice channel: "+channelName+" ("+channel.id+")\n")
+                      )
+                      break
+                else
+                  #join first voice channel
+                  for channel in self.client.guilds[selected_guild_id].channels
+                    if channel.type == 2
+                      channel.join().then((VoiceConnection) ->
+                        self.client.voiceConnections[selected_guild_id] = VoiceConnection
+                        process.stdout.write("\x1b[32m\u25CF\x1b[0m OKAY: Successfully join voice channel: "+channel.name+"\n")
+                      )
+                      break
+              else
+                process.stdout.write("\x1b[31m\u25CF\x1b[0m ERROR: Could not find guild with id: "+selected_guild_id+"\n")
+            else if !joining && leaving
+              if self.client.guilds[selected_guild_id]
+                self.client.leaveVoiceChannel(selected_guild_id)
+                process.stdout.write("\x1b[32m\u25CF\x1b[0m OKAY: Left channel in guild "+self.client.guilds[selected_guild_id].name+" ("+selected_guild_id+") successfully\n")
+              else
+                process.stdout.write("\x1b[31m\u25CF\x1b[0m ERROR: Could not find guild with id: "+selected_guild_id+"\n")
+            else
+              process.stdout.write("Incorrect arguments passed.\nExpected: Either -j / --join or -l / --leave\nGot: Both\n")
+        else if cmd == "gateway"
+          type = "status"
+          for c, i in args
+            if c == "-s" || c == "--status"
+              type = "status"
+          if type == "status"
+            if self.client.internals.pings.length > 2
+              rel_pings = self.client.internals.pings.slice(Math.max(self.client.internals.pings.length - 10, 0))
+              min_ping = Math.min.apply(null, self.client.internals.pings)
+              max_ping = Math.max.apply(null, self.client.internals.pings)
+              avg_ping = Math.round((self.client.internals.totalPings / self.client.internals.pings.length)*100)/100
+              status = "\x1b[31m\u25CF POOR\x1b[0m"
+              if avg_ping < 200
+                status = "\x1b[32m\u25CF GOOD\x1b[0m"
+              else if avg_ping < 400
+                status = "\x1b[33m\u25CF OKAY\x1b[0m"
+              process.stdout.write(status+" - GATEWAY CONNECTION \n")
+              process.stdout.write("\u251C        Active: \x1b[32mactive (running)\x1b[0m since "+ new Date(self.client.internals.gatewayStart)+"; "+((new Date().getTime() - self.client.internals.gatewayStart)/1000)+"s ago\n")
+              process.stdout.write("\u251C Last Sequence: "+self.client.internals.sequence+" ("+self.client.internals.session_id+")\n")
+              process.stdout.write("\u251C   Retry Count: "+self.client.internals.connection_retry_count+"\n")
+              process.stdout.write("\u2514          PING: Discord Gateway Connection ~ "+self.client.internals.gateway+"\n")
+
+              process.stdout.write("\nPing History - Last "+rel_pings.length+" Pings:\n")
+              process.stdout.write("---------------------------------------------------------------------\n")
+              i=0
+              for p in rel_pings
+                process.stdout.write("Heartbeat returned from "+self.client.internals.gateway+": seq="+i+" time="+p+"ms\n")
+                i++
+              process.stdout.write("---------------------------------------------------------------------\n")
+              process.stdout.write("min / max / avg = "+min_ping+"ms / "+max_ping+"ms / "+avg_ping+"ms\n")
+              process.stdout.write("---------------------------------------------------------------------\n")
+
+            else
+              status = "\x1b[33m\u25CF UNKNOWN\x1b[0m"
+              process.stdout.write(status+" - GATEWAY CONNECTION \n");
+              process.stdout.write("\x1b[38;5;248m\u2514 Not yet connected long enough, total number of pings: "+self.client.internals.pings.length+"\x1b[0m\n")
+        rl.prompt()
+    );
 
   init: () ->
     @debug("Initialising")
-    @client = new DiscordClient({token: keys.token})
+    @cmd()
+    @client = new DiscordClient({token: keys.token, debug: "verbose"})
     new motorbotEventHandler(@, @client)
     @client.connect()
     self = @
@@ -84,11 +349,11 @@ class App
     @websocket.connectedClients = []
     @websocket.on('connection', (ws) ->
       self.debug("WebSocket Connection")
-      session = Buffer(new Date().getTime() + uid(32)).toString("base64")
+      session = Buffer(new Date().getTime() + uuidv4()).toString("base64")
       self.debug("A New WebSocket Connection Has Been Registered: "+session,"info");
 
       ws.on("close", (e) ->
-        console.log "SOCKET CLOSED"
+        self.debug("[WEBSOCKET][/ ][WSS.MOTORBOT.IO]: SOCKET CLOSED","warn")
         self.websocket.connectedClients.forEach((client) ->
           if client
             if client.session == session
@@ -97,7 +362,7 @@ class App
       )
       ws.on('message', (message) ->
         #recieved message
-        self.debug("[WEBSOCKET][INCOMING]: "+message)
+        self.debug("[WEBSOCKET][<=][WSS.MOTORBOT.IO]: "+message)
         msg = JSON.parse(message);
         switch msg.op
           when 0
@@ -109,7 +374,8 @@ class App
               id: new Date().getTime() + msg.d.user_id,
               user_id: msg.d.user_id,
               ws: ws,
-              session: session
+              session: session,
+              t: new Date().getTime()
             })
             welcome_obj = {
               guilds: {},

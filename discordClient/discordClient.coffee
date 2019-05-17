@@ -3,7 +3,6 @@ Constants = require './constants.coffee'
 req = require 'request'
 pjson = require '../package.json'
 u = require('./utils.coffee')
-utils = new u()
 DiscordManager = require './rest/DiscordManager'
 
 clientConnection = require './client/clientConnection.coffee'
@@ -13,17 +12,19 @@ class DiscordClient extends EventEmitter
   constructor: (@options) ->
     super()
     if !@options.token then throw new Error("No Token Provided")
+    @utils = new u()
+    if @options.debug then @utils.level = @options.debug
     @rest = new DiscordManager(@)
 
   getGateway: () ->
     self = @
-    utils.debug("Retrieving Discord Gateway Server")
+    @utils.debug("Retrieving Discord Gateway Server")
     req.get({url: Constants.api.host+"/gateway", json: true, time: true}, (err, res, data) ->
       if res.statusCode != 200 || err
-        utils.debug("Error Occurred Obtaining Gateway Server: "+res.statusCode+" "+res.statusMessage,"error")
+        self.utils.debug("Error Occurred Obtaining Gateway Server: "+res.statusCode+" "+res.statusMessage,"error")
         return self.emit("disconnect")
       ping = res.elapsedTime
-      utils.debug("Gateway Server: "+data.url+" ("+ping+"ms)")
+      self.utils.debug("Gateway Server: "+data.url+" ("+ping+"ms)")
       self.emit("gateway_found", data.url)
       self.establishGatewayConnection(data.url)
     )
@@ -39,7 +40,7 @@ class DiscordClient extends EventEmitter
 
   #PUBLIC METHODS
   connect: () ->
-    utils.debug("Starting MotorBot "+pjson.version,"info")
+    @utils.debug("Starting MotorBot "+pjson.version,"info")
     @internals = {}
     @internals.voice = {}
     @internals.sequence = 0
@@ -49,6 +50,11 @@ class DiscordClient extends EventEmitter
     @voiceHandlers = {}
     @voiceConnections = {}
     @getGateway()
+
+  setDebugLevel: (level) ->
+    @utils.debug("Changing Debug Level To: "+level);
+    @options.debug = level;
+    @utils.level = level;
 
   setStatus: (status, type = 2, state = "online") ->
     since = null
@@ -71,7 +77,7 @@ class DiscordClient extends EventEmitter
     }
     if @gatewayWS.readyState == @gatewayWS.OPEN
       @gatewayWS.send(JSON.stringify(dataMsg))
-      utils.debug("Status Successfully Set to \""+status+"\"","info")
+      @utils.debug("Status Successfully Set to \""+status+"\"","info")
   
   leaveVoiceChannel: (server) ->
     leaveVoicePackage = {
@@ -84,7 +90,7 @@ class DiscordClient extends EventEmitter
       }
     }
     self = @
-    utils.debug("Leaving voice channel in guild: "+server,"info")
+    @utils.debug("Leaving voice channel in guild: "+server,"info")
     delete self.voiceConnections[server]
     self.gatewayWS.send(JSON.stringify(leaveVoicePackage))
 

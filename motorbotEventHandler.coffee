@@ -536,13 +536,13 @@ class motorbotEventHandler
             additionalString += "\n*by "+game.state+"*"
           if game.assets.large_text
             additionalString += "\non "+game.assets.large_text
-          console.log game
+          #console.log game
           thumbnail_url = ""
           if game.assets
             if game.assets.large_image
               thumbnail_id = game.assets.large_image.replace("spotify:","")
               thumbnail_url = "https://i.scdn.co/image/"+thumbnail_id
-          console.log thumbnail_url
+          #console.log thumbnail_url
           self.client.channels["432351112616738837"].sendMessage("","embed": {
             "title": "<:spotify:525318301367271425>  "+statusText+someText,
             "description": additionalString,
@@ -561,7 +561,7 @@ class motorbotEventHandler
             #self.client.channels["432351112616738837"].sendMessage(time+"<@"+user_id+"> is `invisible` and a status refresh event occurred")
           else
             self.client.channels["432351112616738837"].sendMessage(time+"<@"+user_id+">"+statusText+someText+additionalString)
-            console.log(extra_info);
+            #console.log(extra_info);
 
         userStatus[user_id] = extra_info
     )

@@ -3,7 +3,6 @@ router = express.Router()
 ObjectID = require('mongodb').ObjectID
 request = require('request')
 async = require('async')
-uid = require('rand-token').uid;
 
 ###
   MUSIC ENDPOINT
@@ -75,7 +74,7 @@ router.get("/play", (req, res) ->
           musicPlayer.player_state.isPaused = false
           if musicPlayer.seekPosition
             musicPlayer.player_state.seekPosition = musicPlayer.seekPosition
-        req.app.locals.motorbot.websocket.broadcastByGroupID(JSON.stringify({type: 'PLAYER_UPDATE', op: 7, d: {event_type: 'PLAY', player_state: musicPlayer.player_state, playlist_id: musicPlayer.playlist_id, song_id: musicPlayer.song_id}}), guild_id)
+        req.app.locals.motorbot.websocket.broadcastByGuildID(JSON.stringify({type: 'PLAYER_UPDATE', op: 7, d: {event_type: 'PLAY', player_state: musicPlayer.player_state, playlist_id: musicPlayer.playlist_id, song_id: musicPlayer.song_id}}), guild_id)
         res.sendStatus(200)
       else
         res.sendStatus(400)

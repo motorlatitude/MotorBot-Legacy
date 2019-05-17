@@ -1,5 +1,3 @@
-u = require('../utils.coffee')
-utils = new u()
 ws = require 'ws'
 zlib = require 'zlib'
 os = require 'os'
@@ -20,7 +18,7 @@ class ClientConnection
   connect: (@gateway) ->
     self = @
     @discordClient.internals.gateway = @gateway
-    utils.debug("Creating Gateway Connection")
+    @discordClient.utils.debug("[GATEWAYSOCKET]: Creating Gateway Connection")
     @discordClient.gatewayWS = new ws(self.gateway+"/?v=6") #use version 6, cause you can do that :o
 
     @discordClient.gatewayWS.once('open', () -> self.gatewayOpen())
@@ -30,16 +28,16 @@ class ClientConnection
     #@discordClient.emit("con")
 
   gatewayError: (err) ->
-    utils.debug("Error Occurred Connecting to Gateway Server: "+err.toString(),"error")
+    @discordClient.utils.debug("[GATEWAYSOCKET]: Error Occurred Connecting to Gateway Server: "+err.toString(),"error")
 
   gatewayClose: () ->
-    utils.debug("Connection to Gateway Server CLOSED","warn")
-    utils.debug("Attempting To Reacquire Connection to Gateway Server","info")
+    @discordClient.utils.debug("[GATEWAYSOCKET]: Connection to Gateway Server CLOSED","warn")
+    @discordClient.utils.debug("[GATEWAYSOCKET]: Attempting To Reacquire Connection to Gateway Server","info")
     clearInterval(@gatewayHeartbeat)
     @sendResumePayload()
 
   gatewayOpen: () ->
-    utils.debug("Connected to Gateway Server","info")
+    @discordClient.utils.debug("Connected to Gateway Server","info")
     if @discordClient.internals.resuming
       resumePackage = {
         "op": 6,
@@ -49,9 +47,10 @@ class ClientConnection
           "seq": @discordClient.internals.sequence
         }
       }
-      utils.debug("Sending Resume Package")
+      @discordClient.utils.debug("Sending Resume Package")
       console.log resumePackage
       @discordClient.gatewayWS.send(JSON.stringify(resumePackage))
+      @discordClient.utils.debug("[GATEWAYSOCKET] ~> ["+@gateway.toUpperCase()+"]: Sent RESUME Payload")
 
   sendResumePayload: () ->
     if @discordClient.internals.connection_retry_count < 5
@@ -63,11 +62,11 @@ class ClientConnection
         self.connect(self.gateway)
       , 1000)
     else
-      utils.debug("Failed to Resume Connection: Retry Limit Exceeded","error")
-      utils.debug("Terminating","warn")
+      @discordClient.utils.debug("[GATEWAYSOCKET]: Failed to Resume Connection: Retry Limit Exceeded","error")
+      @discordClient.utils.debug("[GATEWAYSOCKET]: Terminating","warn")
 
   sendReadyPayload: () ->
-    utils.debug("Using Compression: "+!!zlib.inflateSync)
+    @discordClient.utils.debug("[GATEWAYSOCKET]: Using Compression: "+!!zlib.inflateSync)
     idpackage = {
       "op": 2,
       "d": {
@@ -83,20 +82,21 @@ class ClientConnection
         "large_threshold": 250
       }
     }
-    utils.debug("Sending Identity Package")
     @discordClient.gatewayWS.send(JSON.stringify(idpackage))
+    @discordClient.utils.debug("[GATEWAYSOCKET] ~> ["+@gateway.toUpperCase()+"]: Sent IDENTITY Payload")
 
   helloPackage: (data) ->
-    utils.debug("Hello Payload Received")
+    @discordClient.utils.debug("[GATEWAYSOCKET] <~ ["+@gateway.toUpperCase()+"]: HELLO Payload Received")
     if @discordClient.internals.resuming
-      utils.debug("Ignoring Hello, attempting resume")
+      @discordClient.utils.debug("[GATEWAYSOCKET]: Ignoring Hello, attempting resume")
       @HEARTBEAT_INTERVAL = data.d.heartbeat_interval
     else
       @HEARTBEAT_INTERVAL = data.d.heartbeat_interval
       @sendReadyPayload()
     self = @
     # Setup gateway heartbeat
-    utils.debug("Starting Heartbeat: "+@HEARTBEAT_INTERVAL)
+    @discordClient.utils.debug("[GATEWAYSOCKET]: Starting Heartbeat: "+@HEARTBEAT_INTERVAL)
+    self.discordClient.internals.gatewayStart = new Date().getTime()
     @gatewayHeartbeat = setInterval(() ->
       hbPackage = {
         "op": 1
@@ -105,8 +105,9 @@ class ClientConnection
       self.discordClient.internals.gatewayPing = new Date().getTime()
       if self.discordClient.gatewayWS
         self.discordClient.gatewayWS.send(JSON.stringify(hbPackage))
+        self.discordClient.utils.debug("[GATEWAYSOCKET] ~> ["+self.gateway.toUpperCase()+"]: Sent Heartbeat")
       else
-        utils.debug("Gateway WebSocket Closed?","error")
+        self.discordClient.utils.debug("[GATEWAYSOCKET]: Gateway WebSocket Closed?","error")
     ,@HEARTBEAT_INTERVAL)
 
   heartbeatACK: (data) ->
@@ -114,13 +115,13 @@ class ClientConnection
     @discordClient.internals.pings.push(ping)
     @discordClient.internals.totalPings+=ping
     @discordClient.internals.avgPing = @discordClient.internals.totalPings/@discordClient.internals.pings.length
-    utils.debug("Sent Heartbeat with sequence: "+@discordClient.internals.sequence+" ("+ping+"ms - average: "+((Math.round(@discordClient.internals.avgPing*100))/100)+"ms)")
+    @discordClient.utils.debug("[GATEWAYSOCKET] <~ ["+@gateway.toUpperCase()+"]: Heartbeat acknowledged with sequence: "+@discordClient.internals.sequence+" ("+ping+"ms - average: "+((Math.round(@discordClient.internals.avgPing*100))/100)+"ms)")
 
   handleInvalidSession: (data) ->
     self = @
     if @discordClient.internals.resuming
-      utils.debug("Resuming Failed: INVALID_SESSION","error")
-      utils.debug("Attempting Full Reconnect")
+      @discordClient.utils.debug("[GATEWAYSOCKET]: Resuming Failed: INVALID_SESSION","error")
+      @discordClient.utils.debug("[GATEWAYSOCKET]: Attempting Full Reconnect")
       clearInterval(@gatewayHeartbeat)
       @discordClient.internals.resuming = false
       @connect(self.gateway)
@@ -129,9 +130,9 @@ class ClientConnection
     if flags
       msg = if flags.binary then JSON.parse(zlib.inflateSync(data).toString()) else JSON.parse(data)
     else
-      utils.debug("No Flags Present","warn")
+      @discordClient.utils.debug("[GATEWAYSOCKET]: No Flags Present","warn")
       if typeof data == "object"
-        utils.debug("Received Gateway Message With Type Object -> Buffer","warn")
+        @discordClient.utils.debug("[GATEWAYSOCKET]: Received Gateway Message With Type Object -> Buffer","warn")
         msg = {op: -1}
       else
         msg = JSON.parse(data)
@@ -145,6 +146,6 @@ class ClientConnection
       when DISPATCH then @dispatcher.parseDispatch(msg)
       when INVALID_SESSION then @handleInvalidSession(msg)
       else
-        utils.debug("Unhandled op: "+msg.op, "warn")
+        @discordClient.utils.debug("Unhandled op: "+msg.op, "warn")
 
 module.exports = ClientConnection

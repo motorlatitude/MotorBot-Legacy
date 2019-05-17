@@ -3,7 +3,6 @@ router = express.Router()
 ObjectID = require('mongodb').ObjectID
 request = require('request')
 async = require('async')
-uid = require('rand-token').uid;
 
 utilities = require './objects/APIUtilities.coffee'
 APIUtilities = new utilities()

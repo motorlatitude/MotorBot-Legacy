@@ -662,6 +662,7 @@ define('serverSelection',["constants", "ws"], function(c, ws){
        },
        setGuilds: function(guilds, ws){
            elGuildSelector = document.getElementById("serverOptions");
+           elGuildSelector.innerHTML = "";
            for(var i=0;i<guilds.length;i++){
                var elguild_item = document.createElement("li");
                elguild_item.innerHTML = guilds[i].name;

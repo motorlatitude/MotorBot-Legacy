@@ -1,5 +1,3 @@
-u = require('../utils.coffee')
-utils = new u()
 fs = require 'fs'
 {EventEmitter} = require 'events'
 dgram = require 'dgram'
@@ -25,10 +23,11 @@ class UDPClient extends EventEmitter
     @udpClient = dgram.createSocket('udp4')
     udpInitPacket = Buffer.alloc(70)
     udpInitPacket.writeUInt16BE(parseInt(@conn.ssrc), 0, 4)
+    self = @
     @udpClient.send(udpInitPacket, 0, udpInitPacket.length, parseInt(@conn.port), @conn.endpoint, (err, bytes) ->
       if err
         return utils.debug("Failed to establish UDP Connection","error")
-      utils.debug("UDP Init message sent")
+      self.voiceConnection.discordClient.utils.debug("UDP Init message sent")
     )
     self = @
     @udpClient.on('message', (msg, rinfo) -> self.handleUDPMessage(msg, rinfo))
@@ -95,8 +94,8 @@ class UDPClient extends EventEmitter
             @userPacketQueue[id].push({sequence: sequence, timestamp: timestamp, data: output})###
     else
       @connected = true
-      utils.debug("UDP Package Received From: "+rinfo.address+":"+rinfo.port)
-      utils.debug("UDP Server responded successfully","info")
+      @voiceConnection.discordClient.utils.debug("UDP Package Received From: "+rinfo.address+":"+rinfo.port)
+      @voiceConnection.discordClient.utils.debug("UDP Server responded successfully","info")
       buffArr = JSON.parse(JSON.stringify(msg)).data
       localIP = ""
       localPort = msg.readUIntLE(msg.length-2,2).toString(10)
@@ -108,7 +107,7 @@ class UDPClient extends EventEmitter
           else
             break
         i++
-      utils.debug("Local Address: "+localIP+":"+localPort)
+      @voiceConnection.discordClient.utils.debug("Local Address: "+localIP+":"+localPort)
       @emit("ready", localIP, localPort)
 
   send: (packet, x, packetLength, port, endpoint, cb) ->

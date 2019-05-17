@@ -3,7 +3,7 @@ router = express.Router()
 ObjectID = require('mongodb').ObjectID
 request = require('request')
 async = require('async')
-uid = require('rand-token').uid;
+uid = require('uuid/v4')
 
 ###
   BROWSE ENDPOINT
@@ -156,7 +156,7 @@ importingScript = (req, res, playlist_id = undefined) ->
           tracksList = []
           albumartwork = undefined
           user_id = "169554882674556930"
-          if !playlist_id then playlist_id = uid(32)
+          if !playlist_id then playlist_id = uid()
           io = 1
           async.eachSeries(videos, (video_id, cb) ->
             console.log "Importing "+io+":"+video_id
@@ -242,7 +242,7 @@ importingScript = (req, res, playlist_id = undefined) ->
                           track_number = Number(body.tracks.items[0].track_number)
                           disc_number = Number(body.tracks.items[0].disc_number)
                           explicit = body.tracks.items[0].explicit
-                      track_id = uid(32)
+                      track_id = uid()
                       track_obj = {
                         id: track_id,
                         type: "youtube",
@@ -309,7 +309,7 @@ importingScript = (req, res, playlist_id = undefined) ->
               if err then return res.status(500).send({code: 500, status: "Database Error", error: err})
               browseCollection.insertOne({playlist_id: playlist_id}, (err, result) ->
                 if err then return res.status(500).send({code: 500, status: "Database Error", error: err})
-                res.status(200).send({code: 200, status: "OKAY"})
+                res.status(200).send({code: 200, status: "OKAY"}) #INFO Cannot Set Headers after they are sent - request times out and sends 504 before we get here most of the time
               )
             )
           )
