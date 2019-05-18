@@ -6,8 +6,8 @@ var requirejs,require,define;!function(global,setTimeout){function commentReplac
 define("requireLib", function(){});
 
 //to build;
-// node ./r.js -o build.js
-// uglifyjs app-built.js -o app-built.min.js
+// node ./r.js -o build.js && uglifyjs app-built.js -o app-built.min.js
+//
 
 requirejs.config({
     //By default load any module IDs from js/lib
@@ -6556,7 +6556,7 @@ define('user',["constants","requester","views","Sortable"], function(c,req,v, So
                 let new_element = old_element.cloneNode(true);
                 old_element.parentNode.replaceChild(new_element, old_element);
             }
-            req.get(c.base_url+"/user/playlists?offset="+offset+"&limit="+limit+"&filter=id,name,position&api_key="+c.api_key,{dataType: 'json', authorize: true}).then(function(response){
+            req.get(c.base_url+"/user/playlists?offset="+offset+"&limit="+limit+"&filter=items(id,name,position)&api_key="+c.api_key,{dataType: 'json', authorize: true}).then(function(response){
                 let response_data = response.data;
                 let data = response_data.items;
                 data.sort(function(a, b){
@@ -7326,7 +7326,7 @@ define('views',["constants","requester","marked","simpleBar","playlist"], functi
                                }
                                let elPlaylistSelection = document.getElementById("playlistSelection");
                                if(elPlaylistSelection){
-                                   req.get(c.base_url+"/spotify/playlists", {dataType: "json"}).then(function(response){
+                                   req.get(c.base_url+"/spotify/playlists?api_key="+c.api_key, {dataType: "json", authorize: true}).then(function(response){
                                        console.log(response);
                                        let elPlaylistSelectionOptions = document.getElementById("playlistSelectionOptions");
                                        if(response){

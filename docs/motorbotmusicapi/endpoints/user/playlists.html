@@ -60,7 +60,7 @@ Authorization: Bearer {access_token}</code></pre>
 <br/>
 <h1>Response Format</h1>
 <p>
-    On success, the HTTP status code in the response header will be set to <code>200</code> <b>OK</b> and the response body will contain a pagination object which will contain an array of simplified playlist objects in JSON format. Should an error occur, the header status code in the response header will be set to the corresponding error. If either your API key or the required access token for the requested user are not present a <code>401</code> <b>Unauthorized</b> response header will be returned.
+    On success, the HTTP status code in the response header will be set to <code>200</code> <b>OK</b> and the response body will contain a <a href="#pagination">pagination object</a> which will contain an array of simplified playlist objects in JSON format. Should an error occur, the header status code in the response header will be set to the corresponding error. If either your API key or the required access token for the requested user are not present a <code>401</code> <b>Unauthorized</b> response header will be returned.
 </p>
 <div class="code" data-codeBlockId="1">
     <pre class="http" data-codeBlock="1-HTTP"><code class="http">HTTP/1.1 200 OK
@@ -94,7 +94,7 @@ Content-Type: application/json</code></pre>
     <tr>
         <td>songs</td>
         <td>an array of short song objects</td>
-        <td>A list containing short song objects</td>
+        <td>A list containing <a href="#shortsongobject">short song objects</a></td>
     </tr>
     <tr>
         <td>creator</td>
@@ -131,11 +131,6 @@ Content-Type: application/json</code></pre>
         <td>integer</td>
         <td>The order in which the user has ordered their playlists</td>
     </tr>
-    <tr>
-        <td>owner</td>
-        <td>object</td>
-        <td>Contains basic owner information such as their <code>id</code>, <code>username</code> and <code>discriminator</code></td>
-    </tr>
     </tbody>
 </table>
 <div class="code" data-codeBlockId="2">
@@ -163,12 +158,7 @@ Content-Type: application/json</code></pre>
       "artwork": "https://i.scdn.co/image/cbaae5a0a78584e707943c56035123195639a48b",
       "private": true,
       "collaborative": false,
-      "position": 1,
-      "owner": {
-        "username": "squírrel",
-        "discriminator": "2549",
-        "id": "95164972807487488"
-      }
+      "position": 1
     },
     ...
   ],
@@ -221,6 +211,7 @@ Content-Type: application/json</code></pre>
     </tbody>
 </table>
 <h2>Short Song Object</h2>
+<a name="shortsongobject"></a>
 <table class="endpointTable object shortSongObject">
     <thead>
     <tr>

@@ -8,61 +8,34 @@ passport = require 'passport'
 moment = require 'moment'
 SpotifyStrategy = require('passport-spotify').Strategy
 
+OAuth = require './auth/oauth.coffee'
+PassportSpotify = require './auth/PassportSpotify.coffee'
+SpotifyRefreshAccessToken = require './auth/SpotifyRefreshAccessToken.coffee'
+
+objects = require './objects/APIObjects.coffee'
+APIObjects = new objects()
+utilities = require './objects/APIUtilities.coffee'
+APIUtilities = new utilities()
+APIWebsocket = require './objects/APIWebsocket.coffee'
+APIError = require './objects/APIError.coffee'
+
 ###
   SPOTIFY ENDPOINT
 
   https://motorbot.io/api/spotify/
 
   Contains Endpoints:
-  - GET /
+  - GET / ->                                                              authentication with user
+  - GET /callback ->                                                      spotify oauth callback
 
-  Authentication Required: false
-  API Key Required: false
+  - GET /revoke ->                                                        *, **: revoke spotify and MotorBot account connection
+  - PUT /playlist/:spotify_playlist_id/owner/:spotify_owner_id ->         *, **: import spotify playlist
+
+  *  Authentication Required: true
+  ** API Key Required: true
 ###
 
-passport.serializeUser((user, done) ->
-  done(null, user.id)
-)
-
-passport.deserializeUser((req, id, done) ->
-  usersCollection = req.app.locals.motorbot.database.collection("users")
-  usersCollection.find({id: id}).toArray((err, results) ->
-    if results[0]
-      done(null, results[0])
-  )
-)
-
-passport.use(new SpotifyStrategy({
-    clientID: "935356234ee749df96a3ab1999e0d659",
-    clientSecret: "622b1a10ae054059bd2e5c260d87dabd",
-    callbackURL: "https://motorbot.io/api/spotify/callback",
-    passReqToCallback: true
-  },
-  (req, accessToken, refreshToken, profile, done) ->
-    usersCollection = req.app.locals.motorbot.database.collection("users")
-    usersCollection.find({id: req.user.id}).toArray((err, result) ->
-      if err then done(err, undefined)
-      if result[0]
-        connections = {}
-        if result[0].connections then connections = result[0].connections
-        connections["spotify"] = {
-          username: profile.username
-          access_token: accessToken
-          refresh_token: refreshToken
-          expires: new Date().getTime() + 3600
-          sync: true
-        }
-        usersCollection.update({id: req.user.id},{$set: {connections: connections}}, (err, result) ->
-          if err
-            done(err, undefined)
-          else
-            done(err, profile)
-        )
-      else
-        done(err, undefined)
-    )
-  )
-)
+passport = new PassportSpotify()
 
 router.get("/", passport.authenticate('spotify', {scope: ['playlist-read-private', 'playlist-read-collaborative', 'user-read-recently-played', 'user-read-private user-top-read'], session: false}), (req, res) ->
   res.type('json')
@@ -72,122 +45,11 @@ router.get("/callback", passport.authenticate('spotify', { failureRedirect: 'htt
   res.redirect("https://motorbot.io/dashboard/account/connections")
 )
 
-authChecker = (req, res, next) ->
-  if !req.query.api_key
-    return res.status(429).send({code: 429, status: "No API Key Supplied"})
-  else
-    APIAccessCollection = req.app.locals.motorbot.database.collection("apiaccess")
-    APIAccessCollection.find({key: req.query.api_key}).toArray((err, results) ->
-      if err then console.log err
-      if results[0]
-        client_id = results[0].id
-        if req.headers["authorization"]
-          bearerHeader = req.headers["authorization"]
-          if typeof bearerHeader != 'undefined'
-            bearer = bearerHeader.split(" ")
-            bearerToken = bearer[1]
-            console.log bearerToken
-            accessTokenCollection = req.app.locals.motorbot.database.collection("accessTokens")
-            accessTokenCollection.find({value: bearerToken}).toArray((err, result) ->
-              if err then console.log err
-              if result[0]
-                if client_id == result[0].clientId
-                  req.user_id = result[0].userId
-                  req.client_id = result[0].clientId
-                  return next()
-                else
-                  return res.status(429).send({code: 429, status: "Client Unauthorized"})
-              else
-                return res.status(429).send({code: 429, status: "Unknown Access Token"})
-            )
-          else
-            return res.status(429).send({code: 429, status: "No Token Supplied"})
-        else
-          return res.status(429).send({code: 429, status: "No Token Supplied"})
-      else
-        return res.status(429).send({code: 429, status: "Unauthorized"})
-    )
-
-refreshAccessToken = (req, res, next) ->
-  if req.user.connections
-    if req.user.connections["spotify"]
-      if req.user.connections["spotify"].refresh_token
-        request({
-          method: "POST",
-          url: "https://accounts.spotify.com/api/token",
-          json: true
-          form: {
-            "grant_type": "refresh_token",
-            "refresh_token": req.user.connections["spotify"].refresh_token
-          },
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
-            "Authorization": "Basic "+new Buffer("935356234ee749df96a3ab1999e0d659:622b1a10ae054059bd2e5c260d87dabd").toString('base64')
-          }
-        }, (err, httpResponse, body) ->
-          console.log err
-          console.log body
-          if body.access_token
-            usersCollection = req.app.locals.motorbot.database.collection("users")
-            usersCollection.find({id: req.user.id}).toArray((err, result) ->
-              if err then console.log err
-              if result[0]
-                usersCollection.update({id: req.user.id},{$set: {"connections.spotify.access_token": body.access_token}}, (err, result) ->
-                  if err then console.log err
-                  if req.user
-                    if req.user.connections
-                      if req.user.connections["spotify"]
-                        req.user.connections["spotify"].access_token = body.access_token
-                  next()
-                )
-              else
-                console.log "User doesn't exist"
-                next()
-            )
-          else
-            console.log "No Access Token was returned"
-            next()
-        )
-      else
-        next()
-    else
-      next()
-  else
-    next()
-
-getSpotifyPlaylists = (req, res, offset, limit, playlists, cb) ->
-  request({
-      url: "https://api.spotify.com/v1/me/playlists?offset="+offset+"&limit="+limit,
-      json: true,
-      'auth': {
-        'bearer': req.user.connections["spotify"].access_token
-      }
-    }, (err, httpResponse, data) ->
-      if err then return res.status(500).send({code: 500, status: "Internal Server Error", error: err})
-      if data.items
-        playlists = playlists.concat(data.items);
-      if data.next
-        getSpotifyPlaylists(req, res, offset+limit, limit, playlists, cb)
-      else
-        if typeof cb == "function"
-          cb(playlists)
-  )
-
-
-router.get("/playlists", refreshAccessToken, (req, res) ->
+router.get("/playlists", new OAuth(), new SpotifyRefreshAccessToken(), (req, res) ->
   res.type("json")
-  if req.user
-    if req.user.connections
-      if req.user.connections["spotify"]
-        getSpotifyPlaylists(req, res, 0, 20, [], (playlists) ->
-          return res.status(200).send(playlists)
-        )
-      else
-        return res.status(403).send({code: 403, status: "Unauthorized"})
-    else
-      return res.status(403).send({code: 403, status: "Unauthorized"})
-  else
-    return res.status(403).send({code: 403, status: "Unauthorized"})
+  APIObjects.spotifyPlaylists(req, res).getPlaylists(0, 20, [], (playlists) ->
+    return res.status(200).send(playlists)
+  )
 )
 
 findVideos = (req, importStartTime, tracks) ->
@@ -415,30 +277,22 @@ getPlaylistTracks = (req, cb, tracks = {}, next = undefined, playlist_obj = unde
       cb({tracks: tracks, playlist_obj: playlist_obj})
   )
 
-router.get("/revoke", authChecker, (req, res) ->
-  console.log(req.user_id);
-  usersCollection = req.app.locals.motorbot.database.collection("users")
-  usersCollection.find({id: req.user_id}).toArray((err, result) ->
-    if err then console.log err
-    if result[0]
-      console.log "Found User"
-      usersCollection.updateOne({id: req.user_id},{$unset: {"connections.spotify": ""}}, (err, result) ->
-        if err then console.log err
-        console.log "Updated User"
-        if req.user
-          if req.user.connections
-            if req.user.connections["spotify"]
-              req.user.connections = {}
-              delete req.user.connections["spotify"]
-        res.status(204).send()
+router.get("/revoke", new OAuth(), (req, res) ->
+  if req.user
+    u = APIObjects.user(req)
+    u.userById(req.user_id).then((user) ->
+      u.revokeSpotify().then(() ->
+        res.sendStatus(204)
+      ).catch((err) ->
+        res.type('json')
+        res.status(500).send(JSON.stringify(err, Object.getOwnPropertyNames(err)))
       )
-    else
-      console.log "User doesn't exist"
-      res.send(JSON.stringify({error: 404, message: "User Doesn't Exist"}))
-  )
+    )
+  else
+    res.sendStatus(403)
 )
 
-router.patch("/sync", authChecker, (req, res) ->
+router.patch("/sync", new OAuth(), (req, res) ->
   sync = "true"
   if req.query.sync
     if req.query.sync == "true"
@@ -464,86 +318,66 @@ router.patch("/sync", authChecker, (req, res) ->
   )
 )
 
-router.put("/playlist/:spotify_playlist_id/owner/:spotify_owner_id", authChecker, (req, res) ->
+router.put("/playlist/:spotify_playlist_id/owner/:spotify_owner_id", new OAuth(), (req, res) ->
   req.setTimeout(0)
   importStartTime = new Date().getTime()
+  APIWebSocket_Connection = new APIWebsocket(req)
   if req.user_id && req.params.spotify_playlist_id && req.params.spotify_owner_id
-    if req.user
-      req.app.locals.motorbot.websocket.broadcast(JSON.stringify({type: 'SPOTIFY_IMPORT', op: 9, d: {event_type: "START", event_data: {user: req.user_id, start: importStartTime, message: "Gathering Data", progress: (0/100)}}}), req.user_id)
-      if req.user.connections
-        if req.user.connections["spotify"]
-          getPlaylistTracks(req, (tracks) ->
-            playlist_obj = tracks.playlist_obj
-            playlist_id = playlist_obj.id
-            tracks = tracks.tracks
-            req.app.locals.motorbot.websocket.broadcast(JSON.stringify({type: 'SPOTIFY_IMPORT', op: 9, d: {event_type: "START", event_data: {user: req.user_id, start: importStartTime, message: "Finding Songs", progress: (25/100)}}}), req.user_id)
-            console.log "Finding Youtube Videos"
-            findVideos(req, importStartTime, tracks).then((videos) ->
-              console.log "Video Find Complete"
-              console.log videos
-              if Object.keys(videos).length >= 0
-                video_id_list = []
-                for spotify_id, video of videos["found"]
-                  video_id_list.push(video.video_id)
-                console.log video_id_list
-                tracksCollection = req.app.locals.motorbot.database.collection("tracks")
-                tracksCollection.find({video_id:{"$in":video_id_list}}).toArray((err, results) ->
-                  if err then return res.status(500).send({code: 500, status: "Internal Server Error", error: err})
-                  if results[0]
-                    console.log "Determined Repeats"
-                    for song in results
-                      if song.artwork && !playlist_obj.artwork
-                        playlist_obj.artwork = song.artwork
-                      date_added = new Date().getTime()
-                      for spotify_id, video of videos["found"]
-                        if video.video_id == song.video_id
-                          console.log video.track_details.added_at
-                          date_added = moment(video.track_details.added_at).unix()*1000
-                          delete videos["found"][spotify_id]
-                      playlist_obj.songs.push({
-                        id: song.id
-                        date_added: date_added
-                        play_count: 0
-                        last_played: undefined
-                      })
-                  console.log "Import Other Songs"
-                  importSongs(req, videos["found"], importStartTime).then((small_song_obj)->
-                    for song in small_song_obj
-                      playlist_obj.songs.push(song)
-                    req.app.locals.motorbot.websocket.broadcast(JSON.stringify({type: 'SPOTIFY_IMPORT', op: 9, d: {event_type: "UPDATE", event_data: {user: req.user_id, start: importStartTime, message: "Finalising", progress: (75/100)}}}), req.user_id)
-                    console.log "Inserting Playlist"
-                    playlistsCollection = req.app.locals.motorbot.database.collection("playlists")
-                    playlistsCollection.insertOne(playlist_obj, (err, result) ->
-                      if err then return res.status(500).send({code: 500, status: "Database Error", error: err})
-                      console.log "User receiving access to playlist"
-                      usersCollection = req.app.locals.motorbot.database.collection("users")
-                      usersCollection.find({id: req.user_id}).toArray((err, results) ->
-                        if err then return res.status(500).send({code: 500, status: "Database Error", error: err})
-                        if results[0]
-                          playlists = results[0].playlists
-                          playlists.push(playlist_id)
-                          usersCollection.update({id: req.user_id},{$set: {playlists: playlists}}, (err, result) ->
-                            if err then return res.status(500).send({code: 500, status: "Database Error", error: err})
-                            res.send({"playlist":playlist_obj,"not_found":videos["not_found"]})
-                            req.app.locals.motorbot.websocket.broadcast(JSON.stringify({type: 'SPOTIFY_IMPORT', op: 9, d: {event_type: "END", event_data: {user: req.user_id, start: importStartTime, message: "Done", progress: (100/100), report: {"playlist":playlist_obj,"not_found":videos["not_found"]}}}}), req.user_id)
-                          )
-                        else
-                          return res.status(404).send({code: 404, status: "User Not Found"})
-                      )
-                    )
-                  ).catch((err) ->
-                    console.log "Importing Failed"
-                    console.log err
-                  )
-                  )
-              else
-                return res.status(404).send({code: 404, status: "No Videos Found"})
+    if APIUtilities.has(req, "user.connections.spotify")
+      APIWebSocket_Connection.send("SPOTIFY_IMPORT",{
+        type: "START",
+        importStartTime: importStartTime,
+        message: "Gathering Data",
+        progress: 0
+      })
+      APIObjects.spotifyPlaylists(req, res).getPlaylistTracks(req.params.spotify_owner_id,req.params.spotify_playlist_id).then((spotifyPlaylistResults) ->
+        playlist = spotifyPlaylistResults.playlist
+        tracks = spotifyPlaylistResults.tracks
+        APIWebSocket_Connection.send("SPOTIFY_IMPORT",{
+          type: "START",
+          importStartTime: importStartTime,
+          message: "Finding Songs",
+          progress: 0.15
+        })
+        APIObjects.youtube(req).findVideosForSongsByName(tracks, importStartTime).then((videos) ->
+          APIObjects.track(req).importTracksFromYoutubeForPlaylist(videos, importStartTime).then((short_songs) ->
+            playlist.songs = short_songs
+            APIWebSocket_Connection.send("SPOTIFY_IMPORT", {
+              type: "UPDATE",
+              start: importStartTime,
+              message: "Finalising",
+              progress: 0.9
+            })
+            APIObjects.playlist(req).importPlaylist(playlist).then(() ->
+              APIObjects.user(req).addPlaylist(playlist.id).then(() ->
+                res.type('json')
+                res.send({"playlist":playlist,"not_found":videos["not_found"]})
+                APIWebSocket_Connection.send("SPOTIFY_IMPORT", {
+                  type: "END",
+                  start: importStartTime,
+                  message: "Done",
+                  progress: 1
+                })
+              ).catch((err) ->
+                res.type('json')
+                res.status(500).send(JSON.stringify(err, Object.getOwnPropertyNames(err)))
+              )
+            ).catch((err) ->
+              res.type('json')
+              res.status(500).send(JSON.stringify(err, Object.getOwnPropertyNames(err)))
             )
+          ).catch((err) ->
+            res.type('json')
+            res.status(500).send(JSON.stringify(err, Object.getOwnPropertyNames(err)))
           )
-        else
-          return res.status(429).send({code: 429, status: "Unauthorized"})
-      else
-        return res.status(429).send({code: 429, status: "Unauthorized"})
+        ).catch((err) ->
+          res.type('json')
+          res.status(500).send(JSON.stringify(err, Object.getOwnPropertyNames(err)))
+        )
+      ).catch((err) ->
+        res.type('json')
+        res.status(500).send(JSON.stringify(err, Object.getOwnPropertyNames(err)))
+      )
     else
       return res.status(429).send({code: 429, status: "Unauthorized"})
   else

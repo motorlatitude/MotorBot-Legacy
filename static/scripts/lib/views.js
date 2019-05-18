@@ -437,7 +437,7 @@ define(["constants","requester","marked","simpleBar","playlist"], function(c,req
                                }
                                let elPlaylistSelection = document.getElementById("playlistSelection");
                                if(elPlaylistSelection){
-                                   req.get(c.base_url+"/spotify/playlists", {dataType: "json"}).then(function(response){
+                                   req.get(c.base_url+"/spotify/playlists?api_key="+c.api_key, {dataType: "json", authorize: true}).then(function(response){
                                        console.log(response);
                                        let elPlaylistSelectionOptions = document.getElementById("playlistSelectionOptions");
                                        if(response){

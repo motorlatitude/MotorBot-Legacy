@@ -117,9 +117,10 @@ html
       top 0
       right 0
       margin-top -2px
-      margin-right 10px
-      border-radius 2px
-      padding 9px 12px
+      margin-right 20px
+      border-radius 50%
+      padding 0 12px
+      line-height 35px
       font-family Open Sans, sans-serif
       font-weight 500
       font-size 12px
@@ -137,19 +138,18 @@ html
       position relative
       top 0
       right 0
-      padding 0 10px
+      padding 0 15px
       color #fff
-      background #26272A
-      border-top-left-radius 3px
-      border-bottom-left-radius 3px
+      background $active_color
+      border-top-left-radius 30px
+      border-bottom-left-radius 30px
       width auto
-      height 30px
-      line-height 30px
+      height 34px
+      line-height 34px
       z-index 10
       cursor pointer
       & .serverRegion
         float right
-        background rgba(0, 0, 0, 0.2)
         border-radius 2px
         padding 0 5px
         line-height 20px
@@ -162,48 +162,47 @@ html
       &:after
         content ''
         position absolute
-        right -15px
-        top 0
-        width: 0;
-        height: 0;
-        border-top: 15px solid transparent;
-        border-bottom: 15px solid transparent;
-        border-left: 15px solid #26272A;
-      &:before
-        content ''
-        position absolute
         right -17px
-        top -2px
+        top 0
         width: 0;
         height: 0;
         border-top: 17px solid transparent;
         border-bottom: 17px solid transparent;
-        border-left: 17px solid #191919;
+        border-left: 17px solid $active_color;
+      &:before
+        content ''
+        position absolute
+        right -19px
+        top -2px
+        width: 0;
+        height: 0;
+        border-top: 19px solid transparent;
+        border-bottom: 19px solid transparent;
+        border-left: 19px solid #191919;
       &:hover
-        background #2A2D32
+        background $active_hover
         &:after
-          border-left: 15px solid #2A2D32
+          border-left: 17px solid $active_hover
       & .selected
         float left
         width auto
       & .options
         display none
         position absolute
-        top 30px
+        top 34px
         left 0
         width 180px
-        background rgba(25, 25, 25, 1)
+        background $active_color
         margin 0
         padding 0
         list-style none
-        border-bottom-left-radius 3px
-        border-bottom-right-radius 3px
+        border-radius 3px
         overflow hidden
         z-index 1000
         &.visible
           display block
         & li
-          padding 0 20px
+          padding 0 10px
           line-height 40px
           color #ccc
           font-size 12px
@@ -211,7 +210,7 @@ html
           & i
             color #aaa
           &:hover
-            background #26272A
+            background $active_hover
           &:last-child
             border-bottom 0 solid transparent
     & .channelSelection
@@ -219,32 +218,31 @@ html
       margin-left 0
       position relative
       top 0
-      padding 0 10px
+      padding 0 15px
       color #fff
-      background #26272A
-      border-radius 3px
+      background $active_hover
+      border-top-right-radius 30px
+      border-bottom-right-radius 30px
       width auto
-      height 30px
-      line-height 30px
+      height 34px
+      line-height 34px
       z-index 9
       cursor pointer
       & .selected
         float left
-        margin-left 15px
+        margin-left 17px
         width auto
         &.green
           color rgba(45, 175, 109, 1.00)
         &.yellow
           color rgba(255, 197, 51, 1.00)
-      &:hover
-        background #2A2D32
       & .options
         display none
         position absolute
         top 30px
         left 0
         width 180px
-        background rgba(25, 25, 25, 1)
+        background $active_color
         margin 0
         padding 0
         z-index 1000
@@ -264,14 +262,20 @@ html
           & i
             color #aaa
           &:hover
-            background #26272A
+            background $active_hover
           &:last-child
             border-bottom 0 solid transparent
   & .profile
     position absolute
-    top 14px
-    right 22px
+    top 6px
+    right 18px
+    padding 7px 11px 7px 0
+    border-top-left-radius 3px
+    border-top-right-radius 3px
     cursor pointer
+    background: transparent
+    &.active
+      background rgba(10, 11, 15, 1)
     & .profileIcon
       float right
       width 34px
@@ -305,10 +309,10 @@ html
     & .options
       display none
       position absolute
-      top 46px
-      right -5px
-      width 180px
-      background rgba(25, 25, 25, 1)
+      top 49px
+      right 0
+      width 177px
+      background rgba(10, 11, 15, 1)
       margin 0
       padding 0
       list-style none
@@ -316,8 +320,12 @@ html
       border-bottom-left-radius 3px
       overflow hidden
       z-index 1000
+      transform scaleY(0)
+      transform-origin top
+      transition transform 0.2s cubic-bezier(0.545, 0.745, 0.695, 1.175)
       &.visible
         display block
+        transform scaleY(1)
       & li
         padding 0 20px
         line-height 40px
@@ -327,7 +335,7 @@ html
         & i
           color #aaa
         &:hover
-          background #26272A
+          background #000
         &:last-child
           border-bottom 0 solid transparent
 
@@ -435,6 +443,34 @@ html
   position relative
   & .simplebar-track.horizontal
     display: none !important;
+  & .background_icon_wrapper
+    position fixed
+    top 0
+    left 0
+    width 230px
+    bottom 0
+    overflow hidden
+    & .background_icon
+      position absolute
+      left -160px
+      bottom 60px
+      width 350px
+      height 350px
+      background-image url(../another_icon.png)
+      background-size cover
+      filter blur(40px)
+      opacity 0.3
+      &:before
+        content ''
+        position absolute
+        left 200px
+        top -660px
+        width 450px
+        height 450px
+        background-image url(../another_icon.png)
+        background-size cover
+        filter blur(40px)
+        opacity 0.8
   & .scrollFader
     position fixed
     left 0
@@ -447,7 +483,8 @@ html
       background linear-gradient(to top, rgba(8, 10, 16, 0) 0%, rgba(8, 10, 16, 1) 60%, rgba(8, 10, 16, 1) 100%)
     &.bottom
       bottom 0
-      background linear-gradient(to bottom, rgba(8, 10, 16, 0) 0%, rgba(8, 10, 16, 1) 60%, rgba(8, 10, 16, 1) 100%)
+      height 140px
+      background linear-gradient(to bottom, rgba(8, 10, 16, 0) 0%, rgba(8, 10, 16, 1) 40%, rgba(8, 10, 16, 1) 100%)
   & .title
     font-family 'Montserrat', sans-serif
     font-size 14px
@@ -456,8 +493,9 @@ html
     margin-left 10px
     margin-top 30px
     margin-bottom 15px
-    &:nth-child(3)
-      margin-top: 80px;
+  & .spacer
+    width 230px
+    height 60px
   & ul
     list-style none
     margin 0
@@ -470,7 +508,7 @@ html
       top 0
       width calc(100% - 55px)
       line-height 38px
-      color rgba(96, 102, 111, 1)
+      color rgba(126, 132, 141, 1)
       padding-left 20px
       padding-right 20px
       font-weight 600
@@ -485,7 +523,7 @@ html
       font-size 13px
       transition background 0.15s ease-in-out
       &:hover
-        background rgba(28, 30, 36, 1)
+        background rgba(68, 70, 76, 0.4)
       &:after
         content ''
         position absolute
@@ -1162,7 +1200,7 @@ html
   min-width 1128px
   height 300px
   color #fff
-  background rgba(31, 32, 37, 1)
+  background rgba(19, 20, 24, 1)
   font-size 26px
   font-family 'Montserrat', sans-serif
   font-weight 500
@@ -1181,11 +1219,11 @@ html
     transition filter 0.25s ease-in-out
   & .bg_overlay
     position absolute
-    width 840px
+    width 860px
     height 840px
     top -220px
-    right calc(50% - 420px);
-    background radial-gradient(rgba(31, 32, 37, 0) 0%, rgba(31, 32, 37, 1) 70%, rgba(31, 32, 37, 1) 100%)
+    right calc(50% - 430px);
+    background radial-gradient(rgba(19, 20, 24, 0) 0%, rgba(19, 20, 24, 1) 60%, rgba(19, 20, 24, 1) 100%)
   & .playlistType
     position absolute
     left 220px

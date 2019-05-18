@@ -177,10 +177,10 @@ html(lang="en")
                 .serverSelection(onclick="document.getElementById('channelOptions').classList.remove('visible'); document.getElementById('serverOptions').classList.toggle('visible'); document.getElementById('accountOptions').classList.remove('visible');")
                     .selected#selectedServer Connecting...
                     ul.options#serverOptions
-                .channelSelection(onclick="document.getElementById('channelOptions').classList.toggle('visible'); document.getElementById('serverOptions').classList.remove('visible'); document.getElementById('accountOptions').classList.remove('visible');")
+                .channelSelection(onclick="document.getElementById('profile').classList.remove('active'); document.getElementById('channelOptions').classList.toggle('visible'); document.getElementById('serverOptions').classList.remove('visible'); document.getElementById('accountOptions').classList.remove('visible');")
                     .selected.yellow#selectedChannel Disconnected
                     ul.options#channelOptions
-            .profile(onclick="document.getElementById('channelOptions').classList.remove('visible'); document.getElementById('serverOptions').classList.remove('visible'); document.getElementById('accountOptions').classList.toggle('visible');")
+            .profile#profile(onclick="document.getElementById('profile').classList.toggle('active'); document.getElementById('channelOptions').classList.remove('visible'); document.getElementById('serverOptions').classList.remove('visible'); document.getElementById('accountOptions').classList.toggle('visible');")
                 .profileArrow <i class="fas fa-chevron-down"></i>
                 .profileIcon(style="background: url('https://cdn.discordapp.com/avatars/" + user.id + "/" + user.avatar + ".png?size=128') no-repeat center; background-size: cover;")
                 .profileName #{user.username}<span class="disc">##{user.discriminator}</span><br /><span class="karma"><i class="fas fa-asterisk" aria-hidden="true"></i> &nbsp; #{user.karma} karma
@@ -193,9 +193,11 @@ html(lang="en")
             ul#notificationsList
         .flexContainer
             .sidebar(data-simplebar)
+                .background_icon_wrapper
+                    .background_icon
                 .scrollFader.top
                 .scrollFader.bottom
-                .title Main
+                .title(style="margin-top: 95px;")
                 ul.mainNav
                     li(data-view="home").active Overview
                     li(data-view="browse") Browse
@@ -205,6 +207,7 @@ html(lang="en")
                     li(data-view="recently-played") Recently Played
                 .title Playlists
                 ul.mainNav.playlistNav#playlistNav
+                .spacer
                 .newPlaylistButton#newPlaylistButton New Playlist
             .contentView#ajax_contentView(data-simplebar)
                 p

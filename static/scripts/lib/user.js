@@ -45,7 +45,7 @@ define(["constants","requester","views","Sortable"], function(c,req,v, Sortable)
                 let new_element = old_element.cloneNode(true);
                 old_element.parentNode.replaceChild(new_element, old_element);
             }
-            req.get(c.base_url+"/user/playlists?offset="+offset+"&limit="+limit+"&filter=id,name,position&api_key="+c.api_key,{dataType: 'json', authorize: true}).then(function(response){
+            req.get(c.base_url+"/user/playlists?offset="+offset+"&limit="+limit+"&filter=items(id,name,position)&api_key="+c.api_key,{dataType: 'json', authorize: true}).then(function(response){
                 let response_data = response.data;
                 let data = response_data.items;
                 data.sort(function(a, b){
