@@ -307,19 +307,20 @@ class motorbotEventHandler
     @client.on("voiceChannelUpdate", (data) ->
       if data.user_id == '169554882674556930'
         if data.channel
-          self.app.websocket.broadcastByGuildID(JSON.stringify({type: "VOICE_UPDATE", d:{status:"JOIN", channel: data.channel.name, channel_id: data.channel.id, channel_obj: data}}, (key, value) ->
+          self.app.websocket.broadcast(JSON.stringify({type: "VOICE_UPDATE", d:{status:"JOIN", channel: data.channel.name, channel_id: data.channel.id, channel_obj: data, guild_id: data.guild_id}}, (key, value) ->
             if key == "client"
               return undefined
             else
               return value
-          ), data.guild_id)
+          ))
         else
-          self.app.websocket.broadcastByGuildID(JSON.stringify({type: "VOICE_UPDATE", d:{status:"LEAVE", channel: undefined, channel_id: undefined, channel_obj: data}}, (key, value) ->
+          delete self.app.client.voiceConnections[data.guild_id]
+          self.app.websocket.broadcast(JSON.stringify({type: "VOICE_UPDATE", d:{status:"LEAVE", channel: undefined, channel_id: undefined, channel_obj: data, guild_id: data.guild_id}}, (key, value) ->
             if key == "client"
               return undefined
             else
               return value
-          ), data.guild_id)
+          ))
       d = new Date()
       time = "`["+d.getDate()+"/"+(parseInt(d.getMonth())+1)+"/"+d.getFullYear()+" "+d.toLocaleTimeString()+"]` "
       if data.channel

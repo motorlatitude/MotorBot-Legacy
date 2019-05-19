@@ -116,16 +116,20 @@ passport.use(new DiscordStrategy({
 ###
 
 refreshDiscordAccessToken = (req, refresh_token, cb) ->
+  refresh_package = {
+    "grant_type": "refresh_token",
+    "refresh_token": refresh_token,
+    "client_id": keys.clientId,
+    "client_secret": keys.clientSecret,
+    "redirect_uri": "https://motorbot.io/loginflow/register/discord/callback",
+    "scope": "identify guilds"
+  }
+  console.log refresh_package
   request({
       method: "POST",
-      url: "https://discordapp.com/api/v6/oauth2/token",
+      url: "https://discordapp.com/api/oauth2/token",
       json: true
-      form: {
-        "grant_type": "refresh_token",
-        "refresh_token": refresh_token,
-        "client_id": keys.clientId,
-        "client_secret": keys.clientSecret
-      },
+      form: refresh_package,
       headers: {
         "Content-Type": "application/x-www-form-urlencoded"
       }
@@ -207,6 +211,7 @@ refreshDiscordUserData = (req, res, next) ->
       if results[0].discordAuth
         if results[0].discordAuth.expires <= new Date().getTime()
           #discord accesstoken expired, refresh
+          console.log "Discord Access Token Has Expired"
           refreshDiscordAccessToken(req, results[0].discordAuth.refreshToken, (access_token) ->
             getDiscordUserData(req, access_token, () ->
               next()

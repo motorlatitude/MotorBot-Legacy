@@ -363,7 +363,12 @@ class App
       ws.on('message', (message) ->
         #recieved message
         self.debug("[WEBSOCKET][<=][WSS.MOTORBOT.IO]: "+message)
-        msg = JSON.parse(message);
+        msg = {}
+        try
+          msg = JSON.parse(message);
+        catch e
+          console.log message
+          console.log e
         switch msg.op
           when 0
             ws.send(JSON.stringify({op: 1, type:"HEARTBEAT_ACK", d:{}}), (err) ->
@@ -381,7 +386,14 @@ class App
               guilds: {},
               session: session
             }
-            if self.client.guilds then welcome_obj.guilds = self.client.guilds #this should be changed to be user specific and only show the ones motorbot is part of
+            if self.client.guilds
+              guilds = self.client.guilds
+              for key, guild of guilds
+                if self.client.voiceConnections[guild.id]
+                  guilds[key].connected_voice_channel = self.client.voiceConnections[guild.id].channel_name || undefined
+                else
+                  guilds[key].connected_voice_channel = undefined
+              welcome_obj.guilds = guilds #this should be changed to be user specific and only show the ones motorbot is part of
             ws.send(JSON.stringify({op: 3, type:"WELCOME", d:welcome_obj}, (key, value) ->
               if key == "client" then return undefined else return value
             ), (err) ->

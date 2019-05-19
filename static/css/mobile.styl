@@ -5,7 +5,42 @@ $active_color = rgba(19, 112, 226, 1)
     -webkit-tap-highlight-color  rgba(255, 255, 255, 0)
 
   .motorbotSelection
-    display none
+    position absolute
+    top 54px !important
+    right 18px !important
+    & .issue
+      display none
+    & .enviromentSelection
+      padding 7px 13px 7px 9px !important
+      &:after
+        content ''
+        display none
+      & .arrow
+        float right !important
+        margin-left 10px !important
+        margin-right 0 !important
+      & .guild_icon
+        float right !important
+      & .guild
+        float right !important
+        text-align right !important
+      & .voice
+        float right !important
+        text-align right !important
+
+  .header
+    min-width 500px
+    & .bg
+      filter blur(25px)
+      opacity 0.6
+    & .playlistName
+      top 125px !important
+      font-size 30px !important
+      text-overflow ellipsis
+      overflow hidden
+      white-space nowrap
+    & .playlistDescription
+      display none
 
   #playlist,
   #search_playlist,
@@ -25,9 +60,41 @@ $active_color = rgba(19, 112, 226, 1)
           -webkit-flex-basis 0
           flex-basis 0
 
+@media all and (max-width: 1000px)
+
+  .header
+    & .playlistType
+      display none
+    & .playlistStats
+      top 175px
+      left 140px
+      width calc(100% - 180px)
+      white-space nowrap
+      text-overflow ellipsis
+      overflow hidden
+      & .totalPlayTime
+        display none
+      & .numberOfFollowers
+        display none
+    & .artwork
+      left 40px
+      top 120px
+      width 80px
+      height 80px
+    & .playlistName
+      top 130px !important
+      left 120px !important
+      font-size 18px !important
+      width calc(100% - 170px) !important
+      text-align left
+      padding 0 20px
+    & .playlistOptions
+      width 100%
+      left 40px
+      text-align left
+
 @media all and (max-width: 750px)
-  *
-    -webkit-tap-highlight-color  rgba(255, 255, 255, 0)
+
   #playlist,
   #search_playlist,
   .songList
@@ -35,6 +102,11 @@ $active_color = rgba(19, 112, 226, 1)
     & li
       min-width 400px
       & .trackRow
+        & .artist
+          display none
+          flex-grow 0
+          -webkit-flex-basis 0
+          flex-basis 0
         & .album
           display none
           flex-grow 0
@@ -45,6 +117,32 @@ $active_color = rgba(19, 112, 226, 1)
           flex-grow 0
           -webkit-flex-basis 0
           flex-basis 0
+
+  .titlebar .search, .titlebar .searchIcon
+    display none
+
+  .header
+    & .playlistType
+      display none
+    & .playlistStats
+      display none
+    & .artwork
+      top 80px
+      left calc(50% - 40px)
+      width 80px
+      height 80px
+    & .playlistName
+      top 170px !important
+      left 0 !important
+      font-size 18px !important
+      width calc(100% - 40px) !important
+      text-align center
+      padding 0 20px
+    & .playlistOptions
+      width 100%
+      left 0
+      text-align center
+
 
 @media (display-mode: standalone), (max-width: 500px)
   *

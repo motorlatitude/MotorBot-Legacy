@@ -173,14 +173,18 @@ html(lang="en")
             .searchAutocomplete#searchAutocomplete
             .version
             .motorbotSelection
-                .issue.button(onclick="window.location.href='https://github.com/motorlatitude/MotorBot/issues'") <i class="fas fa-bug"></i>
-                .serverSelection(onclick="document.getElementById('channelOptions').classList.remove('visible'); document.getElementById('serverOptions').classList.toggle('visible'); document.getElementById('accountOptions').classList.remove('visible');")
-                    .selected#selectedServer Connecting...
+                .issue.button(onclick="window.location.href='https://issues.motorbot.io/issues'") <i class="fas fa-bug"></i>
+                .enviromentSelection#enviromentSelection(onclick="document.getElementById('enviromentSelection').classList.toggle('active'); document.getElementById('serverOptions').classList.toggle('visible'); document.getElementById('profile').classList.remove('active'); document.getElementById('accountOptions').classList.remove('visible');")
+                    .arrow <i class="fas fa-chevron-down"></i>
+                    .guild_icon#selectedGuildIcon
+                    .guild#selectedGuild Connecting...
+                    .voice.disconnect#selectedVoice
                     ul.options#serverOptions
-                .channelSelection(onclick="document.getElementById('profile').classList.remove('active'); document.getElementById('channelOptions').classList.toggle('visible'); document.getElementById('serverOptions').classList.remove('visible'); document.getElementById('accountOptions').classList.remove('visible');")
-                    .selected.yellow#selectedChannel Disconnected
-                    ul.options#channelOptions
-            .profile#profile(onclick="document.getElementById('profile').classList.toggle('active'); document.getElementById('channelOptions').classList.remove('visible'); document.getElementById('serverOptions').classList.remove('visible'); document.getElementById('accountOptions').classList.toggle('visible');")
+                        li
+                            .guild_icon(style='background: url("https://cdn.discordapp.com/icons/207252720485269504/bd2ff31a6c975dbb83bdc153296ffd5c.png?size=256") no-repeat center; background-size: cover;')
+                            .guild Development Server
+                            .voice.connected General
+            .profile#profile(onclick="document.getElementById('profile').classList.toggle('active'); document.getElementById('accountOptions').classList.toggle('visible'); document.getElementById('enviromentSelection').classList.remove('active'); document.getElementById('serverOptions').classList.remove('visible');")
                 .profileArrow <i class="fas fa-chevron-down"></i>
                 .profileIcon(style="background: url('https://cdn.discordapp.com/avatars/" + user.id + "/" + user.avatar + ".png?size=128') no-repeat center; background-size: cover;")
                 .profileName #{user.username}<span class="disc">##{user.discriminator}</span><br /><span class="karma"><i class="fas fa-asterisk" aria-hidden="true"></i> &nbsp; #{user.karma} karma

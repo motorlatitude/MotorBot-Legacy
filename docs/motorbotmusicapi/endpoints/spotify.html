@@ -1,0 +1,51 @@
+<div class="title">
+    Spotify
+    <a href="#endpoints/spotify" title="User">
+        <i class="fa fa-anchor anchor" aria-hidden="true"></i>
+    </a>
+    <div class="type"></div>
+</div>
+<h3>Endpoints for retrieving a users spotify information. This assumes that the user has connected their MotorBot Music account with their Spotify account.</h3>
+<br/>
+<table class="endpointTable endpoints" id="endpoint-list">
+    <thead>
+    <tr>
+        <td>Method</td>
+        <td>Endpoint</td>
+        <td>Usage</td>
+        <td>Returns</td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr data-endpoint="#endpoints/spotify/authenticate" data-endpoint-accessible="false">
+        <td>GET</td>
+        <td>/spotify/</td>
+        <td>Authenticate</td>
+        <td></td>
+    </tr>
+    <tr data-endpoint="#endpoints/spotify/callback" data-endpoint-accessible="false">
+        <td>GET</td>
+        <td>/spotify/callback</td>
+        <td>Authentication Callback</td>
+        <td></td>
+    </tr>
+    <tr data-endpoint="#endpoints/spotify/import_playlist">
+        <td>PUT</td>
+        <td><span class="link" onclick="loadView('endpoints/spotify/import_playlist');">/spotify/{spotify_playlist_id}/owner/{spotify_owner_id}</span></td>
+        <td>Import Spotify Playlist</td>
+        <td>playlist</td>
+    </tr>
+    <tr data-endpoint="#endpoints/spotify/revoke">
+        <td>GET</td>
+        <td><span class="link" onclick="loadView('endpoints/spotify/revoke');">/spotify/revoke</span></td>
+        <td>Revoke Spotify Connection</td>
+        <td></td>
+    </tr>
+    <tr data-endpoint="#endpoints/spotify/sync">
+        <td>PATCH</td>
+        <td><span class="link" onclick="loadView('endpoints/spotify/sync');">/spotify/sync</span></td>
+        <td>Toggle Playlist Syncing</td>
+        <td></td>
+    </tr>
+    </tbody>
+</table>

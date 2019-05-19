@@ -772,8 +772,8 @@ body{
 }
 
 .content table.endpointTable.endpoints thead tr td:last-child{
-    width: 200px;
-    min-width: 200px;
+    width: 155px;
+    min-width: 155px;
 }
 
 

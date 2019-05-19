@@ -28,7 +28,7 @@ define(["constants", "playerbar", "serverSelection","notification","audioPlayer"
                                 }
                             }
                             if(guild.name){
-                                guild_names.push({name: guild.name, id: guild.id})
+                                guild_names.push({name: guild.name, id: guild.id, icon: guild.icon, connected_voice_channel: guild.connected_voice_channel})
                             }
                             if(i === 0){
                                 console.log("Connecting to Guild: "+guild_id)
@@ -46,12 +46,11 @@ define(["constants", "playerbar", "serverSelection","notification","audioPlayer"
                     let playing = packet.playing;
                     let channel = packet.channel;
                     if(playing){
-                        if (playing.artwork) {
-                            pb.updateArtwork(playing.artwork);
-                        }
+                        pb.updateArtwork(playing.artwork);
                         pb.updateDetails(playing.title, playing.artist, playing.album);
                         pb.updateSeek((parseFloat(playing.position) / 1000), playing.duration);
                         let elPlayButton = document.getElementById("playStop");
+                        let playlist = document.getElementById("playlist");
                         let back = document.getElementById("playerBack");
                         let skip = document.getElementById("playerSkip");
                         if(playing.currently_playing) {
@@ -92,10 +91,7 @@ define(["constants", "playerbar", "serverSelection","notification","audioPlayer"
                             clearInterval(c.seekInterval);
                         }
                     }
-                    if(channel){
-                        console.log("Loading Channel: "+channel);
-                        ss.setChannel(channel)
-                    }
+                    ss.setEnviromentSelection(packet.guild, packet.channel, ws)
                     break;
                 case "SPOTIFY_IMPORT":
                     if(packet.event_type) {
@@ -426,13 +422,11 @@ define(["constants", "playerbar", "serverSelection","notification","audioPlayer"
                         switch(data.d.status){
                             case "JOIN":
                                 console.info("MotorBot Has Joined a Voice Channel");
-                                c.currentChannel = data.d;
-                                ss.setChannel(data.d.channel);
+                                ss.setChannel(data.d.channel, data.d.guild_id);
                                 break;
                             case "LEAVE":
                                 console.info("MotorBot Has Left a Voice Channel");
-                                c.currentChannel = undefined;
-                                ss.setChannel(data.d.channel);
+                                ss.setChannel(data.d.channel, data.d.guild_id);
                                 break;
                             default:
                                 console.warn("WEBSOCKET_VOICE_UNKNOWN_STATUS");

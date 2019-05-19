@@ -46,12 +46,14 @@ define(["constants", "wsEventHandler"], function(c, wsEventHandler){
             if(!message){
                 message = {};
             }
-            message.session = wss.session;
-            wss.send(JSON.stringify({
+            message.session = c.websocketSession
+            let p = {
                 op: c.op[type],
                 type: type,
                 d: message
-            }));
+            }
+            console.log("[WEBSOCKET] ~> : %@",p)
+            wss.send(JSON.stringify(p));
         }
     };
     return WebSocketConnection

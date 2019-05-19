@@ -108,19 +108,19 @@ html
     cursor pointer
   & .motorbotSelection
     position absolute
-    top 15px
+    top 6px
     right 210px
     white-space nowrap
     & .issue
       float left
       position relative
-      top 0
+      top 7px
       right 0
       margin-top -2px
-      margin-right 20px
-      border-radius 50%
-      padding 0 12px
-      line-height 35px
+      margin-right 30px
+      border-radius 3px
+      padding 0 11px
+      line-height 32px
       font-family Open Sans, sans-serif
       font-weight 500
       font-size 12px
@@ -133,149 +133,113 @@ html
       transition opacity 0.1s ease-in-out
       &:hover
         opacity 1
-    & .serverSelection
-      float left
+    & .enviromentSelection
       position relative
       top 0
-      right 0
-      padding 0 15px
-      color #fff
-      background $active_color
-      border-top-left-radius 30px
-      border-bottom-left-radius 30px
-      width auto
-      height 34px
-      line-height 34px
-      z-index 10
+      float left
+      width 230px
+      padding 7px 11px
+      border-top-left-radius 3px
+      border-top-right-radius 3px
       cursor pointer
-      & .serverRegion
-        float right
-        border-radius 2px
-        padding 0 5px
-        line-height 20px
-        font-size 10px
-        font-weight bold
-        margin-top 5px
-        margin-left 12px
-        color #eee
-        text-transform uppercase
+      background transparent
+      transition background 0.1s 0.1s ease-out
       &:after
         content ''
         position absolute
-        right -17px
-        top 0
-        width: 0;
-        height: 0;
-        border-top: 17px solid transparent;
-        border-bottom: 17px solid transparent;
-        border-left: 17px solid $active_color;
-      &:before
-        content ''
-        position absolute
-        right -19px
-        top -2px
-        width: 0;
-        height: 0;
-        border-top: 19px solid transparent;
-        border-bottom: 19px solid transparent;
-        border-left: 19px solid #191919;
-      &:hover
-        background $active_hover
-        &:after
-          border-left: 17px solid $active_hover
-      & .selected
+        right -8px
+        top 6px
+        height 34px
+        width 2px
+        background rgba(0,0,0,0.2)
+      &.active
+        background rgba(10, 11, 15, 1)
+        transition background 0.05s 0s ease-in
+      & .arrow
+        margin-right 10px
         float left
-        width auto
-      & .options
-        display none
-        position absolute
-        top 34px
-        left 0
-        width 180px
-        background $active_color
-        margin 0
-        padding 0
-        list-style none
+        line-height 36px
+        color rgba(83, 86, 92, 1)
+      & .guild_icon
+        float left
+        width 34px
+        height 34px
         border-radius 3px
-        overflow hidden
-        z-index 1000
-        &.visible
-          display block
-        & li
-          padding 0 10px
-          line-height 40px
-          color #ccc
-          font-size 12px
-          font-weight bold
-          & i
-            color #aaa
-          &:hover
-            background $active_hover
-          &:last-child
-            border-bottom 0 solid transparent
-    & .channelSelection
-      float left
-      margin-left 0
-      position relative
-      top 0
-      padding 0 15px
-      color #fff
-      background $active_hover
-      border-top-right-radius 30px
-      border-bottom-right-radius 30px
-      width auto
-      height 34px
-      line-height 34px
-      z-index 9
-      cursor pointer
-      & .selected
+        background #2A2D32
+      & .guild
         float left
-        margin-left 17px
-        width auto
-        &.green
+        width 115px
+        margin-top 2px
+        padding 0 10px
+        height 16px
+        line-height 16px
+        color #fff
+        font-size 12px
+        font-family "Open Sans", sans-serif
+        font-weight bold
+      & .voice
+        float left
+        width 115px
+        padding 0 10px
+        color rgba(83, 86, 92, 1)
+        font-size 11px
+        font-weight 400
+        height 16px
+        line-height 16px
+        font-family "Open Sans", sans-serif
+        &.disconnect
+          color rgba(83, 86, 92, 1)
+        &.connected
           color rgba(45, 175, 109, 1.00)
-        &.yellow
-          color rgba(255, 197, 51, 1.00)
       & .options
-        display none
         position absolute
-        top 30px
-        left 0
-        width 180px
-        background $active_color
+        top 49px
+        right 0
+        width 252px
+        background rgba(10, 11, 15, 1)
         margin 0
         padding 0
-        z-index 1000
         list-style none
-        border-bottom-left-radius 3px
         border-bottom-right-radius 3px
-        border-top-right-radius 3px
+        border-bottom-left-radius 3px
         overflow hidden
+        z-index 1000
+        opacity 0
+        transform scaleY(0)
+        transform-origin top
+        transition transform 0.2s cubic-bezier(0.545, 0.785, 0.695, 1.175), opacity 0.1s 0.05s ease-out
         &.visible
-          display block
+          opacity 1
+          transform scaleY(1)
+          transition transform 0.2s cubic-bezier(0.545, 0.785, 0.695, 1.175), opacity 0.05s ease-in
         & li
-          padding 0 20px
-          line-height 40px
+          padding 10px 33px
+          line-height 34px
+          height 34px
           color #ccc
           font-size 12px
           font-weight bold
           & i
             color #aaa
           &:hover
-            background $active_hover
+            background #000
           &:last-child
             border-bottom 0 solid transparent
+          &.hidden
+            display none
   & .profile
     position absolute
     top 6px
     right 18px
-    padding 7px 11px 7px 0
+    padding 7px 13px 7px 0
     border-top-left-radius 3px
     border-top-right-radius 3px
     cursor pointer
     background: transparent
+    transition background 0.1s 0.1s ease-out
     &.active
       background rgba(10, 11, 15, 1)
+      transition background 0.05s 0s ease-in
     & .profileIcon
       float right
       width 34px
@@ -307,11 +271,11 @@ html
       line-height 36px
       color rgba(83, 86, 92, 1)
     & .options
-      display none
+      //display none
       position absolute
       top 49px
       right 0
-      width 177px
+      width 179px
       background rgba(10, 11, 15, 1)
       margin 0
       padding 0
@@ -320,12 +284,15 @@ html
       border-bottom-left-radius 3px
       overflow hidden
       z-index 1000
+      opacity 0
       transform scaleY(0)
       transform-origin top
-      transition transform 0.2s cubic-bezier(0.545, 0.745, 0.695, 1.175)
+      transition transform 0.2s cubic-bezier(0.545, 0.745, 0.695, 1.175), opacity 0.1s 0.05s ease-out
       &.visible
-        display block
+        //display block
+        opacity 1
         transform scaleY(1)
+        transition transform 0.2s cubic-bezier(0.545, 0.745, 0.695, 1.175), opacity 0.05s ease-in
       & li
         padding 0 20px
         line-height 40px
@@ -1239,7 +1206,7 @@ html
     position absolute
     left 220px
     top 95px
-    width auto
+    width calc(100% - 240px)
     font-size 38px
     font-weight 700
     color #fff

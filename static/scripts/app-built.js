@@ -646,26 +646,101 @@ define('playerbar',["constants"], function(c){
 });
 define('serverSelection',["constants", "ws"], function(c, ws){
    serverSelection = {
-       setChannel: function(channel){
-           var elChannelSelector = document.getElementById("selectedChannel");
-           console.log("Switching Channel: "+channel);
-           if(channel){
-               c.currentChannel = channel;
-               elChannelSelector.innerHTML = channel;
-               elChannelSelector.className = "selected green";
+       setChannel: function(channel, guild_id){
+           let elSelectedGuild = document.getElementById("selectedGuild")
+           if(elSelectedGuild.getAttribute("data-guildID") === guild_id){
+               let elSelectedVoice = document.getElementById("selectedVoice")
+               elSelectedVoice.classList.remove("disconnect")
+               elSelectedVoice.classList.remove("connected")
+               if(channel){
+                   elSelectedVoice.innerHTML = channel
+                   elSelectedVoice.classList.add("connected")
+                   c.currentChannel = channel;
+               }
+               else{
+                   c.currentChannel = undefined;
+                   elSelectedVoice.innerHTML = "Disconnected"
+                   elSelectedVoice.classList.add("disconnect")
+               }
+           }
+           let elChannelSelector = document.querySelector("#serverOptions li[data-guildID='"+guild_id+"'] .voice");
+           console.log("Switching Channel: "+channel+" for guild: "+guild_id);
+           if(elChannelSelector){
+               elChannelSelector.classList.remove("connected");
+               elChannelSelector.classList.remove("disconnect");
+               if(channel){
+                   elChannelSelector.innerHTML = channel;
+                   elChannelSelector.classList.add("connected");
+               }
+               else{
+                   elChannelSelector.innerHTML = "Disconnected";
+                   elChannelSelector.classList.add("disconnect");
+               }
            }
            else{
-               c.currentChannel = undefined;
-               elChannelSelector.innerHTML = "Disconnected";
-               elChannelSelector.className = "selected yellow";
+               console.warn("A voice status event occurred that this user is not part of, possible security vulnerability")
            }
+
+       },
+       setEnviromentSelection: function(guild, channel_name, ws){
+           let elSelectedGuildIcon = document.getElementById("selectedGuildIcon");
+           elSelectedGuildIcon.setAttribute("style","background: url('https://cdn.discordapp.com/icons/"+guild.id+"/"+guild.icon+".png?size=256') no-repeat center; background-size: cover;")
+           let elSelectedGuild = document.getElementById("selectedGuild")
+           elSelectedGuild.setAttribute("data-guildID",guild.id)
+           elSelectedGuild.innerHTML = guild.name
+           let elSelectedVoice = document.getElementById("selectedVoice")
+           elSelectedVoice.classList.remove("disconnect")
+           elSelectedVoice.classList.remove("connected")
+           if(channel_name){
+               elSelectedVoice.innerHTML = channel_name
+               elSelectedVoice.classList.add("connected")
+               c.currentChannel = channel_name;
+           }
+           else{
+               elSelectedVoice.innerHTML = "Disconnected"
+               elSelectedVoice.classList.add("disconnect")
+               c.currentChannel = undefined;
+           }
+           let elChannels = document.querySelectorAll("#serverOptions li")
+           if(elChannels){
+               for(let k = 0; k < elChannels.length; k++){
+                   let c = elChannels[k]
+                   c.classList.remove("hidden");
+               }
+               let elChannel = document.querySelector("#serverOptions li[data-guildID='"+guild.id+"']");
+               elChannel.classList.add("hidden");
+           }
+           ws.send(JSON.stringify({
+               op: c.op["PLAYER_STATE"],
+               type: "PLAYER_STATE",
+               d: {
+                   session: c.websocketSession
+               }
+           }));
        },
        setGuilds: function(guilds, ws){
-           elGuildSelector = document.getElementById("serverOptions");
+           let elGuildSelector = document.getElementById("serverOptions");
            elGuildSelector.innerHTML = "";
            for(var i=0;i<guilds.length;i++){
                var elguild_item = document.createElement("li");
-               elguild_item.innerHTML = guilds[i].name;
+               let guild_icon = document.createElement("div")
+               guild_icon.setAttribute("style","background: url('https://cdn.discordapp.com/icons/"+guilds[i].id+"/"+guilds[i].icon+".png?size=256') no-repeat center; background-size: cover;")
+               guild_icon.classList.add("guild_icon")
+               elguild_item.appendChild(guild_icon)
+               let guild_name = document.createElement("div")
+               guild_name.classList.add("guild")
+               guild_name.innerHTML = guilds[i].name
+               elguild_item.appendChild(guild_name)
+               let guild_voice = document.createElement("div")
+               if(guilds[i].connected_voice_channel){
+                   guild_voice.classList.add("connected")
+               }
+                else{
+                   guild_voice.classList.add("disconnect")
+               }
+               guild_voice.classList.add("voice")
+               guild_voice.innerHTML = guilds[i].connected_voice_channel || "Disconnected"
+               elguild_item.appendChild(guild_voice)
                elguild_item.setAttribute("data-guildID",guilds[i].id)
                elguild_item.onclick = function(e){
                    serverSelection.connectToGuild(this.getAttribute("data-guildID"), this.innerHTML, ws)
@@ -675,8 +750,6 @@ define('serverSelection',["constants", "ws"], function(c, ws){
        },
        connectToGuild: function(guild_id, guild_name, ws){
            c.currentGuild = guild_id
-           let elServerSelector = document.getElementById("selectedServer");
-           elServerSelector.innerHTML = guild_name;
            ws.send(JSON.stringify({
                op: c.op["GUILD"],
                type: "GUILD",
@@ -685,9 +758,6 @@ define('serverSelection',["constants", "ws"], function(c, ws){
                    session: c.websocketSession
                }
            }));
-       },
-       setChannels: function(channels){
-
        }
    };
    return serverSelection
@@ -933,7 +1003,7 @@ define('wsEventHandler',["constants", "playerbar", "serverSelection","notificati
                                 }
                             }
                             if(guild.name){
-                                guild_names.push({name: guild.name, id: guild.id})
+                                guild_names.push({name: guild.name, id: guild.id, icon: guild.icon, connected_voice_channel: guild.connected_voice_channel})
                             }
                             if(i === 0){
                                 console.log("Connecting to Guild: "+guild_id)
@@ -951,12 +1021,11 @@ define('wsEventHandler',["constants", "playerbar", "serverSelection","notificati
                     let playing = packet.playing;
                     let channel = packet.channel;
                     if(playing){
-                        if (playing.artwork) {
-                            pb.updateArtwork(playing.artwork);
-                        }
+                        pb.updateArtwork(playing.artwork);
                         pb.updateDetails(playing.title, playing.artist, playing.album);
                         pb.updateSeek((parseFloat(playing.position) / 1000), playing.duration);
                         let elPlayButton = document.getElementById("playStop");
+                        let playlist = document.getElementById("playlist");
                         let back = document.getElementById("playerBack");
                         let skip = document.getElementById("playerSkip");
                         if(playing.currently_playing) {
@@ -997,10 +1066,7 @@ define('wsEventHandler',["constants", "playerbar", "serverSelection","notificati
                             clearInterval(c.seekInterval);
                         }
                     }
-                    if(channel){
-                        console.log("Loading Channel: "+channel);
-                        ss.setChannel(channel)
-                    }
+                    ss.setEnviromentSelection(packet.guild, packet.channel, ws)
                     break;
                 case "SPOTIFY_IMPORT":
                     if(packet.event_type) {
@@ -1331,13 +1397,11 @@ define('wsEventHandler',["constants", "playerbar", "serverSelection","notificati
                         switch(data.d.status){
                             case "JOIN":
                                 console.info("MotorBot Has Joined a Voice Channel");
-                                c.currentChannel = data.d;
-                                ss.setChannel(data.d.channel);
+                                ss.setChannel(data.d.channel, data.d.guild_id);
                                 break;
                             case "LEAVE":
                                 console.info("MotorBot Has Left a Voice Channel");
-                                c.currentChannel = undefined;
-                                ss.setChannel(data.d.channel);
+                                ss.setChannel(data.d.channel, data.d.guild_id);
                                 break;
                             default:
                                 console.warn("WEBSOCKET_VOICE_UNKNOWN_STATUS");
@@ -1459,12 +1523,14 @@ define('ws',["constants", "wsEventHandler"], function(c, wsEventHandler){
             if(!message){
                 message = {};
             }
-            message.session = wss.session;
-            wss.send(JSON.stringify({
+            message.session = c.websocketSession
+            let p = {
                 op: c.op[type],
                 type: type,
                 d: message
-            }));
+            }
+            console.log("[WEBSOCKET] ~> : %@",p)
+            wss.send(JSON.stringify(p));
         }
     };
     return WebSocketConnection

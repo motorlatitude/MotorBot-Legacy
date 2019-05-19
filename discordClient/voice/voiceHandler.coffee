@@ -41,7 +41,7 @@ class VoiceConnection
     @bytesTransmitted = 0
     @buffer_size = 0
     @AudioPlayers = []
-    @discordClient.utils.debug("Generating new voice WebSocket connection")
+    @discordClient.utils.debug("Generating new voice WebSocket connection: "+@endpoint)
     @vws = new ws("wss://" + @endpoint.split(":")[0]) #using version 3 now
     self = @
     @opusEncoder = new Opus.OpusEncoder(48000, 2)

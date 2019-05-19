@@ -48,7 +48,7 @@ function addExtraButton() {
                         document.getElementById("motorbot-button").classList.add("active");
                         $("#motorbotDropDown").html("<div class='loader'></div>");
                         $.ajax({
-                            url: "https://motorbot.io/api/user/playlists?limit=50&filter=id,name,creator,position&api_key=caf07b8b-366e-44ab-9bda-152a42g8d1ef",
+                            url: "https://motorbot.io/api/user/playlists?limit=50&filter=items(id,name,creator,position)&api_key=caf07b8b-366e-44ab-9bda-152a42g8d1ef",
                             dataType: "json",
                             beforeSend: function (xhr) {
                                 xhr.setRequestHeader("Authorization", "Bearer " + value.userInfo.token);

@@ -1,0 +1,48 @@
+<div class="title">
+    Revoke Spotify Connection
+    <a href="#endpoints/spotify/revoke" title="Revoke Spotify Connection">
+        <i class="fa fa-anchor anchor" aria-hidden="true"></i>
+    </a>
+    <div class="method get">GET</div>
+    <div class="type">Endpoint</div>
+</div>
+<p>
+
+</p>
+<br/>
+<div class="code" data-codeBlockId="1">
+    <pre class="http" data-codeBlock="1-HTTP"><code class="http">GET https://motorbot.io/api/spotify/revoke HTTP/1.1
+Authorization: Bearer {access_token}</code></pre>
+</div>
+<p>
+    Revoke access to spotify data. This disconnects the spotify account from the MotorBot account and MotorBot will no
+    longer have access to the spotify account and be able to carry out any spotify related tasks.
+    <br><br>
+    This will also stop any syncing of playlists even if this is currently enabled.
+</p>
+<h1>Request Parameters</h1>
+<h2>Header Fields</h2>
+<table class="endpointTable headers">
+    <thead>
+    <tr>
+        <td>Header Field</td>
+        <td>Value</td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>Authorization<br><span class="required">REQUIRED</span></td>
+        <td>A valid access token from the MotorBot authorization system. See the <span class="link" onclick="loadView('endpoints/oauth2')">OAuth 2.0 endpoint</span> or the <span class="link" onclick="loadView('guides/authorization')">User Authorization Guide</span> for further information. The access token must have been issued on behalf of the current user.</td>
+    </tr>
+    </tbody>
+</table>
+<br/>
+<h1>Response Format</h1>
+<p>
+    On success, the HTTP status code in the response header will be set to <code>204</code> <b>No Content</b>.
+    Should an error occur, the header status code in the response header will be set to the corresponding error.
+    If either your API key or the required access token for the requested user are not present a <code>401</code> <b>Unauthorized</b> response header will be returned.
+</p>
+<div class="code" data-codeBlockId="1">
+    <pre class="http" data-codeBlock="1-HTTP"><code class="http">HTTP/1.1 204 No Content</code></pre>
+</div>

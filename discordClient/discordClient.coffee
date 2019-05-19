@@ -91,6 +91,7 @@ class DiscordClient extends EventEmitter
     }
     self = @
     @utils.debug("Leaving voice channel in guild: "+server,"info")
+    self.voiceConnections[server] = {}
     delete self.voiceConnections[server]
     self.gatewayWS.send(JSON.stringify(leaveVoicePackage))
 

@@ -1,0 +1,228 @@
+<div class="title">
+    Import Spotify Playlist
+    <a href="#endpoints/spotify/import_playlist" title="Import Spotify Playlist">
+        <i class="fa fa-anchor anchor" aria-hidden="true"></i>
+    </a>
+    <div class="method put">PUT</div>
+    <div class="type">Endpoint</div>
+</div>
+<p>
+
+</p>
+<br/>
+<div class="code" data-codeBlockId="1">
+    <pre class="http" data-codeBlock="1-HTTP"><code class="http">PUT https://motorbot.io/api/spotify/{spotify_playlist_id}/owner/{spotify_owner_id} HTTP/1.1
+Authorization: Bearer {access_token}</code></pre>
+</div>
+<p>
+    Import a spotify playlist into the authorised users list of playlists
+</p>
+<h1>Request Parameters</h1>
+<h2>Path Parameters</h2>
+<table class="endpointTable pathParameters">
+    <thead>
+    <tr>
+        <td>Path Parameters</td>
+        <td>Value</td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>spotify_playlist_id<br><span class="required">REQUIRED</span></td>
+        <td>The spotify <code>playlist_id</code> of the spotify playlist to be imported</td>
+    </tr>
+    <tr>
+        <td>spotify_owner_id<br><span class="required">REQUIRED</span></td>
+        <td>The spotify <code>owner_id</code> of the spotify playlist to be imported</td>
+    </tr>
+    </tbody>
+</table>
+<h2>Header Fields</h2>
+<table class="endpointTable headers">
+    <thead>
+    <tr>
+        <td>Header Field</td>
+        <td>Value</td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>Authorization<br><span class="required">REQUIRED</span></td>
+        <td>A valid access token from the MotorBot authorization system. See the <span class="link" onclick="loadView('endpoints/oauth2')">OAuth 2.0 endpoint</span> or the <span class="link" onclick="loadView('guides/authorization')">User Authorization Guide</span> for further information. The access token must have been issued on behalf of the current user.</td>
+    </tr>
+    </tbody>
+</table>
+<br/>
+<h1>Response Format</h1>
+<p>
+    On success, the HTTP status code in the response header will be set to <code>200</code> <b>OK</b> and the response body will contain a playlist object with <code>Content-Type: application/json</code>. Should an error occur, the header status code in the response header will be set to the corresponding error. If either your API key or the required access token for the requested user are not present a <code>401</code> <b>Unauthorized</b> response header will be returned. <br><br>This request will last longer than expected and will only return a response once completed, for larger playlists this request can take a few minutes. A status update event can be received through the MotorBot websocket connection.
+</p>
+<div class="code" data-codeBlockId="1">
+    <pre class="http" data-codeBlock="1-HTTP"><code class="http">HTTP/1.1 200 OK
+Content-Type: application/json</code></pre>
+</div>
+<h2>Playlist Import Object</h2>
+<table class="endpointTable object playlistImportObject">
+    <thead>
+    <tr>
+        <td>Key</td>
+        <td>Value Type</td>
+        <td>Value Description</td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>playlist</td>
+        <td>Playlist Object</td>
+        <td>Simplified playlist object of the created playlist</td>
+    </tr>
+    <tr>
+        <td>not_found</td>
+        <td>object</td>
+        <td>A list of song ids that were not successfully found and hence could not be imported from spotify</td>
+    </tr>
+    </tbody>
+</table>
+<div class="code" data-codeBlockId="1">
+    <pre class="json" data-codeBlock="1-JSON"><code class="json">
+{
+  "playlist": {
+    playlist object
+  },
+  "not_found": {
+    not found object
+  }
+}</code></pre>
+</div>
+<h2>Playlist Object (Simplified)</h2>
+<table class="endpointTable object playlistObject">
+    <thead>
+    <tr>
+        <td>Key</td>
+        <td>Value Type</td>
+        <td>Value Description</td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>id</td>
+        <td>string</td>
+        <td>The unique identifier that is assigned to the playlist</td>
+    </tr>
+    <tr>
+        <td>type</td>
+        <td>string</td>
+        <td>The type of playlist, this will be set to <code>spotify playlist</code> for any imported playlists</td>
+    </tr>
+    <tr>
+        <td>name</td>
+        <td>string</td>
+        <td>The name of the playlist</td>
+    </tr>
+    <tr>
+        <td>description</td>
+        <td>string</td>
+        <td>The description of the playlist</td>
+    </tr>
+    <tr>
+        <td>songs</td>
+        <td>an array of short song objects</td>
+        <td>A list containing <a href="#shortsongobject">short song objects</a></td>
+    </tr>
+    <tr>
+        <td>creator</td>
+        <td>string</td>
+        <td>The <code>id</code> of the user who created the playlist</td>
+    </tr>
+    <tr>
+        <td>create_date</td>
+        <td>integer</td>
+        <td>The timestamp of when the playlist was created by a user</td>
+    </tr>
+    <tr>
+        <td>followers</td>
+        <td>an array of strings</td>
+        <td>A list of <code>id</code>'s of the users that are currently following this playlist. This includes the current user.</td>
+    </tr>
+    <tr>
+        <td>artwork</td>
+        <td>strings</td>
+        <td>A URL for the cover art for the playlist. If none is supplied by the user, it will automatically generate one by using the first added track'S (that has a cover art) cover art</td>
+    </tr>
+    <tr>
+        <td>private</td>
+        <td>boolean</td>
+        <td>Has the owner made this playlist private? If set to <code>false</code> anyone can view this playlist and it can be returned as part of the browse endpoint</td>
+    </tr>
+    <tr>
+        <td>collaborative</td>
+        <td>boolean</td>
+        <td>Will be set to <code>true</code> if the owner has allowed other users to modify the playlist</td>
+    </tr>
+    </tbody>
+</table>
+<div class="code" data-codeBlockId="2">
+    <pre class="json" data-codeBlock="1-JSON"><code class="json">
+{
+  "id": "cjvu14m2g00006hqlajue9873",
+  "type": "spotify playlist",
+  "name": "Chill Mix",
+  "description": "",
+  "songs": [
+    {
+      "id": "OwlUeVcCTn2cDKcgXsQARVqKmtseM7M0",
+      "date_added": 1550293846000,
+      "play_count": 0
+    },...
+  ],
+  "creator": "95164972807487488",
+  "create_date": 1558215250361,
+  "followers": [
+    "95164972807487488"
+  ],
+  "artwork": "",
+  "private": false,
+  "collaborative": false
+}</code></pre>
+</div>
+<h2>Short Song Object</h2>
+<table class="endpointTable object shortSongObject">
+    <thead>
+    <tr>
+        <td>Key</td>
+        <td>Value Type</td>
+        <td>Value Description</td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>id</td>
+        <td>string</td>
+        <td>The track <code>id</code> for the track</td>
+    </tr>
+    <tr>
+        <td>date_added</td>
+        <td>integer</td>
+        <td>The timestamp at which the track was added to the playlist</td>
+    </tr>
+    <tr>
+        <td>play_count</td>
+        <td>integer</td>
+        <td>The number of times the track has been played as part of the playlist</td>
+    </tr>
+    <tr>
+        <td>last_played</td>
+        <td>integer</td>
+        <td>The timestamp at which the track was last played as part of the playlist</td>
+    </tr>
+    </tbody>
+</table>
+<div class="code" data-codeBlockId="3">
+    <pre class="json" data-codeBlock="1-JSON"><code class="json">
+{
+  "id": "57967c978aa4e45748542b98",
+  "date_added": 1484180236021,
+  "play_count": 3,
+  "last_played": 1528819465394
+}</code></pre>
+</div>

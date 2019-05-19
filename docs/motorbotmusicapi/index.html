@@ -39,8 +39,10 @@
                         if($("#loadEndpointsDiv #endpoint-list tbody tr").length > 0){
                             $("#nav>li[data-item='" + view + "']").append("<ul></ul>");
                             $("#loadEndpointsDiv #endpoint-list tbody tr").each(function (index) {
-                                var endpoint = $(this).attr('data-endpoint');
-                                $("#nav>li[data-item='" + view + "']>ul").append("<li onclick=\"loadView('" + endpoint.split("#")[1] + "')\" data-item=\"" + endpoint.split("#")[1] + "\">" + $(this).children("td")[2].innerHTML + "</li>");
+                                let endpoint = $(this).attr('data-endpoint');
+                                if($(this).attr('data-endpoint-accessible') !== "false"){
+                                    $("#nav>li[data-item='" + view + "']>ul").append("<li onclick=\"loadView('" + endpoint.split("#")[1] + "')\" data-item=\"" + endpoint.split("#")[1] + "\">" + $(this).children("td")[2].innerHTML + "</li>");
+                                }
                             });
                             var nav = $("#nav");
                             nav.find(">li>ul>li.active").removeClass("active");
@@ -207,6 +209,9 @@
             </li>
             <li class="navItem" data-item="endpoints/playlist">
                 <span onclick="loadView('endpoints/playlist')">Playlist</span>
+            </li>
+            <li class="navItem" data-item="endpoints/spotify">
+                <span onclick="loadView('endpoints/spotify')">Spotify</span>
             </li>
             <li class="navItem" data-item="endpoints/user">
                 <span onclick="loadView('endpoints/user')">User</span>
