@@ -249,7 +249,7 @@ router.post("/login",  passport.authenticate('local', { failureRedirect: '/login
 router.get("/callback", passport.authenticate('oauth2', { failureRedirect: '/?err=true', session: true}), refreshDiscordUserData, (req, res) ->
   if req.user
     console.log "Logged In"
-    res.redirect("/dashboard/browse")
+    res.redirect("/dashboard/home")
 )
 
 router.get("/register", (req, res) ->

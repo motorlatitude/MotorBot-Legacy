@@ -977,6 +977,9 @@ class motorbotEventHandler
           )
         else if msg.content == "!triggerTyping"
           msg.channel.triggerTyping()
+        else if msg.content.match(/^\!getMembers\s/gmi)
+          guild_id = msg.content.replace(/^\!getMembers\s/gmi, "")
+          self.client.getMembers(guild_id)
         else if msg.content.match(/^\!setStatus\s/gmi)
           newStatus = msg.content.replace(/^\!setStatus\s/gmi,"")
           self.client.setStatus(newStatus, 0, "online")

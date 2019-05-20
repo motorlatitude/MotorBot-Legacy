@@ -31,7 +31,7 @@ router.use(new OAuth())
 
 router.get("/me", (req, res) ->
   if req.user_id
-    APIObjects.user(req).userById(req.user_id).then((user) ->
+    APIObjects.user(req).userById(req.user_id, {}, (if req.query.karma then true else false)).then((user) ->
       res.type('json')
       u = {}
       if user.id
@@ -40,6 +40,7 @@ router.get("/me", (req, res) ->
           username: user.username,
           discriminator: user.discriminator,
           avatar: user.avatar,
+          karma: (if req.query.karma then user.karma else undefined),
           email: user.email || "",
           guilds: user.guilds || [],
           playlists: user.playlists || []

@@ -1,5 +1,19 @@
 .contentWrapper
-    .contentTitle Change Log
-    br
-    br
-    ul#commitHistory
+    .contentHeader(style="height: 300px;")
+        img.icon(src="/img/another_icon.png")
+    .homeWrapper
+        #HomeProfile.profile
+            .icon#home_icon(style="background: url('') no-repeat center; background-size: cover;")
+            .name#home_username John<span>#Doe</span>
+            .stats
+                .karma <i id="home_karma">00</i> <br><span>Karma</span>
+                    .star *
+                .messages <i id="home_message_count">000</i> <br><span>Messages</span>
+                    .messages-icon <i class="fas fa-comment-alt"></i>
+        .homeProfileTitle Overview
+        ul.overview_list
+            li.status
+            li
+            li
+            li
+            li

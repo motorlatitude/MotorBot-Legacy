@@ -1,5 +1,6 @@
 EventEmitter = require('events').EventEmitter
 Constants = require './constants.coffee'
+keys = require './../keys.json'
 req = require 'request'
 pjson = require '../package.json'
 u = require('./utils.coffee')
@@ -19,7 +20,9 @@ class DiscordClient extends EventEmitter
   getGateway: () ->
     self = @
     @utils.debug("Retrieving Discord Gateway Server")
-    req.get({url: Constants.api.host+"/gateway", json: true, time: true}, (err, res, data) ->
+    req.get({url: Constants.api.host+"/gateway/bot?v=6", json: true, time: true, headers: {
+        "Authorization": "Bot "+keys.token
+      }}, (err, res, data) ->
       if res.statusCode != 200 || err
         self.utils.debug("Error Occurred Obtaining Gateway Server: "+res.statusCode+" "+res.statusMessage,"error")
         return self.emit("disconnect")
@@ -78,7 +81,19 @@ class DiscordClient extends EventEmitter
     if @gatewayWS.readyState == @gatewayWS.OPEN
       @gatewayWS.send(JSON.stringify(dataMsg))
       @utils.debug("Status Successfully Set to \""+status+"\"","info")
-  
+
+  getMembers: (guild_id) ->
+    dataMsg = {
+      "op": 8,
+      "d" :{
+        "guild_id": guild_id,
+        "query": "",
+        "limit": 0
+      }
+    }
+    if @gatewayWS.readyState == @gatewayWS.OPEN
+      @gatewayWS.send(JSON.stringify(dataMsg))
+
   leaveVoiceChannel: (server) ->
     leaveVoicePackage = {
       "op": 4,

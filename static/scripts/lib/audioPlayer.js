@@ -53,7 +53,13 @@ define(["constants", "requester","notification","playerbar"], function(c, req, N
                         pb.loading.end();
                     }
                     else {
-                        pb.loading.end();
+                        if(response.data.success){
+                            pb.loading.end();
+                        }
+                        else{
+                            pb.loading.end();
+                            Notification.create("warn","exclamation-triangle",response.data.message);
+                        }
                     }
                 }).catch(function (e) {
                     console.log(e);

@@ -659,7 +659,7 @@ define('serverSelection',["constants", "ws"], function(c, ws){
                }
                else{
                    c.currentChannel = undefined;
-                   elSelectedVoice.innerHTML = "Disconnected"
+                   elSelectedVoice.innerHTML = "Not in a voice channel"
                    elSelectedVoice.classList.add("disconnect")
                }
            }
@@ -673,7 +673,7 @@ define('serverSelection',["constants", "ws"], function(c, ws){
                    elChannelSelector.classList.add("connected");
                }
                else{
-                   elChannelSelector.innerHTML = "Disconnected";
+                   elChannelSelector.innerHTML = "Not in a voice channel";
                    elChannelSelector.classList.add("disconnect");
                }
            }
@@ -697,7 +697,7 @@ define('serverSelection',["constants", "ws"], function(c, ws){
                c.currentChannel = channel_name;
            }
            else{
-               elSelectedVoice.innerHTML = "Disconnected"
+               elSelectedVoice.innerHTML = "Not in a voice channel"
                elSelectedVoice.classList.add("disconnect")
                c.currentChannel = undefined;
            }
@@ -739,7 +739,7 @@ define('serverSelection',["constants", "ws"], function(c, ws){
                    guild_voice.classList.add("disconnect")
                }
                guild_voice.classList.add("voice")
-               guild_voice.innerHTML = guilds[i].connected_voice_channel || "Disconnected"
+               guild_voice.innerHTML = guilds[i].connected_voice_channel || "Not in a voice channel"
                elguild_item.appendChild(guild_voice)
                elguild_item.setAttribute("data-guildID",guilds[i].id)
                elguild_item.onclick = function(e){
@@ -942,7 +942,13 @@ define('audioPlayer',["constants", "requester","notification","playerbar"], func
                         pb.loading.end();
                     }
                     else {
-                        pb.loading.end();
+                        if(response.data.success){
+                            pb.loading.end();
+                        }
+                        else{
+                            pb.loading.end();
+                            Notification.create("warn","exclamation-triangle",response.data.message);
+                        }
                     }
                 }).catch(function (e) {
                     console.log(e);
@@ -6692,7 +6698,7 @@ define('playlist',["constants","requester","audioPlayer","simpleBar","eventListe
             req.delete(c.base_url+"/playlist/" + playlist_id + "?api_key="+c.api_key,{dataType: "json", authorize: true}).then(function(response){
                 u.loadPlaylists(0,50, function(){
                     const v = require("views");
-                    v.load("browse","undefined", function(){
+                    v.load("home","undefined", function(){
                         document.getElementsByClassName("flexContainer")[0].style.opacity = "1";
                     });
                 });
@@ -7002,36 +7008,17 @@ define('views',["constants","requester","marked","simpleBar","playlist"], functi
                document.getElementById("ajax_contentView").innerHTML = response.data;
                switch(view){
                    case "home":
-                       req.get("https://api.github.com/repos/motorlatitude/motorbot/commits", {dataType: "json"}).then(function(response){
-                           document.getElementById("ajax_loader").style.display = "none";
-                           document.getElementById("ajax_contentView").style.opacity = "1";
-                           for(let item in response.data){
-                               let d = response.data;
-                               if(d[item]) {
-                                   if (d[item].commit) {
-                                       if (d[item].commit.message !== "") {
-                                           let elCommit = document.createElement("li");
-                                           elCommit.innerHTML = "<li>" +
-                                               "<div class='date'>" +
-                                               d[item].commit.author.date.replace(/T/gmi, "&nbsp;&bull;&nbsp;").replace(/-/gmi, "/").replace(/Z/gmi, "") +
-                                               "&nbsp;&bull;&nbsp;<span class='author'>" +
-                                               d[item].author.login +
-                                               "</span>" +
-                                               "</div>" +
-                                               "<div class='commit'>" +
-                                               d[item].sha.substr(0, 7) +
-                                               "</div>" +
-                                               "<div class='container'>" +
-                                               marked(d[item].commit.message.replace(/Signed-off-by(.*?)$/gmi, "").replace(/<(.*?)>$/gmi, "&lt;$1&gt;").replace(/FIX/g, "<div class='type fix'>FIX</div>").replace(/NEW/g, "<div class='type new'>NEW</div>").replace(/TODO/g, "<div class='type todo'>TODO</div>").replace(/CODE\sIMPROVEMENT/g, "<div class='type code'>CODE</div>").replace(/CODE/g, "<div class='type code'>CODE</div>").replace(/IMPROVEMENT/g, "<div class='type improvement'>IMPROVEMENT</div>").replace(/DEPRECIATED/g, "<div class='type depreciated'>DEPRECIATED</div>")) + "</div></li>";
-                                           document.getElementById("commitHistory").appendChild(elCommit);
-                                       }
-                                   }
-                               }
-                           }
-                           new SimpleBar(document.getElementById("ajax_contentView"));
-                       }).catch(function(error){
-                          console.warn(error);
-                       });
+                        req.get(c.base_url+"/user/me?karma=true&api_key="+c.api_key,{dataType: "json", authorize: true}).then(function(response) {
+                            let data = response.data
+                            document.getElementById("home_username").innerHTML = data.username +"<span>#"+data.discriminator+"</span>"
+                            document.getElementById("home_icon").setAttribute("style","background: url('https://cdn.discordapp.com/avatars/"+data.id+"/"+data.avatar+".png?size=2048') no-repeat center; background-size: cover;")
+                            document.getElementById("home_karma").innerHTML = data.karma
+                            req.get(c.base_url+"/message_history/user/"+data.id+"?api_key="+c.api_key,{dataType: "json", authorize: true}).then(function(response) {
+                                document.getElementById("home_message_count").innerHTML = response.data.messages_length
+                                document.getElementById("ajax_loader").style.display = "none";
+                                document.getElementById("ajax_contentView").style.opacity = "1";
+                            })
+                        })
                        break;
                    case "playlists":
                        document.getElementById("ajax_contentView").style.opacity = "0";
@@ -7326,7 +7313,14 @@ define('views',["constants","requester","marked","simpleBar","playlist"], functi
                            for(let i in data){
                                let item = data[i];
                                let developerItem = document.createElement("li");
-                               developerItem.innerHTML = "<div class='title'>" + item.title + "</div><br>API Key<pre>" + item.key + "</pre>Client ID<pre>" + item.id + "</pre>Secret<pre>" + item.secret + "</pre>";
+                               developerItem.innerHTML = "<div class='title'>" + item.title + "</div>" +
+                                   "<div class='description'>" + (item.description || 'No Description') + "</div>" +
+                                   "<div class='apikey api_value'> <div class='type'>API Key</div><div class='value'><pre>"+item.key+"</pre></div></div>" +
+                                   "<div class='toggleSecretValues'><i class=\"fas fa-chevron-down\"></i> &nbsp; Toggle Secret Values</div>" +
+                                   "<div class='secretValues'>"+
+                                   "<div class='clientid api_value'> <div class='type'>Client ID</div><div class='value'><pre title='Copy'>"+item.id+"</pre></div></div>" +
+                                   "<div class='clientsecret api_value'> <div class='type'>Client Secret</div><div class='value'><pre title='Copy'>"+item.secret+"</pre></div></div>" +
+                                   "</div>";
                                temporaryDeveloperItem.appendChild(developerItem);
                            }
                            document.getElementById("developer_apps").appendChild(temporaryDeveloperItem);
@@ -7933,7 +7927,7 @@ define('main',["domReady.min","ws","eventListener","audioPlayer","user","views"]
             //load view
             const url = window.location.href;
             const view_params = url.split("dashboard/")[1];
-            const view = view_params.split("/")[0] || "browse";
+            const view = view_params.split("/")[0] || "home";
             const param = view_params.split("/")[1] || "undefined";
             v.load(view, param, function () {
                 document.getElementsByClassName("flexContainer")[0].style.opacity = "1";

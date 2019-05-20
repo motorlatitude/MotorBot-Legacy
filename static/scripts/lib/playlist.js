@@ -15,7 +15,7 @@ define(["constants","requester","audioPlayer","simpleBar","eventListener","views
             req.delete(c.base_url+"/playlist/" + playlist_id + "?api_key="+c.api_key,{dataType: "json", authorize: true}).then(function(response){
                 u.loadPlaylists(0,50, function(){
                     const v = require("views");
-                    v.load("browse","undefined", function(){
+                    v.load("home","undefined", function(){
                         document.getElementsByClassName("flexContainer")[0].style.opacity = "1";
                     });
                 });

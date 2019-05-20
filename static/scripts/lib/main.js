@@ -14,7 +14,7 @@ define(["domReady.min","ws","eventListener","audioPlayer","user","views"], funct
             //load view
             const url = window.location.href;
             const view_params = url.split("dashboard/")[1];
-            const view = view_params.split("/")[0] || "browse";
+            const view = view_params.split("/")[0] || "home";
             const param = view_params.split("/")[1] || "undefined";
             v.load(view, param, function () {
                 document.getElementsByClassName("flexContainer")[0].style.opacity = "1";

@@ -5,8 +5,9 @@ class User
 
   constructor:(@req) ->
     @database = @req.app.locals.motorbot.database.collection("users")
+    @karmaDatabase = @req.app.locals.motorbot.database.collection("karma_points")
 
-  userById: (user_id, filter = {}) ->
+  userById: (user_id, filter = {}, karma = false) ->
     self = @
     filter['_id'] = 0
     return new Promise((resolve, reject) ->
@@ -15,7 +16,17 @@ class User
           err.code = "DBERR"
           reject(err)
         if results[0]
-          resolve(results[0])
+          if karma
+            self.karmaDatabase.find({author: user_id}).toArray((err, karma_results) ->
+              if err
+                err.code = "DBERR"
+                reject(err)
+              if karma_results[0]
+                results[0].karma = karma_results[0].karma
+                resolve(results[0])
+            )
+          else
+            resolve(results[0])
         else
           resolve({})
       )

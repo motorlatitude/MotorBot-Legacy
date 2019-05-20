@@ -31,4 +31,20 @@ router.get("/:message_id", (req, res) ->
   )
 )
 
+router.get("/user/:user_id", (req, res) ->
+  res.type('json')
+  messageCollection = req.app.locals.motorbot.database.collection("messages")
+  messageCollection.find({"author.id": req.params.user_id}).toArray((err, results) ->
+    if err then console.log err
+    if results[0]
+      res.send(JSON.stringify({
+        query_user_id: req.params.user_id,
+        messages_length: results.length,
+        messages: results[0]
+      }))
+    else
+      return res.status(404).send({code: 404, status: "Message Not Found"})
+  )
+)
+
 module.exports = router

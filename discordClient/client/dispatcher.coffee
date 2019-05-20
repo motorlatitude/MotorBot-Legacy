@@ -23,6 +23,7 @@ class Dispatcher
       when 'CHANNEL_DELETE' then @handleChannelDelete(data)
       when 'CHANNEL_PINS_UPDATE' then @handleChannelPinsUpdate(data)
       when 'GUILD_CREATE' then @handleGuildCreate(data)
+      when 'GUILD_MEMBERS_CHUNK' then @handleMemberChunk(data)
       when 'MESSAGE_CREATE' then @handleMessageCreate(data)
       when 'MESSAGE_UPDATE' then @handleMessageUpdate(data)
       when 'MESSAGE_DELETE' then @handleMessageDelete(data)
@@ -134,6 +135,9 @@ class Dispatcher
     #console.log thisServer.channels
     @discordClient.emit("guildCreate", thisServer)
     @discordClient.utils.debug("Joined Guild: "+thisServer.name+" ("+thisServer.presences.length+" online / "+(parseInt(thisServer.member_count)-thisServer.presences.length)+" offline)","info")
+
+  handleMemberChunk: (data) ->
+    console.log data.d.members
 
   handleMessageReactionAdd: (data) ->
     #console.log data.d

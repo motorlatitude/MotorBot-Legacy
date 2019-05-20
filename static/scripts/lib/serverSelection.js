@@ -13,7 +13,7 @@ define(["constants", "ws"], function(c, ws){
                }
                else{
                    c.currentChannel = undefined;
-                   elSelectedVoice.innerHTML = "Disconnected"
+                   elSelectedVoice.innerHTML = "Not in a voice channel"
                    elSelectedVoice.classList.add("disconnect")
                }
            }
@@ -27,7 +27,7 @@ define(["constants", "ws"], function(c, ws){
                    elChannelSelector.classList.add("connected");
                }
                else{
-                   elChannelSelector.innerHTML = "Disconnected";
+                   elChannelSelector.innerHTML = "Not in a voice channel";
                    elChannelSelector.classList.add("disconnect");
                }
            }
@@ -51,7 +51,7 @@ define(["constants", "ws"], function(c, ws){
                c.currentChannel = channel_name;
            }
            else{
-               elSelectedVoice.innerHTML = "Disconnected"
+               elSelectedVoice.innerHTML = "Not in a voice channel"
                elSelectedVoice.classList.add("disconnect")
                c.currentChannel = undefined;
            }
@@ -93,7 +93,7 @@ define(["constants", "ws"], function(c, ws){
                    guild_voice.classList.add("disconnect")
                }
                guild_voice.classList.add("voice")
-               guild_voice.innerHTML = guilds[i].connected_voice_channel || "Disconnected"
+               guild_voice.innerHTML = guilds[i].connected_voice_channel || "Not in a voice channel"
                elguild_item.appendChild(guild_voice)
                elguild_item.setAttribute("data-guildID",guilds[i].id)
                elguild_item.onclick = function(e){
