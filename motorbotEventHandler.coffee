@@ -1,7 +1,5 @@
 Table = require 'cli-table'
 keys = require '/var/www/motorbot/keys.json'
-apiai = require('apiai')
-apiai = apiai(keys.apiai) #AI for !talk method
 fs = require 'fs'
 req = require 'request'
 moment = require 'moment'

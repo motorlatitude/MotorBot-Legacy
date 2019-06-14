@@ -4,7 +4,6 @@ passport = require 'passport'
 #session = require('express-session')
 LocalStrategy = require('passport-local').Strategy
 crypto = require('crypto')
-uuid = require 'node-uuid'
 ###
   OAUTH 2.0
 

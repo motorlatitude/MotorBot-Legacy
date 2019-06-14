@@ -103,8 +103,6 @@ class WebServer
     @site.use("/api/message_history", require('./routes/api_routes/message_history'))
     @app.debug("Registering Route ./routes/api_routes/twitch")
     @site.use("/twitch", require('./routes/twitch'))
-    @app.debug("Registering Route ./routes/api_routes/destiny2")
-    @site.use("/destiny2", require('./routes/destiny2'))
     @app.debug("Registering Route ./routes/api_routes/DiscordWebsocketEvent")
     @site.use("/api/DiscordWebsocketEvent", require('./routes/api_routes/DiscordWebsocketEvent'))
     @app.debug("Registering Routes Complete")

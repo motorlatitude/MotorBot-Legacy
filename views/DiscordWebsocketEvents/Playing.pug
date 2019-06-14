@@ -16,9 +16,10 @@ html(lang="en")
             .event-wrapper
                 .top-level
                     div(class="event_type start") <i class="fas fa-dice"></i>
+                        .inner-icon <i class="fas fa-play"></i>
                     .profile_icon(style="background: url('https://cdn.discordapp.com/avatars/" + PresenceUpdateData.id + "/" + PresenceUpdateData.avatar + ".png?size=128') no-repeat center; background-size: cover;")
                     .event_data
-                        .value <span class='user'>#{PresenceUpdateData.user}</span><span class='disc'>##{PresenceUpdateData.discriminator}</span> Started Playing <span>#{PresenceUpdateData.game}</span>
+                        .value <span class='user'>#{PresenceUpdateData.user}</span><span class='disc'>##{PresenceUpdateData.discriminator}</span> started playing <span>#{PresenceUpdateData.game}</span>
                         - let d = new Date()
                         .date #{d.getDate()}/#{(d.getMonth()+1 < 10 ? "0"+(d.getMonth()+1) : d.getMonth()+1)}/#{d.getFullYear()} at #{(d.getHours() < 10 ? "0"+d.getHours() : d.getHours())}:#{(d.getMinutes() < 10 ? "0"+d.getMinutes() : d.getMinutes())}:#{(d.getSeconds() < 10 ? "0"+d.getSeconds() : d.getSeconds())}
                 .bottom-level
@@ -26,21 +27,19 @@ html(lang="en")
                         tr
                             td
                                 - console.log(PresenceUpdateData);
-                                if PresenceUpdateData.game_asset_large != "undefined"
-                                    - console.log("https://cdn.discordapp.com/app-assets/"+PresenceUpdateData.application_id+"/"+PresenceUpdateData.game_asset_large+".png")
-                                    div(class="asset", style="background-image: url('https://cdn.discordapp.com/app-assets/"+PresenceUpdateData.application_id+"/"+PresenceUpdateData.game_asset_large+".png')")
-                                else
-                                    div(class="asset", style="background-image: url('https://cdn.discordapp.com/app-icons/"+PresenceUpdateData.application_id+"/"+PresenceUpdateData.game_icon+".png')")
+                                div(class="asset", style="background-image: url('https://cdn.discordapp.com/app-icons/"+PresenceUpdateData.application_id+"/"+PresenceUpdateData.game_icon+".png'); background-position: center; background-repeat: no-repeat;")
                             td
                                 ul.list-small
                                     li
                                         div(class="id online") 01 &mdash;
                                         .val With Application ID <span class='code'>#{PresenceUpdateData.application_id}</span>
-                                    li
-                                        div(class="id online") 02 &mdash;
-                                        .val With State <span class='code'>#{PresenceUpdateData.game_state}</span>
-                                    li
-                                        div(class="id online") 03 &mdash;
-                                        .val With Details <span class='code'>#{PresenceUpdateData.game_details}</span>
+                                    if PresenceUpdateData.game_state != "undefined"
+                                        li
+                                            div(class="id online") 02 &mdash;
+                                            .val With State <span class='code'>#{PresenceUpdateData.game_state}</span>
+                                    if PresenceUpdateData.game_details != "undefined"
+                                        li
+                                            div(class="id online") 03 &mdash;
+                                            .val With Details <span class='code'>#{PresenceUpdateData.game_details}</span>
 
 

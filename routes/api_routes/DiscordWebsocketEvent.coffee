@@ -64,19 +64,34 @@ router.get("/VoiceUpdate", (req, res) ->
 )
 
 router.get("/Playing", (req, res) ->
-  pud = {
-    id: req.query.id,
-    avatar: req.query.avatar,
-    user: req.query.user,
-    discriminator: req.query.discriminator,
-    game: req.query.game,
-    game_icon: req.query.game_icon,
-    application_id: req.query.application_id,
-    game_asset_large: req.query.game_asset_large,
-    game_state: req.query.game_state,
-    game_details: req.query.game_details
-  }
-  res.render("DiscordWebsocketEvents/Playing",{user: req.user, PresenceUpdateData: pud})
+  # use personal access token to retrieve application information
+  usersCollection = req.app.locals.motorbot.database.collection("users")
+  usersCollection.find({id: "95164972807487488"}).toArray((err, result) ->
+    discordAccessToken = result[0].discordAuth.accessToken
+    request.get({
+      url: "https://discordapp.com/api/applications/"+req.query.application_id,
+      headers: {
+        "Authorization": "Bearer "+discordAccessToken
+      }
+      json: true
+    }, (err, body, response) ->
+      if err then console.log err
+      application_icon = response.icon;
+      pud = {
+        id: req.query.id,
+        avatar: req.query.avatar,
+        user: req.query.user,
+        discriminator: req.query.discriminator,
+        game: req.query.game,
+        game_icon: application_icon,
+        application_id: req.query.application_id,
+        game_asset_large: req.query.game_asset_large,
+        game_state: req.query.game_state,
+        game_details: req.query.game_details
+      }
+      res.render("DiscordWebsocketEvents/Playing",{user: req.user, PresenceUpdateData: pud})
+    )
+  );
 )
 
 router.get("/StoppedPlaying", (req, res) ->

@@ -6,7 +6,6 @@ async = require('async')
 request = require 'request'
 uid = require('uuid/v4')
 async = require 'async'
-multer = require 'multer'
 path = require 'path'
 
 utilities = require './objects/APIUtilities.coffee'

@@ -63,13 +63,12 @@ body
   background #292B2F
   z-index 0
 
-.event-wrapper .top-level .event_type.add:before
-  content '+'
+.event-wrapper .top-level .event_type.add .inner-icon
   z-index 2
   text-align center
-  line-height 17px
+  line-height 16px
   font-family Whitney, "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif
-  font-size 18px
+  font-size 8px
   position absolute
   top 41px
   right 6px
@@ -80,13 +79,12 @@ body
   color #43B581
   border 2px solid #43B581
 
-.event-wrapper .top-level .event_type.start:before
-  content '\25BA'
+.event-wrapper .top-level .event_type.start .inner-icon
   z-index 2
   text-align center
-  line-height 17px
+  line-height 16px
   font-family Arial
-  font-size 8px
+  font-size 7px
   position absolute
   top 41px
   right 6px
@@ -211,12 +209,13 @@ body
 
 .event-wrapper .bottom-level table tr td:last-child ul li
   padding 0
+  width calc(100% - 60px)
 
 .event-wrapper .bottom-level table tr td:last-child ul li .val
-  max-width 580px
+  max-width 670px
 
 .event-wrapper .bottom-level ul li span
-  font-size 26px
+  font-size 25px
   color #fff
 
 .event-wrapper .bottom-level ul li span.code
@@ -244,7 +243,7 @@ body
   height 140px
   border-radius 5px
   background-color rgba(0,0,0,0.4)
-  margin 20px
+  margin 0 25px
 
 .event-wrapper .bottom-level ul li .val
   float left

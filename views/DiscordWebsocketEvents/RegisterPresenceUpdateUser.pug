@@ -16,9 +16,10 @@ html(lang="en")
             .event-wrapper
                 .top-level
                     div(class="event_type add") <i class="fas fa-user-alt"></i>
+                        .inner-icon <i class="fas fa-plus"></i>
                     .profile_icon(style="background: url('https://cdn.discordapp.com/avatars/" + PresenceUpdateData.id + "/" + PresenceUpdateData.avatar + ".png?size=128') no-repeat center; background-size: cover;")
                     .event_data
-                        .value <span class='user'>#{PresenceUpdateData.user}</span><span class='disc'>##{PresenceUpdateData.discriminator}</span> Created Presence Update Listener
+                        .value <span class='user'>#{PresenceUpdateData.user}</span><span class='disc'>##{PresenceUpdateData.discriminator}</span> created presence update listener
                         - let d = new Date()
                         .date #{d.getDate()}/#{(d.getMonth() + 1 < 10 ? "0" + (d.getMonth() + 1) : d.getMonth() + 1)}/#{d.getFullYear()} at #{(d.getHours() < 10 ? "0" + d.getHours() : d.getHours())}:#{(d.getMinutes() < 10 ? "0" + d.getMinutes() : d.getMinutes())}:#{(d.getSeconds() < 10 ? "0"+d.getSeconds() : d.getSeconds())}
                 .bottom-level
