@@ -3,7 +3,7 @@ router = express.Router()
 ObjectID = require('mongodb').ObjectID
 request = require('request')
 async = require('async')
-uid = require('uuid/v4')
+cuid = require 'cuid'
 
 ###
   BROWSE ENDPOINT
@@ -156,7 +156,7 @@ importingScript = (req, res, playlist_id = undefined) ->
           tracksList = []
           albumartwork = undefined
           user_id = "169554882674556930"
-          if !playlist_id then playlist_id = uid()
+          if !playlist_id then playlist_id = cuid()
           io = 1
           async.eachSeries(videos, (video_id, cb) ->
             console.log "Importing "+io+":"+video_id
@@ -242,10 +242,12 @@ importingScript = (req, res, playlist_id = undefined) ->
                           track_number = Number(body.tracks.items[0].track_number)
                           disc_number = Number(body.tracks.items[0].disc_number)
                           explicit = body.tracks.items[0].explicit
-                      track_id = uid()
+                      track_id = cuid()
                       track_obj = {
                         id: track_id,
                         type: "youtube",
+                        spotify_id: body.tracks.items[0].id || "",
+                        spotify_popularity: body.tracks.items[0].popularity|| "",
                         video_id: video_id,
                         video_title: data.items[0].snippet.title,
                         title: title,

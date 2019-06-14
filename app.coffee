@@ -589,6 +589,9 @@ class App
                   self.client.setStatus(title)
                   self.debug("Now Playing: "+title)
                 )
+                self.musicPlayers[guild_id].on("streamPacket", (packet) ->
+                  self.websocket.broadcast(JSON.stringify({type: 'TRACK_PACKET', op: 12, d: {event_type: "UPDATE", event_data: {packet}}}))
+                )
                 self.musicPlayers[guild_id].on("progress", (seconds) ->
                   self.websocket.broadcast(JSON.stringify({type: 'TRACK_DOWNLOAD', op: 10, d: {event_type: "UPDATE", event_data: {download_position: seconds}}}))
                 )

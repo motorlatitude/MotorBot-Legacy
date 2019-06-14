@@ -22,6 +22,7 @@ html {
   background: transparent;
   z-index: 151;
   -webkit-app-region: drag;
+  user-select: none;
 }
 .titlebar .motorbotIcon {
   position: absolute;
@@ -1493,7 +1494,7 @@ html {
   text-overflow: ellipsis;
   cursor: pointer;
   opacity: 1;
-  transition: opacity 0.2s ease-in-out, top 0.4s ease-in-out;
+  transition: top 0.2s ease-in-out;
 }
 .header .playlistDescription {
   position: absolute;
@@ -1588,10 +1589,12 @@ html {
   border: 1px solid #1370e2;
   cursor: pointer;
   opacity: 0.9;
+  transition: transform 0.2s ease-in-out;
 }
 .header .playlistOptions .playPlaylistButton:hover,
 .header .playlistOptions .followPlaylistButton:hover,
 .header .playlistOptions .playlistExtraOptions:hover {
+  transform: scale(1.05);
   opacity: 1;
 }
 .header .playlistOptions .followPlaylistButton {
@@ -1601,12 +1604,14 @@ html {
 }
 .header .playlistOptions .followPlaylistButton:hover {
   border: 1px solid #1370e2;
+  color: #1370e2;
 }
 .header .playlistOptions .followPlaylistButton.following {
   border: 1px solid #1370e2;
 }
 .header .playlistOptions .followPlaylistButton.following:hover {
   border: 1px solid #c8c8c8;
+  color: #1370e2;
 }
 .header .playlistOptions .playlistExtraOptions {
   background: rgba(0,0,0,0.4);
@@ -1627,7 +1632,7 @@ html {
   border-radius: 8px;
   box-shadow: 0 0 10px rgba(11,11,11,0.4);
   opacity: 1;
-  transition: opacity 0.2s ease-in-out, top 0.4s ease-in-out;
+  transition: width 0.2s ease-in-out, height 0.2s ease-in-out, top 0.2s ease-in-out;
 }
 .header.mini {
   position: fixed;
@@ -1636,33 +1641,32 @@ html {
   width: calc(100% - 230px);
   min-width: 1128px;
   height: 300px;
-}
-.header.mini .bg {
-  filter: blur(10px);
+/*& .bg
+      filter blur(10px)*/
 }
 .header.mini .artwork {
-  top: 45px;
-  opacity: 0;
+  width: 75px;
+  height: 75px;
+  top: 170px;
 }
 .header.mini .playlistType {
-  top: 45px;
   opacity: 0;
 }
 .header.mini .playlistName {
-  top: 65px;
-  opacity: 0;
+  top: 180px !important;
+  left: 130px;
 }
 .header.mini .playlistDescription {
-  top: 120px;
   opacity: 0;
 }
 .header.mini .playlistStats {
-  top: 150px;
   opacity: 0;
 }
 .header.mini .playlistOptions {
   top: 185px;
-  opacity: 0;
+  right: 30px;
+  left: auto;
+  text-align: right;
 }
 #playlist,
 #search_playlist,

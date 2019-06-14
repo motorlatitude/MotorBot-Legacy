@@ -93,6 +93,8 @@ class WebServer
     @site.use("/api/browse", require('./routes/api_routes/browse'))
     @app.debug("Registering Route ./routes/api_routes/spotify")
     @site.use("/api/spotify", require('./routes/api_routes/spotify'))
+    @app.debug("Registering Route ./routes/api_routes/track")
+    @site.use("/api/track", require('./routes/api_routes/track'))
     @app.debug("Registering Route ./routes/api_routes/electron")
     @site.use("/api/electron", require('./routes/api_routes/electron'))
     @app.debug("Registering Route ./routes/api_routes/search")
@@ -103,6 +105,8 @@ class WebServer
     @site.use("/twitch", require('./routes/twitch'))
     @app.debug("Registering Route ./routes/api_routes/destiny2")
     @site.use("/destiny2", require('./routes/destiny2'))
+    @app.debug("Registering Route ./routes/api_routes/DiscordWebsocketEvent")
+    @site.use("/api/DiscordWebsocketEvent", require('./routes/api_routes/DiscordWebsocketEvent'))
     @app.debug("Registering Routes Complete")
 
     #redirect for when adding bot

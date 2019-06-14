@@ -26,6 +26,7 @@ html
   background transparent
   z-index 151
   -webkit-app-region drag
+  user-select none
   & .motorbotIcon
     position absolute
     top 10px
@@ -1349,7 +1350,7 @@ html
     text-overflow ellipsis
     cursor pointer
     opacity 1
-    transition opacity 0.2s ease-in-out, top 0.4s ease-in-out
+    transition top 0.2s ease-in-out
   & .playlistDescription
     position absolute
     left 220px
@@ -1423,7 +1424,9 @@ html
       border 1px solid $active_color
       cursor pointer
       opacity 0.9
+      transition transform 0.2s ease-in-out
       &:hover
+        transform scale(1.05)
         opacity 1
     & .followPlaylistButton
       background rgba(0, 0, 0, 0.4)
@@ -1431,10 +1434,12 @@ html
       margin-left 20px
       &:hover
         border 1px solid $active_color
+        color $active_color
       &.following
         border 1px solid $active_color
         &:hover
           border 1px solid rgba(200, 200, 200, 1.0)
+          color $active_color
     & .playlistExtraOptions
       background rgba(0, 0, 0, 0.4)
       border 1px solid rgba(255, 255, 255, 0.6)
@@ -1452,7 +1457,7 @@ html
     border-radius 8px
     box-shadow 0 0 10px rgba(11,11,11,0.4)
     opacity 1
-    transition opacity 0.2s ease-in-out, top 0.4s ease-in-out
+    transition width 0.2s ease-in-out, height 0.2s ease-in-out, top 0.2s ease-in-out
   &.mini
     position fixed
     left 230px
@@ -1460,26 +1465,26 @@ html
     width calc(100% - 230px)
     min-width 1128px
     height 300px
-    & .bg
-      filter blur(10px)
+    /*& .bg
+      filter blur(10px)*/
     & .artwork
-      top 45px
-      opacity 0
+      width 75px
+      height 75px
+      top 170px
     & .playlistType
-      top 45px
       opacity 0
     & .playlistName
-      top 65px
-      opacity 0
+      top 180px !important
+      left 130px
     & .playlistDescription
-      top 120px
       opacity 0
     & .playlistStats
-      top 150px
       opacity 0
     & .playlistOptions
       top 185px
-      opacity 0
+      right 30px
+      left auto
+      text-align right
 #playlist,
 #search_playlist,
 .songList
@@ -1499,7 +1504,7 @@ html
     font-weight 500
     margin-left 5px
     margin-right 5px
-    //border-bottom 1px solid rgba(36, 36, 36, 1.00)
+    //border-bottom 1px solid rgba(0, 0, 0, 0.2)
     background transparent
     border-radius 2px
     color rgba(255, 255, 255, 0.8);

@@ -23,6 +23,8 @@ MotorBot has a number of features that it can do right out of the box;
  
 &nbsp;
 
+[![MotorBotThumbnail](https://github.com/motorlatitude/MotorBot/blob/develop/Thumbnail.jpg?raw=true)]()
+
 ## DiscordClient Library
 MotorBot uses a custom written library the DiscordClient Library. This 
 library is built on [Node.js](https://nodejs.org/) which allows the interaction with [Discords API](https://discordapp.com/developers/docs/). The library is currently

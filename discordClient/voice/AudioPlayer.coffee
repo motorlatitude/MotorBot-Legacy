@@ -114,7 +114,7 @@ class AudioPlayer extends EventEmitter
       packet = @packageList.shift()
       if packet
         @voiceConnection.streamPacketList.push(packet)
-        @emit("streamTime",self.seekCnt*20)
+        @emit("streamTime", self.seekCnt*20)
         @seekPosition = self.seekCnt*20
       else if @ffmpegDone && !@streamFinished
         @streamFinished = true

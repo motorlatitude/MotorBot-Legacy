@@ -11,7 +11,14 @@ class Track
     @database = @req.app.locals.motorbot.database.collection("tracks")
 
   trackById: (track_id, filter = {}) ->
-
+    self = @
+    filter['_id'] = 0
+    return new Promise((resolve, reject) ->
+      self.database.find({id: track_id}, filter).toArray((err, results) ->
+        if err then reject({error: "DATABASE_ERROR", message: err})
+        resolve(results[0])
+      )
+    )
 
   tracksForIds: (track_ids, filter = {}) ->
     self = @
@@ -92,7 +99,8 @@ class Track
               type: "youtube",
               video_id: v.video_id,
               video_title: v.video_title,
-              spotify_id: v.track_details.spotify_id || ""
+              spotify_id: v.track_details.spotify_id || "",
+              spotify_popularity: v.track_details.spotify_popularity,
               title: v.track_details.track.name || v.video_title,
               artist: artist,
               album: album,

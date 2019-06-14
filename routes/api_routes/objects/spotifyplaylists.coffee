@@ -56,7 +56,7 @@ class SpotifyPlaylists
               artwork = data.images[0].url
             playlist= {
               id: cuid()
-              type: "spotify playlist"
+              type: "spotify playlist",
               name: data.name
               description: data.description || ""
               songs: []
@@ -70,6 +70,8 @@ class SpotifyPlaylists
             if data.tracks.items
               #loop over available tracks
               for track in data.tracks.items
+                track.spotify_id = track.track.id
+                track.spotify_popularity = track.track.popularity
                 tracks[track.track.id ||cuid()] = track
               if data.tracks.next
                 #playlist has more than {{track limit}} songs, further request required
@@ -84,6 +86,7 @@ class SpotifyPlaylists
             #loop over available tracks
             for track in data.items
               track.spotify_id = track.track.id
+              track.spotify_popularity = track.track.popularity
               tracks[track.track.id || cuid()] = track
             if data.next
               #playlist has more than {{track limit}} songs, further request required

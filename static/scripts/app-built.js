@@ -541,7 +541,8 @@ define('constants',["moment"], function(moment){
             "PLAYER_STATE": 8,
             "SPOTIFY_IMPORT": 9,
             "GUILD": 10,
-            "GUILD_STATE": 11
+            "GUILD_STATE": 11,
+            "TRACK_PACKET": 12
         },
         websocketSession: undefined,
         currentGuild: undefined,
@@ -7006,12 +7007,13 @@ define('views',["constants","requester","marked","simpleBar","playlist"], functi
            req.get(url, {dataType: "html"}).then(function(response){
                console.log(response);
                document.getElementById("ajax_contentView").innerHTML = response.data;
+               document.getElementById("ajax_contentView").style.opacity = "0";
                switch(view){
                    case "home":
                         req.get(c.base_url+"/user/me?karma=true&api_key="+c.api_key,{dataType: "json", authorize: true}).then(function(response) {
                             let data = response.data
                             document.getElementById("home_username").innerHTML = data.username +"<span>#"+data.discriminator+"</span>"
-                            document.getElementById("home_icon").setAttribute("style","background: url('https://cdn.discordapp.com/avatars/"+data.id+"/"+data.avatar+".png?size=2048') no-repeat center; background-size: cover;")
+                            document.getElementById("home_icon").setAttribute("style","background: url('https://cdn.discordapp.com/avatars/"+data.id+"/"+data.avatar+"."+( data.avatar.substr(0,2) == "a_" ? "gif" : "png")+"?size=2048') no-repeat center; background-size: cover;")
                             document.getElementById("home_karma").innerHTML = data.karma
                             req.get(c.base_url+"/message_history/user/"+data.id+"?api_key="+c.api_key,{dataType: "json", authorize: true}).then(function(response) {
                                 document.getElementById("home_message_count").innerHTML = response.data.messages_length
@@ -7806,6 +7808,8 @@ define('eventListener',["constants","audioPlayer","views","playlist","user","req
                     let sb = new SimpleBar(elContentView);
                     sb.getScrollElement().onscroll = function () {
                         let scrolled = sb.getScrollElement().scrollTop;
+                        document.querySelector("#playlist_header .bg").style.filter = "blur("+(Math.round(scrolled/30) > 25 ? 25 : Math.round(scrolled/30))+"px)";
+                        document.querySelector("#playlist_header .bg").style.opacity = 1/(Math.round(scrolled/30) > 25 ? 0 : Math.round(scrolled/30));
                         if (scrolled >= 100 && !ph.classList.contains("mini")) {
                             ph.classList.add("mini");
                             plst.classList.add("mini");
@@ -7870,7 +7874,13 @@ define('eventListener',["constants","audioPlayer","views","playlist","user","req
                             let elContextMenuListItem_info = document.createElement("li");
                             elContextMenuListItem_info.innerHTML = "Details";
                             elContextMenuListItem_info.onclick = function(){
-                                document.getElementById("song_info").style.display = "block";
+                                req.get(c.base_url+"/track/"+self.getAttribute("data-songid")+"?api_key="+c.api_key, {dataType:"json"}).then(function(response){
+                                    console.log(response);
+                                    document.querySelector(".song_info_raw").innerHTML = JSON.stringify(response.data, null, 4)
+                                    document.getElementById("song_info").style.display = "block";
+                                }).catch(function(err){
+                                    console.warn(err);
+                                });
                             };
                             elContextMenuList.appendChild(elContextMenuListItem_info);
                             let elContextMenuListItem_sep2 = document.createElement("li");

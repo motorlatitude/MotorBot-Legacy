@@ -122,7 +122,7 @@ refreshDiscordAccessToken = (req, refresh_token, cb) ->
     "client_id": keys.clientId,
     "client_secret": keys.clientSecret,
     "redirect_uri": "https://motorbot.io/loginflow/register/discord/callback",
-    "scope": "identify guilds"
+    "scope": "identify guilds email"
   }
   console.log refresh_package
   request({
@@ -209,9 +209,9 @@ refreshDiscordUserData = (req, res, next) ->
     if err then console.log err
     if results[0]
       if results[0].discordAuth
-        if results[0].discordAuth.expires <= new Date().getTime()
+        if !results[0].discordAuth.expires || results[0].discordAuth.expires <= new Date().getTime()
           #discord accesstoken expired, refresh
-          console.log "Discord Access Token Has Expired"
+          console.log "Discord Access Token Has Expired Or We dont have an expires value so updating anyway"
           refreshDiscordAccessToken(req, results[0].discordAuth.refreshToken, (access_token) ->
             getDiscordUserData(req, access_token, () ->
               next()

@@ -45,12 +45,13 @@ define(["constants","requester","marked","simpleBar","playlist"], function(c,req
            req.get(url, {dataType: "html"}).then(function(response){
                console.log(response);
                document.getElementById("ajax_contentView").innerHTML = response.data;
+               document.getElementById("ajax_contentView").style.opacity = "0";
                switch(view){
                    case "home":
                         req.get(c.base_url+"/user/me?karma=true&api_key="+c.api_key,{dataType: "json", authorize: true}).then(function(response) {
                             let data = response.data
                             document.getElementById("home_username").innerHTML = data.username +"<span>#"+data.discriminator+"</span>"
-                            document.getElementById("home_icon").setAttribute("style","background: url('https://cdn.discordapp.com/avatars/"+data.id+"/"+data.avatar+".png?size=2048') no-repeat center; background-size: cover;")
+                            document.getElementById("home_icon").setAttribute("style","background: url('https://cdn.discordapp.com/avatars/"+data.id+"/"+data.avatar+"."+( data.avatar.substr(0,2) == "a_" ? "gif" : "png")+"?size=2048') no-repeat center; background-size: cover;")
                             document.getElementById("home_karma").innerHTML = data.karma
                             req.get(c.base_url+"/message_history/user/"+data.id+"?api_key="+c.api_key,{dataType: "json", authorize: true}).then(function(response) {
                                 document.getElementById("home_message_count").innerHTML = response.data.messages_length

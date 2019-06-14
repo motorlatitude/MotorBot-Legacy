@@ -355,11 +355,53 @@ class motorbotEventHandler
               self.client.channels["432351112616738837"].sendMessage(time+"<@"+data.user_id+"> is no longer muted in the `"+data.channel.name+"` voice channel")
           else
             #newly joined
-            self.client.channels["432351112616738837"].sendMessage(time+"<@"+data.user_id+"> has joined the `"+data.channel.name+"` voice channel")
+            self.client.channels["432351112616738837"].sendMessageWithFile("", req.get({
+              url:'http://motorbot.io/api/DiscordWebsocketEvent/capture?api_key=caf07b8b-366e-44ab-9bda-623f94a9c2df',
+              json: true
+              body: {
+                "PresenceUpdateData": {
+                  "type": "VoiceUpdate",
+                  "id": data.user_id,
+                  "avatar": self.client.users[data.user_id].avatar,
+                  "user": self.client.users[data.user_id].username,
+                  "discriminator": self.client.users[data.user_id].discriminator,
+                  "voice_status": "joined",
+                  "channel": data.channel.name
+                }
+              }
+            }), "VoiceUpdate.png")
         else
-          self.client.channels["432351112616738837"].sendMessage(time+"<@"+data.user_id+"> has joined the `"+data.channel.name+"` voice channel")
+          self.client.channels["432351112616738837"].sendMessageWithFile("", req.get({
+            url:'http://motorbot.io/api/DiscordWebsocketEvent/capture?api_key=caf07b8b-366e-44ab-9bda-623f94a9c2df',
+            json: true
+            body: {
+              "PresenceUpdateData": {
+                "type": "VoiceUpdate",
+                "id": data.user_id,
+                "avatar": self.client.users[data.user_id].avatar,
+                "user": self.client.users[data.user_id].username,
+                "discriminator": self.client.users[data.user_id].discriminator,
+                "voice_status": "joined",
+                "channel": data.channel.name
+              }
+            }
+          }), "VoiceUpdate.png")
       else
-        self.client.channels["432351112616738837"].sendMessage(time+"<@"+data.user_id+"> has left a voice channel")
+        self.client.channels["432351112616738837"].sendMessageWithFile("", req.get({
+          url:'http://motorbot.io/api/DiscordWebsocketEvent/capture?api_key=caf07b8b-366e-44ab-9bda-623f94a9c2df',
+          json: true
+          body: {
+            "PresenceUpdateData": {
+              "type": "VoiceUpdate",
+              "id": data.user_id,
+              "avatar": self.client.users[data.user_id].avatar,
+              "user": self.client.users[data.user_id].username,
+              "discriminator": self.client.users[data.user_id].discriminator,
+              "voice_status": "left",
+              "channel": undefined
+            }
+          }
+        }), "VoiceUpdate.png")
 
       voiceStates[data.user_id] = data
     )
@@ -367,6 +409,7 @@ class motorbotEventHandler
     userStatus = {}
 
     @client.on("status", (user_id,status,game,extra_info) ->
+      console.log extra_info
       if extra_info.guild_id == "130734377066954752" #only listening for presence updates in the KTJ guild for now to avoid duplicates across multiple channels
         if game
           self.app.debug(user_id+"'s status ("+status+") has changed; "+game.name+"("+game.type+")","notification")
@@ -393,23 +436,52 @@ class motorbotEventHandler
             #no status change, only game update
             if !game && userStatus[user_id].game
               if userStatus[user_id].game.type == 0
-                statusText = " has stopped playing **"+userStatus[user_id].game.name+"** after "+(moment.unix(userStatus[user_id].last_game_update/1000).fromNow()).replace(" ago","")+"\n"
+                #statusText = " has stopped playing **"+userStatus[user_id].game.name+"** after "+(moment.unix(userStatus[user_id].last_game_update/1000).fromNow()).replace(" ago","")+"\n"
+                self.client.channels["432351112616738837"].sendMessageWithFile("", req.get({
+                  url:'http://motorbot.io/api/DiscordWebsocketEvent/capture?api_key=caf07b8b-366e-44ab-9bda-623f94a9c2df',
+                  json: true
+                  body: {
+                    "PresenceUpdateData": {
+                      "type": "StoppedPlaying",
+                      "id": user_id,
+                      "avatar": self.client.users[user_id].avatar,
+                      "user": self.client.users[user_id].username,
+                      "discriminator": self.client.users[user_id].discriminator
+                      "game": userStatus[user_id].game.name,
+                      "duration": (moment.unix(userStatus[user_id].last_game_update/1000).fromNow()).replace(" ago","")
+                    }
+                  }
+                }), "StoppedPlaying.png")
               else if userStatus[user_id].game.type == 1
                 statusText = " has stopped streaming **"+userStatus[user_id].game.name+"** after "+(moment.unix(userStatus[user_id].last_game_update/1000).fromNow()).replace(" ago","")+"\n"
               else if userStatus[user_id].game.type == 2
                 statusText = " has stopped listening to **"+userStatus[user_id].game.name+"** after "+(moment.unix(userStatus[user_id].last_game_update/1000).fromNow()).replace(" ago","")+"\n"
             if extra_info.client_status.desktop != userStatus[user_id].client_status.desktop || extra_info.client_status.mobile != userStatus[user_id].client_status.mobile || extra_info.client_status.web != userStatus[user_id].client_status.web
               #status event update on an alternative client
-              if statusText != ""
-                x = "`[---------------------]`"
-              else
-                x = "\n`[---------------------]`";
+              dev = "Desktop"
               if extra_info.client_status.desktop != userStatus[user_id].client_status.desktop
-                statusText += x+" Status changed on the `desktop` client to `"+(if extra_info.client_status.desktop then extra_info.client_status.desktop else "offline")+"`"
+                dev = "Desktop"
               if extra_info.client_status.mobile != userStatus[user_id].client_status.mobile
-                statusText += x+" Status changed  on the `mobile` client to `"+(if extra_info.client_status.mobile then extra_info.client_status.mobile else "offline")+"`"
+                dev = "Mobile"
               if extra_info.client_status.web != userStatus[user_id].client_status.web
-                statusText += x+" Status changed  on the `web` client to `"+(if extra_info.client_status.web then extra_info.client_status.web else "offline")+"`"
+                dev = "Web"
+              self.client.channels["432351112616738837"].sendMessageWithFile("", req.get({
+                url:'http://motorbot.io/api/DiscordWebsocketEvent/capture?api_key=caf07b8b-366e-44ab-9bda-623f94a9c2df',
+                json: true
+                body: {
+                  "PresenceUpdateData": {
+                    "type": "StatusChange",
+                    "id": user_id,
+                    "avatar": self.client.users[user_id].avatar,
+                    "user": self.client.users[user_id].username,
+                    "discriminator": self.client.users[user_id].discriminator,
+                    "last_status": userStatus[user_id].status,
+                    "last_status_time": (moment.unix(userStatus[user_id].last_update/1000).fromNow()).replace(" ago",""),
+                    "status": status,
+                    "device": dev
+                  }
+                }
+              }), "PresenceUpdateData.png")
             else
               statusText = statusText.replace(/\n/gmi,"");
             extra_info["last_update"] = userStatus[user_id].last_update
@@ -417,102 +489,117 @@ class motorbotEventHandler
             #status change
             if extra_info.client_status.desktop != userStatus[user_id].client_status.desktop || extra_info.client_status.mobile != userStatus[user_id].client_status.mobile || extra_info.client_status.web != userStatus[user_id].client_status.web
               #status event update on an alternative client
+              dev = "Desktop"
               if extra_info.client_status.desktop != userStatus[user_id].client_status.desktop
-                statusText += "Status change on the `desktop` client to `"+(if extra_info.client_status.desktop then extra_info.client_status.desktop else "offline")+"`\n"
+                dev = "Desktop"
               if extra_info.client_status.mobile != userStatus[user_id].client_status.mobile
-                statusText += "Status change on the `mobile` client to `"+(if extra_info.client_status.mobile then extra_info.client_status.mobile else "offline")+"`\n"
+                dev = "Mobile"
               if extra_info.client_status.web != userStatus[user_id].client_status.web
-                statusText += "Status change on the `web` client to `"+(if extra_info.client_status.web then extra_info.client_status.web else "offline")+"`\n"
-              self.client.channels["432351112616738837"].sendMessage("","embed": {
-                "title": ":bellhop: User Presence Update",
-                "description": statusText+"\n",
-                "fields": [
-                  {
-                    "name": "Last Status",
-                    "value": self.statusIcon(userStatus[user_id].status)+" "+userStatus[user_id].status+" for "+(moment.unix(userStatus[user_id].last_update/1000).fromNow()).replace(" ago","")
-                  },
-                  {
-                    "name": "Current Status",
-                    "value": self.statusIcon(status)+" "+status
-                  },
-                  {
-                    "name": "Desktop",
-                    "value": self.statusIcon((if extra_info.client_status.desktop then extra_info.client_status.desktop else "offline"))+" "+(if extra_info.client_status.desktop then extra_info.client_status.desktop else "offline"),
-                    "inline": true
-                  },
-                  {
-                    "name": "Web",
-                    "value": self.statusIcon((if extra_info.client_status.web then extra_info.client_status.web else "offline"))+" "+(if extra_info.client_status.web then extra_info.client_status.web else "offline"),
-                    "inline": true
-                  },
-                  {
-                    "name": "Mobile",
-                    "value": self.statusIcon((if extra_info.client_status.mobile then extra_info.client_status.mobile else "offline"))+" "+(if extra_info.client_status.mobile then extra_info.client_status.mobile else "offline"),
-                    "inline": true
-                  }],
-                "color": 14474718,
-                "timestamp": new Date().toISOString(),
-                "footer": {
-                  "icon_url": "https://cdn.discordapp.com/avatars/"+user_id+"/"+self.client.users[user_id].avatar+".png?size=512",
-                  "text": self.client.users[user_id].username+"#"+self.client.users[user_id].discriminator
-                },
-              })
+                dev = "Web"
+              self.client.channels["432351112616738837"].sendMessageWithFile("", req.get({
+                url:'http://motorbot.io/api/DiscordWebsocketEvent/capture?api_key=caf07b8b-366e-44ab-9bda-623f94a9c2df',
+                json: true
+                body: {
+                  "PresenceUpdateData": {
+                    "type": "StatusChange",
+                    "id": user_id,
+                    "avatar": self.client.users[user_id].avatar,
+                    "user": self.client.users[user_id].username,
+                    "discriminator": self.client.users[user_id].discriminator,
+                    "last_status": userStatus[user_id].status,
+                    "last_status_time": (moment.unix(userStatus[user_id].last_update/1000).fromNow()).replace(" ago",""),
+                    "status": status,
+                    "device": dev
+                  }
+                }
+              }), "PresenceUpdateData.png")
               statusText = ""
             ###else
               statusText = "'s status was `"+userStatus[user_id].status+"` for "+(moment.unix(userStatus[user_id].last_update/1000).fromNow()).replace(" ago","")+" and is now `"+status+"`"###
             extra_info["last_update"] = new Date().getTime()
         else
           #we don't know previous status so assume status change
-          self.client.channels["432351112616738837"].sendMessage("","embed": {
-            "title": ":spy: Registering New Event User",
-            "description": "A user that has not undergone a presence update after MotorBot was launched has undergone a presence update event\n\n",
-            "fields": [
-              {
-                "name": "User",
-                "value": "<@"+user_id+">"
-                "inline": true
-              },
-              {
-                "name": "User Identifier",
-                "value": "`"+user_id+"`",
-                "inline": true
-              },
-              {
-                "name": "Current Status",
-                "value": self.statusIcon(status)+" "+status,
-                "inline": true
-              },
-              {
-                "name": " ‏‏‎ ",
-                "value": " ‏‏‎ "
-              },
-              {
-                "name": "Desktop",
-                "value": self.statusIcon((if extra_info.client_status.desktop then extra_info.client_status.desktop else "offline"))+" "+(if extra_info.client_status.desktop then extra_info.client_status.desktop else "offline"),
-                "inline": true
-              },
-              {
-                "name": "Web",
-                "value": self.statusIcon((if extra_info.client_status.web then extra_info.client_status.web else "offline"))+" "+(if extra_info.client_status.web then extra_info.client_status.web else "offline"),
-                "inline": true
-              },
-              {
-                "name": "Mobile",
-                "value": self.statusIcon((if extra_info.client_status.mobile then extra_info.client_status.mobile else "offline"))+" "+(if extra_info.client_status.mobile then extra_info.client_status.mobile else "offline"),
-                "inline": true
-            }],
-            "color": 1274082,
-            "timestamp": new Date().toISOString(),
-            "footer": {
-              "icon_url": "https://cdn.discordapp.com/avatars/"+user_id+"/"+self.client.users[user_id].avatar+".png?size=512",
-              "text": self.client.users[user_id].username+"#"+self.client.users[user_id].discriminator
-            },
-          })
+          self.client.channels["432351112616738837"].sendMessageWithFile("", req.get({
+            url:'http://motorbot.io/api/DiscordWebsocketEvent/capture?api_key=caf07b8b-366e-44ab-9bda-623f94a9c2df',
+            json: true
+            body: {
+              "PresenceUpdateData": {
+                "type": "RegisterPresenceUpdateUser",
+                "id": user_id,
+                "avatar": self.client.users[user_id].avatar,
+                "user": self.client.users[user_id].username,
+                "discriminator": self.client.users[user_id].discriminator
+                "status": status
+              }
+            }
+          }), "RegisterPresenceUpdateUser.png")
           statusText = ""
           extra_info["last_update"] = new Date().getTime()
 
         if game && game.type == 0
-          gameText = " is playing **"+game.name+"**"
+          if userStatus[user_id]
+            if userStatus[user_id].game
+              if userStatus[user_id].game.name != game.name
+                #gameText = " is playing **"+game.name+"**"
+                self.client.channels["432351112616738837"].sendMessageWithFile("", req.get({
+                  url:'http://motorbot.io/api/DiscordWebsocketEvent/capture?api_key=caf07b8b-366e-44ab-9bda-623f94a9c2df',
+                  json: true
+                  body: {
+                    "PresenceUpdateData": {
+                      "type": "Playing",
+                      "id": user_id,
+                      "avatar": self.client.users[user_id].avatar,
+                      "user": self.client.users[user_id].username,
+                      "discriminator": self.client.users[user_id].discriminator
+                      "game": game.name,
+                      "game_state": game.state,
+                      "game_details": game.details,
+                      "game_icon": game.icon,
+                      "game_asset_large": if game.assets then game.assets.large_image else undefined,
+                      "application_id": game.application_id
+                    }
+                  }
+                }), "Playing.png")
+            else
+              self.client.channels["432351112616738837"].sendMessageWithFile("", req.get({
+                url:'http://motorbot.io/api/DiscordWebsocketEvent/capture?api_key=caf07b8b-366e-44ab-9bda-623f94a9c2df',
+                json: true
+                body: {
+                  "PresenceUpdateData": {
+                    "type": "Playing",
+                    "id": user_id,
+                    "avatar": self.client.users[user_id].avatar,
+                    "user": self.client.users[user_id].username,
+                    "discriminator": self.client.users[user_id].discriminator
+                    "game": game.name,
+                    "game_state": game.state,
+                    "game_details": game.details,
+                    "game_icon": game.icon,
+                    "game_asset_large": if game.assets then game.assets.large_image else undefined,
+                    "application_id": game.application_id
+                  }
+                }
+              }), "Playing.png")
+          else
+            self.client.channels["432351112616738837"].sendMessageWithFile("", req.get({
+              url:'http://motorbot.io/api/DiscordWebsocketEvent/capture?api_key=caf07b8b-366e-44ab-9bda-623f94a9c2df',
+              json: true
+              body: {
+                "PresenceUpdateData": {
+                  "type": "Playing",
+                  "id": user_id,
+                  "avatar": self.client.users[user_id].avatar,
+                  "user": self.client.users[user_id].username,
+                  "discriminator": self.client.users[user_id].discriminator
+                  "game": game.name,
+                  "game_state": game.state,
+                  "game_details": game.details,
+                  "game_icon": game.icon,
+                  "game_asset_large": if game.assets then game.assets.large_image else undefined,
+                  "application_id": game.application_id
+                }
+              }
+            }), "Playing.png")
         else if game && game.type == 1
           gameText = " is streaming **"+game.name+"**"
         else if game && game.type == 2

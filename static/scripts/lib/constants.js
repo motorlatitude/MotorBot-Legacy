@@ -16,7 +16,8 @@ define(["moment"], function(moment){
             "PLAYER_STATE": 8,
             "SPOTIFY_IMPORT": 9,
             "GUILD": 10,
-            "GUILD_STATE": 11
+            "GUILD_STATE": 11,
+            "TRACK_PACKET": 12
         },
         websocketSession: undefined,
         currentGuild: undefined,

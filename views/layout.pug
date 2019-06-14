@@ -186,7 +186,7 @@ html(lang="en")
                             .voice.connected General
             .profile#profile(onclick="document.getElementById('profile').classList.toggle('active'); document.getElementById('accountOptions').classList.toggle('visible'); document.getElementById('enviromentSelection').classList.remove('active'); document.getElementById('serverOptions').classList.remove('visible');")
                 .profileArrow <i class="fas fa-chevron-down"></i>
-                .profileIcon(style="background: url('https://cdn.discordapp.com/avatars/" + user.id + "/" + user.avatar + ".png?size=128') no-repeat center; background-size: cover;")
+                .profileIcon(style="background: url('https://cdn.discordapp.com/avatars/" + user.id + "/" + user.avatar + "."+(user.avatar.substr(0,2) == 'a_' ? "gif" : "png")+"?size=128') no-repeat center; background-size: cover;")
                 .profileName #{user.username}<span class="disc">##{user.discriminator}</span><br /><span class="karma"><i class="fas fa-asterisk" aria-hidden="true"></i> &nbsp; #{user.karma} karma
                 ul.options#accountOptions
                     li(data-view="account") <i class="fas fa-user-astronaut" aria-hidden="true"></i> &nbsp; &nbsp; Account

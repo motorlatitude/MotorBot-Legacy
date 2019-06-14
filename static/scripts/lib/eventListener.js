@@ -334,6 +334,8 @@ define(["constants","audioPlayer","views","playlist","user","requester", "simple
                     let sb = new SimpleBar(elContentView);
                     sb.getScrollElement().onscroll = function () {
                         let scrolled = sb.getScrollElement().scrollTop;
+                        document.querySelector("#playlist_header .bg").style.filter = "blur("+(Math.round(scrolled/30) > 25 ? 25 : Math.round(scrolled/30))+"px)";
+                        document.querySelector("#playlist_header .bg").style.opacity = 1/(Math.round(scrolled/30) > 25 ? 0 : Math.round(scrolled/30));
                         if (scrolled >= 100 && !ph.classList.contains("mini")) {
                             ph.classList.add("mini");
                             plst.classList.add("mini");
@@ -398,7 +400,13 @@ define(["constants","audioPlayer","views","playlist","user","requester", "simple
                             let elContextMenuListItem_info = document.createElement("li");
                             elContextMenuListItem_info.innerHTML = "Details";
                             elContextMenuListItem_info.onclick = function(){
-                                document.getElementById("song_info").style.display = "block";
+                                req.get(c.base_url+"/track/"+self.getAttribute("data-songid")+"?api_key="+c.api_key, {dataType:"json"}).then(function(response){
+                                    console.log(response);
+                                    document.querySelector(".song_info_raw").innerHTML = JSON.stringify(response.data, null, 4)
+                                    document.getElementById("song_info").style.display = "block";
+                                }).catch(function(err){
+                                    console.warn(err);
+                                });
                             };
                             elContextMenuList.appendChild(elContextMenuListItem_info);
                             let elContextMenuListItem_sep2 = document.createElement("li");

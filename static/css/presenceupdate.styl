@@ -1,0 +1,254 @@
+html,
+body
+  margin 0
+  padding 0
+  background #36393F
+
+.capture-frame
+  width 1004px
+  max-width 1004px
+
+.event-wrapper
+  width 1000px
+  border-radius 5px
+  border 2px solid #202225
+  overflow hidden
+
+.event-wrapper .top-level
+  height 100px
+  background #292B2F
+
+.event-wrapper .top-level.light
+  background #303237
+
+.event-wrapper .top-level .event_type
+  position relative
+  top 0
+  line-height 100px
+  width 70px
+  text-align center
+  font-size 34px
+  color #A9AAAC
+  float left
+
+.event-wrapper .top-level .event_type.joined
+  color #fff
+  background rgba(67,181,129, 1)
+
+.event-wrapper .top-level .event_type.left
+  color #fff
+  background #202225
+
+.event-wrapper .top-level .event_type:before
+  content ''
+  position absolute
+  top 41px
+  right 2px
+  width 20px
+  height 20px
+  background transparent
+  border-radius 50%
+  border 6px solid transparent
+
+.event-wrapper .top-level .event_type.add:after,
+.event-wrapper .top-level .event_type.start:after,
+.event-wrapper .top-level .event_type.stop:after
+  content ''
+  width 28px
+  height 28px
+  position absolute
+  top 38px
+  right 2px
+  border-radius 50%
+  background #292B2F
+  z-index 0
+
+.event-wrapper .top-level .event_type.add:before
+  content '+'
+  z-index 2
+  text-align center
+  line-height 17px
+  font-family Whitney, "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif
+  font-size 18px
+  position absolute
+  top 41px
+  right 6px
+  width 16px
+  height 16px
+  background #292B2F
+  border-radius 50%
+  color #43B581
+  border 2px solid #43B581
+
+.event-wrapper .top-level .event_type.start:before
+  content '\25BA'
+  z-index 2
+  text-align center
+  line-height 17px
+  font-family Arial
+  font-size 8px
+  position absolute
+  top 41px
+  right 6px
+  width 16px
+  height 16px
+  background #292B2F
+  border-radius 50%
+  color #43B581
+  border 2px solid #43B581
+
+.event-wrapper .top-level .event_type.stop:before
+  content '-'
+  z-index 2
+  text-align center
+  line-height 13px
+  font-family Whitney, "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif
+  font-size 22px
+  position absolute
+  top 41px
+  right 6px
+  width 16px
+  height 16px
+  background #292B2F
+  border-radius 50%
+  color #F04747
+  border 2px solid #F04747
+
+.event-wrapper .top-level .event_type.online:before
+  background #43B581
+  border 4px solid #292B2F
+
+.event-wrapper .top-level .event_type.idle:before
+  background #FAA61A
+  border 4px solid #292B2F
+
+.event-wrapper .top-level .event_type.dnd:before
+  background #F04747
+  border 4px solid #292B2F
+
+.event-wrapper .top-level .event_type.offline:before
+  background #747F8D
+  border 4px solid #292B2F
+
+.event-wrapper .top-level .profile_icon
+  width 60px
+  height 60px
+  margin 20px 10px
+  border-radius 50%
+  background rgba(0,0,0,0.1)
+  float left
+
+.event-wrapper .top-level .event_data
+  width 830px
+  margin 8px
+  float left
+  overflow hidden
+  white-space nowrap
+  text-overflow ellipsis
+
+.event-wrapper .top-level .event_data .value
+  line-height 40px
+  color #B9BBBE
+  font-size 24px
+  font-family Whitney, "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif
+
+.event-wrapper .top-level .event_data .value span
+  color #fff
+  font-size 24px
+
+.event-wrapper .top-level .event_data .value .user
+  color #fff
+  font-size 25px
+
+.event-wrapper .top-level .event_data .value .disc
+  color #66676B
+  font-size 20px
+  font-family SourceCodePro, Consolas, "Liberation Mono", Menlo, Courier, monospace
+
+.event-wrapper .top-level .event_data .date
+  line-height 40px
+  color #72767D
+  font-size 24px
+  font-family Whitney, "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif
+
+.event-wrapper .bottom-level
+  min-height 60px
+  background #303237
+  border-top 2px solid #202225
+  padding 20px 0
+
+.event-wrapper .bottom-level table
+  border-spacing 0
+  padding 0
+  margin 0
+  width 100%
+
+.event-wrapper .bottom-level table tr
+  width 100%
+  min-height 140px
+
+.event-wrapper .bottom-level table tr td:first-child
+  width 150px
+
+.event-wrapper .bottom-level table tr td:last-child
+  width calc(100% - 160px)
+
+.event-wrapper .bottom-level ul
+  list-style none
+  margin 0
+  padding 0
+  width 100%
+  height auto
+
+.event-wrapper .bottom-level ul li
+  width calc(100% - 150px)
+  padding 0 0 0 75px
+  height 55px
+  line-height 50px
+  color #72767D
+  font-size 25px
+  font-family Whitney, "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif
+
+.event-wrapper .bottom-level table tr td:last-child ul li
+  padding 0
+
+.event-wrapper .bottom-level table tr td:last-child ul li .val
+  max-width 580px
+
+.event-wrapper .bottom-level ul li span
+  font-size 26px
+  color #fff
+
+.event-wrapper .bottom-level ul li span.code
+  font-family SourceCodePro, Consolas, "Liberation Mono", Menlo, Courier, monospace
+
+.event-wrapper .bottom-level ul li .id
+  float left
+  font-family SourceCodePro, Consolas, "Liberation Mono", Menlo, Courier, monospace
+  color #2eb0f3
+
+.event-wrapper .bottom-level ul li .id.online
+  color #43B581
+
+.event-wrapper .bottom-level ul li .id.idle
+  color #FAA61A
+
+.event-wrapper .bottom-level ul li .id.dnd
+  color #F04747
+
+.event-wrapper .bottom-level ul li .id.offline
+  color #747F8D
+
+.event-wrapper .bottom-level table  tr td .asset
+  width 140px
+  height 140px
+  border-radius 5px
+  background-color rgba(0,0,0,0.4)
+  margin 20px
+
+.event-wrapper .bottom-level ul li .val
+  float left
+  margin-left 20px
+  overflow hidden
+  white-space nowrap
+  text-overflow ellipsis
