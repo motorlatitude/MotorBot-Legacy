@@ -5,7 +5,7 @@
   "main": "app.coffee",
   "private": true,
   "scripts": {
-    "test": "./node_modules/.bin/mocha test/libTest.coffee --require coffeescript/register -t 15000 --reporter spec --exit"
+    "test": "./node_modules/.bin/mocha test/TravisTest.coffee --require coffeescript/register -t 15000 --reporter spec --exit"
   },
   "dependencies": {
     "asciify-image": "^0.1.5",
