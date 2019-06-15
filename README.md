@@ -1,4 +1,4 @@
-[![MotorbotHeader](https://github.com/motorlatitude/MotorBot/blob/develop/motorbotHeader.png?raw=true)]()
+[![MotorbotHeader](https://github.com/motorlatitude/MotorBot/blob/develop/.github/motorbotHeader.png?raw=true)]()
 
 
 [![Github Issues](https://img.shields.io/github/issues/motorlatitude/motorbot.svg?style=flat-square)]() &nbsp; &nbsp;
@@ -23,7 +23,7 @@ MotorBot has a number of features that it can do right out of the box;
  
 &nbsp;
 
-[![MotorBotThumbnail](https://github.com/motorlatitude/MotorBot/blob/develop/Thumbnail.jpg?raw=true)]()
+[![MotorBotThumbnail](https://github.com/motorlatitude/MotorBot/blob/develop/.github/Thumbnail.jpg?raw=true)]()
 
 ## DiscordClient Library
 MotorBot uses a custom written library the DiscordClient Library. This 

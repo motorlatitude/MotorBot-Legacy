@@ -14,7 +14,7 @@ class DiscordClient extends EventEmitter
     super()
     if !@options.token then throw new Error("No Token Provided")
     @utils = new u()
-    if @options.debug then @utils.level = @options.debug
+    if @options.Debug then @utils.level = @options.Debug
     @rest = new DiscordManager(@)
 
   getGateway: () ->
