@@ -73,6 +73,34 @@ describe 'Logger', ->
       require.resolve('./../src/debug/Debug.coffee')
   Debug = require './../src/debug/Debug.coffee'
 
-
+describe 'Main', ->
+  describe 'Resolve Main Class', ->
+    it 'Should Load ./../src/main.coffee', ->
+      require.resolve('./../src/main.coffee')
+  Main = require './../src/main.coffee'
+  describe 'Constructor', ->
+    app = new Main()
+    it 'Should Create Debugger', ->
+      app.Logger.constructor.name.should.equal "Debug"
+    it 'Should Create DiscordClient Object', ->
+      app.Client.constructor.name.should.equal "DiscordClient"
+    it 'Should Generate A MotorBot Event Listener', ->
+      app.motorbotEventHandler.constructor.name.should.equal "MotorBotEventHandler"
+    describe 'CreateMongoDatabaseConnection', ->
+      it 'Should Return Promise With Database Object', ->
+        app.CreateMongoDatabaseConnection().should.be.fulfilled
+    describe 'CreateWebSocket', ->
+      it 'Should Create a WebSocket Connection', ->
+        app.WebSocket.constructor.name.should.equal "WebSocketServer"
+    describe 'CreateWebServer', ->
+      it 'Should Create a WebServer', ->
+        app.WebServer.constructor.name.should.equal "WebServer"
+    describe 'CreateMotorBotMusic', ->
+      it 'Should Create And Store the MotorBotMusic class in @Music', ->
+        app.Music.constructor.name.should.equal "MotorBotMusic"
+    describe 'ConnectedGuild', ->
+      it 'Should return the guild_id for the supplied user_id, should be undefined if user isn\'t connected', ->
+        guild_id = app.ConnectedGuild(95164972807487488)
+        assert(guild_id == undefined, "Returned guild_id should be undefined as no users are connected")
 
 
