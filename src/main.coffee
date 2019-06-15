@@ -1,3 +1,5 @@
+EventEmitter = require('events').EventEmitter
+
 Debug = require './debug/Debug'
 
 DiscordClient = require './../discordClient/discordClient.coffee'
@@ -10,9 +12,11 @@ MotorBotMusic = require './MotorBotMusic.coffee'
 
 keys = require './../keys.json'
 
-class Main
+class Main extends EventEmitter
 
   constructor: () ->
+    super()
+
     @Logger = new Debug("verbose")
     @Client = undefined
     @Database = undefined
@@ -24,6 +28,8 @@ class Main
     @VoiceStates = {}
     @UserStatus = {}
 
+
+  run: () ->
     @CreateDiscordClient()
     self = @
     @CreateMongoDatabaseConnection().then((db) ->
@@ -31,6 +37,7 @@ class Main
       self.CreateWebServer()
       self.CreateWebSocket()
       self.CreateMotorBotMusic()
+      self.emit("MotorBotReady", {})
     ).catch((err) ->
       console.log err
       throw new Error("Failed to Connect to database")

@@ -6,7 +6,6 @@ session = require 'express-session'
 DiscordStrategy = require('passport-discord').Strategy
 OAuth2Strategy = require('passport-oauth2').Strategy
 crypto = require('crypto')
-uuid = require 'node-uuid'
 request = require 'request'
 
 passport.serializeUser((user, done) ->

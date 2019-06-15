@@ -78,29 +78,70 @@ describe 'Main', ->
     it 'Should Load ./../src/main.coffee', ->
       require.resolve('./../src/main.coffee')
   Main = require './../src/main.coffee'
-  describe 'Constructor', ->
+  describe 'Running MotorBot With Tests', ->
     app = new Main()
-    it 'Should Create Debugger', ->
+    it 'Should Emit Event `MotorBotReady` Once Ready', ->
+      app.on("MotorBotReady", () ->
+        describe "Once MotorBot Is Ready", ->
+          it 'Should Have Created Database Object', ->
+            app.Database.constructor.name.should.equal "Db"
+          it 'Should Have Created a WebSocket Connection', ->
+            app.WebSocket.constructor.name.should.equal "WebSocketServer"
+          it 'Should Have Created a WebServer', ->
+            app.WebServer.constructor.name.should.equal "WebServer"
+          it 'Should Have Created And Store the MotorBotMusic class in @Music', ->
+            app.Music.constructor.name.should.equal "MotorBotMusic"
+          describe 'MotorBotMusic', ->
+            it 'Should create empty object: yStream', ->
+              assert(app.Music.yStream, {})
+            it 'Should create empty object: musicPlayers', ->
+              assert(app.Music.musicPlayers, {})
+            describe 'InitialisePlaylist', ->
+              songQueueCollection = app.Database.collection("songQueue")
+              before(() ->
+                await songQueueCollection.insertOne({_id: "unit_test_track", status: "playing"})
+              )
+              after(() ->
+                await songQueueCollection.deleteOne({_id: "unit_test_track"})
+              )
+              it 'Should Clear Song Queue of tracks with status "playing" and return an empty promise', ->
+                app.Music.InitialisePlaylist().should.be.fulfilled
+
+              it 'Track Status Should Be `played`', ->
+                songQueueCollection.find({_id: "unit_test_track"}).toArray((err, result) ->
+                  assert(err == null, "No Error Should be returned")
+                  assert(result[0].status == "played", "Track Should Be Played")
+                )
+      )
+      app.run()
+    it 'Should Have Create Debugger', ->
       app.Logger.constructor.name.should.equal "Debug"
-    it 'Should Create DiscordClient Object', ->
+    it 'Should Have Create DiscordClient Object', ->
       app.Client.constructor.name.should.equal "DiscordClient"
-    it 'Should Generate A MotorBot Event Listener', ->
+    it 'Should Have Generate A MotorBot Event Listener', ->
       app.motorbotEventHandler.constructor.name.should.equal "MotorBotEventHandler"
-    describe 'CreateMongoDatabaseConnection', ->
-      it 'Should Return Promise With Database Object', ->
-        app.CreateMongoDatabaseConnection().should.be.fulfilled
-    describe 'CreateWebSocket', ->
-      it 'Should Create a WebSocket Connection', ->
-        app.WebSocket.constructor.name.should.equal "WebSocketServer"
-    describe 'CreateWebServer', ->
-      it 'Should Create a WebServer', ->
-        app.WebServer.constructor.name.should.equal "WebServer"
-    describe 'CreateMotorBotMusic', ->
-      it 'Should Create And Store the MotorBotMusic class in @Music', ->
-        app.Music.constructor.name.should.equal "MotorBotMusic"
-    describe 'ConnectedGuild', ->
-      it 'Should return the guild_id for the supplied user_id, should be undefined if user isn\'t connected', ->
-        guild_id = app.ConnectedGuild(95164972807487488)
-        assert(guild_id == undefined, "Returned guild_id should be undefined as no users are connected")
+    describe 'Main Class Methods', ->
+      describe 'CreateMongoDatabaseConnection', ->
+        it 'Should Return Promise With Database Object', ->
+          app.CreateMongoDatabaseConnection().should.be.fulfilled
+      describe 'ConnectedGuild', ->
+        it 'Should return the guild_id for the supplied user_id, should be undefined if user isn\'t connected', ->
+          guild_id = app.ConnectedGuild(95164972807487488)
+          assert(guild_id == undefined, "Returned guild_id should be undefined as no users are connected")
 
-
+describe 'MongoDatabase', ->
+  describe 'Resolve MongoDatabase Class', ->
+    it 'Should Load ./../src/MongoDatabase.coffee', ->
+      require.resolve('./../src/MongoDatabase.coffee')
+  MongoDatabase = require './../src/MongoDatabase.coffee'
+  Debug = require './../src/debug/Debug.coffee'
+  describe 'Constructor', ->
+    it 'Should Create Class', ->
+      Logger = new Debug('verbose')
+      db = new MongoDatabase(Logger)
+      db.constructor.name.should.equal "MongoDatabase"
+  describe 'connect', ->
+    Logger = new Debug('verbose')
+    db = new MongoDatabase(Logger)
+    it 'Should Establish Connection With Mongo on localhost:27017 and return a Promise with a database object', ->
+      db.connect().should.be.fulfilled

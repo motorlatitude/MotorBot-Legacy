@@ -3,7 +3,7 @@ Main = require './src/main.coffee'
 class App
 
   constructor: () ->
-    new Main();
-
+    m = new Main();
+    m.run();
 
 new App();
