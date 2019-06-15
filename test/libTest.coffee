@@ -30,8 +30,16 @@ describe 'Load NPM Modules', ->
     require.resolve('ytdl-core')
   it 'Should Load request', ->
     require.resolve('request')
-  it 'Should Load rand-token', ->
-    require.resolve('rand-token')
+  it 'Should Load cuid', ->
+    require.resolve('cuid')
+  it 'Should Load readline', ->
+    require.resolve('readline')
+  it 'Should Load cli-table', ->
+    require.resolve('cli-table')
+  it 'Should Load string-argv', ->
+    require.resolve('string-argv')
+  it 'Should Load asciify-image', ->
+    require.resolve('asciify-image')
   describe "Express Web Server Used Modules", ->
     it 'Should Load morgan', ->
       require.resolve 'morgan'
@@ -80,8 +88,19 @@ describe 'DiscordClient Object', ->
         console.log "\tReady Event Received"
         assert(data.v == 6, "Discord Gateway Protocol version should equal 6")
         console.log "\tDiscord Gateway Protocol Version 6"
+        expect(client.internals.gateway).to.be.a("string")
+        assert(client.connected == true, "Client Connected Public Var Should Be Set To True")
         done()
       )
   it "Should Determine Gateway Address and Connect", () ->
     client.connect()
     expect(client.internals).to.be.a("object")
+  it "Should Create Empty Public Variables", () ->
+    assert(typeof client.internals == "object", "DiscordClient Internals Created")
+    assert(typeof client.internals.voice == "object", "DiscordClient Voice Internals Created")
+    assert(client.internals.sequence == 0, "DiscordClient Sequence Is Starting At 0")
+    assert(typeof client.channels == "object", "DiscordClient Channels Created")
+    assert(typeof client.guilds == "object", "DiscordClient Guilds Created")
+    assert(typeof client.users == "object", "DiscordClient Users Created")
+    assert(typeof client.voiceHandlers == "object", "DiscordClient voiceHandlers Created")
+    assert(typeof client.voiceConnections == "object", "DiscordClient voiceConnections Created")

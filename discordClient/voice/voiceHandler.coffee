@@ -48,7 +48,7 @@ class VoiceConnection
     @vws.once('open', () -> self.voiceGatewayOpen())
     @vws.once('close', () -> self.voiceGatewayClose())
     @vws.once('error', (err) -> self.voiceGatewayError(err))
-    @vws.on('message', (msg, flags) -> self.voiceGatewayMessage(msg, flags))
+    @vws.on('message', (msg) -> self.voiceGatewayMessage(msg))
 
   voiceGatewayOpen: (guild_id) ->
     @discordClient.utils.debug("[VOICESOCKET]: Connected to Voice Gateway Server: " + @endpoint, "info")
@@ -73,8 +73,8 @@ class VoiceConnection
   voiceGatewayError: (err, guild_id) ->
     @discordClient.utils.debug("[VOICESOCKET] Voice gateway server encountered an error: " + err.toString(), "error")
 
-  voiceGatewayMessage: (data, flags) ->
-    msg = if flags.binary then JSON.parse(zlib.inflateSync(data).toString()) else JSON.parse(data)
+  voiceGatewayMessage: (data) ->
+    msg = if typeof data != "string" then JSON.parse(zlib.inflateSync(data).toString()) else JSON.parse(data)
     switch msg.op
       when Constants.voice.PacketCodes.READY then @handleReady(msg)
       when Constants.voice.PacketCodes.HEARTBEAT then @handleHeartbeat(msg)

@@ -2,21 +2,19 @@ DiscordClient = require './discordClient/discordClient'
 WebServer = require './webserver'
 motorbotEventHandler = require './motorbotEventHandler'
 keys = require './keys.json'
+
+fs = require 'fs'
+path = require 'path'
+
 websocketServer = require("ws").Server
-#SocketCluster = require('socketcluster');
-stream = require 'stream'
-http2 = require 'http2'
 MongoClient = require('mongodb').MongoClient
 youtubeStream = require 'ytdl-core'
 request = require 'request'
-fs = require 'fs'
-path = require 'path'
-uuidv4 = require('uuid/v4');
-readline = require('readline');
+cuid = require 'cuid'
+readline = require 'readline'
 Table = require 'cli-table'
 StringArgv = require 'string-argv'
 ImageToASCII = require 'asciify-image'
-chalk = require 'chalk'
 
 readline.emitKeypressEvents(process.stdin);
 if (process.stdin.isTTY)
@@ -345,11 +343,11 @@ class App
   initWebSocket: () ->
     self = @
     @debug("Initialising WebSocket Connection")
-    @websocket = websocketServer({port: 3006}) #public port is 443 (wss://wss.lolstat.net) and local 3006 via nginx proxy
+    @websocket = new websocketServer({port: 3006}) #public port is 443 (wss://wss.lolstat.net) and local 3006 via nginx proxy
     @websocket.connectedClients = []
     @websocket.on('connection', (ws) ->
       self.debug("WebSocket Connection")
-      session = Buffer(new Date().getTime() + uuidv4()).toString("base64")
+      session = Buffer(new Date().getTime() + cuid()).toString("base64")
       self.debug("A New WebSocket Connection Has Been Registered: "+session,"info");
 
       ws.on("close", (e) ->

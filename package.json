@@ -5,14 +5,13 @@
   "main": "app.coffee",
   "private": true,
   "scripts": {
-    "test": "./node_modules/.bin/mocha test/libTest.coffee --require coffee-script/register -t 15000 --reporter spec --exit"
+    "test": "./node_modules/.bin/mocha test/libTest.coffee --require coffeescript/register -t 15000 --reporter spec --exit"
   },
   "dependencies": {
     "asciify-image": "^0.1.5",
     "async": "^2.6.1",
     "body-parser": "^1.15.2",
     "chai": "*",
-    "chalk": "^2.4.2",
     "cheerio": "^1.0.0-rc.2",
     "cjopus": "0.0.4",
     "cli-table": "^0.3.1",
@@ -52,5 +51,8 @@
     "ytdl-core": "^0.29.2"
   },
   "author": "Lennart Hase",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "coffeescript": "^2.4.1"
+  }
 }

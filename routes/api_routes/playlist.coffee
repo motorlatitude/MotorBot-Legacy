@@ -4,7 +4,7 @@ ObjectID = require('mongodb').ObjectID
 request = require('request')
 async = require('async')
 request = require 'request'
-uid = require('uuid/v4')
+cuid = require('cuid')
 async = require 'async'
 path = require 'path'
 
@@ -153,7 +153,7 @@ router.post("/", (req, res) ->
   user_id = req.user_id
   playlistsCollection = req.app.locals.motorbot.database.collection("playlists")
   usersCollection = req.app.locals.motorbot.database.collection("users")
-  playlist_id = uid();
+  playlist_id = cuid();
   if req.body.playlist_name
     uploadRemainingData = (album_key) ->
       if album_key then album_key = "https://motorbot.io/AlbumArt/"+album_key+".png"
@@ -185,7 +185,7 @@ router.post("/", (req, res) ->
       )
     if req.body.playlist_artwork
       console.log "Album Art Detected"
-      albumart_key = uid();
+      albumart_key = cuid();
       req_albumartContent = req.body.playlist_artwork.replace(/^data:([A-Za-z-+/]+);base64,/, '')
       require("fs").writeFile(path.join(__dirname, '../../static/AlbumArt/')+albumart_key+".png", req_albumartContent, 'base64', (err) ->
         if err then console.log(err)
@@ -322,7 +322,7 @@ router.put("/:playlist_id/song", refreshSpotifyAccessToken, (req, res) ->
                       track_number = Number(body.tracks.items[0].track_number)
                       disc_number = Number(body.tracks.items[0].disc_number)
                       explicit = body.tracks.items[0].explicit
-                  track_id = uid()
+                  track_id = cuid()
                   track_obj = {
                     id: track_id,
                     type: "youtube",

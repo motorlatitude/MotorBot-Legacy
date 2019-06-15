@@ -21,5 +21,6 @@ before_install:
   -in keys.json.enc -out ./keys.json -d
 - npm install -g node-gyp
 - node-gyp install
+- npm install -g coffeescript
 node_js:
-- '6'
+- '11'

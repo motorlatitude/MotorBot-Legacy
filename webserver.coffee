@@ -1,6 +1,8 @@
+
+fs = require 'fs'
+
 morgan = require 'morgan'
 express = require "express"
-fs = require 'fs'
 nib = require 'nib'
 stylus = require 'stylus'
 compression = require 'compression'

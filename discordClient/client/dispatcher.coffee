@@ -43,7 +43,7 @@ class Dispatcher
     @discordClient.internals.session_id = data.d.session_id
     @discordClient.internals.user_id = data.d.user.id
     self = @
-    @connected = true
+    @discordClient.connected = true
     for dm in data.d.private_channels
       @discordClient.channels[dm.id] = new DirectMessageChannel(@discordClient, dm) #TODO might have changed, so might have to use extra endpoint call
     @discordClient.emit("ready", data.d)
@@ -216,6 +216,6 @@ class Dispatcher
     @discordClient.utils.debug("Connection Resumed","info")
     @discordClient.internals.resuming = false
     @discordClient.internals.connection_retry_count = 0
-    @connected = true
+    @discordClient.connected = true
 
 module.exports = Dispatcher

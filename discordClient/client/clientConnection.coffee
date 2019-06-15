@@ -24,7 +24,7 @@ class ClientConnection
     @discordClient.gatewayWS.once('open', () -> self.gatewayOpen())
     @discordClient.gatewayWS.once('close', () -> self.gatewayClose())
     @discordClient.gatewayWS.once('error', (err) -> self.gatewayError(err))
-    @discordClient.gatewayWS.on('message', (msg, flags) -> self.gatewayMessage(msg, flags))
+    @discordClient.gatewayWS.on('message', (msg) -> self.gatewayMessage(msg))
     #@discordClient.emit("con")
 
   gatewayError: (err) ->
@@ -55,7 +55,7 @@ class ClientConnection
   sendResumePayload: () ->
     if @discordClient.internals.connection_retry_count < 5
       @discordClient.internals.resuming = true
-      @dispatcher.connected = false
+      @discordClient.connected = false
       @discordClient.internals.connection_retry_count++
       self = @
       setTimeout(() ->
@@ -126,11 +126,10 @@ class ClientConnection
       @discordClient.internals.resuming = false
       @connect(self.gateway)
 
-  gatewayMessage: (data, flags) ->
-    if flags
-      msg = if flags.binary then JSON.parse(zlib.inflateSync(data).toString()) else JSON.parse(data)
+  gatewayMessage: (data) ->
+    if typeof data != "string"
+      msg = if typeof data != "string" then JSON.parse(zlib.inflateSync(data).toString()) else JSON.parse(data)
     else
-      @discordClient.utils.debug("[GATEWAYSOCKET]: No Flags Present","warn")
       if typeof data == "object"
         @discordClient.utils.debug("[GATEWAYSOCKET]: Received Gateway Message With Type Object -> Buffer","warn")
         msg = {op: -1}
