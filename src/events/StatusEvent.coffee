@@ -4,7 +4,6 @@ moment = require 'moment'
 class StatusEvent
 
   constructor: (@App, @Client, @Logger, user_id, status, game, extra_info) ->
-    console.log extra_info
     self = @
     if extra_info.guild_id == "130734377066954752" #only listening for presence updates in the KTJ guild for now to avoid duplicates across multiple channels
       if game

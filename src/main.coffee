@@ -2,15 +2,18 @@ EventEmitter = require('events').EventEmitter
 
 Debug = require './debug/Debug'
 
-DiscordClient = require 'node-discord'
+DiscordClient = require 'discord-coffee'
 
 MotorBotEventHandler = require './MotorBotEventHandler.coffee'
 MongoDatabase = require './MongoDatabase.coffee'
 MotorBotWebServer = require './WebServer.coffee'
 MotorBotWebSocket = require './WebSocket.coffee'
 MotorBotMusic = require './MotorBotMusic.coffee'
+MotorBotSoundboard = require './MotorBotSoundboard.coffee'
+MotorBotTwitchStreamNotifier = require './MotorBotTwitchStreamNotifier.coffee'
 
 keys = require './../keys.json'
+pjon = require './../package.json'
 
 class Main extends EventEmitter
 
@@ -18,33 +21,48 @@ class Main extends EventEmitter
     super()
 
     @Logger = new Debug("verbose")
+    @Logger.write("Initialising")
     @Client = undefined
     @Database = undefined
     @WebServer = undefined
     @WebSocket = undefined
     @Music = undefined
     @motorbotEventHandler = undefined
+    @soundboard = undefined
 
     @VoiceStates = {}
     @UserStatus = {}
 
 
   run: () ->
+    @Logger.write("Starting MotorBot "+pjon.version, "info")
     @CreateDiscordClient()
     self = @
     @CreateMongoDatabaseConnection().then((db) ->
       self.Database = db
-      self.CreateWebServer()
-      self.CreateWebSocket()
-      self.CreateMotorBotMusic()
-      self.emit("MotorBotReady", {})
+      self.CreateWebServer() #handles web interface
+      self.CreateWebSocket() #handles web interface
+      self.CreateMotorBotMusic() #handles playback from interface to node-discord
+      self.CreateMotorBotSoundboard() #handles sound effects from discord chat and handles the playback from interface to node-discord
+      self.CreateMotorBotTwitchNotifier() #handles subscribing to twitch webhook service
+      self.emit("MotorBotReady", {}) #we have set everything up, lets say we're ready
     ).catch((err) ->
       console.log err
-      throw new Error("Failed to Connect to database")
+      throw new Error("Failed to Connect to Database Or Failed to Initialise a MotorBot Component")
     )
 
+  CreateMotorBotTwitchNotifier: () ->
+    tn = new MotorBotTwitchStreamNotifier(@, @Logger, keys.twitch)
+    tn.RegisterListener(22032158) #motorlatitude
+    tn.RegisterListener(26752266) #mutme
+    tn.RegisterListener(26538483) #sips_
+    tn.RegisterListener(22510310) #GDQ
+    tn.RegisterListener(36029255) #RiotGames
+
+  CreateMotorBotSoundboard: () ->
+    @soundboard = new MotorBotSoundboard(@, @Logger)
+
   CreateDiscordClient: () ->
-    @Logger.write("Initialising")
     @Client = new DiscordClient({token: keys.token, debug: "verbose"})
     @RegisterEventListener(@Client)
     @Client.connect()

@@ -18,7 +18,6 @@ class OAuth
                 accessTokenCollection = req.app.locals.motorbot.Database.collection("accessTokens")
                 accessTokenCollection.find({value: bearerToken}).toArray((err, result) ->
                   if err then console.log err
-                  console.log result
                   if result[0]
                     if client_id == result[0].clientId
                       req.user_id = result[0].userId

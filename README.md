@@ -25,6 +25,6 @@ MotorBot has a number of features that it can do right out of the box;
 
 [![MotorBotThumbnail](https://github.com/motorlatitude/MotorBot/blob/develop/.github/Thumbnail.jpg?raw=true)]()
 
-## 📚 node-discord Framework
-MotorBot uses a custom written framework formerly known as DiscordClient Library and now known as [node-discord](https://github.com/motorlatitude/node-discord). This 
+## 📚 discord-coffee Framework
+MotorBot uses a custom written framework formerly known as DiscordClient Library and now known as [discord-coffee](https://github.com/motorlatitude/discord-coffee). This 
 frame is built on [Node.js](https://nodejs.org/) in CoffeeScript, which allows the interaction with [Discords API](https://discordapp.com/developers/docs/).

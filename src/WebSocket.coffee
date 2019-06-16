@@ -40,13 +40,13 @@ class WebSocket
 
   NewConnection: (ws) ->
     @Logger.write("WebSocket Connection")
-    session = Buffer(new Date().getTime() + cuid()).toString("base64")
-    @Logger.write("A New WebSocket Connection Has Been Registered: "+session,"info")
+    session = cuid()
+    @Logger.write("A New WebSocket Connection Has Been Registered: "+session,"info",true)
 
     self = @
 
     ws.on("close", (e) ->
-      self.Logger.write("[WEBSOCKET][/ ][WSS.MOTORBOT.IO]: SOCKET CLOSED","warn")
+      self.Logger.write("[WEBSOCKET][/ ][WSS.MOTORBOT.IO]: SOCKET CLOSED","info")
       self.wss.ConnectedClients.forEach((client) ->
         if client
           if client.session == session

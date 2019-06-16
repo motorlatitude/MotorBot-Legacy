@@ -35,6 +35,7 @@ define(["constants", "wsEventHandler"], function(c, wsEventHandler){
                 document.querySelector(".modalityOverlay").style.display = "block";
                 document.getElementById("newPlaylistModal").style.display = "none"; //INFO: make sure no other modals are open
                 document.getElementById("websocketDisconnectOverlay").style.display = "block";
+                clearInterval(HEARTBEAT_INTERVAL);
                 setTimeout(function(){
                     WebSocketConnection.init();
                 },5000);

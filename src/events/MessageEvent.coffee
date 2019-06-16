@@ -88,61 +88,58 @@ class MessageEvent
         msg.channel.sendMessage(":zero: Tails <@"+msg.author.id+">")
     else if msg.content.match(/\!random/)
       msg.channel.sendMessage("Random Number: "+(Math.round((Math.random()*100))))
-    ###
     else if msg.content == "!sb diddly"
-      self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/DootDiddly.mp3", 5)
+      self.App.soundboard.play(msg.guild_id, __dirname+"/../soundboard/DootDiddly.mp3", 5)
     else if msg.content == "!sb pog"
-      self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/play of the game.mp3", 3)
+      self.App.soundboard.play(msg.guild_id, __dirname+"/../soundboard/play of the game.mp3", 3)
     else if msg.content == "!sb kled"
-      self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/Kled.mp3", 3)
+      self.App.soundboard.play(msg.guild_id, __dirname+"/../soundboard/Kled.mp3", 3)
     else if msg.content == "!sb wonder"
-      self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/wonder.mp3", 3)
+      self.App.soundboard.play(msg.guild_id, __dirname+"/../soundboard/wonder.mp3", 3)
     else if msg.content == "!sb 1"
-      self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/1.mp3", 3)
+      self.App.soundboard.play(msg.guild_id, __dirname+"/../soundboard/1.mp3", 3)
     else if msg.content == "!sb 2"
-      self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/2.mp3", 3)
+      self.App.soundboard.play(msg.guild_id, __dirname+"/../soundboard/2.mp3", 3)
     else if msg.content == "!sb 3"
-      self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/3.mp3", 3)
+      self.App.soundboard.play(msg.guild_id, __dirname+"/../soundboard/3.mp3", 3)
     else if msg.content == "!sb affirmative"
-      self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/affirmative.mp3", 3)
+      self.App.soundboard.play(msg.guild_id, __dirname+"/../soundboard/affirmative.mp3", 3)
     else if msg.content == "!sb gp"
-      self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/gp.mp3", 3)
+      self.App.soundboard.play(msg.guild_id, __dirname+"/../soundboard/gp.mp3", 3)
     else if msg.content == "!sb justice"
-      self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/justice 3.mp3", 3)
+      self.App.soundboard.play(msg.guild_id, __dirname+"/../soundboard/justice 3.mp3", 3)
     else if msg.content == "!sb speed boost"
-      self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/speed boost.mp3", 3)
+      self.App.soundboard.play(msg.guild_id, __dirname+"/../soundboard/speed boost.mp3", 3)
     else if msg.content == "!sb stop the payload"
-      self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/stop the payload.mp3", 3)
+      self.App.soundboard.play(msg.guild_id, __dirname+"/../soundboard/stop the payload.mp3", 3)
     else if msg.content == "!sb wsr"
-      self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/wsr.mp3", 2)
+      self.App.soundboard.play(msg.guild_id, __dirname+"/../soundboard/wsr.mp3", 2)
     else if msg.content == "!sb drop"
-      self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/drop_beat.wav", 3)
+      self.App.soundboard.play(msg.guild_id, __dirname+"/../soundboard/drop_beat.wav", 3)
     else if msg.content == "!sb tears"
-      self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/bings_tears.wav", 3)
+      self.App.soundboard.play(msg.guild_id, __dirname+"/../soundboard/bings_tears.wav", 3)
     else if msg.content == "!sb balanced"
-      self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/balancing_teams.wav", 3)
+      self.App.soundboard.play(msg.guild_id, __dirname+"/../soundboard/balancing_teams.wav", 3)
     else if msg.content == "!sb ez mode"
-      self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/D.Va_-_Easy_mode.ogg", 3)
+      self.App.soundboard.play(msg.guild_id, __dirname+"/../soundboard/D.Va_-_Easy_mode.ogg", 3)
     else if msg.content == "!sb enemy"
-      self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/Enemy Slain.mp3", 2)
+      self.App.soundboard.play(msg.guild_id, __dirname+"/../soundboard/Enemy Slain.mp3", 2)
     else if msg.content == "!sb victory"
-      self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/Victory.mp3", 2)
+      self.App.soundboard.play(msg.guild_id, __dirname+"/../soundboard/Victory.mp3", 2)
     else if msg.content == "!sb defeat"
-      self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/Defeat.mp3", 2)
+      self.App.soundboard.play(msg.guild_id, __dirname+"/../soundboard/Defeat.mp3", 2)
     else if msg.content == "!sb pentakill"
-      self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/Pentakill1.mp3", 2)
+      self.App.soundboard.play(msg.guild_id, __dirname+"/../soundboard/Pentakill1.mp3", 2)
     else if msg.content == "!sb happy birthday adz"
-      self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/happybirthdayadz.wav", 3)
+      self.App.soundboard.play(msg.guild_id, __dirname+"/../soundboard/happybirthdayadz.wav", 3)
     else if msg.content == "!sb airport"
-      self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/En-BAW-LHR-boarding.mp3", 2)
+      self.App.soundboard.play(msg.guild_id, __dirname+"/../soundboard/En-BAW-LHR-boarding.mp3", 2)
     else if msg.content == "!sb airport de"
-      self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/Ge-DLH-FRA-boarding.mp3", 2)
+      self.App.soundboard.play(msg.guild_id, __dirname+"/../soundboard/Ge-DLH-FRA-boarding.mp3", 2)
     else if msg.content == "!sb airport du"
-      self.setupSoundboard(msg.guild_id, __dirname+"/soundboard/Du-KLM-AMS-boarding.mp3", 2)
+      self.App.soundboard.play(msg.guild_id, __dirname+"/../soundboard/Du-KLM-AMS-boarding.mp3", 2)
     else if msg.content == "!sb stop"
-      if self.app.soundboard[msg.guild_id]
-        self.app.soundboard[msg.guild_id].stop()
-        delete self.app.soundboard[msg.guild_id]
+      self.App.soundboard.stop(msg.guild_id)
     else if msg.content == "!sb help"
       msg.channel.sendMessage("",{
         embed: {
@@ -175,7 +172,7 @@ class MessageEvent
               **!sb stop** - Resets the soundboard, useful if the soundboard commands aren't working"
           color: 39125
         }
-      })###
+      })
     else if msg.content == "!help"
       msg.channel.sendMessage("",{
         embed: {
