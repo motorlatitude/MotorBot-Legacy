@@ -1,4 +1,4 @@
-DiscordClient = require '../discordClient/discordClient.coffee'
+DiscordClient = require 'node-discord'
 keys = require '../keys.json'
 chai = require 'chai'
 chaiAsPromised = require 'chai-as-promised'
@@ -14,12 +14,12 @@ describe 'sanity check', ->
     (true).should.equal true
 
 describe 'Load Custom Modules', ->
-  it 'Should Load DiscordClient Library', ->
-    require.resolve('../discordClient/discordClient')
   it 'Should Load Secret Keys', ->
     require.resolve('../keys.json')
 
 describe 'Resolve NPM Modules', ->
+  it 'Should Load node-discord', ->
+    require.resolve("node-discord")
   it 'Should Load ws', ->
     require.resolve("ws")
   it 'Should Load mongodb', ->

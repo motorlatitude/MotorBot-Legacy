@@ -25,10 +25,6 @@ MotorBot has a number of features that it can do right out of the box;
 
 [![MotorBotThumbnail](https://github.com/motorlatitude/MotorBot/blob/develop/.github/Thumbnail.jpg?raw=true)]()
 
-## DiscordClient Library
-MotorBot uses a custom written library the DiscordClient Library. This 
-library is built on [Node.js](https://nodejs.org/) which allows the interaction with [Discords API](https://discordapp.com/developers/docs/). The library is currently
-integrated within this project with plans of making it a separate node module. Currently,
-the library and its relevant files are located in the [discordClient directory](https://github.com/motorlatitude/MotorBot/tree/master/discordClient). 
-
-- [DiscordClient Library Documentation](https://motorlatitude.github.io/MotorBot/discordclient/#introduction/overview)
+## 📚 node-discord Framework
+MotorBot uses a custom written framework formerly known as DiscordClient Library and now known as [node-discord](https://github.com/motorlatitude/node-discord). This 
+frame is built on [Node.js](https://nodejs.org/) in CoffeeScript, which allows the interaction with [Discords API](https://discordapp.com/developers/docs/).

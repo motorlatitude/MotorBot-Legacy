@@ -2,7 +2,7 @@ EventEmitter = require('events').EventEmitter
 
 Debug = require './debug/Debug'
 
-DiscordClient = require './../discordClient/discordClient.coffee'
+DiscordClient = require 'node-discord'
 
 MotorBotEventHandler = require './MotorBotEventHandler.coffee'
 MongoDatabase = require './MongoDatabase.coffee'
