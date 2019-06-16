@@ -14,5 +14,4 @@ class api
             return res.status(401).send({code: 401, status: "Unauthorized"})
         )
 
-
 module.exports = api

@@ -141,7 +141,7 @@ router.post("/token", (req, res) ->
     APIAccessCollection.find({id: client_id, secret: client_secret}).toArray((err, result) ->
       if err then return authError(res, "unknown_error", "Internal Database Error")
       if result[0]
-        AuthorizationCodesCollection = req.app.locals.motorbot.database.collection("authorizationCodes")
+        AuthorizationCodesCollection = req.app.locals.motorbot.Database.collection("authorizationCodes")
         AuthorizationCodesCollection.find({value: code.toString(), client_id: client_id, redirect_uri: redirect_uri}).toArray((err, result) ->
           if err then return authError(res, "unknown_error", "Internal Database Error")
           if result[0]

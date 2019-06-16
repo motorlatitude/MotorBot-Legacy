@@ -1,0 +1,225 @@
+* {
+  -webkit-font-smoothing: antialiased;
+}
+body,
+html {
+  margin: 0;
+  padding: 0;
+  background: #13161a;
+  color: #fff;
+  font-family: 'Ubuntu', 'Open Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  min-width: 1128px;
+  overflow: hidden;
+}
+.sidebar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 27%;
+  height: 100%;
+  background: #03a4d8;
+}
+.sidebar .bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: url("../bg.jpg") no-repeat center center;
+  background-size: cover;
+  opacity: 0.2;
+}
+.steps {
+  position: absolute;
+  left: calc(63% - 300px);
+  top: calc(50% - 150px);
+  width: 600px;
+}
+.steps .step {
+  float: left;
+  width: 100%;
+  margin-top: 30px;
+}
+.steps .step .info {
+  float: left;
+  margin-top: 7px;
+  margin-left: 20px;
+  font-weight: bold;
+  width: calc(100% - 50px);
+}
+.steps .step .details {
+  float: left;
+  margin-left: 20px;
+  color: rgba(255,255,255,0.7);
+  width: calc(100% - 50px);
+}
+.steps .step .details .button {
+  margin-left: calc(50% - 125px);
+  text-align: center;
+  width: 150px;
+  padding: 5px 10px;
+  background: #03a4d8;
+  border: 0 solid transparent;
+  color: #fff;
+  font-family: 'Ubuntu', 'Open Sans', sans-serif;
+  font-size: 13px;
+  font-weight: bold;
+  line-height: 25px;
+  margin-top: 16px;
+  border-radius: 20px;
+  cursor: pointer;
+}
+.steps .step .details form {
+  float: left;
+  margin-left: 0;
+  color: rgba(255,255,255,0.7);
+  width: calc(100% - 50px);
+}
+.steps .step .details form .error {
+  width: 100%;
+  padding: 4px 10px;
+  line-height: 30px;
+  background: #ee3e3e;
+  color: rgba(0,0,0,0.5);
+  border-radius: 3px;
+}
+.steps .step .details form input[type="text"],
+.steps .step .details form input[type="password"] {
+  width: 100%;
+  line-height: 30px;
+  background: rgba(0,0,0,0.2);
+  padding: 4px 10px;
+  font-family: 'Ubuntu', 'Open Sans', sans-serif;
+  font-size: 13px;
+  border-radius: 3px;
+  border: 0 solid transparent;
+  color: #fff;
+  margin-top: 8px;
+}
+.steps .step .details form input[type="text"]::-webkit-input-placeholder,
+.steps .step .details form input[type="password"]::-webkit-input-placeholder {
+  color: rgba(255,255,255,0.1);
+}
+.steps .step .details form input[type="text"]:focus,
+.steps .step .details form input[type="password"]:focus {
+  outline: none;
+}
+.steps .step .details form input[type="submit"] {
+  width: 40%;
+  background: #03a4d8;
+  border: 0 solid transparent;
+  color: #fff;
+  font-family: 'Ubuntu', 'Open Sans', sans-serif;
+  font-size: 13px;
+  font-weight: bold;
+  line-height: 25px;
+  margin-top: 16px;
+  border-radius: 20px;
+  cursor: pointer;
+}
+.steps .step .details form input[type="submit"]:focus {
+  outline: none;
+}
+.steps .step .details form input[type="submit"]:active {
+  outline: none;
+}
+.steps .step .stepNumber {
+  float: left;
+  font-family: 'Ubuntu', 'Open Sans', sans-serif;
+  font-size: 14px;
+  font-weight: bold;
+  color: #fff;
+  background: rgba(0,0,0,0.2);
+  width: 28px;
+  line-height: 28px;
+  border-radius: 50%;
+  text-align: center;
+  position: relative;
+  top: 0;
+}
+.steps .step .stepNumber.active {
+  background: #03a4d8;
+}
+.steps .step .stepNumber:after {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  right: -5px;
+  bottom: -5px;
+  border: 3px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+}
+.form {
+  position: absolute;
+  left: calc(63% - 150px);
+  top: calc(50% - 150px);
+  width: 300px;
+}
+.form h1 {
+  font-family: 'Ubuntu', 'Open Sans', sans-serif;
+  font-size: 38px;
+  color: #fff;
+  font-weight: 300;
+}
+.form .error {
+  width: 100%;
+  padding: 4px 10px;
+  line-height: 30px;
+  background: #ee3e3e;
+  color: rgba(0,0,0,0.5);
+  border-radius: 3px;
+}
+.form input[type="text"],
+.form input[type="password"] {
+  width: 100%;
+  line-height: 30px;
+  background: rgba(0,0,0,0.2);
+  padding: 4px 10px;
+  font-family: 'Ubuntu', 'Open Sans', sans-serif;
+  font-size: 13px;
+  border-radius: 3px;
+  border: 0 solid transparent;
+  color: #fff;
+  margin-top: 8px;
+}
+.form input[type="text"]::-webkit-input-placeholder,
+.form input[type="password"]::-webkit-input-placeholder {
+  color: rgba(255,255,255,0.1);
+}
+.form input[type="text"]:focus,
+.form input[type="password"]:focus {
+  outline: none;
+}
+.form input[type="submit"] {
+  width: 40%;
+  background: #03a4d8;
+  border: 0 solid transparent;
+  color: #fff;
+  font-family: 'Ubuntu', 'Open Sans', sans-serif;
+  font-size: 13px;
+  font-weight: bold;
+  line-height: 25px;
+  margin-top: 16px;
+  border-radius: 20px;
+  cursor: pointer;
+}
+.form input[type="submit"]:focus {
+  outline: none;
+}
+.form input[type="submit"]:active {
+  outline: none;
+}
+.form .register {
+  width: calc(60% - 12px);
+  text-align: right;
+  margin-left: 10px;
+  display: inline-block;
+}
+.form .register a {
+  text-decoration: none;
+  color: #03a4d8;
+}

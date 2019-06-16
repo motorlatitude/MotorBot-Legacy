@@ -1,0 +1,13 @@
+{
+  "short_name": "MotorBot",
+  "name": "MotorBot Music",
+  "icons": [
+    {
+      "src": "img/another_icon.png",
+      "sizes": "1000x1000",
+      "type": "image/png"
+    }
+  ],
+  "display": "standalone",
+  "orientation": "portrait"
+}
