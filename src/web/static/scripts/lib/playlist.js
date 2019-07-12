@@ -73,7 +73,14 @@ define(["constants","requester","audioPlayer","simpleBar","eventListener","views
                 }
                 document.getElementById("playplaylist").onclick = function(e){
                     if(document.getElementById("playlist").childNodes[1].dataset.songid) {
-                        AudioPlayer.playSongFromPlaylist(document.getElementById("playlist").childNodes[1].dataset.songid, playlist_id)
+                        let SongIds = [];
+                        let Offset = 0;
+                        document.querySelectorAll("#playlist li").forEach(function (element, index){
+                            if(element.getAttribute("data-songid")){
+                                SongIds.push(element.getAttribute("data-songid"))
+                            }
+                        })
+                        AudioPlayer.playSongsFromPlaylist(SongIds, playlist_id, Offset);
                     }
                 };
                 ws.send("PLAYER_STATE",{});
@@ -220,36 +227,41 @@ define(["constants","requester","audioPlayer","simpleBar","eventListener","views
             if(tracks.items){
                 for(let i in tracks.items){
                     let data = tracks.items[i];
-                    let trackNo = parseInt(i) + 1 + parseInt(offset);
-                    totalPlaylistDuration += data.track.duration;
-                    let formattedDuration = c.secondsToHms(data.track.duration);
-                    let added = "";
-                    if (data.date_added >= (new Date().getTime() - 604800000)) {
-                        added = c.millisecondsToStr(data.date_added);
+                    if(data.track && data.track.id){
+                        let trackNo = parseInt(i) + 1 + parseInt(offset);
+                        totalPlaylistDuration += data.track.duration;
+                        let formattedDuration = c.secondsToHms(data.track.duration);
+                        let added = "";
+                        if (data.date_added >= (new Date().getTime() - 604800000)) {
+                            added = c.millisecondsToStr(data.date_added);
+                        }
+                        else {
+                            const a = new Date(data.date_added);
+                            added = (a.getDate() < 10 ? "0" + (a.getDate()) : a.getDate()) + " - " + (a.getMonth() + 1 < 10 ? "0" + (a.getMonth() + 1) : a.getMonth() + 1) + " - " + a.getFullYear();
+                        }
+                        let artist = data.track.artist.name || "";
+                        let album = data.track.album.name || "";
+                        let explicit = "";
+                        if (data.track.explicit) {
+                            explicit = "<div class='explicit'>E</div>";
+                        }
+                        let elPlaylistTrack = document.createElement("li");
+                        elPlaylistTrack.id = data.track.id;
+                        elPlaylistTrack.setAttribute("data-songid", data.track.id);
+                        elPlaylistTrack.setAttribute("data-playlistid", playlist_id);
+                        elPlaylistTrack.innerHTML = "<div class='trackRow'>" +
+                            "<div class='item' data-trackNo='" + trackNo + "'>" + trackNo + "</div>" +
+                            "<div class='title' data-sortIndex='" + data.track.title.toUpperCase() + "'>" + data.track.title + " " + explicit + "</div>" +
+                            "<div class='artist' data-sortIndex='" + artist.toUpperCase() + "'>" + artist + "</div>" +
+                            "<div class='album' data-sortIndex='" + album.toUpperCase() + "'>" + album + "</div>" +
+                            "<div class='timestamp' data-sortIndex='" + data.date_added + "'>" + added + "</div>" +
+                            "<div class='time'>" + formattedDuration + "</div>" +
+                            "</div>";
+                        document.getElementById("playlist").appendChild(elPlaylistTrack);
                     }
                     else {
-                        const a = new Date(data.date_added);
-                        added = (a.getDate() < 10 ? "0" + (a.getDate()) : a.getDate()) + " - " + (a.getMonth() + 1 < 10 ? "0" + (a.getMonth() + 1) : a.getMonth() + 1) + " - " + a.getFullYear();
+                        console.warn("Track error: ", data.track);
                     }
-                    let artist = data.track.artist.name || "";
-                    let album = data.track.album.name || "";
-                    let explicit = "";
-                    if (data.track.explicit) {
-                        explicit = "<div class='explicit'>E</div>";
-                    }
-                    let elPlaylistTrack = document.createElement("li");
-                    elPlaylistTrack.id = data.track.id;
-                    elPlaylistTrack.setAttribute("data-songid", data.track.id);
-                    elPlaylistTrack.setAttribute("data-playlistid", playlist_id);
-                    elPlaylistTrack.innerHTML = "<div class='trackRow'>" +
-                        "<div class='item' data-trackNo='" + trackNo + "'>" + trackNo + "</div>" +
-                        "<div class='title' data-sortIndex='" + data.track.title.toUpperCase() + "'>" + data.track.title + " " + explicit + "</div>" +
-                        "<div class='artist' data-sortIndex='" + artist.toUpperCase() + "'>" + artist + "</div>" +
-                        "<div class='album' data-sortIndex='" + album.toUpperCase() + "'>" + album + "</div>" +
-                        "<div class='timestamp' data-sortIndex='" + data.date_added + "'>" + added + "</div>" +
-                        "<div class='time'>" + formattedDuration + "</div>" +
-                        "</div>";
-                    document.getElementById("playlist").appendChild(elPlaylistTrack);
                 }
                 playlistObj.sortTracks(); //TODO can cause issues for user since sorting takes time, look into improving
                 if(tracks.next){

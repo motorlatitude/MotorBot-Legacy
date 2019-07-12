@@ -3,6 +3,16 @@ define(["constants","requester","views","Sortable"], function(c,req,v, Sortable)
         init: function(){
 
         },
+        registerListener: function() {
+            // This is an example script - don't forget to change it!
+            req.get(c.base_url+"/user/me?api_key="+c.api_key,{
+                dataType: "json",
+                authorize: true}).then(function(response){
+                LogRocket.identify(response.data.id, response.data);
+            }).catch(function(error){
+                console.warn(error);
+            });
+        },
         submitCreatePlaylist: function(album_art, cb){
             let playlistName = document.querySelector(".playlist_name_input").value;
             let playlistDescription = document.querySelector(".playlist_description_input").value;

@@ -17,7 +17,10 @@ define(["moment"], function(moment){
             "SPOTIFY_IMPORT": 9,
             "GUILD": 10,
             "GUILD_STATE": 11,
-            "TRACK_PACKET": 12
+            "TRACK_PACKET": 12,
+            "TRACK_WAVEFORM": 13,
+            "SET_TRACK_WAVEFORM": 14,
+            "GET_TRACK_WAVEFORM": 15
         },
         websocketSession: undefined,
         currentGuild: undefined,
@@ -37,6 +40,7 @@ define(["moment"], function(moment){
         },
         seekInterval: undefined,
         playtime: 0,
-        duration: 0
+        duration: 0,
+        downloadDuration: 0
     }
 });

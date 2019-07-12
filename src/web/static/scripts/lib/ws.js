@@ -1,6 +1,7 @@
-define(["constants", "wsEventHandler"], function(c, wsEventHandler){
+define(["constants", "wsEventHandler", "wavify"], function(c, wsEventHandler, w){
     let wss = undefined;
     let HEARTBEAT_INTERVAL = undefined;
+    let wave = undefined;
     let WebSocketConnection = {
         init: function () {
             wss = new WebSocket("wss://wss.motorbot.io");
@@ -21,10 +22,13 @@ define(["constants", "wsEventHandler"], function(c, wsEventHandler){
                 document.querySelector(".playerBar").style.filter = "blur(0)";
                 document.querySelector(".errorList").style.filter = "blur(0)";
                 document.querySelector(".modalityOverlay").style.display = "none";
+                if(wave){
+                    wave.pause();
+                }
             };
 
             wss.onmessage = function (event) {
-                wsEventHandler(wss, event);
+                wsEventHandler(wss, WebSocketConnection, event);
             };
 
             wss.onclose = function (event) {
@@ -35,6 +39,13 @@ define(["constants", "wsEventHandler"], function(c, wsEventHandler){
                 document.querySelector(".modalityOverlay").style.display = "block";
                 document.getElementById("newPlaylistModal").style.display = "none"; //INFO: make sure no other modals are open
                 document.getElementById("websocketDisconnectOverlay").style.display = "block";
+                wave = w(document.querySelector('#wavy'), {
+                    height: 300,
+                    bones: 4,
+                    amplitude: 45,
+                    color: 'rgba(19, 112, 226, 0.9)',
+                    speed: .20
+                })
                 clearInterval(HEARTBEAT_INTERVAL);
                 setTimeout(function(){
                     WebSocketConnection.init();

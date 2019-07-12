@@ -505,15 +505,15 @@ router.get("/:playlist_id", (req, res) ->
             songsFinal = {}
             for song in songs
               songIds.push(song.id)
-              songsFinal[song.id] = song #store user variables
-              delete songsFinal[song.id].id
+              songsFinal[song.id+","+song.date_added] = song #store user variables
+              delete songsFinal[song.id+","+song.date_added].id
             APIObjects.track(req).tracksForIds(songIds, {}).then((tracks) ->
               tracks_obj = []
-              for track in tracks
-                t = {}
-                t = songsFinal[track.id]
-                t["track"] = track
-                tracks_obj.push(t)
+              for SongId, song of songsFinal
+                song["track"] = tracks[tracks.findIndex((t) -> if t then return t.id == SongId.split(",")[0] else return undefined)]
+                if song.track == undefined || song.track == {}
+                  song["track"] = {error: "SONG_NOT_FOUND", message: "The song with this id does not exist"}
+                tracks_obj.push(song)
               playlist["tracks"] = APIObjects.pagination().paginate("/playlist/"+req.params.playlist_id+"/tracks", tracks_obj, playlist.songs.length, 0, 100)
               delete playlist.songs
               asyncParallelComplete()
@@ -555,22 +555,24 @@ router.get("/:playlist_id/tracks", (req, res) ->
         songsFinal = {}
         for song in songs
           songIds.push(song.id)
-          songsFinal[song.id] = song #store user variables
-          delete songsFinal[song.id].id
+          songsFinal[song.id+","+song.date_added] = song #store user variables
+          delete songsFinal[song.id+","+song.date_added].id
         APIObjects.track(req).tracksForIds(songIds).then((tracks) ->
           tracks_obj = []
-          for track in tracks
-            t = {}
-            t = songsFinal[track.id]
-            t["track"] = track
-            tracks_obj.push(t)
+          for SongId, song of songsFinal
+            song["track"] = tracks[tracks.findIndex((t) -> if t then return t.id == SongId.split(",")[0] else return undefined)]
+            if song.track == undefined || song.track == {}
+              song["track"] = {error: "SONG_NOT_FOUND", message: "The song with this id does not exist"}
+            tracks_obj.push(song)
           finalTracks = APIObjects.pagination().paginate("/playlist/"+req.params.playlist_id+"/tracks", tracks_obj, playlist.songs.length, offset, limit)
           finalTracks = APIUtilities.filterResponse(finalTracks,req.query.filter)
           res.type("json")
           res.send(JSON.stringify(finalTracks))
 
         ).catch((error_obj) ->
-
+          console.log "PLAYLIST_ERROR", error_obj
+          res.type("json")
+          res.send(JSON.stringify(error_obj))
         )
       else
         # No songs in this playlist

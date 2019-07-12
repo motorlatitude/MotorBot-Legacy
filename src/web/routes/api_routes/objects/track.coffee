@@ -20,13 +20,23 @@ class Track
       )
     )
 
-  tracksForIds: (track_ids, filter = {}) ->
+  naturalOrderResults: (resultsFromMongoDB, queryIds) ->
+    #Let's build the hashmap
+    hashOfResults = resultsFromMongoDB.reduce((prev, curr) ->
+      prev[curr.id] = curr
+      return prev
+    , {})
+    return queryIds.map((id) ->
+      return hashOfResults[id]
+    )
+
+  tracksForIds: (track_ids, filter = {}, sort = {}) ->
     self = @
     filter['_id'] = 0
     return new Promise((resolve, reject) ->
-      self.database.find({id: {$in: track_ids}}, filter).toArray((err, results) ->
+      self.database.find({id: {$in: track_ids}}, filter).sort(sort).toArray((err, results) ->
         if err then reject({error: "DATABASE_ERROR", message: err})
-        resolve(results)
+        resolve(self.naturalOrderResults(results, track_ids))
       )
     )
 

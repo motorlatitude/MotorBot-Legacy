@@ -232,7 +232,18 @@ define(["constants","audioPlayer","views","playlist","user","requester", "simple
                             case 13: //enter
                                 if (document.getElementById("playlist")) {
                                     let elActiveSong = document.querySelector("#playlist li.active");
-                                    ap.playSongFromPlaylist(elActiveSong.getAttribute("data-songid"), elActiveSong.getAttribute("data-playlistid"))
+                                    let SongIds = [];
+                                    let Offset = 0;
+                                    document.querySelectorAll("#playlist li").forEach(function (element, index){
+                                        if(element.getAttribute("data-songid")){
+                                            SongIds.push(element.getAttribute("data-songid"))
+                                        }
+                                        if(element.classList.contains("active")){
+                                            Offset = index - 1;
+                                        }
+                                    })
+                                    // ap.playSongFromPlaylist(elActiveSong.getAttribute("data-songid"), elActiveSong.getAttribute("data-playlistid"))
+                                    ap.playSongsFromPlaylist(SongIds, elActiveSong.getAttribute("data-playlistid"), Offset);
                                 }
                                 break;
                             case 32: //space
@@ -360,7 +371,18 @@ define(["constants","audioPlayer","views","playlist","user","requester", "simple
                     self.addEventListener("dblclick", function(e){
                         let songId = self.getAttribute("data-songid");
                         let playlistId = self.getAttribute("data-playlistid");
-                        ap.playSongFromPlaylist(songId, playlistId);
+                        let SongIds = [];
+                        let Offset = 0;
+                        document.querySelectorAll("#playlist li").forEach(function (element, index){
+                            let i = element.getAttribute("data-songid");
+                            if(i) {
+                                SongIds.push(i)
+                                if (i === songId) {
+                                    Offset = index - 1;
+                                }
+                            }
+                        })
+                        ap.playSongsFromPlaylist(SongIds, playlistId, Offset);
                     });
                     self.addEventListener("contextmenu", function(e){
                         let contextmenu = document.getElementById("contextMenu");

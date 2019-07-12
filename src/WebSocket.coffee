@@ -122,6 +122,30 @@ class WebSocket
               else
                 self.Logger.write("PLAYER_STATE requested without registering WebSocket connection first", "warn")
         )
+      when 14
+        # set track waveform bucket size
+        cc = undefined
+        self.wss.ConnectedClients.forEach((client) ->
+          if client
+            if client.session == msg.d.session
+              cc = client
+              if cc
+                if cc.guild
+                  if self.app.Music.musicPlayers[cc.guild]
+                    self.app.Music.musicPlayers[cc.guild].waveform_packet_size = msg.d.waveform_packet_size
+        )
+      when 15
+        # get track waveform
+        cc = undefined
+        self.wss.ConnectedClients.forEach((client) ->
+          if client
+            if client.session == msg.d.session
+              cc = client
+              if cc
+                if cc.guild
+                  if self.app.Music.musicPlayers[cc.guild]
+                    self.app.Music.musicPlayers[cc.guild].getWaveForm()
+        )
       when 10
         #connect to a guild
         self.wss.ConnectedClients.forEach((client, i) ->

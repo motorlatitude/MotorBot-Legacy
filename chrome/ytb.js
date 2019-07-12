@@ -1,3 +1,60 @@
+function CheckDuplicate(PlaylistId, ThisVideoId, value, cb){
+    let Offset = 0;
+    let Limit = 100;
+    let VideoIds = []
+    FetchIds = function() {
+        $.ajax({
+            url: "https://motorbot.io/api/playlist/" + PlaylistId + "/tracks?limit="+Limit+"&offset="+Offset+"&filter=items.track.video_id,limit,offset,total,next&api_key=caf07b8b-366e-44ab-9bda-152a42g8d1ef",
+            type: "GET",
+            dataType: "json",
+            processData: false,
+            contentType: 'application/json',
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("Authorization", "Bearer " + value.userInfo.token);
+            },
+            success: function (data) {
+                if(data.items){
+                    data.items.forEach(function(track, index) {
+                        VideoIds.push(track.track.video_id);
+                    })
+                }
+                if(data.next){
+                    Offset = Limit;
+                    FetchIds();
+                }
+                else{
+                    if(VideoIds.indexOf(ThisVideoId) > -1){
+                        // Duplicate exists
+                        let ConfirmReturn = confirm("You already have a song with this id in this playlist, would you still like to add it?");
+                        if(ConfirmReturn === true){
+                            cb();
+                        }
+                        else{
+                            cb("error");
+                        }
+                    }
+                    else{
+                        cb();
+                    }
+                }
+            },
+            error: function (err) {
+                $(".html5-video-container").append("<style type='text/css'>#motorbot-state{opacity: 1; position: absolute; top: 16px; left: 20px; line-height: 40px; z-index: 301; padding-left: 10px; min-width: 250px; width: 310px; border-radius: 4px; background: rgba(35, 35, 35, 0.9);box-shadow: 0 0 10px rgba(0,0,0,0.3); transition: opacity 0.5s ease-in-out; transition-delay: 3s;} #motorbot-state.active{opacity: 0}</style>");
+                $("#motorbot-state").css("background","rgba(255, 0, 0, 0.9)").html("<span class=\"yt-uix-button-content\" style='color: #fff; vertical-align: middle; font-family: Roboto, Arial, sans-serif; font-size: 13px; font-weight: 500; letter-spacing: 0.007px; line-height: 40px;'>Error Adding Song :(</span>");
+                document.getElementById("motorbot-state").classList.add("active");
+                setTimeout(function(){
+                    $("#motorbot-state").remove();
+                },4000);
+                $("#motorbot-button").remove();
+                $("#motorbotDropDown").remove();
+                console.error("Error Occurred Sending Video to motorbot: ", err);
+                cb("error");
+            }
+        });
+    }
+    FetchIds();
+}
+
 function addExtraButton() {
     if ($('.html5-video-container').length > 0) {
         let mb_element = document.getElementById('motorbot-button');
@@ -95,36 +152,53 @@ function addExtraButton() {
                                                 }
                                                 else {
                                                     var videoId = getParameterByName("v", window.location.href);
-                                                    console.info("[Motorbot] " + value.userInfo.id + " Adding video " + videoId + " to playlist " + playlistId);
-                                                    $.ajax({
-                                                        url: "https://motorbot.io/api/playlist/" + playlistId + "/song?api_key=caf07b8b-366e-44ab-9bda-152a42g8d1ef",
-                                                        type: "PUT",
-                                                        dataType: "json",
-                                                        processData: false,
-                                                        contentType: 'application/json',
-                                                        data: JSON.stringify({"source": "ytb", "video_id": videoId}),
-                                                        beforeSend: function (xhr) {
-                                                            xhr.setRequestHeader("Authorization", "Bearer " + value.userInfo.token);
-                                                        },
-                                                        success: function (data) {
-                                                            if (data.added) {
-                                                                $(".html5-video-container").append("<style type='text/css'>#motorbot-state{opacity: 1; position: absolute; top: 16px; left: 20px; line-height: 40px; z-index: 301; padding-left: 10px; min-width: 250px; width: 310px; border-radius: 4px; background: rgba(35, 35, 35, 0.9);box-shadow: 0 0 10px rgba(0,0,0,0.3); transition: opacity 0.5s ease-in-out; transition-delay: 3s;} #motorbot-state.active{opacity: 0}</style>");
-                                                                $("#motorbot-state").css("background","rgba(0, 200, 83, 0.9)").html("<span class=\"yt-uix-button-content\" style='color: #fff; vertical-align: middle; font-family: Roboto, Arial, sans-serif; font-size: 13px; font-weight: 500; letter-spacing: 0.007px; line-height: 40px;'>Successfully Added</span>");
-                                                                document.getElementById("motorbot-state").classList.add("active");
-                                                                setTimeout(function(){
-                                                                    $("#motorbot-state").remove();
-                                                                },4000);
-                                                                $("#motorbot-button").remove();
-                                                                $("#motorbotDropDown").remove();
-                                                            }
-                                                        },
-                                                        error: function (err) {
+                                                    CheckDuplicate(playlistId, videoId, value, function(err) {
+                                                        if (!err) {
+                                                            console.info("[Motorbot] " + value.userInfo.id + " Adding video " + videoId + " to playlist " + playlistId);
+                                                            $.ajax({
+                                                                url: "https://motorbot.io/api/playlist/" + playlistId + "/song?api_key=caf07b8b-366e-44ab-9bda-152a42g8d1ef",
+                                                                type: "PUT",
+                                                                dataType: "json",
+                                                                processData: false,
+                                                                contentType: 'application/json',
+                                                                data: JSON.stringify({
+                                                                    "source": "ytb",
+                                                                    "video_id": videoId
+                                                                }),
+                                                                beforeSend: function (xhr) {
+                                                                    xhr.setRequestHeader("Authorization", "Bearer " + value.userInfo.token);
+                                                                },
+                                                                success: function (data) {
+                                                                    if (data.added) {
+                                                                        $(".html5-video-container").append("<style type='text/css'>#motorbot-state{opacity: 1; position: absolute; top: 16px; left: 20px; line-height: 40px; z-index: 301; padding-left: 10px; min-width: 250px; width: 310px; border-radius: 4px; background: rgba(35, 35, 35, 0.9);box-shadow: 0 0 10px rgba(0,0,0,0.3); transition: opacity 0.5s ease-in-out; transition-delay: 3s;} #motorbot-state.active{opacity: 0}</style>");
+                                                                        $("#motorbot-state").css("background", "rgba(0, 200, 83, 0.9)").html("<span class=\"yt-uix-button-content\" style='color: #fff; vertical-align: middle; font-family: Roboto, Arial, sans-serif; font-size: 13px; font-weight: 500; letter-spacing: 0.007px; line-height: 40px;'>Successfully Added</span>");
+                                                                        document.getElementById("motorbot-state").classList.add("active");
+                                                                        setTimeout(function () {
+                                                                            $("#motorbot-state").remove();
+                                                                        }, 4000);
+                                                                        $("#motorbot-button").remove();
+                                                                        $("#motorbotDropDown").remove();
+                                                                    }
+                                                                },
+                                                                error: function (err) {
+                                                                    $(".html5-video-container").append("<style type='text/css'>#motorbot-state{opacity: 1; position: absolute; top: 16px; left: 20px; line-height: 40px; z-index: 301; padding-left: 10px; min-width: 250px; width: 310px; border-radius: 4px; background: rgba(35, 35, 35, 0.9);box-shadow: 0 0 10px rgba(0,0,0,0.3); transition: opacity 0.5s ease-in-out; transition-delay: 3s;} #motorbot-state.active{opacity: 0}</style>");
+                                                                    $("#motorbot-state").css("background", "rgba(255, 0, 0, 0.9)").html("<span class=\"yt-uix-button-content\" style='color: #fff; vertical-align: middle; font-family: Roboto, Arial, sans-serif; font-size: 13px; font-weight: 500; letter-spacing: 0.007px; line-height: 40px;'>Error Adding Song :(</span>");
+                                                                    document.getElementById("motorbot-state").classList.add("active");
+                                                                    setTimeout(function () {
+                                                                        $("#motorbot-state").remove();
+                                                                    }, 4000);
+                                                                    $("#motorbot-button").remove();
+                                                                    $("#motorbotDropDown").remove();
+                                                                    console.error("Error Occurred Sending Video to motorbot: " + err);
+                                                                }
+                                                            });
+                                                        } else {
                                                             $(".html5-video-container").append("<style type='text/css'>#motorbot-state{opacity: 1; position: absolute; top: 16px; left: 20px; line-height: 40px; z-index: 301; padding-left: 10px; min-width: 250px; width: 310px; border-radius: 4px; background: rgba(35, 35, 35, 0.9);box-shadow: 0 0 10px rgba(0,0,0,0.3); transition: opacity 0.5s ease-in-out; transition-delay: 3s;} #motorbot-state.active{opacity: 0}</style>");
-                                                            $("#motorbot-state").css("background","rgba(255, 0, 0, 0.9)").html("<span class=\"yt-uix-button-content\" style='color: #fff; vertical-align: middle; font-family: Roboto, Arial, sans-serif; font-size: 13px; font-weight: 500; letter-spacing: 0.007px; line-height: 40px;'>Error Adding Song :(</span>");
+                                                            $("#motorbot-state").css("background", "rgba(255, 0, 0, 0.9)").html("<span class=\"yt-uix-button-content\" style='color: #fff; vertical-align: middle; font-family: Roboto, Arial, sans-serif; font-size: 13px; font-weight: 500; letter-spacing: 0.007px; line-height: 40px;'>Error Adding Song :(</span>");
                                                             document.getElementById("motorbot-state").classList.add("active");
-                                                            setTimeout(function(){
+                                                            setTimeout(function () {
                                                                 $("#motorbot-state").remove();
-                                                            },4000);
+                                                            }, 4000);
                                                             $("#motorbot-button").remove();
                                                             $("#motorbotDropDown").remove();
                                                             console.error("Error Occurred Sending Video to motorbot: " + err);

@@ -16,7 +16,7 @@ define(["constants"], function(c){
             return requesterObj.request("PUT", url, params);
         },
         request: function (method, url, params) {
-            httpRequest = new XMLHttpRequest();
+            let httpRequest = new XMLHttpRequest();
             let promise = new Promise(function (resolve, reject) {
                 if (!httpRequest) {
                     console.error('REQUESTER_INVALID: Cannot create an XMLHTTP instance');
@@ -36,6 +36,14 @@ define(["constants"], function(c){
                             }
                             if (params.authorize) {
                                 httpRequest.setRequestHeader("Authorization", "Bearer " + c.accessToken);
+                            }
+                            if (params.data){
+                                console.log("Send Request With Data: ", params.data);
+                                httpRequest.send(JSON.stringify(params.data));
+                            }
+                            else{
+                                console.log("Sending Request With No Body Data");
+                                httpRequest.send();
                             }
                         }
                         if (httpRequest.readyState === XMLHttpRequest.DONE) {
@@ -91,12 +99,6 @@ define(["constants"], function(c){
                         }
                     }
                     httpRequest.open(method, url);
-                    if (params.data){
-                        httpRequest.send(JSON.stringify(params.data));
-                    }
-                    else{
-                        httpRequest.send();
-                    }
                 }
             });
             return promise;

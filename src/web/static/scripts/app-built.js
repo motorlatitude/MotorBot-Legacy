@@ -542,7 +542,10 @@ define('constants',["moment"], function(moment){
             "SPOTIFY_IMPORT": 9,
             "GUILD": 10,
             "GUILD_STATE": 11,
-            "TRACK_PACKET": 12
+            "TRACK_PACKET": 12,
+            "TRACK_WAVEFORM": 13,
+            "SET_TRACK_WAVEFORM": 14,
+            "GET_TRACK_WAVEFORM": 15
         },
         websocketSession: undefined,
         currentGuild: undefined,
@@ -562,7 +565,8 @@ define('constants',["moment"], function(moment){
         },
         seekInterval: undefined,
         playtime: 0,
-        duration: 0
+        duration: 0,
+        downloadDuration: 0
     }
 });
 define('playerbar',["constants"], function(c){
@@ -617,6 +621,8 @@ define('playerbar',["constants"], function(c){
             document.getElementById("pb_duration").innerHTML = fPlaytime+" / "+fDuration;
             let elTimelineBar = document.getElementById("timelineBar");
             elTimelineBar.style.width = (playtime/duration)*100+"%";
+            let elProgressWave = document.querySelector(".waveform-progress");
+            elProgressWave.style.width = (playtime/duration)*500+"px";
         },
         updateSeek: function(playtime, duration){
             let elTimelineBar = document.getElementById("timelineBar");
@@ -800,7 +806,7 @@ define('requester',["constants"], function(c){
             return requesterObj.request("PUT", url, params);
         },
         request: function (method, url, params) {
-            httpRequest = new XMLHttpRequest();
+            let httpRequest = new XMLHttpRequest();
             let promise = new Promise(function (resolve, reject) {
                 if (!httpRequest) {
                     console.error('REQUESTER_INVALID: Cannot create an XMLHTTP instance');
@@ -820,6 +826,14 @@ define('requester',["constants"], function(c){
                             }
                             if (params.authorize) {
                                 httpRequest.setRequestHeader("Authorization", "Bearer " + c.accessToken);
+                            }
+                            if (params.data){
+                                console.log("Send Request With Data: ", params.data);
+                                httpRequest.send(JSON.stringify(params.data));
+                            }
+                            else{
+                                console.log("Sending Request With No Body Data");
+                                httpRequest.send();
                             }
                         }
                         if (httpRequest.readyState === XMLHttpRequest.DONE) {
@@ -875,12 +889,6 @@ define('requester',["constants"], function(c){
                         }
                     }
                     httpRequest.open(method, url);
-                    if (params.data){
-                        httpRequest.send(JSON.stringify(params.data));
-                    }
-                    else{
-                        httpRequest.send();
-                    }
                 }
             });
             return promise;
@@ -934,6 +942,39 @@ define('audioPlayer',["constants", "requester","notification","playerbar"], func
                 console.warn(error);
             });
         },
+        playSongsFromPlaylist: function(SongIds, PlaylistId, Offset){
+            if(c.currentChannel) {
+                pb.loading.start();
+                let PlayData = {
+                    ids: SongIds,
+                    playlist_id: PlaylistId,
+                    offset: Offset || 0,
+                    guild: c.currentGuild
+                }
+                req.put(c.base_url+'/music/play/song?api_key=' + c.api_key,{dataType: 'json', authorize: true, data: PlayData, headers: {"Content-Type": "application/json;charset=UTF-8"}}).then(function (response) {
+                    if (response.error) {
+                        console.error(response.error);
+                        pb.loading.end();
+                    }
+                    else {
+                        if(!response.error){
+                            pb.loading.end();
+                        }
+                        else{
+                            pb.loading.end();
+                            Notification.create("warn","exclamation-triangle",response.error);
+                        }
+                    }
+                }).catch(function (e) {
+                    pb.loading.end();
+                    console.log(e);
+                });
+            }
+            else{
+                console.warn("MotorBot needs to be in a voice channel to play a song :(");
+                Notification.create("warn","phone","Motorbot needs to join a voice channel first");
+            }
+        },
         playSongFromPlaylist: function(songId, playlistId){
             if(c.currentChannel) {
                 pb.loading.start();
@@ -985,7 +1026,7 @@ define('wsEventHandler',["constants", "playerbar", "serverSelection","notificati
     let wsConstants = {};
     let speaking_users = {};
     let users = {};
-    return function(ws, event) {
+    return function(ws, wsCon, event) {
         let data = JSON.parse(event.data);
         let packet = data.d;
         if (data.type) {
@@ -1075,6 +1116,7 @@ define('wsEventHandler',["constants", "playerbar", "serverSelection","notificati
                         }
                     }
                     ss.setEnviromentSelection(packet.guild, packet.channel, ws)
+                    wsCon.send("GET_TRACK_WAVEFORM",{})
                     break;
                 case "SPOTIFY_IMPORT":
                     if(packet.event_type) {
@@ -1126,6 +1168,9 @@ define('wsEventHandler',["constants", "playerbar", "serverSelection","notificati
                                 pb.updateArtwork(packet.event_data.artwork);
                                 pb.updateDetails(packet.event_data.title, packet.event_data.artist, packet.event_data.album);
                                 pb.updateSeek(0, packet.event_data.duration);
+                                wsCon.send("SET_TRACK_WAVEFORM",{
+                                    waveform_packet_size: 1920 * 2 * ((packet.event_data.duration*packet.event_data.duration / 40000) * 10)
+                                })
                                 if(document.getElementById("currentSong_artwork")){
                                     document.getElementById("currentSong_artwork").style.backgroundImage = "url('"+packet.event_data.artwork+"')";
                                     document.getElementById("currentSong_artwork").style.backgroundSize = "cover";
@@ -1146,10 +1191,21 @@ define('wsEventHandler',["constants", "playerbar", "serverSelection","notificati
                             case "UPDATE":
                                 // a song change event occurred
                                 // - occurs when a new song gets played or the next song gets played
+                                c.downloadDuration = packet.event_data.download_position;
                                 pb.updateDownloadSeek(packet.event_data.download_position,c.duration);
                                 break;
                         }
                     }
+                    break;
+                case "TRACK_WAVEFORM":
+                    document.querySelector(".waveform-container").style.width = ((packet.event_data.seconds / c.duration)*(window.innerWidth - 660)) + "px";
+                    document.getElementById("waveform-mask").innerHTML = packet.event_data.waveform.map((bucket, i) => {
+                        let bucketSVGWidth = (500.0 / packet.event_data.waveform.length);
+                        let bucketSVGHeight = bucket * 100.0;
+                        let x = bucketSVGWidth * i;
+                        let y = (100 - bucketSVGHeight) / 2;
+                        return "<rect x='"+x+"' y='"+y+"' width='"+(bucketSVGWidth*0.5)+"' height='"+bucketSVGHeight+"' />";
+                    }).join("");
                     break;
                 case "PLAYER_UPDATE":
                     if(packet.event_type){
@@ -1176,8 +1232,14 @@ define('wsEventHandler',["constants", "playerbar", "serverSelection","notificati
                                     let elPlaylistPlayButton = document.getElementById("playplaylist");
                                     elPlaylistPlayButton.innerHTML = "<i class=\"fa fa-play\" aria-hidden=\"true\"></i> &nbsp; &nbsp;PLAY";
                                     elPlaylistPlayButton.onclick = function(e){
-                                        let songId = playlist.childNodes[1].dataset.songid;
-                                        AudioPlayer.playSongFromPlaylist(songId, playlist.getAttribute("data-playlistid"));
+                                        let SongIds = [];
+                                        let Offset = 0;
+                                        document.querySelectorAll("#playlist li").forEach(function (element, index){
+                                            if(element.getAttribute("data-songid")){
+                                                SongIds.push(element.getAttribute("data-songid"))
+                                            }
+                                        })
+                                        AudioPlayer.playSongsFromPlaylist(SongIds, playlist.getAttribute("data-playlistid"), Offset);
                                     };
                                     let elPlayingSongRow = document.querySelector("#playlist li.playing");
                                     if(elPlayingSongRow){
@@ -1272,11 +1334,19 @@ define('wsEventHandler',["constants", "playerbar", "serverSelection","notificati
                                 }
                                 else{
                                     let elPlaylistPlayButton = document.getElementById("playplaylist");
-                                    elPlaylistPlayButton.innerHTML = "<i class=\"fa fa-play\" aria-hidden=\"true\"></i> &nbsp; &nbsp;PLAY";
-                                    elPlaylistPlayButton.onclick = function(e){
-                                        let songId = playlist.childNodes[1].dataset.songid;
-                                        AudioPlayer.playSongFromPlaylist(songId, packet.playlist_id);
-                                    };
+                                    if(elPlaylistPlayButton) {
+                                        elPlaylistPlayButton.innerHTML = "<i class=\"fa fa-play\" aria-hidden=\"true\"></i> &nbsp; &nbsp;PLAY";
+                                        elPlaylistPlayButton.onclick = function (e) {
+                                            let SongIds = [];
+                                            let Offset = 0;
+                                            document.querySelectorAll("#playlist li").forEach(function (element, index) {
+                                                if (element.getAttribute("data-songid")) {
+                                                    SongIds.push(element.getAttribute("data-songid"))
+                                                }
+                                            })
+                                            AudioPlayer.playSongsFromPlaylist(SongIds, packet.playlist_id, Offset);
+                                        };
+                                    }
                                 }
                                 break;
                             case "PLAY":
@@ -1375,8 +1445,14 @@ define('wsEventHandler',["constants", "playerbar", "serverSelection","notificati
                                         let elPlaylistPlayButton = document.getElementById("playplaylist");
                                         elPlaylistPlayButton.innerHTML = "<i class=\"fa fa-play\" aria-hidden=\"true\"></i> &nbsp; &nbsp;PLAY";
                                         elPlaylistPlayButton.onclick = function(e){
-                                            let songId = playlist.childNodes[1].dataset.songid;
-                                            AudioPlayer.playSongFromPlaylist(songId, packet.playlist_id);
+                                            let SongIds = [];
+                                            let Offset = 0;
+                                            document.querySelectorAll("#playlist li").forEach(function (element, index){
+                                                if(element.getAttribute("data-songid")){
+                                                    SongIds.push(element.getAttribute("data-songid"))
+                                                }
+                                            })
+                                            AudioPlayer.playSongsFromPlaylist(SongIds, packet.playlist_id, Offset);
                                         };
                                     }
                                 }
@@ -1386,7 +1462,12 @@ define('wsEventHandler',["constants", "playerbar", "serverSelection","notificati
                                         elPlaylistPlayButton.innerHTML = "<i class=\"fa fa-play\" aria-hidden=\"true\"></i> &nbsp; &nbsp;PLAY";
                                         elPlaylistPlayButton.onclick = function (e) {
                                             let songId = playlist.childNodes[1].dataset.songid;
-                                            AudioPlayer.playSongFromPlaylist(songId, packet.playlist_id);
+                                            let SongIds = [];
+                                            let Offset = 0;
+                                            document.querySelectorAll("#playlist li").forEach(function (element, index){
+                                                SongIds.push(element.getAttribute("data-songid"))
+                                            })
+                                            AudioPlayer.playSongFromPlaylist(SongIds, packet.playlist_id, Offset);
                                         };
                                     }
                                 }
@@ -1483,9 +1564,262 @@ define('wsEventHandler',["constants", "playerbar", "serverSelection","notificati
         }
     }
 });
-define('ws',["constants", "wsEventHandler"], function(c, wsEventHandler){
+/*
+*   Wavify
+*   JavaScript library to make some nice waves
+*   by peacepostman @ crezeo
+ */
+define('wavify',[], function() {
+    return function (wave_element, options) {
+        if ("undefined" === typeof options) options = {};
+
+        //  Options
+        //
+        //
+        var settings = Object.assign(
+            {},
+            {
+                container: options.container ? options.container : "body",
+                // Height of wave
+                height: 200,
+                // Amplitude of wave
+                amplitude: 100,
+                // Animation speed
+                speed: 0.15,
+                // Total number of articulation in wave
+                bones: 3,
+                // Color
+                color: "rgba(255,255,255, 0.20)"
+            },
+            options
+        );
+
+        var wave = wave_element,
+            width = document.querySelector(settings.container).getBoundingClientRect().width,
+            height = document.querySelector(settings.container).getBoundingClientRect().height,
+            points = [],
+            lastUpdate,
+            totalTime = 0,
+            animationInstance = false,
+            tweenMaxInstance = false;
+
+        //  Allow new settings, avoid setting new container for logic purpose please :)
+        //
+        function rebuilSettings(params) {
+            settings = Object.assign({}, settings, params);
+        }
+
+        function drawPoints(factor) {
+            var points = [];
+
+            for (var i = 0; i <= settings.bones; i++) {
+                var x = (i / settings.bones) * width;
+                var sinSeed = (factor + (i + (i % settings.bones))) * settings.speed * 100;
+                var sinHeight = Math.sin(sinSeed / 100) * settings.amplitude;
+                var yPos = Math.sin(sinSeed / 100) * sinHeight + settings.height;
+                points.push({ x: x, y: yPos });
+            }
+
+            return points;
+        }
+
+        function drawPath(points) {
+            var SVGString = "M " + points[0].x + " " + points[0].y;
+
+            var cp0 = {
+                x: (points[1].x - points[0].x) / 2,
+                y: points[1].y - points[0].y + points[0].y + (points[1].y - points[0].y)
+            };
+
+            SVGString +=
+                " C " +
+                cp0.x +
+                " " +
+                cp0.y +
+                " " +
+                cp0.x +
+                " " +
+                cp0.y +
+                " " +
+                points[1].x +
+                " " +
+                points[1].y;
+
+            var prevCp = cp0;
+            var inverted = -1;
+
+            for (var i = 1; i < points.length - 1; i++) {
+                var cpLength = Math.sqrt(prevCp.x * prevCp.x + prevCp.y * prevCp.y);
+                var cp1 = {
+                    x: points[i].x - prevCp.x + points[i].x,
+                    y: points[i].y - prevCp.y + points[i].y
+                };
+
+                SVGString +=
+                    " C " +
+                    cp1.x +
+                    " " +
+                    cp1.y +
+                    " " +
+                    cp1.x +
+                    " " +
+                    cp1.y +
+                    " " +
+                    points[i + 1].x +
+                    " " +
+                    points[i + 1].y;
+                prevCp = cp1;
+                inverted = -inverted;
+            }
+
+            SVGString += " L " + width + " " + height;
+            SVGString += " L 0 " + height + " Z";
+            return SVGString;
+        }
+
+        //  Draw function
+        //
+        //
+        function draw() {
+            var now = window.Date.now();
+
+            if (lastUpdate) {
+                var elapsed = (now - lastUpdate) / 1000;
+                lastUpdate = now;
+
+                totalTime += elapsed;
+
+                var factor = totalTime * Math.PI;
+                tweenMaxInstance = TweenMax.to(wave, settings.speed, {
+                    attr: {
+                        d: drawPath(drawPoints(factor))
+                    },
+                    ease: Power1.easeInOut
+                });
+            } else {
+                lastUpdate = now;
+            }
+
+            animationInstance = requestAnimationFrame(draw);
+        }
+
+        //  Pure js debounce function to optimize resize method
+        //
+        //
+        function debounce(func, wait, immediate) {
+            var timeout;
+            return function() {
+                var context = this,
+                    args = arguments;
+                clearTimeout(timeout);
+                timeout = setTimeout(function() {
+                    timeout = null;
+                    if (!immediate) func.apply(context, args);
+                }, wait);
+                if (immediate && !timeout) func.apply(context, args);
+            };
+        }
+
+        //  Redraw for resize with debounce
+        //
+        var redraw = debounce(function() {
+            pause();
+            points = [];
+            totalTime = 0;
+            width = document.querySelector(settings.container).getBoundingClientRect().width;
+            height = document.querySelector(settings.container).getBoundingClientRect().height;
+            lastUpdate = false;
+            play();
+        }, 250);
+
+        function boot() {
+            if (!animationInstance) {
+                tweenMaxInstance = TweenMax.set(wave, { attr: { fill: settings.color } });
+                play();
+                window.addEventListener("resize", redraw);
+            }
+        }
+
+        function reboot(options) {
+            kill();
+            if (typeof options !== undefined) {
+                rebuilSettings(options);
+            }
+            tweenMaxInstance = TweenMax.set(wave, { attr: { fill: settings.color } });
+            play();
+            window.addEventListener("resize", redraw);
+        }
+
+        function play() {
+            if (!animationInstance) {
+                animationInstance = requestAnimationFrame(draw);
+            }
+        }
+
+        function pause() {
+            if (animationInstance) {
+                cancelAnimationFrame(animationInstance);
+                animationInstance = false;
+            }
+        }
+
+        function updateColor(options) {
+            if (typeof options.timing === undefined) {
+                options.timing = 1;
+            }
+            if (typeof options.color === undefined) {
+                options.color = settings.color;
+            }
+            tweenMaxInstance = TweenMax.to(wave, parseInt(options.timing), {
+                attr: { fill: options.color },
+                onComplete: function() {
+                    if (
+                        typeof options.onComplete !== undefined &&
+                        {}.toString.call(options.onComplete) === "[object Function]"
+                    ) {
+                        options.onComplete();
+                    }
+                }
+            });
+        }
+
+        function kill() {
+            if (animationInstance) {
+                pause();
+                tweenMaxInstance.kill();
+                tweenMaxInstance = TweenMax.set(wave, {
+                    x: 0,
+                    y: 0,
+                    rotation: 0,
+                    opacity: 0,
+                    clearProps: "all",
+                    attr: {
+                        d: "M0,0",
+                        fill: ""
+                    }
+                });
+                window.removeEventListener("resize", redraw);
+                animationInstance = false;
+            }
+        }
+
+        //  Boot Wavify
+        //
+        boot();
+
+        return {
+            reboot: reboot,
+            play: play,
+            pause: pause,
+            kill: kill,
+            updateColor: updateColor
+        };
+    }
+});
+define('ws',["constants", "wsEventHandler", "wavify"], function(c, wsEventHandler, w){
     let wss = undefined;
     let HEARTBEAT_INTERVAL = undefined;
+    let wave = undefined;
     let WebSocketConnection = {
         init: function () {
             wss = new WebSocket("wss://wss.motorbot.io");
@@ -1506,10 +1840,13 @@ define('ws',["constants", "wsEventHandler"], function(c, wsEventHandler){
                 document.querySelector(".playerBar").style.filter = "blur(0)";
                 document.querySelector(".errorList").style.filter = "blur(0)";
                 document.querySelector(".modalityOverlay").style.display = "none";
+                if(wave){
+                    wave.pause();
+                }
             };
 
             wss.onmessage = function (event) {
-                wsEventHandler(wss, event);
+                wsEventHandler(wss, WebSocketConnection, event);
             };
 
             wss.onclose = function (event) {
@@ -1520,6 +1857,13 @@ define('ws',["constants", "wsEventHandler"], function(c, wsEventHandler){
                 document.querySelector(".modalityOverlay").style.display = "block";
                 document.getElementById("newPlaylistModal").style.display = "none"; //INFO: make sure no other modals are open
                 document.getElementById("websocketDisconnectOverlay").style.display = "block";
+                wave = w(document.querySelector('#wavy'), {
+                    height: 300,
+                    bones: 4,
+                    amplitude: 45,
+                    color: 'rgba(19, 112, 226, 0.9)',
+                    speed: .20
+                })
                 clearInterval(HEARTBEAT_INTERVAL);
                 setTimeout(function(){
                     WebSocketConnection.init();
@@ -6589,6 +6933,16 @@ define('user',["constants","requester","views","Sortable"], function(c,req,v, So
         init: function(){
 
         },
+        registerListener: function() {
+            // This is an example script - don't forget to change it!
+            req.get(c.base_url+"/user/me?api_key="+c.api_key,{
+                dataType: "json",
+                authorize: true}).then(function(response){
+                LogRocket.identify(response.data.id, response.data);
+            }).catch(function(error){
+                console.warn(error);
+            });
+        },
         submitCreatePlaylist: function(album_art, cb){
             let playlistName = document.querySelector(".playlist_name_input").value;
             let playlistDescription = document.querySelector(".playlist_description_input").value;
@@ -6759,7 +7113,14 @@ define('playlist',["constants","requester","audioPlayer","simpleBar","eventListe
                 }
                 document.getElementById("playplaylist").onclick = function(e){
                     if(document.getElementById("playlist").childNodes[1].dataset.songid) {
-                        AudioPlayer.playSongFromPlaylist(document.getElementById("playlist").childNodes[1].dataset.songid, playlist_id)
+                        let SongIds = [];
+                        let Offset = 0;
+                        document.querySelectorAll("#playlist li").forEach(function (element, index){
+                            if(element.getAttribute("data-songid")){
+                                SongIds.push(element.getAttribute("data-songid"))
+                            }
+                        })
+                        AudioPlayer.playSongsFromPlaylist(SongIds, playlist_id, Offset);
                     }
                 };
                 ws.send("PLAYER_STATE",{});
@@ -6906,36 +7267,41 @@ define('playlist',["constants","requester","audioPlayer","simpleBar","eventListe
             if(tracks.items){
                 for(let i in tracks.items){
                     let data = tracks.items[i];
-                    let trackNo = parseInt(i) + 1 + parseInt(offset);
-                    totalPlaylistDuration += data.track.duration;
-                    let formattedDuration = c.secondsToHms(data.track.duration);
-                    let added = "";
-                    if (data.date_added >= (new Date().getTime() - 604800000)) {
-                        added = c.millisecondsToStr(data.date_added);
+                    if(data.track && data.track.id){
+                        let trackNo = parseInt(i) + 1 + parseInt(offset);
+                        totalPlaylistDuration += data.track.duration;
+                        let formattedDuration = c.secondsToHms(data.track.duration);
+                        let added = "";
+                        if (data.date_added >= (new Date().getTime() - 604800000)) {
+                            added = c.millisecondsToStr(data.date_added);
+                        }
+                        else {
+                            const a = new Date(data.date_added);
+                            added = (a.getDate() < 10 ? "0" + (a.getDate()) : a.getDate()) + " - " + (a.getMonth() + 1 < 10 ? "0" + (a.getMonth() + 1) : a.getMonth() + 1) + " - " + a.getFullYear();
+                        }
+                        let artist = data.track.artist.name || "";
+                        let album = data.track.album.name || "";
+                        let explicit = "";
+                        if (data.track.explicit) {
+                            explicit = "<div class='explicit'>E</div>";
+                        }
+                        let elPlaylistTrack = document.createElement("li");
+                        elPlaylistTrack.id = data.track.id;
+                        elPlaylistTrack.setAttribute("data-songid", data.track.id);
+                        elPlaylistTrack.setAttribute("data-playlistid", playlist_id);
+                        elPlaylistTrack.innerHTML = "<div class='trackRow'>" +
+                            "<div class='item' data-trackNo='" + trackNo + "'>" + trackNo + "</div>" +
+                            "<div class='title' data-sortIndex='" + data.track.title.toUpperCase() + "'>" + data.track.title + " " + explicit + "</div>" +
+                            "<div class='artist' data-sortIndex='" + artist.toUpperCase() + "'>" + artist + "</div>" +
+                            "<div class='album' data-sortIndex='" + album.toUpperCase() + "'>" + album + "</div>" +
+                            "<div class='timestamp' data-sortIndex='" + data.date_added + "'>" + added + "</div>" +
+                            "<div class='time'>" + formattedDuration + "</div>" +
+                            "</div>";
+                        document.getElementById("playlist").appendChild(elPlaylistTrack);
                     }
                     else {
-                        const a = new Date(data.date_added);
-                        added = (a.getDate() < 10 ? "0" + (a.getDate()) : a.getDate()) + " - " + (a.getMonth() + 1 < 10 ? "0" + (a.getMonth() + 1) : a.getMonth() + 1) + " - " + a.getFullYear();
+                        console.warn("Track error: ", data.track);
                     }
-                    let artist = data.track.artist.name || "";
-                    let album = data.track.album.name || "";
-                    let explicit = "";
-                    if (data.track.explicit) {
-                        explicit = "<div class='explicit'>E</div>";
-                    }
-                    let elPlaylistTrack = document.createElement("li");
-                    elPlaylistTrack.id = data.track.id;
-                    elPlaylistTrack.setAttribute("data-songid", data.track.id);
-                    elPlaylistTrack.setAttribute("data-playlistid", playlist_id);
-                    elPlaylistTrack.innerHTML = "<div class='trackRow'>" +
-                        "<div class='item' data-trackNo='" + trackNo + "'>" + trackNo + "</div>" +
-                        "<div class='title' data-sortIndex='" + data.track.title.toUpperCase() + "'>" + data.track.title + " " + explicit + "</div>" +
-                        "<div class='artist' data-sortIndex='" + artist.toUpperCase() + "'>" + artist + "</div>" +
-                        "<div class='album' data-sortIndex='" + album.toUpperCase() + "'>" + album + "</div>" +
-                        "<div class='timestamp' data-sortIndex='" + data.date_added + "'>" + added + "</div>" +
-                        "<div class='time'>" + formattedDuration + "</div>" +
-                        "</div>";
-                    document.getElementById("playlist").appendChild(elPlaylistTrack);
                 }
                 playlistObj.sortTracks(); //TODO can cause issues for user since sorting takes time, look into improving
                 if(tracks.next){
@@ -7708,7 +8074,18 @@ define('eventListener',["constants","audioPlayer","views","playlist","user","req
                             case 13: //enter
                                 if (document.getElementById("playlist")) {
                                     let elActiveSong = document.querySelector("#playlist li.active");
-                                    ap.playSongFromPlaylist(elActiveSong.getAttribute("data-songid"), elActiveSong.getAttribute("data-playlistid"))
+                                    let SongIds = [];
+                                    let Offset = 0;
+                                    document.querySelectorAll("#playlist li").forEach(function (element, index){
+                                        if(element.getAttribute("data-songid")){
+                                            SongIds.push(element.getAttribute("data-songid"))
+                                        }
+                                        if(element.classList.contains("active")){
+                                            Offset = index - 1;
+                                        }
+                                    })
+                                    // ap.playSongFromPlaylist(elActiveSong.getAttribute("data-songid"), elActiveSong.getAttribute("data-playlistid"))
+                                    ap.playSongsFromPlaylist(SongIds, elActiveSong.getAttribute("data-playlistid"), Offset);
                                 }
                                 break;
                             case 32: //space
@@ -7836,7 +8213,18 @@ define('eventListener',["constants","audioPlayer","views","playlist","user","req
                     self.addEventListener("dblclick", function(e){
                         let songId = self.getAttribute("data-songid");
                         let playlistId = self.getAttribute("data-playlistid");
-                        ap.playSongFromPlaylist(songId, playlistId);
+                        let SongIds = [];
+                        let Offset = 0;
+                        document.querySelectorAll("#playlist li").forEach(function (element, index){
+                            let i = element.getAttribute("data-songid");
+                            if(i) {
+                                SongIds.push(i)
+                                if (i === songId) {
+                                    Offset = index - 1;
+                                }
+                            }
+                        })
+                        ap.playSongsFromPlaylist(SongIds, playlistId, Offset);
                     });
                     self.addEventListener("contextmenu", function(e){
                         let contextmenu = document.getElementById("contextMenu");
@@ -7926,6 +8314,7 @@ define('eventListener',["constants","audioPlayer","views","playlist","user","req
 define('main',["domReady.min","ws","eventListener","audioPlayer","user","views"], function(DOMReady, ws, el, ap, u, v) {
     DOMReady(function() {
         console.info("DOM_LOAD_COMPLETE");
+        u.registerListener();
         let socket = ws.init();
         el.init();
         v.init();

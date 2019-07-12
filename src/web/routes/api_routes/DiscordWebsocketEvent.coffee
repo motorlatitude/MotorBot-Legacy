@@ -132,6 +132,7 @@ router.get("/capture", (req, res) ->
     encoding: "binary",
     captureSelector: ".capture-frame"
   }
+
   if pud.type == "StatusChange"
     renderStream = webshot("https://motorbot.io/api/DiscordWebsocketEvent/PresenceUpdate?api_key=caf07b8b-366e-44ab-9bda-623f94a9c2df&id="+pud.id+"&avatar="+pud.avatar+"&user="+encodeURIComponent(pud.user)+"&discriminator="+pud.discriminator+"&status="+pud.status+"&device="+pud.device+"&last_status="+pud.last_status+"&last_status_time="+pud.last_status_time, options)
   else if pud.type == "RegisterPresenceUpdateUser"
@@ -147,17 +148,20 @@ router.get("/capture", (req, res) ->
   res.writeHead(200, [
     "Content-Type", "image/png"
   ])
-  renderStream.on('data', (data) ->
-    res.write(data.toString('binary'),'binary');
-  )
+  if renderStream
+    renderStream.on('data', (data) ->
+      res.write(data.toString('binary'),'binary')
+    )
 
-  renderStream.on('close', () ->
-    res.end();
-  )
+    renderStream.on('close', () ->
+      res.end()
+    )
 
-  renderStream.on('end', () ->
-    res.end();
-  )
+    renderStream.on('end', () ->
+      res.end()
+    )
+  else
+    res.end()
 )
 
 

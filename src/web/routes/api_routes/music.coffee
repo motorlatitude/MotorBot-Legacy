@@ -3,6 +3,7 @@ router = express.Router()
 ObjectID = require('mongodb').ObjectID
 request = require('request')
 async = require('async')
+cuid = require('cuid')
 
 ###
   MUSIC ENDPOINT
@@ -100,6 +101,65 @@ scheduleSongPlay = (fn) ->
       playSongQueue.shift()()
       setTimeout(scheduleSongPlay,1000)
 
+naturalOrderResults = (resultsFromMongoDB, queryIds) ->
+    #Let's build the hashmap
+    hashOfResults = resultsFromMongoDB.reduce((prev, curr) ->
+        prev[curr.id] = curr
+        return prev
+    , {})
+
+    return queryIds.map((id) ->
+      return hashOfResults[id]
+    )
+
+PlaySongs = (req, res, Ids, Offset, PlaylistId, GuildId) ->
+  if req.user_id
+    UserId = req.user_id;
+    console.log("Play These Ids: ", Ids);
+    TracksCollection = req.app.locals.motorbot.Database.collection("tracks")
+    SongQueueCollection = req.app.locals.motorbot.Database.collection("songQueue")
+    TracksCollection.find({"id": {$in: Ids}}).toArray((err, Songs) ->
+      if err then res.sendStatus(500)
+      if Songs[0]
+        Songs = naturalOrderResults(Songs, Ids)
+        ModifiedSongs = Songs.map((Song, Index) ->
+          Track = Song
+          if Index < Offset
+            Track.status = "played"
+          else
+            Track.status = "added"
+          Track.songId = Track.id.toString()
+          Track.playlistId = PlaylistId
+          Track.randId = Math.random() * Songs.length
+          Track.sortId = Index
+          Track.guild = GuildId
+          Track.cuid = cuid()
+          delete Track._id
+          return Track
+        )
+        ModifiedSongs.forEach((Track, index) ->
+          console.log(Track._id)
+        )
+        SongQueueCollection.deleteMany({guild: GuildId}, (err) ->
+          if err
+            res.send(JSON.stringify({success: false, message: err.toString()}))
+          SongQueueCollection.insertMany(ModifiedSongs, { forceServerObjectId: true },(err, results) ->
+            if err
+              res.send(JSON.stringify({success: false, message: err.toString()}))
+            else
+              res.sendStatus(204)
+              if req.app.locals.motorbot.Music.musicPlayers[GuildId]
+                req.app.locals.motorbot.Music.yStream[GuildId].end()
+                req.app.locals.motorbot.Music.musicPlayers[GuildId].stop()
+              else
+                req.app.locals.motorbot.Music.nextSong(GuildId)
+          )
+        )
+      else
+        res.sendStatus(404)
+    )
+  else
+    res.sendStatus(403)
 
 playSong = (req, res, songId, playlistId, playlistSort, playlistSortDir, guild_id) ->
   user_id = req.user_id
@@ -282,7 +342,7 @@ pauseSong = (req, res) ->
   res.type('json')
   user_id = req.user_id
   if user_id
-    guild_id = req.app.locals.motorbot.connectedGuild(user_id)
+    guild_id = req.app.locals.motorbot.ConnectedGuild(user_id)
     if guild_id
       musicPlayer = req.app.locals.motorbot.Music.musicPlayers[guild_id]
       if musicPlayer
@@ -330,7 +390,16 @@ router.get("/play/song", (req, res) ->
   playlistSort = req.query.sort || "timestamp";
   playlistSortDir = req.query.sort_dir || "1";
   guild = req.query.guild_id
-  scheduleSongPlay(playSong(req, res, songId, playlistId, playlistSort, playlistSortDir, guild))
+  if req.body.ids
+    scheduleSongPlay(PlaySongs(req, res, req.body.ids, req.body.offset, req.body.playlist_id, req.body.guild))
+  else
+    scheduleSongPlay(playSong(req, res, songId, playlistId, playlistSort, playlistSortDir, guild))
+)
+
+router.put("/play/song", (req, res) ->
+  res.type('json')
+  if req.body.ids
+    scheduleSongPlay(PlaySongs(req, res, req.body.ids, req.body.offset, req.body.playlist_id, req.body.guild))
 )
 
 router.get("/queue/:song_id/:playlist_id", (req, res) ->
@@ -345,6 +414,7 @@ router.get("/queue/:song_id/:playlist_id", (req, res) ->
           song = results[0]
           song.status = "queued"
           song.songId = song.id.toString()
+          song.guild = guild_id
           song._id = undefined
           song.playlistId = req.params.playlist_id
           if !song.randId

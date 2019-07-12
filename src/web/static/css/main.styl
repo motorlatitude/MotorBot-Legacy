@@ -576,50 +576,53 @@ html
 #websocketDisconnectOverlay
   display none
   position absolute
-  left calc(50% - 290px)
-  top calc(50% - 130px)
+  left 0
+  top -100px
+  right 0
   z-index 10001
-  width 550px
-  height 145px
+  width 100%
+  height 50%
   overflow hidden
-  border-radius 4px
-  box-shadow 0 0 15px rgba(0, 0, 0, 0.3)
-  background #2E3136
-  transform scale(0)
-  animation zoomin .3s
+  animation DisconnectDropDown .3s
   animation-fill-mode forwards
-  & .icon
-    float left
-    font-size 80px
-    line-height 80px
-    text-align center
-    width 90px
-    height 95px
-    padding 25px 15px
-    color rgba(0, 0, 0, 0.4)
-    background-color rgba(238, 62, 62, 1)
-  & .content
-    float left
-    height 95px
-    margin-left 25px
-    width calc(100% - 175px)
-    color #fff
-    padding 25px 15px
-    & .title
+  & .message
+    position absolute
+    top 50px
+    width 700px
+    height 100px
+    left calc(50% - 350px)
+    & .icon
+      float left
+      font-size 90px
+      line-height 80px
+      text-align center
+      width 160px
+      height 95px
+      padding 25px 15px
+      color rgba(255,255,255, 0.2)
+      & i
+        color #fff
+    & .content
+      float left
+      height 95px
+      width calc(100% - 225px)
       color #fff
-      display inline-block
-      font-weight bold
-      font-size 25px
-      width 100%
-      text-transform uppercase
-      letter-spacing 1px
-    & .description
-      margin-top 15px
-      color rgba(255, 255, 255, 0.6)
-      display inline-block
-      font-size 15px
-      width 100%
-      font-weight 400
+      padding 25px 15px
+      & .title
+        color #fff
+        display inline-block
+        font-weight bold
+        font-size 23px
+        width 100%
+        text-transform uppercase
+        letter-spacing 1px
+      & .description
+        margin-top 15px
+        color rgba(255, 255, 255, 0.8)
+        display inline-block
+        font-size 17px
+        width 100%
+        font-weight 400
 
 .modal
   display none
@@ -727,6 +730,12 @@ html
       &:active
         outline none
 
+@keyframes DisconnectDropDown
+  0%
+    top -100px
+  100%
+    top 0
+
 @keyframes zoomin
   0%
     transform scale(0)
@@ -821,17 +830,31 @@ html
   left 0
   right 0
   height 75px
-  background #2F3136
-  box-shadow inset 0 4px 0 rgba(74, 76, 81, 1)
+  background #191919
+  box-shadow inset 0 4px 0 #222
   overflow hidden
   & .bg
     display none
+  & .waveform-container
+    position absolute
+    bottom 12px
+    left 500px
+    right 150px
+    height 50px
+    width calc(100% - 660px)
+    z-index -1
+  & .waveform-bg
+    clip-path url(#waveform-mask)
+    fill rgba(160,160,160,0.1)
+  & .waveform-progress
+    clip-path url(#waveform-mask)
+    fill url(#WaveformProgressGradient)
+    transition width 1s linear
   & .controls
     position absolute
     top calc(50% - 100px)
-    left calc(50% - 100px)
+    left 300px
     border-radius 50%
-    border 2px solid #4A4C51
     font-size 15px
     width 200px
     height 200px
@@ -954,8 +977,8 @@ html
       z-index 1
       border-top-right-radius 2px
       border-bottom-right-radius 2px
-      background rgba(200,200,200,0.3)
-      transition width 2s linear
+      background rgba(200,200,200,0.1)
+      transition width 3s linear
   & .random, .repeat, .queue_button
     position absolute
     left calc(50% + 130px)
@@ -971,8 +994,11 @@ html
     cursor pointer
     &.active
       color $active_color
+  & .random
+    display none
   & .repeat
     left calc(50% - 170px)
+    display none
   & .queue_button
     left auto
     right 125px

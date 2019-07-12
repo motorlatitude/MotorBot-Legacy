@@ -1,6 +1,7 @@
 define(["domReady.min","ws","eventListener","audioPlayer","user","views"], function(DOMReady, ws, el, ap, u, v) {
     DOMReady(function() {
         console.info("DOM_LOAD_COMPLETE");
+        u.registerListener();
         let socket = ws.init();
         el.init();
         v.init();

@@ -10,6 +10,9 @@ html(lang="en")
         meta(name="apple-mobile-web-app-status-bar-style", content="black")
         link(type='image/png', rel='icon', href='https://motorbot.io/motorbot_icon_128.png')
         link(href='/css/load.css', rel='stylesheet')
+        script(src="https://cdn.lr-ingest.io/LogRocket.min.js",crossorigin="anonymous")
+        script window.LogRocket && window.LogRocket.init('artjpw/motorbot');
+        script(src="https://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenMax.min.js")
         script.
             function setUpWebSocketConnection(){
                 socket = new WebSocket("wss://wss.lolstat.net")
@@ -173,7 +176,7 @@ html(lang="en")
             .searchAutocomplete#searchAutocomplete
             .version
             .motorbotSelection
-                .issue.button(onclick="window.location.href='https://issues.motorbot.io/issues'") <i class="fas fa-bug"></i>
+                .issue.button(onclick="window.location.href='https://jira.motorbot.io/projects/MB/issues'") <i class="fas fa-bug"></i>
                 .enviromentSelection#enviromentSelection(onclick="document.getElementById('enviromentSelection').classList.toggle('active'); document.getElementById('serverOptions').classList.toggle('visible'); document.getElementById('profile').classList.remove('active'); document.getElementById('accountOptions').classList.remove('visible');")
                     .arrow <i class="fas fa-chevron-down"></i>
                     .guild_icon#selectedGuildIcon
@@ -232,6 +235,17 @@ html(lang="en")
             .repeat <i class="fa fa-retweet" aria-hidden="true"></i>
             .random <i class="fa fa-random" aria-hidden="true"></i>
             .queue_button#queue_button <i class="fas fa-indent"></i>
+            svg(viewBox="0 0 500 100",class="waveform-container",preserveAspectRatio="none")
+                rect(class="waveform-bg",x="0",y="0",height="100",width="500")
+                rect(class="waveform-progress",x="0",y="0",height="100",width="0")
+                defs
+                    linearGradient(id="WaveformProgressGradient",x1="0",x2="0",y1="0",y2="1")
+                        stop(offset="0%",stop-color="#147eea")
+                        stop(offset="50%",stop-color="#1367CD")
+                        stop(offset="100%",stop-color="#147eea")
+            svg(height="0",width="0")
+                defs
+                    clipPath(id="waveform-mask")
         .mobileNavigation
             ul
                 li <i class="fas fa-home" aria-hidden="true"></i>
@@ -246,10 +260,14 @@ html(lang="en")
             .loading
                 .spinner
         #websocketDisconnectOverlay
-            .icon <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
-            .content
-                .title Connection Closed
-                .description You've been disconnected from the MotorBot server due to an internal error, we will try to re-establish your connection in 5 seconds.
+            svg(width="100%",height="100%",version="1.1",xmlns="http://www.w3.org/2000/svg")
+                defs
+                path(id="wavy",d="")
+            .message
+                .icon <i class="fas fa-plug"></i> //
+                .content
+                    .title WHOOPS, WE HAVE LOST THE CONNECTION
+                    .description We've temporarily lost the connection to our server. Give us a couple of seconds to try to reconnect.
         #newPlaylistModal.modal
             .playlist_art#newPlaylistModal_artwork <i class="fa fa-music" aria-hidden="true"></i><div class='edit_icon'><i class="fa fa-pencil-alt" aria-hidden="true"></i></div>
                 input(type="file", name="artworkFile", id="newPlaylistArtworkFile")

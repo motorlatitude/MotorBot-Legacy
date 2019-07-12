@@ -340,7 +340,7 @@ class MessageEvent
       })
     else if msg.content == "Reacting!" && msg.author.id == "169554882674556930"
       msg.addReaction("%F0%9F%91%BB")
-    else if msg.content.match(/http(s|):\/\//gmi) && msg.channel.id == "130734377066954752"
+    else if msg.content.match(/http(s|):\/\//gmi) && (msg.channel.id == "130734377066954752" || msg.channel.id == "595282731156504749")
       console.log "we got a meme bois"
       setTimeout( () ->
         msg.addReaction("\:upvote\:429449534389616641")

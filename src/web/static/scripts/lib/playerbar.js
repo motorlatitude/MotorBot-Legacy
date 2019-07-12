@@ -50,6 +50,8 @@ define(["constants"], function(c){
             document.getElementById("pb_duration").innerHTML = fPlaytime+" / "+fDuration;
             let elTimelineBar = document.getElementById("timelineBar");
             elTimelineBar.style.width = (playtime/duration)*100+"%";
+            let elProgressWave = document.querySelector(".waveform-progress");
+            elProgressWave.style.width = (playtime/duration)*500+"px";
         },
         updateSeek: function(playtime, duration){
             let elTimelineBar = document.getElementById("timelineBar");

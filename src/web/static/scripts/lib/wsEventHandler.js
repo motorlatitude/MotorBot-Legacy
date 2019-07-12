@@ -2,7 +2,7 @@ define(["constants", "playerbar", "serverSelection","notification","audioPlayer"
     let wsConstants = {};
     let speaking_users = {};
     let users = {};
-    return function(ws, event) {
+    return function(ws, wsCon, event) {
         let data = JSON.parse(event.data);
         let packet = data.d;
         if (data.type) {
@@ -92,6 +92,7 @@ define(["constants", "playerbar", "serverSelection","notification","audioPlayer"
                         }
                     }
                     ss.setEnviromentSelection(packet.guild, packet.channel, ws)
+                    wsCon.send("GET_TRACK_WAVEFORM",{})
                     break;
                 case "SPOTIFY_IMPORT":
                     if(packet.event_type) {
@@ -143,6 +144,9 @@ define(["constants", "playerbar", "serverSelection","notification","audioPlayer"
                                 pb.updateArtwork(packet.event_data.artwork);
                                 pb.updateDetails(packet.event_data.title, packet.event_data.artist, packet.event_data.album);
                                 pb.updateSeek(0, packet.event_data.duration);
+                                wsCon.send("SET_TRACK_WAVEFORM",{
+                                    waveform_packet_size: 1920 * 2 * ((packet.event_data.duration*packet.event_data.duration / 40000) * 10)
+                                })
                                 if(document.getElementById("currentSong_artwork")){
                                     document.getElementById("currentSong_artwork").style.backgroundImage = "url('"+packet.event_data.artwork+"')";
                                     document.getElementById("currentSong_artwork").style.backgroundSize = "cover";
@@ -163,10 +167,21 @@ define(["constants", "playerbar", "serverSelection","notification","audioPlayer"
                             case "UPDATE":
                                 // a song change event occurred
                                 // - occurs when a new song gets played or the next song gets played
+                                c.downloadDuration = packet.event_data.download_position;
                                 pb.updateDownloadSeek(packet.event_data.download_position,c.duration);
                                 break;
                         }
                     }
+                    break;
+                case "TRACK_WAVEFORM":
+                    document.querySelector(".waveform-container").style.width = ((packet.event_data.seconds / c.duration)*(window.innerWidth - 660)) + "px";
+                    document.getElementById("waveform-mask").innerHTML = packet.event_data.waveform.map((bucket, i) => {
+                        let bucketSVGWidth = (500.0 / packet.event_data.waveform.length);
+                        let bucketSVGHeight = bucket * 100.0;
+                        let x = bucketSVGWidth * i;
+                        let y = (100 - bucketSVGHeight) / 2;
+                        return "<rect x='"+x+"' y='"+y+"' width='"+(bucketSVGWidth*0.5)+"' height='"+bucketSVGHeight+"' />";
+                    }).join("");
                     break;
                 case "PLAYER_UPDATE":
                     if(packet.event_type){
@@ -193,8 +208,14 @@ define(["constants", "playerbar", "serverSelection","notification","audioPlayer"
                                     let elPlaylistPlayButton = document.getElementById("playplaylist");
                                     elPlaylistPlayButton.innerHTML = "<i class=\"fa fa-play\" aria-hidden=\"true\"></i> &nbsp; &nbsp;PLAY";
                                     elPlaylistPlayButton.onclick = function(e){
-                                        let songId = playlist.childNodes[1].dataset.songid;
-                                        AudioPlayer.playSongFromPlaylist(songId, playlist.getAttribute("data-playlistid"));
+                                        let SongIds = [];
+                                        let Offset = 0;
+                                        document.querySelectorAll("#playlist li").forEach(function (element, index){
+                                            if(element.getAttribute("data-songid")){
+                                                SongIds.push(element.getAttribute("data-songid"))
+                                            }
+                                        })
+                                        AudioPlayer.playSongsFromPlaylist(SongIds, playlist.getAttribute("data-playlistid"), Offset);
                                     };
                                     let elPlayingSongRow = document.querySelector("#playlist li.playing");
                                     if(elPlayingSongRow){
@@ -289,11 +310,19 @@ define(["constants", "playerbar", "serverSelection","notification","audioPlayer"
                                 }
                                 else{
                                     let elPlaylistPlayButton = document.getElementById("playplaylist");
-                                    elPlaylistPlayButton.innerHTML = "<i class=\"fa fa-play\" aria-hidden=\"true\"></i> &nbsp; &nbsp;PLAY";
-                                    elPlaylistPlayButton.onclick = function(e){
-                                        let songId = playlist.childNodes[1].dataset.songid;
-                                        AudioPlayer.playSongFromPlaylist(songId, packet.playlist_id);
-                                    };
+                                    if(elPlaylistPlayButton) {
+                                        elPlaylistPlayButton.innerHTML = "<i class=\"fa fa-play\" aria-hidden=\"true\"></i> &nbsp; &nbsp;PLAY";
+                                        elPlaylistPlayButton.onclick = function (e) {
+                                            let SongIds = [];
+                                            let Offset = 0;
+                                            document.querySelectorAll("#playlist li").forEach(function (element, index) {
+                                                if (element.getAttribute("data-songid")) {
+                                                    SongIds.push(element.getAttribute("data-songid"))
+                                                }
+                                            })
+                                            AudioPlayer.playSongsFromPlaylist(SongIds, packet.playlist_id, Offset);
+                                        };
+                                    }
                                 }
                                 break;
                             case "PLAY":
@@ -392,8 +421,14 @@ define(["constants", "playerbar", "serverSelection","notification","audioPlayer"
                                         let elPlaylistPlayButton = document.getElementById("playplaylist");
                                         elPlaylistPlayButton.innerHTML = "<i class=\"fa fa-play\" aria-hidden=\"true\"></i> &nbsp; &nbsp;PLAY";
                                         elPlaylistPlayButton.onclick = function(e){
-                                            let songId = playlist.childNodes[1].dataset.songid;
-                                            AudioPlayer.playSongFromPlaylist(songId, packet.playlist_id);
+                                            let SongIds = [];
+                                            let Offset = 0;
+                                            document.querySelectorAll("#playlist li").forEach(function (element, index){
+                                                if(element.getAttribute("data-songid")){
+                                                    SongIds.push(element.getAttribute("data-songid"))
+                                                }
+                                            })
+                                            AudioPlayer.playSongsFromPlaylist(SongIds, packet.playlist_id, Offset);
                                         };
                                     }
                                 }
@@ -403,7 +438,12 @@ define(["constants", "playerbar", "serverSelection","notification","audioPlayer"
                                         elPlaylistPlayButton.innerHTML = "<i class=\"fa fa-play\" aria-hidden=\"true\"></i> &nbsp; &nbsp;PLAY";
                                         elPlaylistPlayButton.onclick = function (e) {
                                             let songId = playlist.childNodes[1].dataset.songid;
-                                            AudioPlayer.playSongFromPlaylist(songId, packet.playlist_id);
+                                            let SongIds = [];
+                                            let Offset = 0;
+                                            document.querySelectorAll("#playlist li").forEach(function (element, index){
+                                                SongIds.push(element.getAttribute("data-songid"))
+                                            })
+                                            AudioPlayer.playSongFromPlaylist(SongIds, packet.playlist_id, Offset);
                                         };
                                     }
                                 }

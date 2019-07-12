@@ -645,52 +645,57 @@ html {
 #websocketDisconnectOverlay {
   display: none;
   position: absolute;
-  left: calc(50% - 290px);
-  top: calc(50% - 130px);
+  left: 0;
+  top: -100px;
+  right: 0;
   z-index: 10001;
-  width: 550px;
-  height: 145px;
+  width: 100%;
+  height: 50%;
   overflow: hidden;
-  border-radius: 4px;
-  box-shadow: 0 0 15px rgba(0,0,0,0.3);
-  background: #2e3136;
-  transform: scale(0);
-  animation: zoomin 0.3s;
+  animation: DisconnectDropDown 0.3s;
   animation-fill-mode: forwards;
 }
-#websocketDisconnectOverlay .icon {
+#websocketDisconnectOverlay .message {
+  position: absolute;
+  top: 50px;
+  width: 700px;
+  height: 100px;
+  left: calc(50% - 350px);
+}
+#websocketDisconnectOverlay .message .icon {
   float: left;
-  font-size: 80px;
+  font-size: 90px;
   line-height: 80px;
   text-align: center;
-  width: 90px;
+  width: 160px;
   height: 95px;
   padding: 25px 15px;
-  color: rgba(0,0,0,0.4);
-  background-color: #ee3e3e;
+  color: rgba(255,255,255,0.2);
 }
-#websocketDisconnectOverlay .content {
+#websocketDisconnectOverlay .message .icon i {
+  color: #fff;
+}
+#websocketDisconnectOverlay .message .content {
   float: left;
   height: 95px;
-  margin-left: 25px;
-  width: calc(100% - 175px);
+  width: calc(100% - 225px);
   color: #fff;
   padding: 25px 15px;
 }
-#websocketDisconnectOverlay .content .title {
+#websocketDisconnectOverlay .message .content .title {
   color: #fff;
   display: inline-block;
   font-weight: bold;
-  font-size: 25px;
+  font-size: 23px;
   width: 100%;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
-#websocketDisconnectOverlay .content .description {
+#websocketDisconnectOverlay .message .content .description {
   margin-top: 15px;
-  color: rgba(255,255,255,0.6);
+  color: rgba(255,255,255,0.8);
   display: inline-block;
-  font-size: 15px;
+  font-size: 17px;
   width: 100%;
   font-weight: 400;
 }
@@ -899,19 +904,36 @@ html {
   left: 0;
   right: 0;
   height: 75px;
-  background: #2f3136;
-  box-shadow: inset 0 4px 0 #4a4c51;
+  background: #191919;
+  box-shadow: inset 0 4px 0 #222;
   overflow: hidden;
 }
 .playerBar .bg {
   display: none;
 }
+.playerBar .waveform-container {
+  position: absolute;
+  bottom: 12px;
+  left: 500px;
+  right: 150px;
+  height: 50px;
+  width: calc(100% - 660px);
+  z-index: -1;
+}
+.playerBar .waveform-bg {
+  clip-path: url("#waveform-mask");
+  fill: rgba(160,160,160,0.1);
+}
+.playerBar .waveform-progress {
+  clip-path: url("#waveform-mask");
+  fill: url("#WaveformProgressGradient");
+  transition: width 1s linear;
+}
 .playerBar .controls {
   position: absolute;
   top: calc(50% - 100px);
-  left: calc(50% - 100px);
+  left: 300px;
   border-radius: 50%;
-  border: 2px solid #4a4c51;
   font-size: 15px;
   width: 200px;
   height: 200px;
@@ -1052,8 +1074,8 @@ html {
   z-index: 1;
   border-top-right-radius: 2px;
   border-bottom-right-radius: 2px;
-  background: rgba(200,200,200,0.3);
-  transition: width 2s linear;
+  background: rgba(200,200,200,0.1);
+  transition: width 3s linear;
 }
 .playerBar .random,
 .playerBar .repeat,
@@ -1076,8 +1098,12 @@ html {
 .playerBar .queue_button.active {
   color: #1370e2;
 }
+.playerBar .random {
+  display: none;
+}
 .playerBar .repeat {
   left: calc(50% - 170px);
+  display: none;
 }
 .playerBar .queue_button {
   left: auto;
@@ -3012,6 +3038,38 @@ html {
   100% {
     margin-left: 0;
     opacity: 1;
+  }
+}
+@-moz-keyframes DisconnectDropDown {
+  0% {
+    top: -100px;
+  }
+  100% {
+    top: 0;
+  }
+}
+@-webkit-keyframes DisconnectDropDown {
+  0% {
+    top: -100px;
+  }
+  100% {
+    top: 0;
+  }
+}
+@-o-keyframes DisconnectDropDown {
+  0% {
+    top: -100px;
+  }
+  100% {
+    top: 0;
+  }
+}
+@keyframes DisconnectDropDown {
+  0% {
+    top: -100px;
+  }
+  100% {
+    top: 0;
   }
 }
 @-moz-keyframes zoomin {

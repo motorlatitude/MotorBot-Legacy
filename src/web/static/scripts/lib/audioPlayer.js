@@ -44,6 +44,39 @@ define(["constants", "requester","notification","playerbar"], function(c, req, N
                 console.warn(error);
             });
         },
+        playSongsFromPlaylist: function(SongIds, PlaylistId, Offset){
+            if(c.currentChannel) {
+                pb.loading.start();
+                let PlayData = {
+                    ids: SongIds,
+                    playlist_id: PlaylistId,
+                    offset: Offset || 0,
+                    guild: c.currentGuild
+                }
+                req.put(c.base_url+'/music/play/song?api_key=' + c.api_key,{dataType: 'json', authorize: true, data: PlayData, headers: {"Content-Type": "application/json;charset=UTF-8"}}).then(function (response) {
+                    if (response.error) {
+                        console.error(response.error);
+                        pb.loading.end();
+                    }
+                    else {
+                        if(!response.error){
+                            pb.loading.end();
+                        }
+                        else{
+                            pb.loading.end();
+                            Notification.create("warn","exclamation-triangle",response.error);
+                        }
+                    }
+                }).catch(function (e) {
+                    pb.loading.end();
+                    console.log(e);
+                });
+            }
+            else{
+                console.warn("MotorBot needs to be in a voice channel to play a song :(");
+                Notification.create("warn","phone","Motorbot needs to join a voice channel first");
+            }
+        },
         playSongFromPlaylist: function(songId, playlistId){
             if(c.currentChannel) {
                 pb.loading.start();

@@ -66,6 +66,7 @@ class MotorBotMusic
                 self.musicPlayers[guild_id] = audioPlayer
                 self.musicPlayers[guild_id].on('ready', () ->
                   self.musicPlayers[guild_id].setVolume(volume)
+                  self.musicPlayers[guild_id].waveform_packet_size = 1920 * 2 * 20
                   self.musicPlayers[guild_id].play()
                   self.musicPlayers[guild_id].playing = true
                   self.musicPlayers[guild_id].start_time = new Date().getTime()
@@ -103,6 +104,9 @@ class MotorBotMusic
                 self.musicPlayers[guild_id].on("progress", (seconds) ->
                   self.app.WebSocket.broadcast(JSON.stringify({type: 'TRACK_DOWNLOAD', op: 10, d: {event_type: "UPDATE", event_data: {download_position: seconds}}}))
                 )
+                self.musicPlayers[guild_id].on("VoiceWaveForm", (waveform, seconds) ->
+                  self.app.WebSocket.broadcast(JSON.stringify({type: 'TRACK_WAVEFORM', op: 13, d: {event_type: "UPDATE", event_data: {waveform, seconds}}}))
+                )
                 self.musicPlayers[guild_id].on("streamDone", () ->
                   delete self.musicPlayers[guild_id]
                   self.app.Client.setStatus("") # reset to blank
@@ -122,15 +126,15 @@ class MotorBotMusic
   goThroughSongQueue: (guild_id) ->
     self = @
     songQueueCollection = @app.Database.collection("songQueue")
-    songQueueCollection.find({status: "queued", guild: guild_id}).sort({sortId: 1}).toArray((err, results) ->
+    songQueueCollection.find({status: "queued", guild: guild_id}).sort({sortId: 1}).toArray((err, QueuedResults) ->
       if err then console.log err
-      if results[0]
-        self.streamNewTrack(results, guild_id)
-      else
-        songQueueCollection.find({status: "added", guild: guild_id}).sort({sortId: 1}).toArray((err, results) ->
-          if err then console.log err
-          self.streamNewTrack(results, guild_id)
-        )
+      if !QueuedResults[0]
+        QueuedResults = []
+      songQueueCollection.find({status: "added", guild: guild_id}).sort({sortId: 1}).toArray((err, results) ->
+        if err then console.log err
+        r = QueuedResults.concat(results)
+        self.streamNewTrack(r, guild_id)
+      )
     )
 
   nextSong: (guild_id) ->

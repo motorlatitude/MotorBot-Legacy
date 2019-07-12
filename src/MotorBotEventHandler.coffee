@@ -3,6 +3,7 @@ ReadyEvent = require './events/ReadyEvent.coffee'
 GuildCreateEvent = require './events/GuildCreateEvent.coffee'
 VoiceUpdateEvent = require './events/VoiceUpdateEvent.coffee'
 VoiceChannelUpdateEvent = require './events/VoiceChannelUpdateEvent.coffee'
+VoiceStateUpdateEvent = require './events/VoiceStateUpdate.coffee'
 StatusEvent = require './events/StatusEvent.coffee'
 ReactionEvent = require './events/ReactionEvent.coffee'
 MessageEvent = require './events/MessageEvent.coffee'
@@ -26,6 +27,9 @@ class MotorBotEventHandler
     )
     @client.on("voiceChannelUpdate", (data) ->
       new VoiceChannelUpdateEvent(self.App, self.client, self.Logger, data)
+    )
+    @client.on("VOICE_STATE_UPDATE", (data) ->
+      new VoiceStateUpdateEvent(self.App, self.client, self.Logger, data)
     )
     @client.on("status", (user_id,status,game,extra_info) ->
       new StatusEvent(self.App, self.client, self.Logger, user_id, status, game, extra_info)
