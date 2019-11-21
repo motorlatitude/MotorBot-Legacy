@@ -51,7 +51,7 @@
     "response-time": "^2.3.2",
     "simple-oauth2": "^0.7.0",
     "sqlite3": "^4.0.2",
-    "stack-trace": "0.0.9",
+    "stack-trace": "0.0.10",
     "stream-chunker": "^1.2.8",
     "stylus": "^0.54.5",
     "turndown": "^4.0.2",
