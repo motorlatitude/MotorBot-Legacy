@@ -13,7 +13,7 @@ class MotorBotMusic
       songQueueCollection = self.app.Database.collection("songQueue")
       songQueueCollection.find({status: "playing"}).toArray((err, results) ->
         if err then reject(err)
-        if results then
+        if results
           for r in results
             trackId = r._id
             songQueueCollection.updateOne({'_id': trackId},{'$set':{'status':'played'}},() ->
