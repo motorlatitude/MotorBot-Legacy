@@ -1,4 +1,5 @@
 MongoClient = require('mongodb').MongoClient
+keys = require '../keys.json'
 
 class MongoDatabase
 
@@ -8,7 +9,8 @@ class MongoDatabase
   connect: () ->
     self = @
     return new Promise((resolve, reject) ->
-      MongoClient.connect('mongodb://localhost:27017/motorbot', (err, db) ->
+      self.Logger.write("Database; "+keys.mongo)
+      MongoClient.connect(keys.mongo, (err, db) ->
         if err
           throw new Error("Failed to connect to database, exiting")
         self.Logger.write("Connected to Database")

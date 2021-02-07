@@ -98,9 +98,6 @@ class MotorBotMusic
                   self.app.Client.setStatus(title)
                   self.Logger.write("Now Playing: "+title)
                 )
-                self.musicPlayers[guild_id].on("streamPacket", (packet) ->
-                  self.app.WebSocket.broadcast(JSON.stringify({type: 'TRACK_PACKET', op: 12, d: {event_type: "UPDATE", event_data: {packet}}}))
-                )
                 self.musicPlayers[guild_id].on("progress", (seconds) ->
                   self.app.WebSocket.broadcast(JSON.stringify({type: 'TRACK_DOWNLOAD', op: 10, d: {event_type: "UPDATE", event_data: {download_position: seconds}}}))
                 )

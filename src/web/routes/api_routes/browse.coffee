@@ -213,6 +213,8 @@ importingScript = (req, res, playlist_id = undefined) ->
                       disc_number = 0
                       artwork = ""
                       explicit = false
+                      spotify_id = ""
+                      spotify_popularity = ""
                       if body.tracks
                         if body.tracks.items[0]
                           if body.tracks.items[0].artists[0]
@@ -242,12 +244,14 @@ importingScript = (req, res, playlist_id = undefined) ->
                           track_number = Number(body.tracks.items[0].track_number)
                           disc_number = Number(body.tracks.items[0].disc_number)
                           explicit = body.tracks.items[0].explicit
+                          spotify_id = body.tracks.items[0].id
+                          spotify_popularity = body.tracks.items[0].popularity
                       track_id = cuid()
                       track_obj = {
                         id: track_id,
                         type: "youtube",
-                        spotify_id: body.tracks.items[0].id || "",
-                        spotify_popularity: body.tracks.items[0].popularity|| "",
+                        spotify_id: spotify_id,
+                        spotify_popularity: spotify_popularity,
                         video_id: video_id,
                         video_title: data.items[0].snippet.title,
                         title: title,

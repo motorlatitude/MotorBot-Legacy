@@ -114,22 +114,23 @@ class StatusEvent
           extra_info["last_update"] = new Date().getTime()
       else
         #we don't know previous status so assume status change
-        self.Client.channels["432351112616738837"].sendMessageWithFile("", req.get({
-          url:'https://motorbot.io/api/DiscordWebsocketEvent/capture?api_key=caf07b8b-366e-44ab-9bda-623f94a9c2df',
-          json: true
-          body: {
-            "PresenceUpdateData": {
-              "type": "RegisterPresenceUpdateUser",
-              "id": user_id,
-              "avatar": self.Client.users[user_id].avatar,
-              "user": self.Client.users[user_id].username,
-              "discriminator": self.Client.users[user_id].discriminator
-              "status": status
+        if self.Client.users[user_id]
+          self.Client.channels["432351112616738837"].sendMessageWithFile("", req.get({
+            url:'https://motorbot.io/api/DiscordWebsocketEvent/capture?api_key=caf07b8b-366e-44ab-9bda-623f94a9c2df',
+            json: true
+            body: {
+              "PresenceUpdateData": {
+                "type": "RegisterPresenceUpdateUser",
+                "id": user_id,
+                "avatar": self.Client.users[user_id].avatar,
+                "user": self.Client.users[user_id].username,
+                "discriminator": self.Client.users[user_id].discriminator
+                "status": status
+              }
             }
-          }
-        }), "RegisterPresenceUpdateUser.png")
-        statusText = ""
-        extra_info["last_update"] = new Date().getTime()
+          }), "RegisterPresenceUpdateUser.png")
+          statusText = ""
+          extra_info["last_update"] = new Date().getTime()
 
       if game && game.type == 0
         if self.App.UserStatus[user_id]
