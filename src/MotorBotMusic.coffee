@@ -12,7 +12,7 @@ class MotorBotMusic
     return new Promise((resolve, reject) ->
       songQueueCollection = self.app.Database.collection("songQueue")
       songQueueCollection.find({status: "playing"}).toArray((err, results) ->
-        if err then reject(err)
+        if err || !results then reject(err)
         for r in results
           trackId = r._id
           songQueueCollection.updateOne({'_id': trackId},{'$set':{'status':'played'}},() ->
