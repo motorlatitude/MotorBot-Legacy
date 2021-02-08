@@ -8,7 +8,7 @@ define(["constants", "wsEventHandler", "wavify"], function (
   let wave = undefined;
   let WebSocketConnection = {
     init: function () {
-      wss = new WebSocket("wss://86.129.178.18:443");
+      wss = new WebSocket("ws://86.129.178.18:443");
       wss.session = undefined;
       wss.onopen = function (event) {
         console.info("websocket connection opened");
