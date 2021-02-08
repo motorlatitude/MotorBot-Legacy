@@ -6,6 +6,7 @@ class OAuth
         return res.status(401).send({code: 401, status: "No API Key Supplied"})
       else
         APIAccessCollection = req.app.locals.motorbot.Database.collection("apiaccess")
+        console.log("Sent API KKEY"+req.query.api_key)
         APIAccessCollection.find({key: req.query.api_key}).toArray((err, results) ->
           if err then console.log err
           if results[0]
