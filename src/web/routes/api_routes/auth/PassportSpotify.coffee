@@ -1,6 +1,8 @@
 passport = require 'passport'
 SpotifyStrategy = require('passport-spotify').Strategy
 
+keys = require './../../../../../keys.json'
+
 class PassportSpotify
 
   constructor: () ->
@@ -19,7 +21,7 @@ class PassportSpotify
     passport.use(new SpotifyStrategy({
         clientID: "935356234ee749df96a3ab1999e0d659",
         clientSecret: "622b1a10ae054059bd2e5c260d87dabd",
-        callbackURL: "https://motorbot.io/api/spotify/callback",
+        callbackURL: keys.baseURL+"/api/spotify/callback",
         passReqToCallback: true
       },
         (req, accessToken, refreshToken, profile, done) ->

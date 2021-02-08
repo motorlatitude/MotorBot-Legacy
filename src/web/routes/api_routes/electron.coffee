@@ -2,6 +2,7 @@ express = require 'express'
 router = express.Router()
 fs = require 'fs'
 path = require 'path'
+keys = require './../../../../keys.json'
 
 ###
   ELECTRON ENDPOINT
@@ -40,7 +41,7 @@ router.get("/updates/latest", (req, res) ->
     res.status(204).end()
   else
     res.json({
-      url: "https://motorbot.io/releases/darwin/"+latestVersion+"/MotorBotMusic.zip"
+      url: keys.baseURL+"/releases/darwin/"+latestVersion+"/MotorBotMusic.zip"
     })
 )
 

@@ -14,6 +14,9 @@ utilities = require './objects/APIUtilities.coffee'
 APIUtilities = new utilities()
 APIWebsocket = require './objects/APIWebsocket.coffee'
 
+
+keys = require './../../../../keys.json'
+
 ###
   SPOTIFY ENDPOINT
 
@@ -37,8 +40,8 @@ router.get("/", passport.authenticate('spotify', {scope: ['playlist-read-private
   res.type('json')
 )
 
-router.get("/callback", passport.authenticate('spotify', { failureRedirect: 'https://motorbot.io/dashboard/account/connections', session: false }), (req, res) ->
-  res.redirect("https://motorbot.io/dashboard/account/connections")
+router.get("/callback", passport.authenticate('spotify', { failureRedirect: keys.baseURL+'/dashboard/account/connections', session: false }), (req, res) ->
+  res.redirect(keys.baseURL+"/dashboard/account/connections")
 )
 
 router.get("/playlists", new OAuth(), new SpotifyRefreshAccessToken(), (req, res) ->

@@ -1,4 +1,5 @@
 req = require 'request'
+keys = require './../../keys.json'
 
 class VoiceChannelUpdateEvent
 
@@ -64,7 +65,7 @@ class VoiceChannelUpdateEvent
   SendVoiceStateEventLog: (data, voice_status) ->
     self = @
     self.Client.channels["432351112616738837"].sendMessageWithFile("", req.get({
-      url:'https://motorbot.io/api/DiscordWebsocketEvent/capture?api_key=caf07b8b-366e-44ab-9bda-623f94a9c2df',
+      url: keys.baseURL+'/api/DiscordWebsocketEvent/capture?api_key=caf07b8b-366e-44ab-9bda-623f94a9c2df',
       json: true
       body: {
         "PresenceUpdateData": {

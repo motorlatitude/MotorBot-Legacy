@@ -4,6 +4,7 @@ ObjectID = require('mongodb').ObjectID
 request = require('request')
 async = require('async')
 cuid = require 'cuid'
+keys = require './../../../../keys.json'
 
 ###
   BROWSE ENDPOINT

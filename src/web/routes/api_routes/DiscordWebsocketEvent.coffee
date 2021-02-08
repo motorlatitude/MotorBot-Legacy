@@ -11,6 +11,8 @@ APIObjects = new objects()
 utilities = require './objects/APIUtilities.coffee'
 APIUtilities = new utilities()
 
+keys = require './../../../../keys.json'
+
 ###
   USER ENDPOINT
 
@@ -134,15 +136,15 @@ router.get("/capture", (req, res) ->
   }
 
   if pud.type == "StatusChange"
-    renderStream = webshot("https://motorbot.io/api/DiscordWebsocketEvent/PresenceUpdate?api_key=caf07b8b-366e-44ab-9bda-623f94a9c2df&id="+pud.id+"&avatar="+pud.avatar+"&user="+encodeURIComponent(pud.user)+"&discriminator="+pud.discriminator+"&status="+pud.status+"&device="+pud.device+"&last_status="+pud.last_status+"&last_status_time="+pud.last_status_time, options)
+    renderStream = webshot(keys.baseURL+"/api/DiscordWebsocketEvent/PresenceUpdate?api_key=caf07b8b-366e-44ab-9bda-623f94a9c2df&id="+pud.id+"&avatar="+pud.avatar+"&user="+encodeURIComponent(pud.user)+"&discriminator="+pud.discriminator+"&status="+pud.status+"&device="+pud.device+"&last_status="+pud.last_status+"&last_status_time="+pud.last_status_time, options)
   else if pud.type == "RegisterPresenceUpdateUser"
-    renderStream = webshot("https://motorbot.io/api/DiscordWebsocketEvent/RegisterPresenceUpdateUser?api_key=caf07b8b-366e-44ab-9bda-623f94a9c2df&id="+pud.id+"&avatar="+pud.avatar+"&user="+encodeURIComponent(pud.user)+"&discriminator="+pud.discriminator+"&status="+pud.status, options)
+    renderStream = webshot(keys.baseURL+"/api/DiscordWebsocketEvent/RegisterPresenceUpdateUser?api_key=caf07b8b-366e-44ab-9bda-623f94a9c2df&id="+pud.id+"&avatar="+pud.avatar+"&user="+encodeURIComponent(pud.user)+"&discriminator="+pud.discriminator+"&status="+pud.status, options)
   else if pud.type == "VoiceUpdate"
-    renderStream = webshot("https://motorbot.io/api/DiscordWebsocketEvent/VoiceUpdate?api_key=caf07b8b-366e-44ab-9bda-623f94a9c2df&id="+pud.id+"&avatar="+pud.avatar+"&user="+encodeURIComponent(pud.user)+"&discriminator="+pud.discriminator+"&voice_status="+pud.voice_status+"&channel="+pud.channel, options)
+    renderStream = webshot(keys.baseURL+"/api/DiscordWebsocketEvent/VoiceUpdate?api_key=caf07b8b-366e-44ab-9bda-623f94a9c2df&id="+pud.id+"&avatar="+pud.avatar+"&user="+encodeURIComponent(pud.user)+"&discriminator="+pud.discriminator+"&voice_status="+pud.voice_status+"&channel="+pud.channel, options)
   else if pud.type == "Playing"
-    renderStream = webshot("https://motorbot.io/api/DiscordWebsocketEvent/Playing?api_key=caf07b8b-366e-44ab-9bda-623f94a9c2df&id="+pud.id+"&avatar="+pud.avatar+"&user="+encodeURIComponent(pud.user)+"&discriminator="+pud.discriminator+"&game="+pud.game+"&application_id="+pud.application_id+"&game_asset_large="+pud.game_asset_large+"&game_icon="+pud.game_icon+"&game_state="+pud.game_state+"&game_details="+pud.game_details, options)
+    renderStream = webshot(keys.baseURL+"/api/DiscordWebsocketEvent/Playing?api_key=caf07b8b-366e-44ab-9bda-623f94a9c2df&id="+pud.id+"&avatar="+pud.avatar+"&user="+encodeURIComponent(pud.user)+"&discriminator="+pud.discriminator+"&game="+pud.game+"&application_id="+pud.application_id+"&game_asset_large="+pud.game_asset_large+"&game_icon="+pud.game_icon+"&game_state="+pud.game_state+"&game_details="+pud.game_details, options)
   else if pud.type == "StoppedPlaying"
-    renderStream = webshot("https://motorbot.io/api/DiscordWebsocketEvent/StoppedPlaying?api_key=caf07b8b-366e-44ab-9bda-623f94a9c2df&id="+pud.id+"&avatar="+pud.avatar+"&user="+encodeURIComponent(pud.user)+"&discriminator="+pud.discriminator+"&game="+pud.game+"&duration="+pud.duration, options)
+    renderStream = webshot(keys.baseURL+"/api/DiscordWebsocketEvent/StoppedPlaying?api_key=caf07b8b-366e-44ab-9bda-623f94a9c2df&id="+pud.id+"&avatar="+pud.avatar+"&user="+encodeURIComponent(pud.user)+"&discriminator="+pud.discriminator+"&game="+pud.game+"&duration="+pud.duration, options)
 
 
   res.writeHead(200, [

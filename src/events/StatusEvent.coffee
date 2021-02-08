@@ -1,5 +1,6 @@
 req = require 'request'
 moment = require 'moment'
+keys = require './../../keys.json'
 
 class StatusEvent
 
@@ -33,7 +34,7 @@ class StatusEvent
             if self.App.UserStatus[user_id].game.type == 0
               #statusText = " has stopped playing **"+userStatus[user_id].game.name+"** after "+(moment.unix(userStatus[user_id].last_game_update/1000).fromNow()).replace(" ago","")+"\n"
               self.Client.channels["432351112616738837"].sendMessageWithFile("", req.get({
-                url:'https://motorbot.io/api/DiscordWebsocketEvent/capture?api_key=caf07b8b-366e-44ab-9bda-623f94a9c2df',
+                url: keys.baseURL+'/api/DiscordWebsocketEvent/capture?api_key=caf07b8b-366e-44ab-9bda-623f94a9c2df',
                 json: true
                 body: {
                   "PresenceUpdateData": {
@@ -61,7 +62,7 @@ class StatusEvent
             if extra_info.client_status.web != self.App.UserStatus[user_id].client_status.web
               dev = "Web"
             self.Client.channels["432351112616738837"].sendMessageWithFile("", req.get({
-              url:'https://motorbot.io/api/DiscordWebsocketEvent/capture?api_key=caf07b8b-366e-44ab-9bda-623f94a9c2df',
+              url: keys.baseURL+'/api/DiscordWebsocketEvent/capture?api_key=caf07b8b-366e-44ab-9bda-623f94a9c2df',
               json: true
               body: {
                 "PresenceUpdateData": {
@@ -92,7 +93,7 @@ class StatusEvent
             if extra_info.client_status.web != self.App.UserStatus[user_id].client_status.web
               dev = "Web"
             self.Client.channels["432351112616738837"].sendMessageWithFile("", req.get({
-              url:'https://motorbot.io/api/DiscordWebsocketEvent/capture?api_key=caf07b8b-366e-44ab-9bda-623f94a9c2df',
+              url: keys.baseURL+'/api/DiscordWebsocketEvent/capture?api_key=caf07b8b-366e-44ab-9bda-623f94a9c2df',
               json: true
               body: {
                 "PresenceUpdateData": {
@@ -116,7 +117,7 @@ class StatusEvent
         #we don't know previous status so assume status change
         if self.Client.users[user_id]
           self.Client.channels["432351112616738837"].sendMessageWithFile("", req.get({
-            url:'https://motorbot.io/api/DiscordWebsocketEvent/capture?api_key=caf07b8b-366e-44ab-9bda-623f94a9c2df',
+            url: keys.baseURL+'/api/DiscordWebsocketEvent/capture?api_key=caf07b8b-366e-44ab-9bda-623f94a9c2df',
             json: true
             body: {
               "PresenceUpdateData": {
@@ -138,7 +139,7 @@ class StatusEvent
             if self.App.UserStatus[user_id].game.name != game.name
               #gameText = " is playing **"+game.name+"**"
               self.Client.channels["432351112616738837"].sendMessageWithFile("", req.get({
-                url:'https://motorbot.io/api/DiscordWebsocketEvent/capture?api_key=caf07b8b-366e-44ab-9bda-623f94a9c2df',
+                url: keys.baseURL+'/api/DiscordWebsocketEvent/capture?api_key=caf07b8b-366e-44ab-9bda-623f94a9c2df',
                 json: true
                 body: {
                   "PresenceUpdateData": {
@@ -158,7 +159,7 @@ class StatusEvent
               }), "Playing.png")
           else
             self.Client.channels["432351112616738837"].sendMessageWithFile("", req.get({
-              url:'https://motorbot.io/api/DiscordWebsocketEvent/capture?api_key=caf07b8b-366e-44ab-9bda-623f94a9c2df',
+              url: keys.baseURL+'/api/DiscordWebsocketEvent/capture?api_key=caf07b8b-366e-44ab-9bda-623f94a9c2df',
               json: true
               body: {
                 "PresenceUpdateData": {
@@ -178,7 +179,7 @@ class StatusEvent
             }), "Playing.png")
         else
           self.Client.channels["432351112616738837"].sendMessageWithFile("", req.get({
-            url:'https://motorbot.io/api/DiscordWebsocketEvent/capture?api_key=caf07b8b-366e-44ab-9bda-623f94a9c2df',
+            url: keys.baseURL+'/api/DiscordWebsocketEvent/capture?api_key=caf07b8b-366e-44ab-9bda-623f94a9c2df',
             json: true
             body: {
               "PresenceUpdateData": {

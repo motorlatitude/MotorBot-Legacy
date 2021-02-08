@@ -7,6 +7,7 @@ DiscordStrategy = require('passport-discord').Strategy
 OAuth2Strategy = require('passport-oauth2').Strategy
 crypto = require('crypto')
 request = require 'request'
+keys = require './../../../keys.json'
 
 passport.serializeUser((user, done) ->
   done(null, user.id)
@@ -29,11 +30,11 @@ passport.deserializeUser((req, id, done) ->
 
 #MB Login
 passport.use(new OAuth2Strategy({
-    authorizationURL: 'https://motorbot.io/api/oauth2/authorize',
-    tokenURL: 'https://motorbot.io/api/oauth2/token',
+    authorizationURL: keys.baseURL+'/api/oauth2/authorize',
+    tokenURL: keys.baseURL+'/api/oauth2/token',
     clientID: '7c78862088c0228ca226f4462df3d4ff',
     clientSecret: '2bd12fcaf92bb63d7c11b0b6858d9d3e1c2c966cb17aa0152c9e07bdfca9535b',
-    callbackURL: "https://motorbot.io/loginflow/callback",
+    callbackURL: keys.baseURL+"/loginflow/callback",
     state: true,
     session: true,
     passReqToCallback: true
@@ -69,7 +70,7 @@ passport.use(new DiscordStrategy({
   clientID: keys.clientId,
   clientSecret: keys.clientSecret,
   scope: ["identify","guilds"],
-  callbackURL: 'https://motorbot.io/loginflow/register/discord/callback'
+  callbackURL: keys.baseURL+'/loginflow/register/discord/callback'
   passReqToCallback: true
 },
   (req, accessToken, refreshToken, profile, cb) ->
@@ -111,7 +112,7 @@ passport.use(new DiscordStrategy({
 ###
   LOGINFLOW
 
-  https://motorbot.io/loginflow/
+  keys.baseURL+/loginflow/
 ###
 
 refreshDiscordAccessToken = (req, refresh_token, cb) ->
@@ -120,7 +121,7 @@ refreshDiscordAccessToken = (req, refresh_token, cb) ->
     "refresh_token": refresh_token,
     "client_id": keys.clientId,
     "client_secret": keys.clientSecret,
-    "redirect_uri": "https://motorbot.io/loginflow/register/discord/callback",
+    "redirect_uri": keys.baseURL+"/loginflow/register/discord/callback",
     "scope": "identify guilds email"
   }
   console.log refresh_package

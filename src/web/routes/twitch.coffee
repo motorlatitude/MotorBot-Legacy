@@ -3,6 +3,7 @@ router = express.Router()
 ObjectID = require('mongodb').ObjectID
 request = require('request')
 async = require('async')
+keys = require './../../../keys.json'
 
 ###
   TWITCH CALLBACK
@@ -22,7 +23,7 @@ router.get("/callback", (req, res) ->
 
 router.get("/sample_notification", (req, res) ->
   #console.log "twitch notification"
-  thumbnail_url = "https://motorbot.io/twitch%20notification%20layout.png"
+  thumbnail_url = keys.baseURL+"/twitch%20notification%20layout.png"
   req.app.locals.motorbot.Client.channels["409781378100756483"].sendMessage("", {
     embed: {
       image: {

@@ -1,6 +1,9 @@
+
+keys = require './../../../../../keys.json'
+
 APIConstants = APIConstants || {}
 
-APIConstants.baseUrl = "https://motorbot.io/api"
+APIConstants.baseUrl = keys.baseURL+"/api"
 
 
 # ERRORS

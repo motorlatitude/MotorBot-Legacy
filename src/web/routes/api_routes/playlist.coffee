@@ -13,6 +13,8 @@ APIUtilities = new utilities()
 objects = require './objects/APIObjects.coffee'
 APIObjects = new objects()
 
+keys = require './../../../../keys.json'
+
 ###
   PLAYLIST ENDPOINT
 
@@ -156,7 +158,7 @@ router.post("/", (req, res) ->
   playlist_id = cuid();
   if req.body.playlist_name
     uploadRemainingData = (album_key) ->
-      if album_key then album_key = "https://motorbot.io/AlbumArt/"+album_key+".png"
+      if album_key then album_key = keys.baseURL+"/AlbumArt/"+album_key+".png"
       playlistObj = {
         id: playlist_id
         name: req.body.playlist_name
