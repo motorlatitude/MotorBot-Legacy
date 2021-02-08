@@ -39,7 +39,7 @@ router.get("/PresenceUpdate", (req, res) ->
     last_status_time: req.query.last_status_time,
     device: req.query.device
   }
-  res.render("DiscordWebsocketEvents/PresenceUpdate",{user: req.user, PresenceUpdateData: pud})
+  res.render("DiscordWebsocketEvents/PresenceUpdate",{user: req.user, PresenceUpdateData: pud, keys: keys})
 )
 
 router.get("/RegisterPresenceUpdateUser", (req, res) ->
@@ -50,7 +50,7 @@ router.get("/RegisterPresenceUpdateUser", (req, res) ->
     discriminator: req.query.discriminator,
     status: req.query.status
   }
-  res.render("DiscordWebsocketEvents/RegisterPresenceUpdateUser",{user: req.user, PresenceUpdateData: pud})
+  res.render("DiscordWebsocketEvents/RegisterPresenceUpdateUser",{user: req.user, PresenceUpdateData: pud, keys: keys})
 )
 
 router.get("/VoiceUpdate", (req, res) ->
@@ -62,7 +62,7 @@ router.get("/VoiceUpdate", (req, res) ->
     channel: req.query.channel,
     voice_status: req.query.voice_status
   }
-  res.render("DiscordWebsocketEvents/VoiceUpdate",{user: req.user, PresenceUpdateData: pud})
+  res.render("DiscordWebsocketEvents/VoiceUpdate",{user: req.user, PresenceUpdateData: pud, keys: keys})
 )
 
 router.get("/Playing", (req, res) ->
@@ -91,7 +91,7 @@ router.get("/Playing", (req, res) ->
         game_state: req.query.game_state,
         game_details: req.query.game_details
       }
-      res.render("DiscordWebsocketEvents/Playing",{user: req.user, PresenceUpdateData: pud})
+      res.render("DiscordWebsocketEvents/Playing",{user: req.user, PresenceUpdateData: pud, keys: keys})
     )
   );
 )
@@ -105,7 +105,7 @@ router.get("/StoppedPlaying", (req, res) ->
     game: req.query.game,
     duration: req.query.duration
   }
-  res.render("DiscordWebsocketEvents/StoppedPlaying",{user: req.user, PresenceUpdateData: pud})
+  res.render("DiscordWebsocketEvents/StoppedPlaying",{user: req.user, PresenceUpdateData: pud, keys: keys})
 )
 
 router.get("/capture", (req, res) ->
