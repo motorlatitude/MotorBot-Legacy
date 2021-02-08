@@ -10,21 +10,22 @@ define("requireLib", function(){});
 //
 
 requirejs.config({
-    //By default load any module IDs from js/lib
-    baseUrl: '/scripts/lib',
-    paths: {
-        marked: "marked",
-        simpleBar: "simplebar",
-        moment: "moment",
-        Sortable: "sortable"
-    }
+  //By default load any module IDs from js/lib
+  baseUrl: "/scripts/lib",
+  paths: {
+    marked: "marked",
+    simpleBar: "simplebar",
+    moment: "moment",
+    Sortable: "sortable",
+  },
 });
 
-require(['require'], function (r) {
-    r(["main"], function(){
-        console.info("Loaded Main");
-    });
+require(["require"], function (r) {
+  r(["main"], function () {
+    console.info("Loaded Main");
+  });
 });
+
 define("../app", function(){});
 
 define('domReady.min',[],function(){"use strict";var n,e,t,o="undefined"!=typeof window&&window.document,d=!o,i=o?document:null,c=[];function a(){var n=c;d&&n.length&&(c=[],function(n){var e;for(e=0;e<n.length;e+=1)n[e](i)}(n))}function l(){d||(d=!0,t&&clearInterval(t),a())}if(o){if(document.addEventListener)document.addEventListener("DOMContentLoaded",l,!1),window.addEventListener("load",l,!1);else if(window.attachEvent){window.attachEvent("onload",l),e=document.createElement("div");try{n=null===window.frameElement}catch(n){}e.doScroll&&n&&window.external&&(t=setInterval(function(){try{e.doScroll(),l()}catch(n){}},30))}"complete"===document.readyState&&l()}function r(n){return d?n(i):c.push(n),r}return r.version="2.0.1",r.load=function(n,e,t,o){o.isBuild?t(null):r(t)},r});
@@ -523,52 +524,59 @@ define('domReady.min',[],function(){"use strict";var n,e,t,o="undefined"!=typeof
         Y("x",Rd),Y("X",Ud),aa("X",function(a,b,c){c._d=new Date(1e3*parseFloat(a,10))}),aa("x",function(a,b,c){c._d=new Date(t(a))}),
 // Side effect imports
         a.version="2.15.1",b(rb),a.fn=Se,a.min=tb,a.max=ub,a.now=Fe,a.utc=j,a.unix=Jc,a.months=Pc,a.isDate=f,a.locale=Za,a.invalid=n,a.duration=Nb,a.isMoment=r,a.weekdays=Rc,a.parseZone=Kc,a.localeData=ab,a.isDuration=wb,a.monthsShort=Qc,a.weekdaysMin=Tc,a.defineLocale=$a,a.updateLocale=_a,a.locales=bb,a.weekdaysShort=Sc,a.normalizeUnits=J,a.relativeTimeRounding=id,a.relativeTimeThreshold=jd,a.calendarFormat=Tb,a.prototype=Se;var nf=a;return nf});
-define('constants',["moment"], function(moment){
-    return {
-        base_url: "https://motorbot.io/api",
-        api_key: "caf07b8b-366e-44ab-9bda-623f94a9c2df",
-        user_id: document.getElementById("store_userId").value,
-        accessToken: document.getElementById("store_accessToken").value,
-        op: {
-            "HEARTBEAT": 0,
-            "HEARTBEAT_ACK": 1,
-            "HELLO": 2,
-            "WELCOME": 3,
-            "VOICE_UPDATE": 4,
-            "TRACK_UPDATE": 5,
-            "YOUTUBE_ERROR": 6,
-            "PLAYER_UPDATE": 7,
-            "PLAYER_STATE": 8,
-            "SPOTIFY_IMPORT": 9,
-            "GUILD": 10,
-            "GUILD_STATE": 11,
-            "TRACK_PACKET": 12,
-            "TRACK_WAVEFORM": 13,
-            "SET_TRACK_WAVEFORM": 14,
-            "GET_TRACK_WAVEFORM": 15
-        },
-        websocketSession: undefined,
-        currentGuild: undefined,
-        currentChannel: undefined,
-        playlistSort: "timestamp",
-        playlistSortDirection: 1,
-        secondsToHms: function(d) {
-            d = Number(d);
-            let h = Math.floor(d / 3600);
-            let m = Math.floor(d % 3600 / 60);
-            let s = Math.floor(d % 3600 % 60);
-            return ((h > 0 ? h + ":" + (m < 10 ? "0" : "") : "") + m + ":" + (s < 10 ? "0" : "") + s);
-        },
-        millisecondsToStr: function(timestamp){
-            let diff = moment.unix(timestamp/1000).fromNow();
-            return diff;
-        },
-        seekInterval: undefined,
-        playtime: 0,
-        duration: 0,
-        downloadDuration: 0
-    }
+define('constants',["moment"], function (moment) {
+  return {
+    base_url: "http://86.129.178.18/api",
+    api_key: "caf07b8b-366e-44ab-9bda-623f94a9c2df",
+    user_id: document.getElementById("store_userId").value,
+    accessToken: document.getElementById("store_accessToken").value,
+    op: {
+      HEARTBEAT: 0,
+      HEARTBEAT_ACK: 1,
+      HELLO: 2,
+      WELCOME: 3,
+      VOICE_UPDATE: 4,
+      TRACK_UPDATE: 5,
+      YOUTUBE_ERROR: 6,
+      PLAYER_UPDATE: 7,
+      PLAYER_STATE: 8,
+      SPOTIFY_IMPORT: 9,
+      GUILD: 10,
+      GUILD_STATE: 11,
+      TRACK_PACKET: 12,
+      TRACK_WAVEFORM: 13,
+      SET_TRACK_WAVEFORM: 14,
+      GET_TRACK_WAVEFORM: 15,
+    },
+    websocketSession: undefined,
+    currentGuild: undefined,
+    currentChannel: undefined,
+    playlistSort: "timestamp",
+    playlistSortDirection: 1,
+    secondsToHms: function (d) {
+      d = Number(d);
+      let h = Math.floor(d / 3600);
+      let m = Math.floor((d % 3600) / 60);
+      let s = Math.floor((d % 3600) % 60);
+      return (
+        (h > 0 ? h + ":" + (m < 10 ? "0" : "") : "") +
+        m +
+        ":" +
+        (s < 10 ? "0" : "") +
+        s
+      );
+    },
+    millisecondsToStr: function (timestamp) {
+      let diff = moment.unix(timestamp / 1000).fromNow();
+      return diff;
+    },
+    seekInterval: undefined,
+    playtime: 0,
+    duration: 0,
+    downloadDuration: 0,
+  };
 });
+
 define('playerbar',["constants"], function(c){
     let PlayerBar = {
         loading: {
@@ -1816,78 +1824,85 @@ define('wavify',[], function() {
         };
     }
 });
-define('ws',["constants", "wsEventHandler", "wavify"], function(c, wsEventHandler, w){
-    let wss = undefined;
-    let HEARTBEAT_INTERVAL = undefined;
-    let wave = undefined;
-    let WebSocketConnection = {
-        init: function () {
-            wss = new WebSocket("wss://wss.motorbot.io");
-            wss.session = undefined;
-            wss.onopen = function (event) {
-                console.info("websocket connection opened");
-                //[C] HELLO -> [S] WELCOME -> [C] JOIN GUILD -> [S] GUILD STATE
-                WebSocketConnection.send("HELLO",{
-                    api_key: "caf07b8b-366e-44ab-9bda-623f94a9c2df",
-                    client_id: "7c78862088c0228ca226f4462df3d4ff",
-                    user_id: c.user_id
-                });
-                HEARTBEAT_INTERVAL = setInterval(function(){
-                    WebSocketConnection.send("HEARTBEAT")
-                },41250);
-                document.getElementById("websocketDisconnectOverlay").style.display = "none";
-                document.querySelector(".flexContainer").style.filter = "blur(0)";
-                document.querySelector(".playerBar").style.filter = "blur(0)";
-                document.querySelector(".errorList").style.filter = "blur(0)";
-                document.querySelector(".modalityOverlay").style.display = "none";
-                if(wave){
-                    wave.pause();
-                }
-            };
-
-            wss.onmessage = function (event) {
-                wsEventHandler(wss, WebSocketConnection, event);
-            };
-
-            wss.onclose = function (event) {
-                console.error("WEBSOCKET_CONNECTION_CLOSED");
-                document.querySelector(".flexContainer").style.filter = "blur(5px)";
-                document.querySelector(".playerBar").style.filter = "blur(5px)";
-                document.querySelector(".errorList").style.filter = "blur(5px)";
-                document.querySelector(".modalityOverlay").style.display = "block";
-                document.getElementById("newPlaylistModal").style.display = "none"; //INFO: make sure no other modals are open
-                document.getElementById("websocketDisconnectOverlay").style.display = "block";
-                wave = w(document.querySelector('#wavy'), {
-                    height: 300,
-                    bones: 4,
-                    amplitude: 45,
-                    color: 'rgba(19, 112, 226, 0.9)',
-                    speed: .20
-                })
-                clearInterval(HEARTBEAT_INTERVAL);
-                setTimeout(function(){
-                    WebSocketConnection.init();
-                },5000);
-            };
-
-            return wss;
-        },
-        send: function (type, message) {
-            if(!message){
-                message = {};
-            }
-            message.session = c.websocketSession
-            let p = {
-                op: c.op[type],
-                type: type,
-                d: message
-            }
-            console.log("[WEBSOCKET] ~> : %@",p)
-            wss.send(JSON.stringify(p));
+define('ws',["constants", "wsEventHandler", "wavify"], function (
+  c,
+  wsEventHandler,
+  w
+) {
+  let wss = undefined;
+  let HEARTBEAT_INTERVAL = undefined;
+  let wave = undefined;
+  let WebSocketConnection = {
+    init: function () {
+      wss = new WebSocket("wss://86.129.178.18:443");
+      wss.session = undefined;
+      wss.onopen = function (event) {
+        console.info("websocket connection opened");
+        //[C] HELLO -> [S] WELCOME -> [C] JOIN GUILD -> [S] GUILD STATE
+        WebSocketConnection.send("HELLO", {
+          api_key: "caf07b8b-366e-44ab-9bda-623f94a9c2df",
+          client_id: "7c78862088c0228ca226f4462df3d4ff",
+          user_id: c.user_id,
+        });
+        HEARTBEAT_INTERVAL = setInterval(function () {
+          WebSocketConnection.send("HEARTBEAT");
+        }, 41250);
+        document.getElementById("websocketDisconnectOverlay").style.display =
+          "none";
+        document.querySelector(".flexContainer").style.filter = "blur(0)";
+        document.querySelector(".playerBar").style.filter = "blur(0)";
+        document.querySelector(".errorList").style.filter = "blur(0)";
+        document.querySelector(".modalityOverlay").style.display = "none";
+        if (wave) {
+          wave.pause();
         }
-    };
-    return WebSocketConnection
+      };
+
+      wss.onmessage = function (event) {
+        wsEventHandler(wss, WebSocketConnection, event);
+      };
+
+      wss.onclose = function (event) {
+        console.error("WEBSOCKET_CONNECTION_CLOSED");
+        document.querySelector(".flexContainer").style.filter = "blur(5px)";
+        document.querySelector(".playerBar").style.filter = "blur(5px)";
+        document.querySelector(".errorList").style.filter = "blur(5px)";
+        document.querySelector(".modalityOverlay").style.display = "block";
+        document.getElementById("newPlaylistModal").style.display = "none"; //INFO: make sure no other modals are open
+        document.getElementById("websocketDisconnectOverlay").style.display =
+          "block";
+        wave = w(document.querySelector("#wavy"), {
+          height: 300,
+          bones: 4,
+          amplitude: 45,
+          color: "rgba(19, 112, 226, 0.9)",
+          speed: 0.2,
+        });
+        clearInterval(HEARTBEAT_INTERVAL);
+        setTimeout(function () {
+          WebSocketConnection.init();
+        }, 5000);
+      };
+
+      return wss;
+    },
+    send: function (type, message) {
+      if (!message) {
+        message = {};
+      }
+      message.session = c.websocketSession;
+      let p = {
+        op: c.op[type],
+        type: type,
+        d: message,
+      };
+      console.log("[WEBSOCKET] ~> : %@", p);
+      wss.send(JSON.stringify(p));
+    },
+  };
+  return WebSocketConnection;
 });
+
 /**
  * marked - a markdown parser
  * Copyright (c) 2011-2014, Christopher Jeffrey. (MIT Licensed)
