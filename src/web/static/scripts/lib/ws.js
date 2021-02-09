@@ -8,14 +8,14 @@ define(["constants", "wsEventHandler", "wavify"], function (
   let wave = undefined;
   let WebSocketConnection = {
     init: function () {
-      wss = new WebSocket("ws://86.129.178.18:443");
+      wss = new WebSocket(c.ws_url);
       wss.session = undefined;
       wss.onopen = function (event) {
         console.info("websocket connection opened");
         //[C] HELLO -> [S] WELCOME -> [C] JOIN GUILD -> [S] GUILD STATE
         WebSocketConnection.send("HELLO", {
-          api_key: "caf07b8b-366e-44ab-9bda-623f94a9c2df",
-          client_id: "7c78862088c0228ca226f4462df3d4ff",
+          api_key: c.api_key,
+          client_id: c.client_id,
           user_id: c.user_id,
         });
         HEARTBEAT_INTERVAL = setInterval(function () {

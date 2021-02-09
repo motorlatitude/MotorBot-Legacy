@@ -526,8 +526,10 @@ define('domReady.min',[],function(){"use strict";var n,e,t,o="undefined"!=typeof
         a.version="2.15.1",b(rb),a.fn=Se,a.min=tb,a.max=ub,a.now=Fe,a.utc=j,a.unix=Jc,a.months=Pc,a.isDate=f,a.locale=Za,a.invalid=n,a.duration=Nb,a.isMoment=r,a.weekdays=Rc,a.parseZone=Kc,a.localeData=ab,a.isDuration=wb,a.monthsShort=Qc,a.weekdaysMin=Tc,a.defineLocale=$a,a.updateLocale=_a,a.locales=bb,a.weekdaysShort=Sc,a.normalizeUnits=J,a.relativeTimeRounding=id,a.relativeTimeThreshold=jd,a.calendarFormat=Tb,a.prototype=Se;var nf=a;return nf});
 define('constants',["moment"], function (moment) {
   return {
-    base_url: "http://86.129.178.18/api",
+    base_url: "http://109.157.12.102/api",
+    ws_url: "ws://109.157.12.102:443",
     api_key: "caf07b8b-366e-44ab-9bda-623f94a9c2df",
+    client_id: "7c78862088c0228ca226f4462df3d4ff",
     user_id: document.getElementById("store_userId").value,
     accessToken: document.getElementById("store_accessToken").value,
     op: {
@@ -1834,14 +1836,14 @@ define('ws',["constants", "wsEventHandler", "wavify"], function (
   let wave = undefined;
   let WebSocketConnection = {
     init: function () {
-      wss = new WebSocket("ws://86.129.178.18:443");
+      wss = new WebSocket(c.ws_url);
       wss.session = undefined;
       wss.onopen = function (event) {
         console.info("websocket connection opened");
         //[C] HELLO -> [S] WELCOME -> [C] JOIN GUILD -> [S] GUILD STATE
         WebSocketConnection.send("HELLO", {
-          api_key: "caf07b8b-366e-44ab-9bda-623f94a9c2df",
-          client_id: "7c78862088c0228ca226f4462df3d4ff",
+          api_key: c.api_key,
+          client_id: c.client_id,
           user_id: c.user_id,
         });
         HEARTBEAT_INTERVAL = setInterval(function () {

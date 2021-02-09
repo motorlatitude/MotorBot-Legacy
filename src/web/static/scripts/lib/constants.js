@@ -1,7 +1,9 @@
 define(["moment"], function (moment) {
   return {
-    base_url: "http://86.129.178.18/api",
+    base_url: "http://109.157.12.102/api",
+    ws_url: "ws://109.157.12.102:443",
     api_key: "caf07b8b-366e-44ab-9bda-623f94a9c2df",
+    client_id: "7c78862088c0228ca226f4462df3d4ff",
     user_id: document.getElementById("store_userId").value,
     accessToken: document.getElementById("store_accessToken").value,
     op: {
