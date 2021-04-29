@@ -1,0 +1,28 @@
+version: 2
+updates:
+- package-ecosystem: npm
+  directory: "/"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: mongodb
+    versions:
+    - 3.6.3
+    - 3.6.4
+    - 3.6.5
+  - dependency-name: ws
+    versions:
+    - 7.4.2
+    - 7.4.3
+    - 7.4.4
+  - dependency-name: connect-redis
+    versions:
+    - 5.0.0
+    - 5.1.0
+  - dependency-name: ytdl-core
+    versions:
+    - 4.4.5
+  - dependency-name: node-gyp
+    versions:
+    - 7.1.2
