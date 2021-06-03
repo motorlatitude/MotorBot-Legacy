@@ -18,7 +18,7 @@
     "coffee-script": "*",
     "compression": "^1.7.3",
     "connect-flash": "^0.1.1",
-    "connect-redis": "^3.3.3",
+    "connect-redis": "^6.0.0",
     "cookie-parser": "^1.4.3",
     "crypto": "^1.0.1",
     "dot-object": "^1.7.0",
